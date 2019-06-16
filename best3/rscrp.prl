@@ -1,0 +1,17 @@
+#!/usr/bin/perl -w
+print ("Hello, world!\n");
+#system "./FastRoute ../../grb/adaptec1.capo70.3d.35.50.90.gr > a1";
+#system "./FastRoute ../../grb/adaptec2.mpl60.3d.35.20.100.gr > a2";
+#system "./FastRoute ../../grb/adaptec3.dragon70.3d.30.50.90.gr > a3";
+#system "./FastRoute ../../grb/adaptec4.aplace60.3d.30.50.90.gr > a4";
+#system "./FastRoute ../../grb/adaptec5.mfar50.3d.50.20.100.gr > a5";
+#system "./FastRoute ../../grb/newblue1.ntup50.3d.30.50.90.gr > n1";
+#system "./FastRoute ../../grb/newblue2.fastplace90.3d.50.20.100.gr > n2";
+system "./FastRoute ../../grb/newblue4.mpl50.3d.40.10.95.gr > n4";
+#system "./FastRoute ../../grb/newblue5.ntup50.3d.40.10.100.gr > n5";
+#system "./FastRoute ../../grb/newblue6.mfar80.3d.60.10.100.gr > n6";
+#system "./FastRoute ../../grb/newblue7.kraftwerk70.3d.80.20.82.m8.gr > n7";
+#system "./FastRoute ../../grb/bigblue1.capo60.3d.50.10.100.gr > b1";
+#system "./FastRoute ../../grb/bigblue2.mpl60.3d.40.60.60.gr > b2";
+#system "./FastRoute ../../grb/bigblue3.aplace70.3d.50.10.90.m8.gr > b3";
+system "./FastRoute ../../grb/bigblue4.fastplace70.3d.80.20.80.gr > b4";

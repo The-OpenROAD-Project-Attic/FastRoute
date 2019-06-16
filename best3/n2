@@ -1,0 +1,223 @@
+No output file specified, FR will not generate output file
+
+Reading ../../grb/newblue2.fastplace90.3d.50.20.100.gr ...
+
+grid 557 463 6
+Layer 0 vertical capacity 0, horizontal capacity 5
+Layer 1 vertical capacity 5, horizontal capacity 0
+Layer 2 vertical capacity 0, horizontal capacity 25
+Layer 3 vertical capacity 25, horizontal capacity 0
+Layer 4 vertical capacity 0, horizontal capacity 25
+Layer 5 vertical capacity 25, horizontal capacity 0
+total vertical capacity 55
+total horizontal capacity 55
+num net 463213
+the total net number is 463213
+
+num of Adjust is 449965
+# valid nets: 373790
+# segments: 1571418
+maxDeg:     116
+
+Done getting input
+MD: 116, AD: 3.60, #nets: 463213, #routed nets: 373790
+TC is 28311910
+
+Reading Lookup Table ...
+
+Done reading table
+
+Reading Time: 1.710000 sec
+WIRELEN : 4611305, WIRELEN1 : 0
+NumSeg  : 1083067
+NumShift: 0
+totalnon 0
+Max 0.000000, Min 10000000.000000
+cnt1 0, cnt2 0, cnt3 0
+first L
+WIRELEN : 4609929, WIRELEN1 : 4609929
+NumSeg  : 1081147
+NumShift: 34018
+totalnon 0
+Max 0.000000, Min 10000000.000000
+cnt1 0, cnt2 0, cnt3 0
+total hCap    : 12489355
+total vCap    : 12922000
+total Usage   : 4609929
+Max H Overflow: 26
+Max V Overflow: 34
+Max Overflow  : 34
+Num Overflow e: 4745
+H   Overflow  : 18274
+V   Overflow  : 4868
+Final Overflow: 23142
+
+second L
+total hCap    : 12489355
+total vCap    : 12922000
+total Usage   : 4609929
+Max H Overflow: 26
+Max V Overflow: 34
+Max Overflow  : 34
+Num Overflow e: 4526
+H   Overflow  : 17444
+V   Overflow  : 4388
+Final Overflow: 21832
+
+first Z
+total hCap    : 12489355
+total vCap    : 12922000
+total Usage   : 4609929
+Max H Overflow: 24
+Max V Overflow: 34
+Max Overflow  : 34
+Num Overflow e: 3270
+H   Overflow  : 12770
+V   Overflow  : 3169
+Final Overflow: 15939
+
+LV routing round 1, enlarge 10 
+1 threshold, 10 expand
+total Usage   : 4629167
+Max H Overflow: 10
+Max V Overflow: 2
+Max Overflow  : 10
+Num Overflow e: 531
+H   Overflow  : 1057
+V   Overflow  : 10
+Final Overflow: 1067
+
+updateType 1
+max value 10 stop 0
+LV routing round 2, enlarge 15 
+1 threshold, 15 expand
+total Usage   : 4627285
+Max H Overflow: 9
+Max V Overflow: 2
+Max Overflow  : 9
+Num Overflow e: 393
+H   Overflow  : 722
+V   Overflow  : 10
+Final Overflow: 732
+
+updateType 1
+max value 19 stop 0
+LV routing round 3, enlarge 20 
+1 threshold, 20 expand
+total Usage   : 4626711
+Max H Overflow: 8
+Max V Overflow: 3
+Max Overflow  : 8
+Num Overflow e: 375
+H   Overflow  : 671
+V   Overflow  : 11
+Final Overflow: 682
+
+updateType 1
+max value 27 stop 0
+LV Time: 5.550000 sec
+updateType 1
+max value 8 stop 0
+iteration 4, enlarge 30, costheight 6, threshold 6 via cost 2 
+log_coef 0.649468, healingTrigger 0 cost_step 2 L 1 cost_type 1
+total Usage   : 4628885
+Max H Overflow: 6
+Max V Overflow: 1
+Max Overflow  : 6
+Num Overflow e: 126
+H   Overflow  : 184
+V   Overflow  : 1
+Final Overflow: 185
+
+updateType 1
+max value 11 stop 0
+iteration 5, enlarge 35, costheight 11, threshold 2 via cost 2 
+log_coef 0.716394, healingTrigger 0 cost_step 5 L 1 cost_type 1
+total Usage   : 4629852
+Max H Overflow: 2
+Max V Overflow: 0
+Max Overflow  : 2
+Num Overflow e: 16
+H   Overflow  : 17
+V   Overflow  : 0
+Final Overflow: 17
+
+updateType 1
+max value 9 stop 0
+iteration 6, enlarge 40, costheight 16, threshold 0 via cost 2 
+log_coef 1.181232, healingTrigger 0 cost_step 5 L 1 cost_type 1
+total Usage   : 4629902
+Max H Overflow: 1
+Max V Overflow: 0
+Max Overflow  : 1
+Num Overflow e: 2
+H   Overflow  : 2
+V   Overflow  : 0
+Final Overflow: 2
+
+updateType 1
+max value 8 stop 0
+iteration 7, enlarge 45, costheight 21, threshold 0 via cost 2 
+log_coef 2.000000, healingTrigger 0 cost_step 5 L 1 cost_type 1
+total Usage   : 4629893
+Max H Overflow: 1
+Max V Overflow: 0
+Max Overflow  : 1
+Num Overflow e: 2
+H   Overflow  : 2
+V   Overflow  : 0
+Final Overflow: 2
+
+updateType 1
+max value 7 stop 0
+iteration 8, enlarge 50, costheight 31, threshold 0 via cost 0 
+log_coef 2.000000, healingTrigger 1 cost_step 5 L 0 cost_type 1
+total Usage   : 4629906
+Max H Overflow: 0
+Max V Overflow: 0
+Max Overflow  : 0
+Num Overflow e: 0
+H   Overflow  : 0
+V   Overflow  : 0
+Final Overflow: 0
+
+usage checked
+maze routing finished
+P3 runtime: 4.430000 sec
+Final 2D results: 
+total Usage   : 4629906
+Max H Overflow: 0
+Max V Overflow: 0
+Max Overflow  : 0
+Num Overflow e: 0
+H   Overflow  : 0
+V   Overflow  : 0
+Final Overflow: 0
+
+
+Layer Assignment Beginsnode processing
+layer assignment
+Total number of via 250252
+layer assignment finished
+2D + Layer Assignment Runtime: 14.500000 sec
+3D Maze Routing Begins 
+3D maze routing finished, starting via filling
+via related to pin nodes 2302910
+via related stiner nodes 169092
+total Usage   : 4670408
+Total Capacity: 25411355
+Max H Overflow: 0
+Max V Overflow: 0
+Max Overflow  : 0
+H   Overflow  : 0
+V   Overflow  : 0
+Final Overflow: 0
+
+
+ threedvia result
+num of vias 2814746
+Final routing length : 4670408
+Final number of via  : 2814746
+Final total length 1 : 7485154
+Final total length 3 : 13114646
+3D runtime: 59.139999 sec
