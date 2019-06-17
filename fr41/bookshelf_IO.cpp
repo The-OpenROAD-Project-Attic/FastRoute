@@ -18,6 +18,8 @@ Iowa State University Research Foundation, Inc.
 #include "memAlloc.h"
 #include "bookshelf_IO.h"
 
+namespace FastRoute{
+
 #define MAX(a,b) ((a)>(b) ? (a) : (b))
 #define MIN(a,b) ((a)<(b) ? (a) : (b))
 
@@ -35,7 +37,7 @@ Iowa State University Research Foundation, Inc.
     float averageCellWidth, *cellWidth, *cellHeight; 
     
     // from readNetsFile() 
-    int numNets, numPins, *netlist, *netlistIndex;
+    int nNets, numPins, *netlist, *netlistIndex;
     float *xPinOffset, *yPinOffset;
        
     // from readPlFile()
@@ -394,7 +396,7 @@ printf("Avg Cell Width:  %.2f \n", averageCellWidth);
    Reads the .nets file to get the netlist information
    
    creates extern vars: 
-      numNets, numPins, 
+      nNets, numPins, 
       xPinOffset[], yPinOffset[], netlist[], netlistIndex[]
 ----------------------------------------------------------- */
 void readNetsFile(char benchmarkPath[], char netsFile[])
@@ -425,8 +427,8 @@ void readNetsFile(char benchmarkPath[], char netsFile[])
     } while( (tempStr[0] == '#') || (strlen(tempStr) < 5) );  
     fseek(fp, currentPos, SEEK_SET);  
 
-    // getting numNets and numPins
-    fscanf(fp, "NumNets\t:\t%d\n", &numNets);
+    // getting nNets and numPins
+    fscanf(fp, "NumNets\t:\t%d\n", &nNets);
     fscanf(fp, "NumPins\t:\t%d\n", &numPins);
 
     do {
@@ -441,12 +443,12 @@ void readNetsFile(char benchmarkPath[], char netsFile[])
     yPinOffset = vector(1,numPins+1);
 
     // index vector for the netlist and offset vectors
-    netlistIndex = ivector(0,numNets+1);
+    netlistIndex = ivector(0,nNets+1);
     
     netlistIndex[0] = 1;
     prevElements = 0;
 
-    for(netNo=1;netNo<=numNets;netNo++) {
+    for(netNo=1;netNo<=nNets;netNo++) {
 
         do {
             currentPos = ftell(fp);
@@ -494,13 +496,13 @@ void readNetsFile(char benchmarkPath[], char netsFile[])
         }
     }
    
-    netlistIndex[numNets+1] = netlistIndex[numNets] + prevElements;
-    netlist[netlistIndex[numNets+1]] = 0;
+    netlistIndex[nNets+1] = netlistIndex[nNets] + prevElements;
+    netlist[netlistIndex[nNets+1]] = 0;
 
     fclose(fp); 
 
 #if(DEBUG)
-for(i=1; i<=numNets; i++) {
+for(i=1; i<=nNets; i++) {
     printf("**%d**  ", netlistIndex[i+1]-netlistIndex[i]);
     for(j=netlistIndex[i]; j<netlistIndex[i+1]; j++) {
         printf("(%d) %.2f %.2f  ", netlist[j], xPinOffset[j], yPinOffset[j]);
@@ -740,4 +742,5 @@ void writePlFile(char outputDir[], char benchmarkName[], float xCoord[], float y
                 cellName[i], xCoord[i]-0.5*cellWidth[i], yCoord[i]-0.5*cellHeight[i]);
    
     fclose(fp);
+}
 }

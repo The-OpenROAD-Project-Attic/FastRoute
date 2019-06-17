@@ -3,6 +3,8 @@
 
 #include <stdio.h>
 
+namespace FastRoute{
+
 #define  TRUE   1
 #define  FALSE  0
 #define  MAXLONG  0x7fffffffL
@@ -16,4 +18,5 @@ typedef  struct point Point;
 
 typedef  long nn_array[8];
 
+}
 #endif  /* _GLOBAL_H_ */

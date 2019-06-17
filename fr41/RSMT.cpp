@@ -6,7 +6,10 @@
 #include "DataProc.h"
 #include "RSMT.h"
 #include "EdgeShift.h"
+#include "route.h"
+#include "RipUp.h"
 
+namespace FastRoute{
 
 #define FLUTEACCURACY 2
 
@@ -972,4 +975,4 @@ void gen_brk_RSMT(Bool congestionDriven, Bool reRoute, Bool genTree, Bool newTyp
 }
 
 
-
+}

@@ -5,6 +5,9 @@
 #include "DataProc.h"
 #include "RipUp.h"
 #include "route.h"
+#include "utility.h"
+
+namespace FastRoute{	
 
 // rip-up a L segment
 void ripupSegL(Segment *seg)
@@ -675,4 +678,4 @@ void newRipupNet(int netID)
 }
 
 
-
+}

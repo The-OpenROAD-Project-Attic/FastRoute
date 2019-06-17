@@ -1,5 +1,7 @@
 #include "global.h"
 
+namespace FastRoute{
+
 void  allocate_nn_arrays( long n );
 void  deallocate_nn_arrays();
 
@@ -17,3 +19,4 @@ void  dq_nearest_neighbors
   nn_array*  nn
 );
 
+}

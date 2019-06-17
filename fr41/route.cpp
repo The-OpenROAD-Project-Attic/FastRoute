@@ -8,6 +8,8 @@
 #include "route.h"
 #include "RipUp.h"
 
+namespace FastRoute{
+
 float costHVH[XRANGE];  // Horizontal first Z
 float costVHV[YRANGE];  // Vertical first Z
 float costH[YRANGE];    // Horizontal segment cost
@@ -2154,8 +2156,4 @@ void newrouteLInMaze(int netID)
     } // loop i
 
 }
-
-
-
-
-
+}

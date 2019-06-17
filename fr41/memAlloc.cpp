@@ -10,6 +10,8 @@
 
 #include "memAlloc.h"
 
+namespace FastRoute{
+
 #define MEM_END 1
 #define FREE_ARG char*
 
@@ -445,4 +447,5 @@ void free_imatrix3D(int ***t, int nrl, int nrh, int ncl, int nch,
   free((FREE_ARG) (t[nrl][ncl]+ndl-MEM_END));
   free((FREE_ARG) (t[nrl]+ncl-MEM_END));
   free((FREE_ARG) (t+nrl-MEM_END));
+}
 }

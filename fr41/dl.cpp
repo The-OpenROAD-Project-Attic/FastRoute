@@ -1,7 +1,7 @@
-#include <dl.h>
+#include "dl.h"
 #include <assert.h>
 #include <stdio.h>
-
+namespace FastRoute{
 dl_t dl_alloc()
 {
   dl_t dl = (dl_t)malloc(sizeof(dl_s));
@@ -158,4 +158,5 @@ void dl_sort(dl_t dl, size_t el_size, int(*compar)(void *, void *))
       }
     }
   }
+}
 }

@@ -15,6 +15,7 @@ Iowa State University Research Foundation, Inc.
 #define BUFFERSIZE 200
 #define STRINGLEN 30
 
+namespace FastRoute{
     /* -----------------------------------------------------------------------------
         Reads the .nodes file and creates a hash linking cell name to cell index for 
         all the nodes in the circuit (movable nodes + fixed nodes + I/O pads)
@@ -138,3 +139,4 @@ Iowa State University Research Foundation, Inc.
     coreHeight          =   siteEndY - siteOriginY 
 
 ---------------------------------------------------------------------------------------------------*/
+}

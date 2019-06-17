@@ -11,6 +11,8 @@
 #define XRANGE 1536
 #define YRANGE 1536
 
+namespace FastRoute {
+
 // global variables
 extern int xGrid, yGrid, numGrids, numNets, vCapacity, hCapacity, vCapacity3D[MAXLAYER], hCapacity3D[MAXLAYER];
 extern float vCapacity_lb, hCapacity_lb, vCapacity_ub, hCapacity_ub;
@@ -111,7 +113,7 @@ extern Bool *pop_heap2;
 
 extern void init_usage();
 extern void readFile(char benchFile[]);
-extern void freememory();
-
+extern void freeAllMemory();
+}
 
 #endif /* _DATAPROC_H_ */

@@ -9,6 +9,8 @@
 
 #include "mst2.h"
 
+namespace FastRoute{
+
 #define INFNTY INT_MAX
 
 #define D2M D2(1)     // Max net degree that flute_mr will handle
@@ -2778,4 +2780,4 @@ Tree xmergetree(Tree t1, Tree t2, int *order1, int *order2,
 
   return t;
 }
-
+}

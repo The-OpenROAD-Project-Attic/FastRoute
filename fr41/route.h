@@ -1,6 +1,8 @@
 #ifndef _ROUTE_H_
 #define _ROUTE_H_
 
+namespace FastRoute{
+
 #define SAMEX 0
 #define SAMEY 1
 
@@ -18,5 +20,5 @@ extern void routeMonotonic(int netID, int edgeID, int threshold);
 extern void routeLVAll(int threshold, int expand);
 extern void spiralRouteAll ();
 extern void newrouteLInMaze(int netID);
-
+}
 #endif /* _ROUTE_H_ */

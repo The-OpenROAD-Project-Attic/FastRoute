@@ -8,6 +8,7 @@
 
 #define TRUE 1
 #define FALSE 0
+namespace FastRoute{
 typedef char Bool;
 
 typedef struct
@@ -150,6 +151,6 @@ typedef struct
 typedef enum {NORTH, EAST, SOUTH, WEST, ORIGIN, UP, DOWN} dirctionT;
 typedef enum {NONE, HORI, VERT, BID} viaST;
 
-
+}
 
 #endif /* _DATATYPE_H_ */

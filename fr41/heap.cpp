@@ -8,6 +8,7 @@
 #include "heap.h"
 #include "err.h"
 
+namespace FastRoute{
 
 Heap*   _heap = (Heap*)NULL;
 long    _max_heap_size = 0;
@@ -174,4 +175,4 @@ long  heap_delete_min()
 
 
 /****************************************************************************/
-
+}

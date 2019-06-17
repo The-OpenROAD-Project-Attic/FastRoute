@@ -1,13 +1,17 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
+
 #include "DataType.h"
 #include "flute.h"
 #include "DataProc.h"
 #include "route.h"
 #include "RipUp.h"
+#include "utility.h"
 #include "maze3D.h"
 #include <time.h>
+
+namespace FastRoute{
 
 #define PARENT(i) (i-1)/2
 //#define PARENT(i) ((i-1)>>1)
@@ -1888,4 +1892,4 @@ void getLayerRange(TreeNode *treenodes ,int edgeID, int n1, int deg)
 	}
 }
 
-
+}

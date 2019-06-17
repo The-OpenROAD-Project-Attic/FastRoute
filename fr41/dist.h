@@ -3,6 +3,7 @@
 
 #include "global.h"
 
+namespace FastRoute{
 long  dist(
   Point  p,
   Point  q
@@ -13,4 +14,5 @@ long  dist2(
   Point*  q
 );
 
+}
 #endif

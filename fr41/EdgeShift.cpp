@@ -6,7 +6,7 @@
 #include "route.h"
 #include "RipUp.h"
 #include "EdgeShift.h"
-
+namespace FastRoute{
 #define HORIZONTAL 1
 #define VERTICAL 0
 
@@ -555,4 +555,4 @@ int edgeShiftNew(Tree *t, int net)
 
     return(numShift);
 }
-
+}

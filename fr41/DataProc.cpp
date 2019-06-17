@@ -5,6 +5,7 @@
 #include "flute.h"
 #include "DataProc.h"
 
+namespace FastRoute{
 
 // Global variables
     int xGrid, yGrid, numGrids, numNets, vCapacity, hCapacity, vCapacity3D[MAXLAYER], hCapacity3D[MAXLAYER];
@@ -506,4 +507,4 @@ void freeAllMemory()
     free(heap1);
     free(heap2);
 }
-
+}

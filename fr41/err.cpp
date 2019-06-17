@@ -1,6 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+namespace FastRoute{
+
 /**************************************************************************/
 /*
   print error message and continue
@@ -25,4 +27,4 @@ char* msg
   fprintf(stderr, "%s\n", msg);
   exit(1);
 }
-
+}

@@ -3,7 +3,7 @@
 
 #include <string.h>
 #include <stdlib.h>
-
+namespace FastRoute{
 typedef struct dl_el_s {
   struct dl_el_s *prev, *next;
 } dl_el;
@@ -177,4 +177,5 @@ void dl_sort(dl_t dl, size_t el_size, int(*compar)(void *, void *));
   } dl_endfor; \
 }
 
+}
 #endif

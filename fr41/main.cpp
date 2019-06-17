@@ -10,6 +10,9 @@
 #include "maze.h"
 #include "RipUp.h"
 #include "utility.h"
+#include "route.h"
+#include "maze3D.h"
+using namespace FastRoute;
 
 int main(int argc, char** argv)
 {

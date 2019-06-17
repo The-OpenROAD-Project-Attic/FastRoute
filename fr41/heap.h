@@ -3,6 +3,8 @@
 
 #include "global.h"
 
+namespace FastRoute{
+
 struct  heap_info
 {
   long  key;
@@ -27,5 +29,5 @@ void   heap_init( long  n );
 void   heap_insert( long  p,  long key );
 void   heap_decrease_key( long  p,  long new_key );
 long   heap_delete_min();
-
+}
 #endif /* _HEAP_H_ */

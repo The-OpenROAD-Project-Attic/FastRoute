@@ -4,6 +4,8 @@
 #include <math.h>
 #include "flute.h"
 
+namespace FastRoute{
+
 #if D<=7
 #define MGROUP 5040/4  // Max. # of groups, 7! = 5040
 #define MPOWV 15  // Max. # of POWVs per group
@@ -1460,4 +1462,5 @@ void plottree(Tree t)
         printf("%d %d\n\n", t.branch[t.branch[i].n].x,
                t.branch[t.branch[i].n].y);
     }
+}
 }

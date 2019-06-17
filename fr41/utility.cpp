@@ -5,6 +5,8 @@
 #include "flute.h"
 #include "DataProc.h"
 
+namespace FastRoute{
+
 void printEdge(int netID, int edgeID)
 {
     int i;
@@ -2042,5 +2044,4 @@ void freeRR (void)
 	}
 }
 
-
-
+}

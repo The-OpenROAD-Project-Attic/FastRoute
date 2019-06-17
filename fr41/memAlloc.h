@@ -7,6 +7,8 @@
 #ifndef _MEMALLOC_H_
 #define _MEMALLOC_H_
 
+namespace FastRoute{
+
 static float sqrarg;
 #define SQR(a) ((sqrarg=(a)) == 0.0 ? 0.0 : sqrarg*sqrarg)
 
@@ -83,4 +85,5 @@ void free_lmatrix3D(unsigned long ***t, long nrl, long nrh, long ncl, long nch,
                    long ndl, long ndh);
 void free_imatrix3D(int ***t, int nrl, int nrh, int ncl, int nch, int ndl, int ndh);
 
+}
 #endif /* _MEMALLOC_H_ */

@@ -1,6 +1,7 @@
 #ifndef _MAZE_H_
 #define _MAZE_H_
 
+namespace FastRoute{
 
 typedef struct
 {
@@ -28,5 +29,5 @@ extern void InitEstUsage();
 
 
 
-
+}
 #endif /* _MAZE_H_ */

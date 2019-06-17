@@ -7,6 +7,11 @@
 #include "route.h"
 #include "RipUp.h"
 #include "maze.h"
+#include "utility.h"
+#include "RSMT.h"
+#include "EdgeShift.h"
+
+namespace FastRoute{
 
 #define PARENT(i) (i-1)/2
 //#define PARENT(i) ((i-1)>>1)
@@ -1058,7 +1063,7 @@ void updateRouteType2(TreeNode *treenodes, int n1, int A1, int A2, int C1, int C
 
 
 
-void reInitTree (netID) 
+void reInitTree (int netID) 
 {
 	int deg,numEdges,edgeID, d, j;
 	TreeEdge *treeedge;
@@ -2260,7 +2265,7 @@ void InitLastUsage(int upType)
 	
 }
 
-
+}
 
 
 
