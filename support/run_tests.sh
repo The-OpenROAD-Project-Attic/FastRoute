@@ -2,11 +2,7 @@
 
 bin_path=./src/FastRoute
 log_folder=./logs
-gold_folder=./logs_fr41
-
-# bin_path=./data/FastRoute
-# log_folder=./logs_data
-# gold_folder=./logs_data
+gold_folder=./logs_gold
 
 data_folder=./data
 
@@ -28,12 +24,14 @@ for f in "${input_files[@]}"
 do
         out=$(diff -q "$log_folder/$f.log" "$gold_folder/$f.log")
         if [[ "$out" != "" ]]; then
+                diff "$log_folder/$f.log" "$gold_folder/$f.log" > "$log_folder/$f.diff"
                 echo "Test $f failed"
                 failed=$((failed+1))
         else
                 echo "Test $f suceeded"
                 suceeded=$((suceeded+1))
         fi
+        rm "$log_folder/$f.output"
 done
 
 total=$((failed+suceeded))

@@ -1,5 +1,5 @@
 
-Reading ./best3/n4 ...
+Reading ./data/n1 ...
 
 grid 0 0 0
 total vertical capacity 0
@@ -68,8 +68,8 @@ H   Overflow  : 0
 V   Overflow  : 0
 Final Overflow: 0
 
-LV routing round 1, enlarge 15 LOGIS_COF 0.010000
-10 threshold, 15 expand
+LV routing round 0, enlarge 10 
+10 threshold, 10 expand
 total Usage   : 0
 Max H Overflow: 0
 Max V Overflow: 0
@@ -79,10 +79,8 @@ H   Overflow  : 0
 V   Overflow  : 0
 Final Overflow: 0
 
-updateType 1
-max value 0 stop 0
-LV routing round 2, enlarge 20 LOGIS_COF 0.010000
-5 threshold, 20 expand
+LV routing round 1, enlarge 15 
+5 threshold, 15 expand
 total Usage   : 0
 Max H Overflow: 0
 Max V Overflow: 0
@@ -92,10 +90,8 @@ H   Overflow  : 0
 V   Overflow  : 0
 Final Overflow: 0
 
-updateType 1
-max value 0 stop 0
-LV routing round 3, enlarge 25 LOGIS_COF 0.010000
-1 threshold, 25 expand
+LV routing round 2, enlarge 20 
+1 threshold, 20 expand
 total Usage   : 0
 Max H Overflow: 0
 Max V Overflow: 0
@@ -105,8 +101,6 @@ H   Overflow  : 0
 V   Overflow  : 0
 Final Overflow: 0
 
-updateType 1
-max value 0 stop 0
 usage checked
 maze routing finished
 Final 2D results: 
@@ -122,10 +116,9 @@ Final Overflow: 0
 
 Layer Assignment Beginsnode processing
 layer assignment
-Total number of via 0
 layer assignment finished
-3D Maze Routing Begins 
-3D maze routing finished, starting via filling
+Post Processing Begins 
+Post Processsing finished, starting via filling
 via related to pin nodes 0
 via related stiner nodes 0
 total Usage   : 0
@@ -137,9 +130,6 @@ H   Overflow  : 0
 V   Overflow  : 0
 Final Overflow: 0
 
-
- threedvia result
-num of vias 0
 Final routing length : 0
 Final number of via  : 0
 Final total length 1 : 0
