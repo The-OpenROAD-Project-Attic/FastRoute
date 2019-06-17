@@ -4,11 +4,11 @@ bin_path=./src/FastRoute
 log_folder=./logs
 gold_folder=./logs_fr41
 
-# bin_path=./best3/FastRoute
-# log_folder=./logs_best3
-# gold_folder=./logs_best3
+# bin_path=./data/FastRoute
+# log_folder=./logs_data
+# gold_folder=./logs_data
 
-data_folder=./best3
+data_folder=./data
 
 input_files=(a1 a2 a3 a5 b1 b2 b3 b4 n1 n2 n3 n4 n5 n6)
 
