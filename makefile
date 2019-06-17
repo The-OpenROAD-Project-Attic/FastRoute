@@ -88,7 +88,7 @@ dirs:
 		mkdir -p $(BUILD_DIR) ;\
 		)
 
-test:
+test: $(BIN_NAME)
 	@( \
 		echo Removing old log folder ;\
 		rm -rf $(LOG_DIR) ;\
@@ -97,6 +97,8 @@ test:
 		echo "Running tests ($(TEST_BIN))" ;\
 		bash $(TEST_BIN) ;\
 		)
+
+$(BIN_NAME): $(TYPE)
 
 clean:
 	rm -rf $(BUILD_DIR)
