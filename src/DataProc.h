@@ -110,7 +110,6 @@ extern Bool *pop_heap2;
 
 
 
-
 extern void init_usage();
 extern void readFile(char benchFile[]);
 extern void freeAllMemory();

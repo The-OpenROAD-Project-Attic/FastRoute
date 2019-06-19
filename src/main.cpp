@@ -14,7 +14,7 @@
 #include "maze3D.h"
 using namespace FastRoute;
 
-int main(int argc, char** argv)
+int run(int argc, char** argv)
 {
 //    char benchFile[FILESTRLEN];
     char routingFile[STRINGLEN];
@@ -35,61 +35,6 @@ int main(int argc, char** argv)
 
     Bool input, WriteOut;
     input=WriteOut=0;
-
-
-	if(strcmp(*argv,"./FastRoute")==0)
-	{
-		argc--;  argv++;
-		if(argc==0)
-		{
-			printf("--FastRoute --\n");
-			printf("Usage: ./FastRoute  <input> -o <output>\n");
-		}
-	} else {
-		printf("--FastRoute --\n");
-		printf("Usage: ./FastRoute  <input> <output>\n");
-
-		while(argc)
-		{
-			argc--; argv++;
-		}
-	}    
-  
-
-   if(argc)
-   {
-      strcpy(benchFile, *argv);
-      argv++; argc--; 
-      input=1;
-      
-   } else {
-	   printf("No input file\n");
-   }
-
-   if(argc)
-   {
-		strcpy(optionS, *argv);
-		argv++; argc--;
-		if (strcmp(optionS,"-o")==0 )
-		{
-			if(argc)
-		   {
-			  strcpy(routingFile, *argv);
-			  argv++; argc--;
-			  WriteOut=1;
-			  needOUTPUT = TRUE;
-		   } else {
-			   printf("No output file specified\n");
-			   exit(0);
-		   }
-		} else {
-			printf("output option not recognized,  FR will not generate output file\n");
-			needOUTPUT = FALSE;
-		}
-   } else {
-	   printf("No output file specified, FR will not generate output file\n");
-	   needOUTPUT = FALSE;
-   }
 
    
 	LB=0.9;
@@ -124,12 +69,8 @@ int main(int argc, char** argv)
 	bmfl = BIG_INT;
 	minofl = BIG_INT;
      
-    if(input==1)
-	{
 
 		t1 = clock();
-		printf("\nReading %s ...\n", benchFile);
-		readFile(benchFile);
 		printf("\nReading Lookup Table ...\n");
 		readLUT();
 		printf("\nDone reading table\n\n");           
@@ -473,7 +414,6 @@ int main(int argc, char** argv)
 			writeRoute3D(routingFile);
 		}
 
-	}//Input ==1
 
 
 
