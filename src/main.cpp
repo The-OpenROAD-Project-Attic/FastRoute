@@ -120,7 +120,7 @@ int run(int argc, char** argv)
 
 		for (i = 0; i < LVIter; i++) {
 
-			LOGIS_COF = max (2.0/(1+log(maxOverflow)), LOGIS_COF);
+			LOGIS_COF = maxFlute(2.0/(1+log(maxOverflow)), LOGIS_COF);
 			LOGIS_COF = 2.0/(1+log(maxOverflow));
 			printf("LV routing round %d, enlarge %d \n", i,enlarge);
 			routeLVAll(newTH, enlarge);
@@ -189,7 +189,7 @@ int run(int argc, char** argv)
 			}
 
 			if(totalOverflow>15000 && maxOverflow > 400) {
-				enlarge = max(xGrid,yGrid) / 30;
+				enlarge = maxFlute(xGrid,yGrid) / 30;
 				slope = BIG_INT;
 				if (i == 5) {
 					VIA = 0;
@@ -212,14 +212,14 @@ int run(int argc, char** argv)
 			}
 
 			 
-			enlarge = min (enlarge, xGrid/2);
+			enlarge = minFlute(enlarge, xGrid/2);
 			costheight+=cost_step;
 			mazeedge_Threshold = THRESH_M;
 
 			if (upType == 3) {
-				LOGIS_COF = max (2.0/(1+log(maxOverflow+max_adj)),LOGIS_COF);
+				LOGIS_COF = maxFlute(2.0/(1+log(maxOverflow+max_adj)),LOGIS_COF);
 			} else {
-				LOGIS_COF = max (2.0/(1+log(maxOverflow)),LOGIS_COF);
+				LOGIS_COF = maxFlute(2.0/(1+log(maxOverflow)),LOGIS_COF);
 			}
 
 			if (i == 8) {

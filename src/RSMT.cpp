@@ -232,8 +232,8 @@ void fluteNormal(int netID, int d, DTYPE x[], DTYPE y[], int acc, float coeffV, 
             if(x[0]<x[2])
             {
                 x_min = x[0];
-                x_mid = min(x[1], x[2]);
-                x_max = max(x[1], x[2]);
+                x_mid = minFlute(x[1], x[2]);
+                x_max = maxFlute(x[1], x[2]);
             }
             else
             {
@@ -252,8 +252,8 @@ void fluteNormal(int netID, int d, DTYPE x[], DTYPE y[], int acc, float coeffV, 
             }
             else
             {
-                x_min = min(x[1], x[2]);
-                x_mid = max(x[1], x[2]);
+                x_min = minFlute(x[1], x[2]);
+                x_mid = maxFlute(x[1], x[2]);
                 x_max = x[0];
             }
         }                                                                                         
@@ -262,8 +262,8 @@ void fluteNormal(int netID, int d, DTYPE x[], DTYPE y[], int acc, float coeffV, 
             if(y[0]<y[2])
             {
                 y_min = y[0];
-                y_mid = min(y[1], y[2]);
-                y_max = max(y[1], y[2]);
+                y_mid = minFlute(y[1], y[2]);
+                y_max = maxFlute(y[1], y[2]);
             }
             else
             {
@@ -282,8 +282,8 @@ void fluteNormal(int netID, int d, DTYPE x[], DTYPE y[], int acc, float coeffV, 
             }
             else
             {
-                y_min = min(y[1], y[2]);
-                y_mid = max(y[1], y[2]);
+                y_min = minFlute(y[1], y[2]);
+                y_mid = maxFlute(y[1], y[2]);
                 y_max = y[0];
             }
         }
@@ -449,8 +449,8 @@ void fluteCongest(int netID, int d, DTYPE x[], DTYPE y[], int acc, float coeffV,
             if(x[0]<x[2])
             {
                 x_min = x[0];
-                x_mid = min(x[1], x[2]);
-                x_max = max(x[1], x[2]);
+                x_mid = minFlute(x[1], x[2]);
+                x_max = maxFlute(x[1], x[2]);
             }
             else
             {
@@ -469,8 +469,8 @@ void fluteCongest(int netID, int d, DTYPE x[], DTYPE y[], int acc, float coeffV,
             }
             else
             {
-                x_min = min(x[1], x[2]);
-                x_mid = max(x[1], x[2]);
+                x_min = minFlute(x[1], x[2]);
+                x_mid = maxFlute(x[1], x[2]);
                 x_max = x[0];
             }
         }
@@ -479,8 +479,8 @@ void fluteCongest(int netID, int d, DTYPE x[], DTYPE y[], int acc, float coeffV,
             if(y[0]<y[2])
             {
                 y_min = y[0];
-                y_mid = min(y[1], y[2]);
-                y_max = max(y[1], y[2]);
+                y_mid = minFlute(y[1], y[2]);
+                y_max = maxFlute(y[1], y[2]);
             }
             else
             {
@@ -499,8 +499,8 @@ void fluteCongest(int netID, int d, DTYPE x[], DTYPE y[], int acc, float coeffV,
             }
             else
             {
-                y_min = min(y[1], y[2]);
-                y_mid = max(y[1], y[2]);
+                y_min = minFlute(y[1], y[2]);
+                y_mid = maxFlute(y[1], y[2]);
                 y_max = y[0];
             }
         }
@@ -557,7 +557,7 @@ void fluteCongest(int netID, int d, DTYPE x[], DTYPE y[], int acc, float coeffV,
             if(x_seg[i]!=0 && usageH!=0)
             {
                 x_seg[i] *= coeffH*usageH/((xs[i+1]-xs[i])*height*hCapacity);
-                x_seg[i] = max(1, x_seg[i]); // the segment len is at least 1 if original segment len > 0
+                x_seg[i] = maxFlute(1, x_seg[i]); // the segment len is at least 1 if original segment len > 0
             }
             usageV = 0;
             for(j=ys[i]; j<ys[i+1]; j++)
@@ -569,7 +569,7 @@ void fluteCongest(int netID, int d, DTYPE x[], DTYPE y[], int acc, float coeffV,
             if(y_seg[i]!=0 && usageV!=0)
             {
                 y_seg[i] *= coeffV*usageV/((ys[i+1]-ys[i])*width*vCapacity);
-                y_seg[i] = max(1, y_seg[i]); // the segment len is at least 1 if original segment len > 0
+                y_seg[i] = maxFlute(1, y_seg[i]); // the segment len is at least 1 if original segment len > 0
             }
 
         }

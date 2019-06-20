@@ -41,6 +41,6 @@ namespace FastRoute {
 	extern void setNumAdjustments(int nAdjustements);
 	extern void addAdjustment(long x1, long y1, int l1, long x2, long y2, int l2, int reducedCap);
 	extern void initAuxVar();
-	extern void getResults();
+	extern std::vector<NET> getResults();
 }
 #endif

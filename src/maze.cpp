@@ -351,7 +351,7 @@ void updateCongestionHistory( int round, int upType)
 						h_edges[grid].last_usage = h_edges[grid].last_usage * 0.9;
 					}
 				}
-				maxlimit = max(maxlimit, h_edges[grid].last_usage);
+				maxlimit = maxFlute(maxlimit, h_edges[grid].last_usage);
 			}
 		}
 						
@@ -370,7 +370,7 @@ void updateCongestionHistory( int round, int upType)
 						v_edges[grid].last_usage = v_edges[grid].last_usage * 0.9;
 					}
 				}
-				maxlimit = max(maxlimit, v_edges[grid].last_usage);
+				maxlimit = maxFlute(maxlimit, v_edges[grid].last_usage);
 			}
 		} 
 	} else if (upType == 2){
@@ -392,11 +392,11 @@ void updateCongestionHistory( int round, int upType)
 				} else{
 					if (!stopDEC) {
 						h_edges[grid].congCNT --;
-						h_edges[grid].congCNT = max (0,h_edges[grid].congCNT );
+						h_edges[grid].congCNT = maxFlute(0,h_edges[grid].congCNT );
 						h_edges[grid].last_usage = h_edges[grid].last_usage * 0.9;
 					}
 				}
-				maxlimit = max(maxlimit, h_edges[grid].last_usage);
+				maxlimit = maxFlute(maxlimit, h_edges[grid].last_usage);
 			}
 		}
 						
@@ -413,11 +413,11 @@ void updateCongestionHistory( int round, int upType)
 				} else {
 					if (!stopDEC) {
 						v_edges[grid].congCNT --;
-						v_edges[grid].congCNT = max (0,v_edges[grid].congCNT );
+						v_edges[grid].congCNT = maxFlute(0,v_edges[grid].congCNT );
 						v_edges[grid].last_usage = v_edges[grid].last_usage * 0.9;
 					}
 				}
-				maxlimit = max(maxlimit, v_edges[grid].last_usage);
+				maxlimit = maxFlute(maxlimit, v_edges[grid].last_usage);
 			}
 		}
 
@@ -435,12 +435,12 @@ void updateCongestionHistory( int round, int upType)
 				} else{
 					if (!stopDEC) {
 						h_edges[grid].congCNT --;
-						h_edges[grid].congCNT = max (0,h_edges[grid].congCNT );
+						h_edges[grid].congCNT = maxFlute(0,h_edges[grid].congCNT );
 						h_edges[grid].last_usage += overflow;
-						h_edges[grid].last_usage = max(h_edges[grid].last_usage,0);
+						h_edges[grid].last_usage = maxFlute(h_edges[grid].last_usage,0);
 					}
 				}
-				maxlimit = max(maxlimit, h_edges[grid].last_usage);
+				maxlimit = maxFlute(maxlimit, h_edges[grid].last_usage);
 			}
 		}
 						
@@ -458,10 +458,10 @@ void updateCongestionHistory( int round, int upType)
 					if (!stopDEC) {
 						v_edges[grid].congCNT --;
 						v_edges[grid].last_usage += overflow;
-						v_edges[grid].last_usage = max(v_edges[grid].last_usage,0);
+						v_edges[grid].last_usage = maxFlute(v_edges[grid].last_usage,0);
 					}
 				}
-				maxlimit = max(maxlimit, v_edges[grid].last_usage);
+				maxlimit = maxFlute(maxlimit, v_edges[grid].last_usage);
 			}
 		}
 
@@ -479,11 +479,11 @@ void updateCongestionHistory( int round, int upType)
 				} else{
 					if (!stopDEC) {
 						h_edges[grid].congCNT --;
-						h_edges[grid].congCNT = max (0,h_edges[grid].congCNT );
+						h_edges[grid].congCNT = maxFlute(0,h_edges[grid].congCNT );
 						h_edges[grid].last_usage = h_edges[grid].last_usage * 0.9;
 					}
 				}
-				maxlimit = max(maxlimit, h_edges[grid].last_usage);
+				maxlimit = maxFlute(maxlimit, h_edges[grid].last_usage);
 			}
 		}
 						
@@ -500,11 +500,11 @@ void updateCongestionHistory( int round, int upType)
 				} else {
 					if (!stopDEC) {
 						v_edges[grid].congCNT --;
-						v_edges[grid].congCNT = max (0,v_edges[grid].congCNT );
+						v_edges[grid].congCNT = maxFlute(0,v_edges[grid].congCNT );
 						v_edges[grid].last_usage = v_edges[grid].last_usage * 0.9;
 					}
 				}
-				maxlimit = max(maxlimit, v_edges[grid].last_usage);
+				maxlimit = maxFlute(maxlimit, v_edges[grid].last_usage);
 			}
 		}
 	//	if (maxlimit < 20) {
@@ -1263,13 +1263,13 @@ void mazeRouteMSMD(int iter, int expand, float costHeight, int ripup_threshold, 
 					
 
 					shifted = FALSE;
-					enlarge = min(origENG, (iter/6 +3) * treeedge->route.routelen );
+					enlarge = minFlute(origENG, (iter/6 +3) * treeedge->route.routelen );
 					segWidth = xmax - xmin;
 					segHeight = ymax - ymin;
-					regionX1 = max(0, xmin - enlarge);
-					regionX2 = min(xGrid-1, xmax + enlarge);
-					regionY1 = max(0, ymin - enlarge);
-					regionY2 = min(yGrid-1, ymax + enlarge);
+					regionX1 = maxFlute(0, xmin - enlarge);
+					regionX2 = minFlute(xGrid-1, xmax + enlarge);
+					regionY1 = maxFlute(0, ymin - enlarge);
+					regionY2 = minFlute(yGrid-1, ymax + enlarge);
 					regionWidth = regionX2 - regionX1 + 1;
 					regionHeight = regionY2 - regionY1 + 1;
 
@@ -1831,12 +1831,12 @@ void mazeRouteMSMD(int iter, int expand, float costHeight, int ripup_threshold, 
 					{
 						if(gridsX[i]==gridsX[i+1]) // a vertical edge
 						{
-							min_y = min(gridsY[i], gridsY[i+1]);
+							min_y = minFlute(gridsY[i], gridsY[i+1]);
 							v_edges[min_y*xGrid+gridsX[i]].usage += 1;
 						}
 						else ///if(gridsY[i]==gridsY[i+1])// a horizontal edge
 						{
-							min_x = min(gridsX[i], gridsX[i+1]);
+							min_x = minFlute(gridsX[i], gridsX[i+1]);
 							h_edges[gridsY[i]*(xGrid-1)+min_x].usage += 1;
 						}
 					}
@@ -1889,7 +1889,7 @@ int getOverflow2Dmaze( int* maxOverflow, int* tUsage)
             if(overflow>0)
             {
 				H_overflow += overflow;
-				max_H_overflow = max(max_H_overflow, overflow);
+				max_H_overflow = maxFlute(max_H_overflow, overflow);
 				numedges++;
             }
         }
@@ -1906,13 +1906,13 @@ int getOverflow2Dmaze( int* maxOverflow, int* tUsage)
             if(overflow>0)
             {
 				V_overflow += overflow;
-				max_V_overflow = max(max_V_overflow, overflow);
+				max_V_overflow = maxFlute(max_V_overflow, overflow);
 				numedges++;
             }
         }
     }
  
-    max_overflow = max(max_H_overflow, max_V_overflow);
+    max_overflow = maxFlute(max_H_overflow, max_V_overflow);
     totalOverflow = H_overflow + V_overflow;
 	*maxOverflow = max_overflow;
     
@@ -1968,7 +1968,7 @@ int getOverflow2D( int* maxOverflow)
             if(overflow>0)
             {
 				H_overflow += overflow;
-				max_H_overflow = max(max_H_overflow, overflow);
+				max_H_overflow = maxFlute(max_H_overflow, overflow);
 				numedges++;
             }
         }
@@ -1986,13 +1986,13 @@ int getOverflow2D( int* maxOverflow)
             if(overflow>0)
             {
 				V_overflow += overflow;
-				max_V_overflow = max(max_V_overflow, overflow);
+				max_V_overflow = maxFlute(max_V_overflow, overflow);
 				numedges++;
             }
         }
     }
  
-    max_overflow = max(max_H_overflow, max_V_overflow);
+    max_overflow = maxFlute(max_H_overflow, max_V_overflow);
     totalOverflow = H_overflow + V_overflow;
 	*maxOverflow = max_overflow;
 
@@ -2048,7 +2048,7 @@ int getOverflow3D( void )
 				if(overflow>0)
 				{
 					H_overflow += overflow;
-					max_H_overflow = max(max_H_overflow, overflow);
+					max_H_overflow = maxFlute(max_H_overflow, overflow);
 				}
 
 			} 
@@ -2065,14 +2065,14 @@ int getOverflow3D( void )
 				if(overflow>0)
 				{
 					V_overflow += overflow;
-					max_V_overflow = max(max_V_overflow, overflow);
+					max_V_overflow = maxFlute(max_V_overflow, overflow);
 				}
 
             }
 		}
 	}
      
-    max_overflow = max(max_H_overflow, max_V_overflow);
+    max_overflow = maxFlute(max_H_overflow, max_V_overflow);
     totalOverflow = H_overflow + V_overflow;
     
     printf("total Usage   : %d\n", total_usage);

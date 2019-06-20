@@ -90,8 +90,8 @@ extern Tree flutes_RDP(int d, DTYPE xs[], DTYPE ys[], int s[], int acc);
 #define flutes_LMD(d, xs, ys, s, acc) \
     (d<=D ? flutes_LD(d, xs, ys, s) : flutes_MD(d, xs, ys, s, acc))
 
-#define max(x,y) ((x)>(y)?(x):(y))
-#define min(x,y) ((x)<(y)?(x):(y))
+#define maxFlute(x,y) ((x)>(y)?(x):(y))
+#define minFlute(x,y) ((x)<(y)?(x):(y))
 #define abs(x) ((x)<0?(-x):(x))
 #define ADIFF(x,y) ((x)>(y)?(x-y):(y-x))  // Absolute difference
 }

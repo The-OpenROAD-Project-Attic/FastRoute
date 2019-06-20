@@ -1022,14 +1022,14 @@ void mazeRouteMSMDOrder3D(int expand, int ripupTHlb, int ripupTHub){
 			// ripup the routing for the edge
 				if(newRipup3DType3(netID, edgeID))
 				{
-					enlarge = min(origEng, treeedge->route.routelen );
+					enlarge = minFlute(origEng, treeedge->route.routelen );
 					
 					segWidth = xmax - xmin;
 					segHeight = ymax - ymin;
-					regionX1 = max(0, xmin - enlarge);
-					regionX2 = min(xGrid-1, xmax + enlarge);
-					regionY1 = max(0, ymin - enlarge);
-					regionY2 = min(yGrid-1, ymax + enlarge);
+					regionX1 = maxFlute(0, xmin - enlarge);
+					regionX2 = minFlute(xGrid-1, xmax + enlarge);
+					regionY1 = maxFlute(0, ymin - enlarge);
+					regionY2 = minFlute(yGrid-1, ymax + enlarge);
 					regionWidth = regionX2 - regionX1 + 1;
 					regionHeight = regionY2 - regionY1 + 1;
 
@@ -1693,12 +1693,12 @@ void mazeRouteMSMDOrder3D(int expand, int ripupTHlb, int ripupTHub){
 						if (gridsL[i]==gridsL[i+1]) {
 							if(gridsX[i]==gridsX[i+1]) // a vertical edge
 							{
-								min_y = min(gridsY[i], gridsY[i+1]);
+								min_y = minFlute(gridsY[i], gridsY[i+1]);
 								v_edges3D[gridsL[i]*gridV+min_y*xGrid+gridsX[i]].usage += 1;
 							}
 							else ///if(gridsY[i]==gridsY[i+1])// a horizontal edge
 							{
-								min_x = min(gridsX[i], gridsX[i+1]);
+								min_x = minFlute(gridsX[i], gridsX[i+1]);
 								h_edges3D[gridsL[i]*gridH+gridsY[i]*(xGrid-1)+min_x].usage += 1;
 							}
 						}

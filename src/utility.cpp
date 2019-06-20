@@ -80,10 +80,10 @@ if(1)//i!=14)
         y1 = treenodes[n1].y;
         x2 = treenodes[n2].x;
         y2 = treenodes[n2].y;
-        xmin = min(xmin, min(x1, x2));
-        xmax = max(xmax, max(x1, x2));
-        ymin = min(ymin, min(y1, y2));
-        ymax = max(ymax, max(y1, y2));
+        xmin = minFlute(xmin, minFlute(x1, x2));
+        xmax = maxFlute(xmax, maxFlute(x1, x2));
+        ymin = minFlute(ymin, minFlute(y1, y2));
+        ymax = maxFlute(ymax, maxFlute(y1, y2));
                 
         routetype = treeedge->route.type;
         
@@ -574,13 +574,13 @@ void assignEdge(int netID, int edgeID, Bool processDIR)
 
 	for (k = 0; k < routelen; k ++) {
 		if (gridsX[k] == gridsX[k+1]) {
-			min_y = min(gridsY[k], gridsY[k+1]);
+			min_y = minFlute(gridsY[k], gridsY[k+1]);
 			for (l = 0; l < numLayers; l ++) {
 				grid = l* gridV + min_y*xGrid+gridsX[k];
 				layerGrid[l][k] = v_edges3D[grid].cap - v_edges3D[grid].usage;
 			}
 		} else {
-			min_x =  min(gridsX[k], gridsX[k+1]);
+			min_x =  minFlute(gridsX[k], gridsX[k+1]);
 			for (l = 0; l < numLayers; l ++) {
 				grid = l* gridH + gridsY[k]*(xGrid -1)+min_x;
 				layerGrid[l][k] = h_edges3D[grid].cap - h_edges3D[grid].usage;
@@ -705,8 +705,8 @@ void assignEdge(int netID, int edgeID, Bool processDIR)
 
 		} else {
 			//treenodes[n2a].assigned = TRUE;
-			treenodes[n2a].topL = gridsL[routelen];//max(endLayer, gridsL[routelen]);
-			treenodes[n2a].botL = gridsL[routelen];//min(endLayer, gridsL[routelen]);
+			treenodes[n2a].topL = gridsL[routelen];//maxFlute(endLayer, gridsL[routelen]);
+			treenodes[n2a].botL = gridsL[routelen];//minFlute(endLayer, gridsL[routelen]);
 			treenodes[n2a].lID = treenodes[n2a].hID = edgeID;
 		}
 
@@ -824,8 +824,8 @@ void assignEdge(int netID, int edgeID, Bool processDIR)
 
 		} else {
 			//treenodes[n1a].assigned = TRUE;
-			treenodes[n1a].topL = gridsL[0];//max(endLayer, gridsL[0]);
-			treenodes[n1a].botL = gridsL[0];//min(endLayer, gridsL[0]);
+			treenodes[n1a].topL = gridsL[0];//maxFlute(endLayer, gridsL[0]);
+			treenodes[n1a].botL = gridsL[0];//minFlute(endLayer, gridsL[0]);
 			treenodes[n1a].lID = treenodes[n1a].hID =edgeID;
 		}
 	}
@@ -833,7 +833,7 @@ void assignEdge(int netID, int edgeID, Bool processDIR)
 
 	for (k = 0; k < routelen; k ++) {
 		if (gridsX[k] == gridsX[k+1]) {
-			min_y = min(gridsY[k], gridsY[k+1]);
+			min_y = minFlute(gridsY[k], gridsY[k+1]);
 			grid = gridsL[k]* gridV + min_y*xGrid+gridsX[k];
 			
 
@@ -845,7 +845,7 @@ void assignEdge(int netID, int edgeID, Bool processDIR)
 			}
 				
 		} else {
-			min_x =  min(gridsX[k], gridsX[k+1]);
+			min_x =  minFlute(gridsX[k], gridsX[k+1]);
 			grid = gridsL[k]* gridH + gridsY[k]*(xGrid -1)+min_x;
 			
 			if (h_edges3D[grid].usage < h_edges3D[grid].cap) {
@@ -1357,15 +1357,15 @@ void StNetOrder()
 			{
 				if(gridsX[i]==gridsX[i+1]) // a vertical edge
 				{
-					min_y = min(gridsY[i], gridsY[i+1]);
+					min_y = minFlute(gridsY[i], gridsY[i+1]);
 					grid = min_y*xGrid+gridsX[i];
-					treeOrderCong[j].xmin += max(0, v_edges[grid].usage - v_edges[grid].cap);
+					treeOrderCong[j].xmin += maxFlute(0, v_edges[grid].usage - v_edges[grid].cap);
 				}
 				else ///if(gridsY[i]==gridsY[i+1])// a horizontal edge
 				{
-					min_x = min(gridsX[i], gridsX[i+1]);
+					min_x = minFlute(gridsX[i], gridsX[i+1]);
 					grid = gridsY[i]*(xGrid-1)+min_x;
-					treeOrderCong[j].xmin += max(0, h_edges[grid].usage - h_edges[grid].cap);
+					treeOrderCong[j].xmin += maxFlute(0, h_edges[grid].usage - h_edges[grid].cap);
 				}
 			}
 
@@ -1447,13 +1447,13 @@ void recoverEdge(int netID, int edgeID)
 		if (gridsL[i] ==  gridsL[i+1]) {
 			if(gridsX[i]==gridsX[i+1]) // a vertical edge
 			{
-				ymin = min(gridsY[i], gridsY[i+1]);
+				ymin = minFlute(gridsY[i], gridsY[i+1]);
 				grid = gridsL[i]*gridV+ymin*xGrid+gridsX[i];
 				v_edges3D[grid].usage += 1;
 			}
 			else if(gridsY[i]==gridsY[i+1])// a horizontal edge
 			{
-				xmin = min(gridsX[i], gridsX[i+1]);
+				xmin = minFlute(gridsX[i], gridsX[i+1]);
 				grid = gridsL[i]*gridH+gridsY[i]*(xGrid-1)+xmin;
 				h_edges3D[grid].usage += 1;
 			} 
@@ -1998,12 +1998,12 @@ void copyBR (void)
 					{
 						if(gridsX[i]==gridsX[i+1]) // a vertical edge
 						{
-							min_y = min(gridsY[i], gridsY[i+1]);
+							min_y = minFlute(gridsY[i], gridsY[i+1]);
 							v_edges[min_y*xGrid+gridsX[i]].usage += 1;
 						}
 						else ///if(gridsY[i]==gridsY[i+1])// a horizontal edge
 						{
-							min_x = min(gridsX[i], gridsX[i+1]);
+							min_x = minFlute(gridsX[i], gridsX[i+1]);
 							h_edges[gridsY[i]*(xGrid-1)+min_x].usage += 1;
 						}
 					}

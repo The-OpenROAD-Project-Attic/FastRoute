@@ -29,7 +29,7 @@ int D3=INFNTY;
 int FIRST_ROUND=2; // note that num of total rounds = 1+FIRST_ROUND
 int EARLY_QUIT_CRITERIA=1;
 
-#define DEFAULT_QSIZE (3+min(d,1000))
+#define DEFAULT_QSIZE (3+minFlute(d,1000))
 
 #define USE_HASHING 1
 #if USE_HASHING
@@ -234,16 +234,16 @@ void update_dist2(Tree t, DTYPE **dist, DTYPE longest,
   x1 = y1 = INFNTY;
   x2 = y2 = 0;
   for (i=0; i<t.deg; i++) {
-    x1 = min(x1, t.branch[i].x);
-    y1 = min(y1, t.branch[i].y);
-    x2 = max(x2, t.branch[i].x);
-    y2 = max(y2, t.branch[i].y);
+    x1 = minFlute(x1, t.branch[i].x);
+    y1 = minFlute(y1, t.branch[i].y);
+    x2 = maxFlute(x2, t.branch[i].x);
+    y2 = maxFlute(y2, t.branch[i].y);
   }
 
   threshold_x = (x2 - x1)/4;
   threshold_y = (y2 - y1)/4;
-  threshold_x = min(threshold_x, longest);
-  threshold_y = min(threshold_y, longest);
+  threshold_x = minFlute(threshold_x, longest);
+  threshold_y = minFlute(threshold_y, longest);
 
   for (i=0; i<dd; i++) {
     b[i] = i;
@@ -2726,8 +2726,8 @@ Tree xmergetree(Tree t1, Tree t2, int *order1, int *order2,
   threshold_x = (max_x - min_x)/4;
   threshold_y = (nodes[num-1]->y - nodes[0]->y)/4;
 
-  threshold_x = min(threshold_x, max_len);
-  threshold_y = min(threshold_y, max_len);
+  threshold_x = minFlute(threshold_x, max_len);
+  threshold_y = minFlute(threshold_y, max_len);
 
   for (cnt=(t1.deg+t2.deg)/2; cnt>0; cnt--) {
     gain = (order_by_x) ?

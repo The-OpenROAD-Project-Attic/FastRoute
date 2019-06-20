@@ -1129,7 +1129,7 @@ void routeMonotonic(int netID, int edgeID, int threshold)
                 grid = yl*xGrid;
                 for(j=0; j<segHeight; j++)
                 {
-                    cost[j+1][0] = cost[j][0] + max(0, v_edges[grid+xl].red+v_edges[grid+xl].est_usage-vCapacity_lb);
+                    cost[j+1][0] = cost[j][0] + maxFlute(0, v_edges[grid+xl].red+v_edges[grid+xl].est_usage-vCapacity_lb);
                     parent[j+1][0] = SAMEX;
                     grid += xGrid;
                 }
@@ -1141,7 +1141,7 @@ void routeMonotonic(int netID, int edgeID, int threshold)
                     grid = yl*xGrid_1;
                     for(j=0; j<=segHeight; j++)
                     {
-                        tmp = max(0, h_edges[grid+x].red+h_edges[grid+x].est_usage-hCapacity_lb);
+                        tmp = maxFlute(0, h_edges[grid+x].red+h_edges[grid+x].est_usage-hCapacity_lb);
                         cost[j][i+1] = cost[j][i] + tmp;
                         parent[j][i+1] = SAMEY;
                         grid += xGrid-1;
@@ -1153,7 +1153,7 @@ void routeMonotonic(int netID, int edgeID, int threshold)
                     for(j=0; j<segHeight; j++)
                     {
                         ind_j = j+1;
-                        tmp = cost[j][ind_i] + max(0, v_edges[grid+ind_x].red+v_edges[grid+ind_x].est_usage-vCapacity_lb);
+                        tmp = cost[j][ind_i] + maxFlute(0, v_edges[grid+ind_x].red+v_edges[grid+ind_x].est_usage-vCapacity_lb);
                         if(cost[ind_j][ind_i]>tmp)
                         {
                             cost[ind_j][ind_i] = tmp;
@@ -1203,7 +1203,7 @@ void routeMonotonic(int netID, int edgeID, int threshold)
                 grid = (yl-1)*xGrid;
                 for(j=segHeight-1; j>=0; j--)
                 {
-                    cost[j][0] = cost[j+1][0] + max(0, v_edges[grid+xl].red+v_edges[grid+xl].est_usage-vCapacity_lb);
+                    cost[j][0] = cost[j+1][0] + maxFlute(0, v_edges[grid+xl].red+v_edges[grid+xl].est_usage-vCapacity_lb);
                     parent[j][0] = SAMEX;
                     grid -= xGrid;
                 }
@@ -1216,7 +1216,7 @@ void routeMonotonic(int netID, int edgeID, int threshold)
                     ind_i = i+1;
                     for(j=segHeight; j>=0; j--)
                     {
-                        tmp = max(0, h_edges[grid+x].red+h_edges[grid+x].est_usage-hCapacity_lb);
+                        tmp = maxFlute(0, h_edges[grid+x].red+h_edges[grid+x].est_usage-hCapacity_lb);
                         cost[j][ind_i] = cost[j][i] + tmp;
                         parent[j][ind_i] = SAMEY;
                         grid -= xGrid-1;
@@ -1226,7 +1226,7 @@ void routeMonotonic(int netID, int edgeID, int threshold)
                     ind_x = x+1;
                     for(j=segHeight-1; j>=0; j--)
                     {
-                        tmp = cost[j+1][ind_i] + max(0, v_edges[grid+ind_x].red+v_edges[grid+ind_x].est_usage-vCapacity_lb);
+                        tmp = cost[j+1][ind_i] + maxFlute(0, v_edges[grid+ind_x].red+v_edges[grid+ind_x].est_usage-vCapacity_lb);
                         if(cost[j][ind_i]>tmp)
                         {
                             cost[j][ind_i] = tmp;
@@ -1725,17 +1725,17 @@ void routeLVEnew(int netID, int edgeID, int threshold, int enlarge)
 		if ( newRipupCheck(treeedge, x1, y1, x2, y2,threshold, netID, edgeID)) {
 
 			deg = sttrees[netID].deg;
-			xmin = max(x1-enlarge,0);
-			xmax = min(xGrid -1, x2+enlarge);
+			xmin = maxFlute(x1-enlarge,0);
+			xmax = minFlute(xGrid -1, x2+enlarge);
 
 			if (y1 < y2) {
-				ymin = max(y1-enlarge,0);
-				ymax = min(yGrid -1, y2+enlarge);
+				ymin = maxFlute(y1-enlarge,0);
+				ymax = minFlute(yGrid -1, y2+enlarge);
 				yminorig = y1;
 				ymaxorig = y2;
 			} else {
-				ymin = max(y2-enlarge,0);
-				ymax = min(yGrid -1, y1+enlarge);
+				ymin = maxFlute(y2-enlarge,0);
+				ymax = minFlute(yGrid -1, y1+enlarge);
 				yminorig = y2;
 				ymaxorig = y1;
 			}

@@ -132,8 +132,8 @@ int edgeShift(Tree *t, int net)
                     else if(y<minY2)
                         minY2 = y;
                 }
-                minY = max(minY1, minY2);
-                maxY = min(maxY1, maxY2);
+                minY = maxFlute(minY1, minY2);
+                maxY = minFlute(maxY1, maxY2);
 //printf("(%d-%d) minY1=%d, maxY1=%d, minY2=%d, maxY2=%d, minY = %d, maxY = %d\n", n1, n2, minY1, maxY1, minY2, maxY2, minY, maxY);                
 
                 // find the best position (least total usage) to shift 
@@ -188,7 +188,7 @@ int edgeShift(Tree *t, int net)
                                     cost2 += v_edges[grid1+smallX].est_usage;
                                     grid1 += xGrid;
                                 }
-                                costH[j] += min(cost1, cost2);
+                                costH[j] += minFlute(cost1, cost2);
                             } // if(n3!=n2)
                         } // loop l
                         for(l=0; l<nbrCnt[n2]; l++)
@@ -231,7 +231,7 @@ int edgeShift(Tree *t, int net)
                                     cost2 += v_edges[grid1+smallX].est_usage;
                                     grid1 += xGrid;
                                 }
-                                costH[j] += min(cost1, cost2);
+                                costH[j] += minFlute(cost1, cost2);
                             } //if(n3!=n1)
                         } // loop l
                     } // loop j
@@ -279,8 +279,8 @@ int edgeShift(Tree *t, int net)
                     else if(x<minX2)
                         minX2 = x;
                 }
-                minX = max(minX1, minX2);
-                maxX = min(maxX1, maxX2);
+                minX = maxFlute(minX1, minX2);
+                maxX = minFlute(maxX1, maxX2);
 
                 // find the best position (least total usage) to shift
                 if(minX<maxX) // more than 1 possible positions
@@ -333,7 +333,7 @@ int edgeShift(Tree *t, int net)
                                     cost2 += v_edges[grid1+smallX].est_usage;
                                     grid1 += xGrid;
                                 }
-                                costV[j] += min(cost1, cost2);
+                                costV[j] += minFlute(cost1, cost2);
                             } // if(n3!=n2)
                         } // loop l
                         for(l=0; l<nbrCnt[n2]; l++)
@@ -376,7 +376,7 @@ int edgeShift(Tree *t, int net)
                                     cost2 += v_edges[grid1+smallX].est_usage;
                                     grid1 += xGrid;
                                 }
-                                costV[j] += min(cost1, cost2);
+                                costV[j] += minFlute(cost1, cost2);
                             } //if(n3!=n1)
                         } // loop l
                     } // loop j

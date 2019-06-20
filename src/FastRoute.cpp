@@ -106,7 +106,7 @@ void addNet(char* name, int netIdx, int nPins, int minWidth, PIN pins[]){
         }
         if(pinInd>1) // valid net
         {
-            MD = max(MD, pinInd);
+            MD = maxFlute(MD, pinInd);
             TD += pinInd;        
             strcpy(nets[newnetID]->name, name);
             nets[newnetID]->netIDorg = netID;
