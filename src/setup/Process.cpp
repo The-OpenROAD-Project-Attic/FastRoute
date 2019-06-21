@@ -20,11 +20,13 @@
 
 #include "session/Session.h"
 #include "io/reader/DesignPositionReader.h"
+#include "tool/fastroute/FastRoute.h"
 // Optimizations
 
 // Registration
 namespace Rsyn {
 void Session::registerProcesses() {
         registerProcess<Rsyn::DesignPositionReader>("loadDesignPosition");
+        registerProcess<Rsyn::FastRouteProcess>("rsyn.fastRoute");
 }  // end method
 }  // end namespace

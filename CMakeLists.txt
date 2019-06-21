@@ -137,6 +137,7 @@ target_compile_options(rsyn PUBLIC "-Wno-unused-result -Wno-format -Wno-return-t
 
 target_link_libraries(rsyn def lef)
 target_link_libraries(rsyn liberty flute)
+target_link_libraries(rsyn FastRoute)
 target_link_libraries(rsyn db)
 
 # Boost
