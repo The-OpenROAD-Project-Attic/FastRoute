@@ -31,26 +31,33 @@ class FastRouteProcess : public Process {
 		long lower_left_y;
 		long tile_width;
 		long tile_height;
+		int xGrids;
+		int yGrids;
 	} GRID;
 
         Rsyn::Session session;
         Rsyn::Design design;
         Rsyn::Module module;
 	Rsyn::PhysicalDesign phDesign;
+	FastRoute::FT fastRoute;
 
 	GRID grid;
+	std::vector<int> vCapacities;
+	std::vector<int> hCapacities;
+	int pitchesInTile = 15;
+	int selectedMetal = 3;
 
         // Main functions
-	void setXYGridsAndLayers();
         void setCapacities();
         void setSpacingsAndMinWidth();
         void initGrid();
         void initNets();
-        // void initEdges(): ?
-        void computeAdustments();
+        void initEdges();
+        void computeAdjustments();
         // void initAuxVar(); ?
         void writeGuides();
 
+	void setGridAdjustments();
 	//Aux functions
 	void getPinPosOnGrid(DBUxy &);
 

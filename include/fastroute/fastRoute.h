@@ -25,21 +25,25 @@ namespace FastRoute {
 		std::vector<ROUTE> route;
 	} NET;
 
+class FT{
+public:
+	FT() = default;
 
-	extern void setGridsAndLayers(int x, int y, int nLayers);
-	extern void addVCapacity(int verticalCapacity, int layer);
-	extern void addHCapacity(int horizontalCapacity, int layer);
-	extern void addMinWidth(int width, int layer);
-	extern void addMinSpacing(int spacing, int layer);
-	extern void addViaSpacing(int spacing, int layer);
-	extern void setNumberNets(int nNets);
-	extern void setLowerLeft(int x, int y);
-	extern void setTileSize(int width, int height);
-	extern void addNet(char * name, int netIdx, int nPins, int minWidth, PIN pins[]);
-	extern void initEdges();
-	extern void setNumAdjustments(int nAdjustments);
-	extern void addAdjustment(long x1, long y1, int l1, long x2, long y2, int l2, int reducedCap);
-	extern void initAuxVar();
-	extern std::vector<NET> getResults();
+	void setGridsAndLayers(int x, int y, int nLayers);
+	void addVCapacity(int verticalCapacity, int layer);
+	void addHCapacity(int horizontalCapacity, int layer);
+	void addMinWidth(int width, int layer);
+	void addMinSpacing(int spacing, int layer);
+	void addViaSpacing(int spacing, int layer);
+	void setNumberNets(int nNets);
+	void setLowerLeft(int x, int y);
+	void setTileSize(int width, int height);
+	void addNet(char * name, int netIdx, int nPIns, int minWIdth, PIN pins[]);
+	void initEdges();
+	void setNumAdjustments(int nAdjustements);
+	void addAdjustment(long x1, long y1, int l1, long x2, long y2, int l2, int reducedCap);
+	void initAuxVar();
+	std::vector<NET> getResults();
+};
 }
 #endif
