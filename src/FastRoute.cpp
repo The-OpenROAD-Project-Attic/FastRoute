@@ -14,53 +14,53 @@ int segcount = 0;
 int pinInd;
 int numAdjust;
 int vCapacity = 0;
-int  hCapacity = 0;
+int hCapacity = 0;
 int MD =0;
 
-void setGridsAndLayers(int x, int y, int nLayers){
+void FT::setGridsAndLayers(int x, int y, int nLayers){
 	xGrid = x;
 	yGrid = y;
 	numLayers = nLayers;
         numGrids = xGrid*yGrid;
 }
 
-void addVCapacity(int verticalCapacity, int layer){
+void FT::addVCapacity(int verticalCapacity, int layer){
 	vCapacity3D[layer-1]=verticalCapacity/2;
 	vCapacity +=vCapacity3D[layer-1];	
 }
 
-void addHCapacity(int horizontalCapacity, int layer){
+void FT::addHCapacity(int horizontalCapacity, int layer){
 	hCapacity3D[layer-1]=horizontalCapacity/2;
 	hCapacity +=hCapacity3D[layer-1];	
 }
 
-void addMinWidth(int width, int layer){
+void FT::addMinWidth(int width, int layer){
 	MinWidth[layer-1]=width;
 }
 
-void addMinSpacing(int spacing, int layer){
+void FT::addMinSpacing(int spacing, int layer){
 	MinSpacing[layer-1]=spacing;
 }
 
-void addViaSpacing(int spacing, int layer){
+void FT::addViaSpacing(int spacing, int layer){
 	ViaSpacing[layer-1]=spacing;
 }
 
-void setNumberNets(int nNets){
+void FT::setNumberNets(int nNets){
 	numNets=nNets;
 }
 
-void setLowerLeft(int x, int y){
+void FT::setLowerLeft(int x, int y){
 	xcorner = x;
 	ycorner = y;
 }
 
-void setTileSize(int width, int height){
+void FT::setTileSize(int width, int height){
 	wTile = width;
 	hTile = height;
 }
 
-void addNet(char* name, int netIdx, int nPins, int minWidth, PIN pins[]){
+void FT::addNet(char * name, int netIdx, int nPins, int minWidth, PIN pins[]){
 	int TD;
 	int i,j,k;
     	int pinX, pinY, pinL, netID, numPins, minwidth;
@@ -140,7 +140,7 @@ void addNet(char* name, int netIdx, int nPins, int minWidth, PIN pins[]){
 }
 
 
-void initEdges(){
+void FT::initEdges(){
 	LB = 0.9;
 	UB = 1.3;
 	int grid,j,k,i;
@@ -222,11 +222,11 @@ void initEdges(){
 
 }
 
-void setNumAdjustments(int nAdjustments){
+void FT::setNumAdjustments(int nAdjustments){
 	numAdjust = nAdjustments;
 }
 
-void addAdjustment(long x1, long y1, int l1, long x2, long y2, int l2, int reducedCap){
+void FT::addAdjustment(long x1, long y1, int l1, long x2, long y2, int l2, int reducedCap){
 		int grid,k;
 		int reduce,cap;
 		reducedCap = reducedCap/2;
@@ -259,7 +259,7 @@ void addAdjustment(long x1, long y1, int l1, long x2, long y2, int l2, int reduc
 		}
 }
 
-void initAuxVar(){
+void FT::initAuxVar(){
 	int k,i;
 	treeOrderCong = NULL;
 	stopDEC = FALSE;
@@ -310,7 +310,7 @@ void initAuxVar(){
 	
 }
 
-std::vector<NET> getResults(){
+std::vector<NET> FT::getResults(){
 	short *gridsX, *gridsY, *gridsL;
 	int netID, d, i,k, edgeID,nodeID,deg, lastX, lastY,lastL, xreal, yreal,l, routeLen;
 	TreeEdge *treeedges, *treeedge;
