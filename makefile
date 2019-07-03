@@ -43,7 +43,8 @@ call_make_lib:
 	@echo Call make
 	@make -C $(BUILD_DIR) $(MK_OPT) -j$(PARALLEL) --no-print-directory
 	@echo Remove old binary
-	@rm -f lib/$(LIB_NAME)
+	@rm -rf lib/$(LIB_NAME)
+	@mkdir -p lib/
 	@echo Copy binary
 	@cp $(BUILD_DIR)/$(LIB_NAME) lib/
 
