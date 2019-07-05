@@ -33,6 +33,8 @@ class FastRouteProcess : public Process {
 		long tile_height;
 		int xGrids;
 		int yGrids;
+                bool perfect_regular_x;
+                bool perfect_regular_y;
 	} GRID;
 
         Rsyn::Session session;
@@ -44,28 +46,26 @@ class FastRouteProcess : public Process {
 	GRID grid;
 	std::vector<int> vCapacities;
 	std::vector<int> hCapacities;
-	int pitchesInTile = 15;
+        int pitchesInTile = 15;
 	int selectedMetal = 3;
+        std::vector<FastRoute::NET> result;
 
         // Main functions
+        void initGrid();
         void setCapacities();
         void setSpacingsAndMinWidth();
-        void initGrid();
         void initNets();
-        void initEdges();
+        void setGridAdjustments();
         void computeAdjustments();
-        // void initAuxVar(); ?
-        void writeGuides();
-
-	void setGridAdjustments();
-	//Aux functions
+        void writeGuides(const std::vector<FastRoute::NET> &, std::string);
+	
+        //Aux functions
 	void getPinPosOnGrid(DBUxy &);
+        Bounds globalRoutingToBounds(const FastRoute::ROUTE &);
 
        public:
         FastRouteProcess() = default;
-//        FastRoute(const FastRoute &orig) {}
-//        virtual ~FastRoute();
-        virtual bool run(const Rsyn::Json &params) override;
+        bool run(const Rsyn::Json &params) override;
 
 };  // end class
 
