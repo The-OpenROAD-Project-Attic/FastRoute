@@ -59,7 +59,7 @@ bool FastRouteProcess::run(const Rsyn::Json &params) {
 	std::cout << "Running FastRoute...\n";
         fastRoute.run(result);
 	std::cout << "Running FastRoute... Done!\n";
-    
+        
         std::cout << "Writing guides...\n";
         writeGuides(result, outfile);
         std::cout << "Writing guides... Done!\n";
@@ -102,7 +102,7 @@ void FastRouteProcess::initGrid() {
 	
 	fastRoute.setLowerLeft(dieBounds[LOWER][X], dieBounds[LOWER][Y]);
 	fastRoute.setTileSize(tileSize, tileSize);
-	fastRoute.setGridsAndLayers(xGrid, yGrid, nLayers-1);
+	fastRoute.setGridsAndLayers(xGrid, yGrid, nLayers);
 
 	grid.lower_left_x = dieBounds[LOWER][X];
 	grid.lower_left_y = dieBounds[LOWER][Y];
@@ -120,9 +120,6 @@ void FastRouteProcess::setCapacities() {
 		if (phLayer.getType() != Rsyn::ROUTING)
 			continue;
 
-		if (phLayer.getRelativeIndex() == 8)
-			continue;
-
 		if (phLayer.getDirection() == Rsyn::HORIZONTAL) {
 			for (PhysicalTracks phTracks : phDesign.allPhysicalTracks(phLayer)) {
 				if (phTracks.getDirection() != (PhysicalTrackDirection)Rsyn::HORIZONTAL) {
@@ -130,6 +127,7 @@ void FastRouteProcess::setCapacities() {
 					break;
 				}
 			}
+                        
 			fastRoute.addVCapacity(0, phLayer.getRelativeIndex()+1);
 			fastRoute.addHCapacity(hCapacity, phLayer.getRelativeIndex()+1);
                         
@@ -142,6 +140,7 @@ void FastRouteProcess::setCapacities() {
 					break;
 				}
 			}
+                        
 			fastRoute.addVCapacity(vCapacity, phLayer.getRelativeIndex()+1);
 			fastRoute.addHCapacity(0, phLayer.getRelativeIndex()+1);
                         
@@ -157,9 +156,6 @@ void FastRouteProcess::setSpacingsAndMinWidth() {
 	
 	for (PhysicalLayer phLayer : phDesign.allPhysicalLayers()) {
 		if (phLayer.getType() != Rsyn::ROUTING)
-			continue;
-
-		if (phLayer.getRelativeIndex() == 8)
 			continue;
 
 		for (PhysicalTracks phTracks : phDesign.allPhysicalTracks(phLayer)) {
@@ -276,9 +272,6 @@ void FastRouteProcess::setGridAdjustments(){
 		if (phLayer.getType() != Rsyn::ROUTING)
 			continue;
 
-		if (phLayer.getRelativeIndex() == 8)
-			continue;
-
 		int layerN = phLayer.getRelativeIndex()+1;
 		int newVCapacity = std::floor((float)vCapacities[layerN-1]*percentageBlockedX);
 		int newHCapacity = std::floor((float)hCapacities[layerN-1]*percentageBlockedY);
@@ -313,10 +306,9 @@ void FastRouteProcess::computeAdjustments() {
 	float percentageBlockedY = ADJ;
 
         for (Rsyn::PhysicalLayer phLayer : phDesign.allPhysicalLayers()) {
-            if (phLayer.getType() != Rsyn::ROUTING)
+                if (phLayer.getType() != Rsyn::ROUTING)
 			continue;
-		if (phLayer.getRelativeIndex() == 8)
-			continue;
+                
                 for (int y=0; y < yGrids; y++){
                         for (int x=0; x < xGrids; x++) {
                             numAdjustments++;
@@ -329,8 +321,6 @@ void FastRouteProcess::computeAdjustments() {
         
 	for (Rsyn::PhysicalLayer phLayer : phDesign.allPhysicalLayers()) {
 		if (phLayer.getType() != Rsyn::ROUTING)
-			continue;
-                if (phLayer.getRelativeIndex() == 8)
 			continue;
                 
 		int layerN = phLayer.getRelativeIndex()+1;
@@ -359,7 +349,6 @@ void FastRouteProcess::computeAdjustments() {
         
         fastRoute.initAuxVar();
 }
-
 
 void FastRouteProcess::writeGuides(const std::vector<FastRoute::NET> &globalRoute, std::string filename) {
         std::ofstream guideFile;
