@@ -2,7 +2,7 @@
 #define _DATATYPE_H_
 
 #define MAXDEMAND 500  // MAX # Segments over an edge
-#define MAXLAYER 8//MAX # Layer of a routing
+#define MAXLAYER 18//MAX # Layer of a routing
 #define FILESTRLEN 100 // MAX length of file name
 #define BIG_INT 1e7    // big integer used as infinity
 

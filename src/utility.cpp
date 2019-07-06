@@ -1129,7 +1129,7 @@ void newLA ()
 		}
 	}
 
-	printf("node processing\n");
+	printf("\nnode processing\n");
 	newLayerAssignmentV4();
 	printf("layer assignment\n");
 	numVIA = 0;

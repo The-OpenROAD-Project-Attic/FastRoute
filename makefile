@@ -52,7 +52,7 @@ cmake_normal:
 		echo Change to $(BUILD_DIR) ;\
 		cd $(BUILD_DIR) ;\
 		echo Call cmake ;\
-		cmake $(CM_OPT) .. ;\
+		cmake $(CM_OPT) -DCMAKE_BUILD_TYPE=Debug .. ;\
 		)
 
 
@@ -62,7 +62,7 @@ cmake_lib:
 		cd $(BUILD_DIR) ;\
 		echo Call cmake ;\
 		export TYPE_CALL=1 ;\
-		cmake $(CM_OPT) -DCMAKE_BUILD_TYPE=Release .. ;\
+		cmake $(CM_OPT) -DCMAKE_BUILD_TYPE=Debug .. ;\
 		)
 
 

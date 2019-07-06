@@ -1,6 +1,7 @@
 #ifndef FASTROUTE_H
 #define FASTROUTE_H
 #include <vector>
+#include <string>
 
 namespace FastRoute {
 
@@ -20,7 +21,7 @@ namespace FastRoute {
 	} ROUTE;
 
 	typedef struct{
-		char* name;
+		std::string name;
 		int id;
 		std::vector<ROUTE> route;
 	} NET;
@@ -43,6 +44,7 @@ public:
 	void setNumAdjustments(int nAdjustements);
 	void addAdjustment(long x1, long y1, int l1, long x2, long y2, int l2, int reducedCap);
 	void initAuxVar();
+	int run(std::vector<NET> &);
 	std::vector<NET> getResults();
 };
 }

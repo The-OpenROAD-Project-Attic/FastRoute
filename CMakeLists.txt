@@ -1,11 +1,11 @@
-cmake_minimum_required (VERSION 3.8)
+cmake_minimum_required (VERSION 2.8)
 project (GlobalRouter)
 
 set(BIN_NAME "FastRoute")
 set(LIB_NAME "FastRoute")
 
 set(CMAKE_CXX_STANDARD 11)
-set(CMAKE_CXX_FLAGS "-O3")
+set(CMAKE_CXX_FLAGS "-O0")
 
 file(GLOB_RECURSE SRC_FILES ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp)
 
