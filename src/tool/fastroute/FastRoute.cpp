@@ -183,46 +183,52 @@ void FastRouteProcess::initNets() {
 	for (Rsyn::Net net : module.allNets()) {
 		std::vector<FastRoute::PIN> pins;
 		for (Rsyn::Pin pin: net.allPins()) {
-			if (pin.getInstanceType() != Rsyn::CELL)
-				continue;
-
 			DBUxy pinPosition;
-			int pinLayer;
-			Rsyn::PhysicalLibraryPin phLibPin = phDesign.getPhysicalLibraryPin(pin);
-			Rsyn::Cell cell = pin.getInstance().asCell();
-			Rsyn::PhysicalCell phCell = phDesign.getPhysicalCell(cell);
-			const DBUxy cellPos = phCell.getPosition();
-			const Rsyn::PhysicalTransform &transform = phCell.getTransform(true);
-			
-			for (Rsyn::PhysicalPinGeometry pinGeo : phLibPin.allPinGeometries()) {
-				if (!pinGeo.hasPinLayer())
-					continue;
-				for (Rsyn::PhysicalPinLayer phPinLayer : pinGeo.allPinLayers()) {
-					pinLayer = phPinLayer.getLayer().getRelativeIndex();
-					
-					std::vector<DBUxy> pinBdsPositions;
-					DBUxy bdsPosition;
-					for (Bounds bds : phPinLayer.allBounds()) {
-						bds = transform.apply(bds);
-						bds.translate(cellPos);
-						bdsPosition = bds.computeCenter();
-						getPinPosOnGrid(bdsPosition);
-						pinBdsPositions.push_back(bdsPosition);
-					}
+                        int pinLayer;
+                        if (pin.getInstanceType() == Rsyn::CELL) {
+                                Rsyn::PhysicalLibraryPin phLibPin = phDesign.getPhysicalLibraryPin(pin);
+                                Rsyn::Cell cell = pin.getInstance().asCell();
+                                Rsyn::PhysicalCell phCell = phDesign.getPhysicalCell(cell);
+                                const DBUxy cellPos = phCell.getPosition();
+                                const Rsyn::PhysicalTransform &transform = phCell.getTransform(true);
 
-					int mostVoted = 0;
-				
-					for (DBUxy pos : pinBdsPositions) {
-						int equals = std::count(pinBdsPositions.begin(),
-								pinBdsPositions.end(), pos);
-						if (equals > mostVoted) {
-							pinPosition = pos;
-							mostVoted = equals;	
-						}
-					}
-				}
+                                for (Rsyn::PhysicalPinGeometry pinGeo : phLibPin.allPinGeometries()) {
+                                        if (!pinGeo.hasPinLayer())
+                                                continue;
+                                        for (Rsyn::PhysicalPinLayer phPinLayer : pinGeo.allPinLayers()) {
+                                                pinLayer = phPinLayer.getLayer().getRelativeIndex();
 
-			}
+                                                std::vector<DBUxy> pinBdsPositions;
+                                                DBUxy bdsPosition;
+                                                for (Bounds bds : phPinLayer.allBounds()) {
+                                                        bds = transform.apply(bds);
+                                                        bds.translate(cellPos);
+                                                        bdsPosition = bds.computeCenter();
+                                                        getPinPosOnGrid(bdsPosition);
+                                                        pinBdsPositions.push_back(bdsPosition);
+                                                }
+
+                                                int mostVoted = 0;
+
+                                                for (DBUxy pos : pinBdsPositions) {
+                                                        int equals = std::count(pinBdsPositions.begin(),
+                                                                        pinBdsPositions.end(), pos);
+                                                        if (equals > mostVoted) {
+                                                                pinPosition = pos;
+                                                                mostVoted = equals;	
+                                                        }
+                                                }
+                                        }
+                                }
+                        } else if (pin.getInstanceType() == Rsyn::PORT) {
+                                Rsyn::PhysicalLibraryPin phLibPin = phDesign.getPhysicalLibraryPin(pin);
+                                Rsyn::Port port = pin.getInstance().asPort();
+                                Rsyn::PhysicalPort phPort = phDesign.getPhysicalPort(port);
+                                DBUxy portPos = phPort.getPosition();
+                                getPinPosOnGrid(portPos);
+                                pinPosition = portPos;
+                                pinLayer = phPort.getLayer().getRelativeIndex();
+                        }
 			FastRoute::PIN grPin;
 			grPin.x = pinPosition.x;
 			grPin.y = pinPosition.y;
