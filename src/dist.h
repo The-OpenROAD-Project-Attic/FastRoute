@@ -3,16 +3,14 @@
 
 #include "global.h"
 
-namespace FastRoute{
-long  dist(
-  Point  p,
-  Point  q
-);
+namespace FastRoute {
+long dist(
+    Point p,
+    Point q);
 
-long  dist2(   
-  Point*  p,
-  Point*  q
-);
+long dist2(
+    Point* p,
+    Point* q);
 
-}
+}  // namespace FastRoute
 #endif

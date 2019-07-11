@@ -20,14 +20,14 @@ extern float vCapacity_lb, hCapacity_lb, vCapacity_ub, hCapacity_ub;
 extern int enlarge, costheight, ripup_threshold;
 extern int MaxDegree;
 extern int MinWidth[MAXLAYER], MinSpacing[MAXLAYER], ViaSpacing[MAXLAYER];
-extern int xcorner,ycorner,wTile,hTile, ahTH;
+extern int xcorner, ycorner, wTile, hTile, ahTH;
 
-extern int numValidNets; // # nets need to be routed (having pins in different grids)
+extern int numValidNets;  // # nets need to be routed (having pins in different grids)
 extern int numLayers;
-extern int totalNumSeg;  // total # segments
-extern int totalOverflow; // total # overflow
-extern int mazeThreshold; // the wirelen threshold to do maze routing
-extern Net** nets;
+extern int totalNumSeg;    // total # segments
+extern int totalOverflow;  // total # overflow
+extern int mazeThreshold;  // the wirelen threshold to do maze routing
+extern Net **nets;
 extern Edge *h_edges, *v_edges;
 
 extern float d1[YRANGE][XRANGE];
@@ -39,7 +39,7 @@ extern Bool hyperH[YRANGE][XRANGE];
 extern int corrEdge[YRANGE][XRANGE];
 extern int SLOPE;
 
-//coefficient 
+//coefficient
 extern float LB;
 extern float UB;
 extern int THRESH_M;
@@ -53,20 +53,19 @@ extern int VCA;
 extern int VIA, slope, max_adj;
 extern char benchFile[STRINGLEN];
 
+extern Segment *seglist;
+extern int *seglistIndex;  // the index for the segments for each net
+extern int *seglistCnt;    // the number of segements for each net
+extern int *segOrder;      // the order of segments for routing
 
-extern Segment* seglist;
-extern int* seglistIndex; // the index for the segments for each net
-extern int* seglistCnt;   // the number of segements for each net
-extern int* segOrder;     // the order of segments for routing
+extern Tree *trees;      // the tree topologies
+extern StTree *sttrees;  // the Steiner trees
+extern DTYPE **gxs;      // the copy of xs for nets, used for second FLUTE
+extern DTYPE **gys;      // the copy of xs for nets, used for second FLUTE
+extern DTYPE **gs;       // the copy of vertical sequence for nets, used for second FLUTE
 
-extern Tree * trees;       // the tree topologies
-extern StTree * sttrees;   // the Steiner trees
-extern DTYPE ** gxs;       // the copy of xs for nets, used for second FLUTE
-extern DTYPE ** gys;       // the copy of xs for nets, used for second FLUTE
-extern DTYPE ** gs;        // the copy of vertical sequence for nets, used for second FLUTE
-
-extern OrderNetPin* treeOrderPV;
-extern OrderTree* treeOrderCong;
+extern OrderNetPin *treeOrderPV;
+extern OrderTree *treeOrderCong;
 extern int numTreeedges;
 extern int viacost;
 
@@ -89,9 +88,9 @@ extern Bool inRegion[YRANGE][XRANGE];
 extern Bool heapVisited[MAXNETDEG];
 extern int heapQueue[MAXNETDEG];
 
-extern  int gridHV,gridH,gridV, gridHs[MAXLAYER],gridVs[MAXLAYER] ;
+extern int gridHV, gridH, gridV, gridHs[MAXLAYER], gridVs[MAXLAYER];
 
-extern int  **heap13D;
+extern int **heap13D;
 extern short **heap23D;
 
 extern float *h_costTable, *v_costTable;
@@ -99,20 +98,18 @@ extern float *h_costTable, *v_costTable;
 extern Bool stopDEC, errorPRONE;
 extern OrderNetEdge netEO[2000];
 
-extern int xcor[2000],ycor[2000], dcor[2000];
+extern int xcor[2000], ycor[2000], dcor[2000];
 
-extern StTree* sttreesBK;
+extern StTree *sttreesBK;
 
 extern short **parentX1, **parentY1, **parentX3, **parentY3;
 
-extern float **heap2,**heap1;
-extern Bool *pop_heap2; 
-
-
+extern float **heap2, **heap1;
+extern Bool *pop_heap2;
 
 extern void init_usage();
 extern void readFile(char benchFile[]);
 extern void freeAllMemory();
-}
+}  // namespace FastRoute
 
 #endif /* _DATAPROC_H_ */

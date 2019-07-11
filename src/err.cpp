@@ -1,18 +1,16 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-namespace FastRoute{
+namespace FastRoute {
 
 /**************************************************************************/
 /*
   print error message and continue
 */
 
-void  err_msg(
-char* msg
-)
-{
-  fprintf(stderr, "%s\n", msg);
+void err_msg(
+    char* msg) {
+        fprintf(stderr, "%s\n", msg);
 }
 
 /**************************************************************************/
@@ -20,11 +18,9 @@ char* msg
   print error message and  exit
 */
 
-void  err_exit(
-char* msg
-)
-{
-  fprintf(stderr, "%s\n", msg);
-  exit(1);
+void err_exit(
+    char* msg) {
+        fprintf(stderr, "%s\n", msg);
+        exit(1);
 }
-}
+}  // namespace FastRoute

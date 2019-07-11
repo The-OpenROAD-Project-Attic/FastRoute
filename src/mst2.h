@@ -3,13 +3,12 @@
 
 #include "global.h"
 
-namespace FastRoute{
+namespace FastRoute {
 
-void  mst2_package_init( long  n );
-void  mst2_package_done();
-void  mst2( long n, Point* pt, long* parent );
+void mst2_package_init(long n);
+void mst2_package_done();
+void mst2(long n, Point* pt, long* parent);
 
-}
+}  // namespace FastRoute
 
-#endif 
-
+#endif
