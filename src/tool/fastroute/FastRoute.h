@@ -26,41 +26,42 @@ namespace Rsyn {
 
 class FastRouteProcess : public Process {
        private:
-	typedef struct {
-		long lower_left_x;
-		long lower_left_y;
-		long tile_width;
-		long tile_height;
-		int xGrids;
-		int yGrids;
+        typedef struct {
+                long lower_left_x;
+                long lower_left_y;
+                long tile_width;
+                long tile_height;
+                int xGrids;
+                int yGrids;
                 bool perfect_regular_x;
                 bool perfect_regular_y;
-	} GRID;
+        } GRID;
 
         Rsyn::Session session;
         Rsyn::Design design;
         Rsyn::Module module;
-	Rsyn::PhysicalDesign phDesign;
-	FastRoute::FT fastRoute;
+        Rsyn::PhysicalDesign phDesign;
+        FastRoute::FT fastRoute;
 
-	GRID grid;
-	std::vector<int> vCapacities;
-	std::vector<int> hCapacities;
+        GRID grid;
+        std::vector<int> vCapacities;
+        std::vector<int> hCapacities;
         int pitchesInTile = 15;
-	int selectedMetal = 3;
+        int selectedMetal = 3;
         std::vector<FastRoute::NET> result;
 
         // Main functions
         void initGrid();
         void setCapacities();
+        void setLayerOrientation();
         void setSpacingsAndMinWidth();
         void initNets();
         void setGridAdjustments();
         void computeAdjustments();
         void writeGuides(const std::vector<FastRoute::NET> &, std::string);
-	
-        //Aux functions
-	void getPinPosOnGrid(DBUxy &);
+
+        // Aux functions
+        void getPinPosOnGrid(DBUxy &);
         Bounds globalRoutingToBounds(const FastRoute::ROUTE &);
 
        public:
@@ -69,6 +70,6 @@ class FastRouteProcess : public Process {
 
 };  // end class
 
-}
+}  // namespace Rsyn
 
 #endif

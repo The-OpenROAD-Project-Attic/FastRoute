@@ -29,37 +29,41 @@ bool FastRouteProcess::run(const Rsyn::Json &params) {
         std::vector<FastRoute::NET> result;
         std::string outfile = params.value("outfile", "out.guide");
         design = session.getDesign();
-	module = design.getTopModule();
-	phDesign = session.getPhysicalDesign();
-        
-	std::cout << "Initing grid...\n";
-	initGrid();
-	std::cout << "Initing grid... Done!\n";
-      
-	std::cout << "Setting capacities...\n";
-	setCapacities();
+        module = design.getTopModule();
+        phDesign = session.getPhysicalDesign();
+
+        std::cout << "Initing grid...\n";
+        initGrid();
+        std::cout << "Initing grid... Done!\n";
+
+        std::cout << "Setting capacities...\n";
+        setCapacities();
         std::cout << "Setting capacities... Done!\n";
 
-	std::cout << "Setting spacings and widths...\n";
+        std::cout << "Setting orientation...\n";
+        setLayerOrientation();
+        std::cout << "Setting orientation... Done!\n";
+
+        std::cout << "Setting spacings and widths...\n";
         setSpacingsAndMinWidth();
         std::cout << "Setting spacings and widths... Done!\n";
-        
-	std::cout << "Initing nets...\n";
+
+        std::cout << "Initing nets...\n";
         initNets();
         std::cout << "Initing nets... Done!\n";
-        
-	std::cout << "Adjusting grid...\n";
+
+        std::cout << "Adjusting grid...\n";
         setGridAdjustments();
         std::cout << "Adjusting grid... Done!\n";
 
         std::cout << "Computing adjustments...\n";
-    	computeAdjustments();
+        computeAdjustments();
         std::cout << "Computing adjustments... Done!\n";
-       
-	std::cout << "Running FastRoute...\n";
+
+        std::cout << "Running FastRoute...\n";
         fastRoute.run(result);
-	std::cout << "Running FastRoute... Done!\n";
-        
+        std::cout << "Running FastRoute... Done!\n";
+
         std::cout << "Writing guides...\n";
         writeGuides(result, outfile);
         std::cout << "Writing guides... Done!\n";
@@ -69,121 +73,135 @@ bool FastRouteProcess::run(const Rsyn::Json &params) {
 
 void FastRouteProcess::initGrid() {
     int nLayers = 0;
-	DBU trackSpacing;	
+        DBU trackSpacing;
 
-	for (Rsyn::PhysicalLayer phLayer : phDesign.allPhysicalLayers()){
-		if (phLayer.getType() != Rsyn::ROUTING)
-			continue;
-                
-		nLayers++;
-		if (phLayer.getRelativeIndex() != selectedMetal -1)
-			continue;
+        for (Rsyn::PhysicalLayer phLayer : phDesign.allPhysicalLayers()){
+                if (phLayer.getType() != Rsyn::ROUTING)
+                        continue;
 
-		Rsyn::PhysicalLayerDirection metalDirection = phLayer.getDirection();
+                nLayers++;
+                if (phLayer.getRelativeIndex() != selectedMetal -1)
+                        continue;
 
-		for (Rsyn::PhysicalTracks phTrack : phDesign.allPhysicalTracks(phLayer)){
-			if (phTrack.getDirection() == (PhysicalTrackDirection) metalDirection)
-				continue;
-			trackSpacing = phTrack.getSpace();
-			break;
-		}
-	}
+                Rsyn::PhysicalLayerDirection metalDirection = phLayer.getDirection();
 
-	DBU tileSize = trackSpacing* pitchesInTile;
+                for (Rsyn::PhysicalTracks phTrack : phDesign.allPhysicalTracks(phLayer)){
+                        if (phTrack.getDirection() == (PhysicalTrackDirection) metalDirection)
+                                continue;
+                        trackSpacing = phTrack.getSpace();
+                        break;
+                }
+        }
 
-	Rsyn::PhysicalDie phDie = phDesign.getPhysicalDie();
-	Bounds dieBounds = phDie.getBounds();
-        
-	DBU dieX = dieBounds[UPPER][X] - dieBounds[LOWER][X];
-	DBU dieY = dieBounds[UPPER][Y] - dieBounds[LOWER][Y];
-	
-	int xGrid = std::ceil((float)dieX/tileSize);
-	int yGrid = std::ceil((float)dieY/tileSize);
-	
-	fastRoute.setLowerLeft(dieBounds[LOWER][X], dieBounds[LOWER][Y]);
-	fastRoute.setTileSize(tileSize, tileSize);
-	fastRoute.setGridsAndLayers(xGrid, yGrid, nLayers);
+        DBU tileSize = trackSpacing* pitchesInTile;
 
-	grid.lower_left_x = dieBounds[LOWER][X];
-	grid.lower_left_y = dieBounds[LOWER][Y];
-	grid.tile_width = tileSize;
-	grid.tile_height = tileSize;
-	grid.yGrids = yGrid;
-	grid.xGrids = xGrid;
+        Rsyn::PhysicalDie phDie = phDesign.getPhysicalDie();
+        Bounds dieBounds = phDie.getBounds();
+
+        DBU dieX = dieBounds[UPPER][X] - dieBounds[LOWER][X];
+        DBU dieY = dieBounds[UPPER][Y] - dieBounds[LOWER][Y];
+
+        int xGrid = std::ceil((float)dieX/tileSize);
+        int yGrid = std::ceil((float)dieY/tileSize);
+
+        fastRoute.setLowerLeft(dieBounds[LOWER][X], dieBounds[LOWER][Y]);
+        fastRoute.setTileSize(tileSize, tileSize);
+        fastRoute.setGridsAndLayers(xGrid, yGrid, nLayers);
+
+        grid.lower_left_x = dieBounds[LOWER][X];
+        grid.lower_left_y = dieBounds[LOWER][Y];
+        grid.tile_width = tileSize;
+        grid.tile_height = tileSize;
+        grid.yGrids = yGrid;
+        grid.xGrids = xGrid;
 }
 
 void FastRouteProcess::setCapacities() {
-	for (PhysicalLayer phLayer : phDesign.allPhysicalLayers()) {
-		int vCapacity = 0;
-		int hCapacity = 0;
-		
-		if (phLayer.getType() != Rsyn::ROUTING)
-			continue;
+        for (PhysicalLayer phLayer : phDesign.allPhysicalLayers()) {
+                int vCapacity = 0;
+                int hCapacity = 0;
 
-		if (phLayer.getDirection() == Rsyn::HORIZONTAL) {
-			for (PhysicalTracks phTracks : phDesign.allPhysicalTracks(phLayer)) {
-				if (phTracks.getDirection() != (PhysicalTrackDirection)Rsyn::HORIZONTAL) {
-					hCapacity = std::floor((float)grid.tile_width/phTracks.getSpace());
-					break;
-				}
-			}
-                        
-			fastRoute.addVCapacity(0, phLayer.getRelativeIndex()+1);
-			fastRoute.addHCapacity(hCapacity, phLayer.getRelativeIndex()+1);
-                        
+                if (phLayer.getType() != Rsyn::ROUTING)
+                        continue;
+
+                if (phLayer.getDirection() == Rsyn::HORIZONTAL) {
+                        for (PhysicalTracks phTracks : phDesign.allPhysicalTracks(phLayer)) {
+                                if (phTracks.getDirection() != (PhysicalTrackDirection)Rsyn::HORIZONTAL) {
+                                        hCapacity = std::floor((float)grid.tile_width/phTracks.getSpace());
+                                        break;
+                                }
+                        }
+
+                        fastRoute.addVCapacity(0, phLayer.getRelativeIndex()+1);
+                        fastRoute.addHCapacity(hCapacity, phLayer.getRelativeIndex()+1);
+
                         vCapacities.push_back(0);
                         hCapacities.push_back(hCapacity);
-		} else {	
-			for (PhysicalTracks phTracks : phDesign.allPhysicalTracks(phLayer)) {
-				if (phTracks.getDirection() != (PhysicalTrackDirection)Rsyn::VERTICAL) {
-					vCapacity = std::floor((float)grid.tile_width/phTracks.getSpace());
-					break;
-				}
-			}
-                        
-			fastRoute.addVCapacity(vCapacity, phLayer.getRelativeIndex()+1);
-			fastRoute.addHCapacity(0, phLayer.getRelativeIndex()+1);
-                        
-			vCapacities.push_back(vCapacity);
+                } else {
+                        for (PhysicalTracks phTracks : phDesign.allPhysicalTracks(phLayer)) {
+                                if (phTracks.getDirection() != (PhysicalTrackDirection)Rsyn::VERTICAL) {
+                                        vCapacity = std::floor((float)grid.tile_width/phTracks.getSpace());
+                                        break;
+                                }
+                        }
+
+                        fastRoute.addVCapacity(vCapacity, phLayer.getRelativeIndex()+1);
+                        fastRoute.addHCapacity(0, phLayer.getRelativeIndex()+1);
+
+                        vCapacities.push_back(vCapacity);
                         hCapacities.push_back(0);
                 }
-	}
+        }
+}
+
+void FastRouteProcess::setLayerOrientation() {
+        for (PhysicalLayer phLayer : phDesign.allPhysicalLayers()) {
+                if (phLayer.getType() != Rsyn::ROUTING)
+                        continue;
+
+                if (phLayer.getDirection() == Rsyn::HORIZONTAL) {
+                        fastRoute.setLayerOrientation(0);
+                } else {
+                        fastRoute.setLayerOrientation(2);
+                }
+                break;
+        }
 }
 
 void FastRouteProcess::setSpacingsAndMinWidth() {
-	int minSpacing = 0;
-	int minWidth;
-	
-	for (PhysicalLayer phLayer : phDesign.allPhysicalLayers()) {
-		if (phLayer.getType() != Rsyn::ROUTING)
-			continue;
+        int minSpacing = 0;
+        int minWidth;
 
-		for (PhysicalTracks phTracks : phDesign.allPhysicalTracks(phLayer)) {
-			if (phTracks.getDirection() != (PhysicalTrackDirection)phLayer.getDirection())
-				minWidth = phTracks.getSpace();
+        for (PhysicalLayer phLayer : phDesign.allPhysicalLayers()) {
+                if (phLayer.getType() != Rsyn::ROUTING)
+                        continue;
+
+                for (PhysicalTracks phTracks : phDesign.allPhysicalTracks(phLayer)) {
+                        if (phTracks.getDirection() != (PhysicalTrackDirection)phLayer.getDirection())
+                                minWidth = phTracks.getSpace();
                         else
                                 continue;
-			fastRoute.addMinSpacing(minSpacing, phLayer.getRelativeIndex()+1);
-			fastRoute.addMinWidth(minWidth, phLayer.getRelativeIndex()+1);
-			fastRoute.addViaSpacing(0, phLayer.getRelativeIndex()+1);
-		}
-	}	
+                        fastRoute.addMinSpacing(minSpacing, phLayer.getRelativeIndex()+1);
+                        fastRoute.addMinWidth(minWidth, phLayer.getRelativeIndex()+1);
+                        fastRoute.addViaSpacing(0, phLayer.getRelativeIndex()+1);
+                }
+        }
 }
 
 void FastRouteProcess::initNets() {
-	int idx = 0;
+        int idx = 0;
         int numNets = 0;
-        
+
         for (Rsyn::Net net : module.allNets()) {
-		numNets++;
+                numNets++;
         }
-        
+
         fastRoute.setNumberNets(numNets);
-        
-	for (Rsyn::Net net : module.allNets()) {
-		std::vector<FastRoute::PIN> pins;
-		for (Rsyn::Pin pin: net.allPins()) {
-			DBUxy pinPosition;
+
+        for (Rsyn::Net net : module.allNets()) {
+                std::vector<FastRoute::PIN> pins;
+                for (Rsyn::Pin pin: net.allPins()) {
+                        DBUxy pinPosition;
                         int pinLayer;
                         if (pin.getInstanceType() == Rsyn::CELL) {
                                 Rsyn::PhysicalLibraryPin phLibPin = phDesign.getPhysicalLibraryPin(pin);
@@ -215,7 +233,7 @@ void FastRouteProcess::initNets() {
                                                                         pinBdsPositions.end(), pos);
                                                         if (equals > mostVoted) {
                                                                 pinPosition = pos;
-                                                                mostVoted = equals;	
+                                                                mostVoted = equals;
                                                         }
                                                 }
                                         }
@@ -229,112 +247,112 @@ void FastRouteProcess::initNets() {
                                 pinPosition = portPos;
                                 pinLayer = phPort.getLayer().getRelativeIndex();
                         }
-			FastRoute::PIN grPin;
-			grPin.x = pinPosition.x;
-			grPin.y = pinPosition.y;
-			grPin.layer = pinLayer+1;
+                        FastRoute::PIN grPin;
+                        grPin.x = pinPosition.x;
+                        grPin.y = pinPosition.y;
+                        grPin.layer = pinLayer+1;
                         pins.push_back(grPin);
-		}
-		FastRoute::PIN grPins[pins.size()];
-		
-		char netName[net.getName().size()+1];
-		strcpy(netName, net.getName().c_str());
-		int count = 0;
-		for (FastRoute::PIN pin : pins) {
-			grPins[count] = pin;
-			count++;
-		}
-		
-		fastRoute.addNet(netName, idx, pins.size(), 1, grPins);
+                }
+                FastRoute::PIN grPins[pins.size()];
+
+                char netName[net.getName().size()+1];
+                strcpy(netName, net.getName().c_str());
+                int count = 0;
+                for (FastRoute::PIN pin : pins) {
+                        grPins[count] = pin;
+                        count++;
+                }
+
+                fastRoute.addNet(netName, idx, pins.size(), 1, grPins);
                 idx++;
-	}
-        
+        }
+
         fastRoute.initEdges();
 }
 
 void FastRouteProcess::setGridAdjustments(){
         grid.perfect_regular_x = false;
         grid.perfect_regular_y = false;
-        
-	Rsyn::PhysicalDie phDie = phDesign.getPhysicalDie();
-	Bounds dieBounds = phDie.getBounds();
-	DBUxy upperDieBounds = dieBounds[UPPER];
+
+        Rsyn::PhysicalDie phDie = phDesign.getPhysicalDie();
+        Bounds dieBounds = phDie.getBounds();
+        DBUxy upperDieBounds = dieBounds[UPPER];
 
         int xGrids = grid.xGrids;
-	int yGrids = grid.yGrids;
-	int xBlocked = upperDieBounds.x % xGrids;
-	int yBlocked = upperDieBounds.y % yGrids;
-	float percentageBlockedX = xBlocked/grid.tile_width;
-	float percentageBlockedY = yBlocked/grid.tile_height;
-        
+        int yGrids = grid.yGrids;
+        int xBlocked = upperDieBounds.x % xGrids;
+        int yBlocked = upperDieBounds.y % yGrids;
+        float percentageBlockedX = xBlocked/grid.tile_width;
+        float percentageBlockedY = yBlocked/grid.tile_height;
+
         if (xBlocked == 0) {
                 grid.perfect_regular_x = true;
         }
         if (yBlocked == 0) {
                 grid.perfect_regular_y = true;
         }
-         
-	for (Rsyn::PhysicalLayer phLayer : phDesign.allPhysicalLayers()){
-		if (phLayer.getType() != Rsyn::ROUTING)
-			continue;
 
-		int layerN = phLayer.getRelativeIndex()+1;
-		int newVCapacity = std::floor((float)vCapacities[layerN-1]*percentageBlockedX);
-		int newHCapacity = std::floor((float)hCapacities[layerN-1]*percentageBlockedY);
-                
-        	int numAdjustments = 0;
-	        for (int i=1; i < yGrids; i++)
-        	        numAdjustments++;
-	        for (int i=1; i < xGrids; i++)
-        	        numAdjustments++;
-        	fastRoute.setNumAdjustments(numAdjustments);        
+        for (Rsyn::PhysicalLayer phLayer : phDesign.allPhysicalLayers()){
+                if (phLayer.getType() != Rsyn::ROUTING)
+                        continue;
 
-		if (!grid.perfect_regular_x){
-			for (int i=1; i < yGrids; i++){
+                int layerN = phLayer.getRelativeIndex()+1;
+                int newVCapacity = std::floor((float)vCapacities[layerN-1]*percentageBlockedX);
+                int newHCapacity = std::floor((float)hCapacities[layerN-1]*percentageBlockedY);
+
+                int numAdjustments = 0;
+                for (int i=1; i < yGrids; i++)
+                        numAdjustments++;
+                for (int i=1; i < xGrids; i++)
+                        numAdjustments++;
+                fastRoute.setNumAdjustments(numAdjustments);
+
+                if (!grid.perfect_regular_x){
+                        for (int i=1; i < yGrids; i++){
                                 fastRoute.addAdjustment(xGrids-1, i-1, layerN, xGrids-1, i, layerN, newVCapacity);
-			}
-		}
-		if (!grid.perfect_regular_y){
-			for (int i=1; i < xGrids; i++){
-				fastRoute.addAdjustment(i-1, yGrids-1, layerN, i, yGrids-1, layerN, newHCapacity);
-			}
-		}
-	}
+                        }
+                }
+                if (!grid.perfect_regular_y){
+                        for (int i=1; i < xGrids; i++){
+                                fastRoute.addAdjustment(i-1, yGrids-1, layerN, i, yGrids-1, layerN, newHCapacity);
+                        }
+                }
+        }
 }
 
 void FastRouteProcess::computeAdjustments() {
         // Temporary adjustment: fixed percentage per layer
         int xGrids = grid.xGrids;
-	int yGrids = grid.yGrids;
+        int yGrids = grid.yGrids;
         int numAdjustments = 0;
-        
+
         float percentageBlockedX = ADJ;
-	float percentageBlockedY = ADJ;
+        float percentageBlockedY = ADJ;
 
         for (Rsyn::PhysicalLayer phLayer : phDesign.allPhysicalLayers()) {
                 if (phLayer.getType() != Rsyn::ROUTING)
-			continue;
-                
+                        continue;
+
                 for (int y=0; y < yGrids; y++){
                         for (int x=0; x < xGrids; x++) {
                             numAdjustments++;
                         }
                 }
         }
-        
+
         numAdjustments *= 2;
         fastRoute.setNumAdjustments(numAdjustments);
-        
-	for (Rsyn::PhysicalLayer phLayer : phDesign.allPhysicalLayers()) {
-		if (phLayer.getType() != Rsyn::ROUTING)
-			continue;
-                
-		int layerN = phLayer.getRelativeIndex()+1;
-		int newVCapacity = std::floor((float)vCapacities[layerN-1]*(1 - percentageBlockedX));
-		int newHCapacity = std::floor((float)hCapacities[layerN-1]*(1 - percentageBlockedY));
-                
-		vCapacities[layerN-1] = newVCapacity;
-		hCapacities[layerN-1] = newHCapacity;
+
+        for (Rsyn::PhysicalLayer phLayer : phDesign.allPhysicalLayers()) {
+                if (phLayer.getType() != Rsyn::ROUTING)
+                        continue;
+
+                int layerN = phLayer.getRelativeIndex()+1;
+                int newVCapacity = std::floor((float)vCapacities[layerN-1]*(1 - percentageBlockedX));
+                int newHCapacity = std::floor((float)hCapacities[layerN-1]*(1 - percentageBlockedY));
+
+                vCapacities[layerN-1] = newVCapacity;
+                hCapacities[layerN-1] = newHCapacity;
 
                 if (hCapacities[layerN-1] != 0) {
                         for (int y=1; y < yGrids; y++) {
@@ -343,7 +361,7 @@ void FastRouteProcess::computeAdjustments() {
                                 }
                         }
                 }
-                
+
                 if (vCapacities[layerN-1] != 0) {
                         for (int x=1; x < xGrids; x++) {
                             for (int y=1; y < yGrids; y++) {
@@ -351,8 +369,8 @@ void FastRouteProcess::computeAdjustments() {
                                 }
                         }
                 }
-	}
-        
+        }
+
         fastRoute.initAuxVar();
 }
 
@@ -364,15 +382,15 @@ void FastRouteProcess::writeGuides(const std::vector<FastRoute::NET> &globalRout
                 guideFile.close();
                 std::exit(0);
         }
-        
+
         for (FastRoute::NET netRoute : globalRoute) {
                 guideFile << netRoute.name << "\n";
                 guideFile << "(\n";
                 for (FastRoute::ROUTE route : netRoute.route) {
                         if (route.initLayer == route.finalLayer) {
-                                Rsyn::PhysicalLayer phLayer = 
+                                Rsyn::PhysicalLayer phLayer =
                                         phDesign.getPhysicalLayerByIndex(Rsyn::ROUTING, route.initLayer-1);
-                                
+
                                 Bounds guideBds;
                                 guideBds = globalRoutingToBounds(route);
                                 guideFile << guideBds.getLower().x << " "
@@ -389,30 +407,30 @@ void FastRouteProcess::writeGuides(const std::vector<FastRoute::NET> &globalRout
                                         continue;
                                 }
                         }
-                        
+
                 }
                 guideFile << ")\n";
         }
 }
 
 void FastRouteProcess::getPinPosOnGrid(DBUxy &pos) {
-	DBU x = pos.x;
-	DBU y = pos.y;
+        DBU x = pos.x;
+        DBU y = pos.y;
 
-	// Computing x and y center:
-	DBU gCellId_X = floor(x/grid.tile_width);
-	DBU gCellId_Y = floor(y/grid.tile_height);
-        
+        // Computing x and y center:
+        DBU gCellId_X = floor(x/grid.tile_width);
+        DBU gCellId_Y = floor(y/grid.tile_height);
+
         if (gCellId_X >= grid.xGrids && grid.perfect_regular_x)
             gCellId_X--;
-        
+
         if (gCellId_Y >= grid.yGrids && grid.perfect_regular_y)
             gCellId_Y--;
-	
-	DBU centerX = (gCellId_X) * grid.tile_width + (grid.tile_width/2);
-	DBU centerY = (gCellId_Y) * grid.tile_height + (grid.tile_height/2);
 
-	pos = DBUxy(centerX, centerY);
+        DBU centerX = (gCellId_X) * grid.tile_width + (grid.tile_width/2);
+        DBU centerY = (gCellId_Y) * grid.tile_height + (grid.tile_height/2);
+
+        pos = DBUxy(centerX, centerY);
 }
 
 Bounds FastRouteProcess::globalRoutingToBounds(const FastRoute::ROUTE &route) {
