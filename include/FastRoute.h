@@ -39,6 +39,7 @@ class FT {
         void setNumberNets(int nNets);
         void setLowerLeft(int x, int y);
         void setTileSize(int width, int height);
+        void setLayerOrientation(int x);
         void addNet(char *name, int netIdx, int nPIns, int minWIdth, PIN pins[]);
         void initEdges();
         void setNumAdjustments(int nAdjustements);

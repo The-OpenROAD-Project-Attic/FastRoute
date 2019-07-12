@@ -16,6 +16,7 @@ namespace FastRoute {
 // global variables
 extern int xGrid, yGrid, numGrids, numNets, vCapacity, hCapacity, vCapacity3D[MAXLAYER], hCapacity3D[MAXLAYER];
 extern float vCapacity_lb, hCapacity_lb, vCapacity_ub, hCapacity_ub;
+extern int layerOrientation;
 
 extern int enlarge, costheight, ripup_threshold;
 extern int MaxDegree;

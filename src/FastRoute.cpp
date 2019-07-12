@@ -68,6 +68,12 @@ void FT::setTileSize(int width, int height) {
         hTile = height;
 }
 
+void FT::setLayerOrientation(int x) {
+        printf("layerOrientation = %d\n", layerOrientation);
+        layerOrientation = x;
+        printf("layerOrientation = %d\n", layerOrientation);
+}
+
 void FT::addNet(char *name, int netIdx, int nPins, int minWidth, PIN pins[]) {
         int TD;
         int i, j, k;
@@ -726,6 +732,7 @@ int FT::run(std::vector<NET> &result) {
         finallength = getOverflow3D();
         numVia = threeDVIA();
         checkRoute3D();
+
         if (needOUTPUT) {
                 writeRoute3D(routingFile);
         }
@@ -742,7 +749,10 @@ int FT::run(std::vector<NET> &result) {
         result = getResults();
         std::cout << "Getting results... Done!\n";
 
-        freeAllMemory();
+        /* TODO:  <11-07-19, this function leads to a segfault, but as the OS
+         * frees all memory after the application end (next line) we can omit
+         * this function call for now.> */
+        /* freeAllMemory(); */
         return (1);
 }
 

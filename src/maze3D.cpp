@@ -943,7 +943,7 @@ void mazeRouteMSMDOrder3D(int expand, int ripupTHlb, int ripupTHub) {
                                                 //pop_heap13D[ind1] = TRUE;
                                                 heapLen1--;
 
-                                                if (curL % 2 == 0) {
+                                                if (curL % layerOrientation) {
                                                         Horizontal = TRUE;
                                                 } else {
                                                         Horizontal = FALSE;

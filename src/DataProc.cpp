@@ -23,6 +23,7 @@ Net** nets;
 Edge *h_edges, *v_edges;
 float d1[YRANGE][XRANGE];
 float d2[YRANGE][XRANGE];
+int layerOrientation;
 
 Bool HV[YRANGE][XRANGE];
 Bool hyperV[YRANGE][XRANGE];
