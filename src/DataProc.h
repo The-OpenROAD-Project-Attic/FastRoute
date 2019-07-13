@@ -3,7 +3,7 @@
 
 #define BUFFERSIZE 800
 #define STRINGLEN 100
-#define MAXNETDEG 1000
+#define MAXNETDEG 2000
 #define MAXEDGES 10000000
 
 #define MAXLEN 20000
