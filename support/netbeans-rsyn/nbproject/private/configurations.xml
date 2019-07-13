@@ -33,72 +33,6 @@
           <in>RoutingGuide.h</in>
         </df>
       </df>
-      <df name="core">
-        <df name="dscp">
-          <in>LibraryCell.h</in>
-          <in>LibraryModule.h</in>
-        </df>
-        <df name="infra">
-          <in>Attribute.h</in>
-          <in>Exception.h</in>
-          <in>List.h</in>
-          <in>Observer.h</in>
-          <in>RangeBasedLoop.h</in>
-          <in>RawPointer.h</in>
-        </df>
-        <df name="obj">
-          <df name="data">
-            <in>Arc.h</in>
-            <in>Cell.h</in>
-            <in>Design.h</in>
-            <in>Instance.h</in>
-            <in>Library.h</in>
-            <in>LibraryArc.h</in>
-            <in>LibraryCell.h</in>
-            <in>LibraryModule.h</in>
-            <in>LibraryPin.h</in>
-            <in>Module.h</in>
-            <in>Net.h</in>
-            <in>Object.h</in>
-            <in>Pin.h</in>
-            <in>Port.h</in>
-          </df>
-          <df name="decl">
-            <in>Arc.h</in>
-            <in>Cell.h</in>
-            <in>Design.h</in>
-            <in>Instance.h</in>
-            <in>Library.h</in>
-            <in>LibraryArc.h</in>
-            <in>LibraryCell.h</in>
-            <in>LibraryModule.h</in>
-            <in>LibraryPin.h</in>
-            <in>Module.h</in>
-            <in>Net.h</in>
-            <in>Object.h</in>
-            <in>Pin.h</in>
-            <in>Port.h</in>
-          </df>
-          <df name="impl">
-            <in>Arc.h</in>
-            <in>Cell.h</in>
-            <in>Design.h</in>
-            <in>Instance.h</in>
-            <in>Library.h</in>
-            <in>LibraryArc.h</in>
-            <in>LibraryCell.h</in>
-            <in>LibraryModule.h</in>
-            <in>LibraryPin.h</in>
-            <in>Module.h</in>
-            <in>Net.h</in>
-            <in>Object.h</in>
-            <in>Pin.h</in>
-            <in>Port.h</in>
-          </df>
-        </df>
-        <in>Rsyn.h</in>
-        <in>RsynTypes.h</in>
-      </df>
       <df name="gui">
         <df name="dialog">
           <in>PropertyDialog.cpp</in>
@@ -169,127 +103,101 @@
         <in>QtUtils.cpp</in>
         <in>QtUtils.h</in>
       </df>
-      <df name="phy">
-        <df name="infra">
-          <in>PhysicalAttribute.h</in>
-          <in>PhysicalObserver.h</in>
+      <df name="io">
+        <df name="parser">
+          <df name="bookshelf">
+            <in>BookshelfParser.cpp</in>
+            <in>BookshelfParser.h</in>
+          </df>
+          <df name="guide">
+            <in>GuideDescriptor.h</in>
+            <in>GuideParser.cpp</in>
+            <in>GuideParser.h</in>
+          </df>
+          <df name="lef_def">
+            <in>DEFControlParser.cpp</in>
+            <in>DEFControlParser.h</in>
+            <in>LEFControlParser.cpp</in>
+            <in>LEFControlParser.h</in>
+          </df>
+          <df name="liberty">
+            <in>LibertyControlParser.cpp</in>
+            <in>LibertyControlParser.h</in>
+          </df>
+          <df name="operations">
+            <in>OperationsControlParser.cpp</in>
+            <in>OperationsControlParser.h</in>
+          </df>
+          <df name="sdc">
+            <in>SDCControlParser.cpp</in>
+            <in>SDCControlParser.h</in>
+          </df>
+          <df name="spef">
+            <in>SPEFControlParser.cpp</in>
+            <in>SPEFControlParser.h</in>
+          </df>
+          <df name="verilog">
+            <in>FlexLexerCopy.h</in>
+            <in>SimplifiedVerilog.tab.cc</in>
+            <in>SimplifiedVerilog.tab.hh</in>
+            <in>SimplifiedVerilog.yy.cc</in>
+            <in>SimplifiedVerilogReader.cpp</in>
+            <in>SimplifiedVerilogReader.h</in>
+            <in>SimplifiedVerilogScanner.h</in>
+            <in>location.hh</in>
+            <in>position.hh</in>
+            <in>stack.hh</in>
+          </df>
+          <in>parser_helper.cpp</in>
+          <in>parser_helper.h</in>
         </df>
+        <df name="reader">
+          <in>BookshelfReader.cpp</in>
+          <in>BookshelfReader.h</in>
+          <in>DesignPositionReader.cpp</in>
+          <in>DesignPositionReader.h</in>
+          <in>GenericReader.cpp</in>
+          <in>GenericReader.h</in>
+          <in>ICCAD15Reader.cpp</in>
+          <in>ICCAD15Reader.h</in>
+          <in>ICCAD15ReaderExtended.cpp</in>
+          <in>ICCAD15ReaderExtended.h</in>
+          <in>ICCAD17Reader.cpp</in>
+          <in>ICCAD17Reader.h</in>
+          <in>ISPD2012Reader.cpp</in>
+          <in>ISPD2012Reader.h</in>
+          <in>ISPD2014Reader.cpp</in>
+          <in>ISPD2014Reader.h</in>
+          <in>ISPD2018Reader.cpp</in>
+          <in>ISPD2018Reader.h</in>
+          <in>PopulateRsyn.cpp</in>
+          <in>PopulateRsyn.h</in>
+          <in>SizingISPDReader.cpp</in>
+          <in>SizingISPDReader.h</in>
+        </df>
+        <df name="writer">
+          <in>Writer.cpp</in>
+          <in>Writer.h</in>
+          <in>WriterDEF.cpp</in>
+          <in>WriterDEF.h</in>
+        </df>
+        <in>Graphics.cpp</in>
+        <in>Graphics.h</in>
+        <in>Report.cpp</in>
+        <in>Report.h</in>
+      </df>
+      <df name="phy">
         <df name="obj">
-          <df name="data">
-            <in>LayerViaManagerData.h</in>
-            <in>PhysicalDesign.h</in>
-            <in>PhysicalDieData.h</in>
-            <in>PhysicalGCellData.h</in>
-            <in>PhysicalGroupData.h</in>
-            <in>PhysicalInstanceData.h</in>
-            <in>PhysicalLayerData.h</in>
-            <in>PhysicalLibraryCellData.h</in>
-            <in>PhysicalLibraryPinData.h</in>
-            <in>PhysicalNetData.h</in>
-            <in>PhysicalObject.h</in>
-            <in>PhysicalObstacleData.h</in>
-            <in>PhysicalPinData.h</in>
-            <in>PhysicalPinGeometryData.h</in>
-            <in>PhysicalPinLayerData.h</in>
-            <in>PhysicalRegionData.h</in>
-            <in>PhysicalRoutingGridData.h</in>
-            <in>PhysicalRoutingPointData.h</in>
-            <in>PhysicalRowData.h</in>
-            <in>PhysicalSiteData.h</in>
-            <in>PhysicalSpacingData.h</in>
-            <in>PhysicalSpacingRuleData.h</in>
-            <in>PhysicalSpecialNetData.h</in>
-            <in>PhysicalSpecialWireData.h</in>
-            <in>PhysicalTracksData.h</in>
-            <in>PhysicalViaData.h</in>
-            <in>ViaGeometryData.h</in>
-            <in>ViaRuleData.h</in>
-          </df>
-          <df name="decl">
-            <in>LayerViaManager.h</in>
-            <in>PhysicalCell.h</in>
-            <in>PhysicalDesign.h</in>
-            <in>PhysicalDie.h</in>
-            <in>PhysicalGCell.h</in>
-            <in>PhysicalGroup.h</in>
-            <in>PhysicalInstance.h</in>
-            <in>PhysicalLayer.h</in>
-            <in>PhysicalLibraryCell.h</in>
-            <in>PhysicalLibraryPin.h</in>
-            <in>PhysicalModule.h</in>
-            <in>PhysicalNet.h</in>
-            <in>PhysicalObstacle.h</in>
-            <in>PhysicalPin.h</in>
-            <in>PhysicalPinGeometry.h</in>
-            <in>PhysicalPinLayer.h</in>
-            <in>PhysicalPort.h</in>
-            <in>PhysicalRegion.h</in>
-            <in>PhysicalRoutingGrid.h</in>
-            <in>PhysicalRoutingPoint.h</in>
-            <in>PhysicalRow.h</in>
-            <in>PhysicalSite.h</in>
-            <in>PhysicalSpacing.h</in>
-            <in>PhysicalSpacingRule.h</in>
-            <in>PhysicalSpecialNet.h</in>
-            <in>PhysicalSpecialWire.h</in>
-            <in>PhysicalTracks.h</in>
-            <in>PhysicalVia.h</in>
-            <in>PhysicalViaGeometry.h</in>
-            <in>PhysicalViaRule.h</in>
-            <in>PhysicalViaRuleBase.h</in>
-            <in>PhysicalViaRuleGenerate.h</in>
-          </df>
           <df name="impl">
-            <in>LayerViaManager.h</in>
-            <in>PhysicalCell.h</in>
             <in>PhysicalDesign.cpp</in>
-            <in>PhysicalDesign.h</in>
-            <in>PhysicalDie.h</in>
-            <in>PhysicalGCell.h</in>
-            <in>PhysicalGroup.h</in>
-            <in>PhysicalInstance.h</in>
-            <in>PhysicalLayer.h</in>
-            <in>PhysicalLibraryCell.h</in>
-            <in>PhysicalLibraryPin.h</in>
-            <in>PhysicalModule.h</in>
-            <in>PhysicalNet.h</in>
-            <in>PhysicalObstacle.h</in>
-            <in>PhysicalPin.h</in>
-            <in>PhysicalPinGeometry.h</in>
-            <in>PhysicalPinLayer.h</in>
-            <in>PhysicalPort.h</in>
-            <in>PhysicalRegion.h</in>
-            <in>PhysicalRoutingGrid.h</in>
-            <in>PhysicalRoutingPoint.h</in>
-            <in>PhysicalRow.h</in>
-            <in>PhysicalSite.h</in>
-            <in>PhysicalSpacing.h</in>
-            <in>PhysicalSpacingRule.h</in>
-            <in>PhysicalSpecialNet.h</in>
-            <in>PhysicalSpecialWire.h</in>
-            <in>PhysicalTracks.h</in>
-            <in>PhysicalVia.h</in>
-            <in>PhysicalViaGeometry.h</in>
-            <in>PhysicalViaRule.h</in>
-            <in>PhysicalViaRuleBase.h</in>
-            <in>PhysicalViaRuleGenerate.h</in>
           </df>
         </df>
         <df name="util">
-          <in>BookshelfDscp.h</in>
           <in>BookshelfMapper.cpp</in>
-          <in>BookshelfMapper.h</in>
-          <in>DefDescriptors.h</in>
-          <in>LefDescriptors.h</in>
           <in>PhysicalLayerUtil.cpp</in>
           <in>PhysicalTransform.cpp</in>
-          <in>PhysicalTransform.h</in>
-          <in>PhysicalTypes.h</in>
-          <in>PhysicalUtil.h</in>
         </df>
-        <in>PhysicalDesign.h</in>
         <in>PhysicalRouting.cpp</in>
-        <in>PhysicalRouting.h</in>
         <in>PhysicalService.cpp</in>
         <in>PhysicalService.h</in>
       </df>
@@ -376,6 +284,10 @@
         <df name="fastplace">
           <in>FastPlace.cpp</in>
           <in>FastPlace.h</in>
+        </df>
+        <df name="fastroute">
+          <in>FastRoute.cpp</in>
+          <in>FastRoute.h</in>
         </df>
         <df name="jezz">
           <in>Jezz.cpp</in>

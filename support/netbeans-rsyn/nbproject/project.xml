@@ -4,13 +4,16 @@
     <configuration>
         <data xmlns="http://www.netbeans.org/ns/make-project/1">
             <name>netbeans-rsyn</name>
-            <c-extensions/>
+            <c-extensions>c</c-extensions>
             <cpp-extensions>cc,cpp</cpp-extensions>
-            <header-extensions>h,hh</header-extensions>
+            <header-extensions>h,hh,hpp</header-extensions>
             <sourceEncoding>UTF-8</sourceEncoding>
             <make-dep-projects/>
             <sourceRootList>
                 <sourceRootElem>../../src</sourceRootElem>
+                <sourceRootElem>../../db</sourceRootElem>
+                <sourceRootElem>../../include</sourceRootElem>
+                <sourceRootElem>../../lib</sourceRootElem>
             </sourceRootList>
             <confList>
                 <confElem>
