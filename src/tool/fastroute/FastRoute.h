@@ -53,7 +53,7 @@ class FastRouteProcess : public Process {
         // Main functions
         void initGrid();
         void setCapacities();
-        void setLayerOrientation();
+        void setLayerDirection();
         void setSpacingsAndMinWidth();
         void initNets();
         void setGridAdjustments();

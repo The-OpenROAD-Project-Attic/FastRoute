@@ -41,7 +41,7 @@ bool FastRouteProcess::run(const Rsyn::Json &params) {
         std::cout << "Setting capacities... Done!\n";
 
         std::cout << "Setting orientation...\n";
-        setLayerOrientation();
+        setLayerDirection();
         std::cout << "Setting orientation... Done!\n";
 
         std::cout << "Setting spacings and widths...\n";
@@ -154,15 +154,18 @@ void FastRouteProcess::setCapacities() {
         }
 }
 
-void FastRouteProcess::setLayerOrientation() {
+void FastRouteProcess::setLayerDirection() {
         for (PhysicalLayer phLayer : phDesign.allPhysicalLayers()) {
                 if (phLayer.getType() != Rsyn::ROUTING)
                         continue;
 
+                if (phLayer.getRelativeIndex() != 0)
+                    continue;
+                
                 if (phLayer.getDirection() == Rsyn::HORIZONTAL) {
                         fastRoute.setLayerOrientation(0);
                 } else {
-                        fastRoute.setLayerOrientation(2);
+                        fastRoute.setLayerOrientation(1);
                 }
                 break;
         }
@@ -183,7 +186,7 @@ void FastRouteProcess::setSpacingsAndMinWidth() {
                                 continue;
                         fastRoute.addMinSpacing(minSpacing, phLayer.getRelativeIndex()+1);
                         fastRoute.addMinWidth(minWidth, phLayer.getRelativeIndex()+1);
-                        fastRoute.addViaSpacing(0, phLayer.getRelativeIndex()+1);
+                        fastRoute.addViaSpacing(1, phLayer.getRelativeIndex()+1);
                 }
         }
 }
@@ -411,6 +414,8 @@ void FastRouteProcess::writeGuides(const std::vector<FastRoute::NET> &globalRout
                 }
                 guideFile << ")\n";
         }
+        
+        guideFile.close();
 }
 
 void FastRouteProcess::getPinPosOnGrid(DBUxy &pos) {
