@@ -269,6 +269,25 @@ void FT::addAdjustment(long x1, long y1, int l1, long x2, long y2, int l2, int r
         }
 }
 
+int FT::getEdgeCapacity(long x1, long y1, int l1, long x2, long y2, int l2) {
+        int grid, k;
+        int cap;
+        
+        k = l1 - 1;
+        
+        if (y1 == y2)  //horizontal edge
+        {
+                grid = y1 * (xGrid - 1) + x1 + k * (xGrid - 1) * yGrid;
+                cap = h_edges3D[grid].cap;
+        } else if (x1 == x2)  //vertical edge
+        {
+                grid = y1 * xGrid + x1 + k * xGrid * (yGrid - 1);
+                cap = v_edges3D[grid].cap;
+        }
+        
+        return cap;
+}
+
 void FT::initAuxVar() {
         int k, i;
         treeOrderCong = NULL;
