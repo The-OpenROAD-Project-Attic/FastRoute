@@ -16,11 +16,19 @@
 #include "FastRoute.h"
 #include "fastroute/fastRoute.h"
 #include "phy/PhysicalDesign.h"
+#include "phy/obj/decl/PhysicalDesign.h"
+#include "phy/obj/decl/PhysicalLayer.h"
+#include "phy/util/PhysicalTypes.h"
+#include "util/Bounds.h"
+#include "util/DBU.h"
+#include "phy/PhysicalRouting.h"
+#include "core/RsynTypes.h"
 #include <cstring>
 #include <string>
 #include <iostream>
 #include <fstream>
 #include <istream>
+#include <utility>
 #define ADJ 0.20
 
 namespace Rsyn {
@@ -55,11 +63,17 @@ bool FastRouteProcess::run(const Rsyn::Json &params) {
         std::cout << "Adjusting grid...\n";
         setGridAdjustments();
         std::cout << "Adjusting grid... Done!\n";
-
-        std::cout << "Computing adjustments...\n";
-        computeAdjustments();
-        std::cout << "Computing adjustments... Done!\n";
-
+        
+//        std::cout << "Computing simple adjustments...\n";
+//        computeSimpleAdjustments();
+//        std::cout << "Computing adjustments... Done!\n";
+        
+        std::cout << "Computing obstacles adjustments...\n";
+        computeObstaclesAdjustments();
+        std::cout << "Computing obstacles adjustments... Done!\n";
+        
+        fastRoute.initAuxVar();
+        
         std::cout << "Running FastRoute...\n";
         fastRoute.run(result);
         std::cout << "Running FastRoute... Done!\n";
@@ -225,7 +239,7 @@ void FastRouteProcess::initNets() {
                                                         bds = transform.apply(bds);
                                                         bds.translate(cellPos);
                                                         bdsPosition = bds.computeCenter();
-                                                        getPinPosOnGrid(bdsPosition);
+                                                        getPosOnGrid(bdsPosition);
                                                         pinBdsPositions.push_back(bdsPosition);
                                                 }
 
@@ -246,7 +260,7 @@ void FastRouteProcess::initNets() {
                                 Rsyn::Port port = pin.getInstance().asPort();
                                 Rsyn::PhysicalPort phPort = phDesign.getPhysicalPort(port);
                                 DBUxy portPos = phPort.getPosition();
-                                getPinPosOnGrid(portPos);
+                                getPosOnGrid(portPos);
                                 pinPosition = portPos;
                                 pinLayer = phPort.getLayer().getRelativeIndex();
                         }
@@ -323,7 +337,7 @@ void FastRouteProcess::setGridAdjustments(){
         }
 }
 
-void FastRouteProcess::computeAdjustments() {
+void FastRouteProcess::computeSimpleAdjustments() {
         // Temporary adjustment: fixed percentage per layer
         int xGrids = grid.xGrids;
         int yGrids = grid.yGrids;
@@ -373,8 +387,130 @@ void FastRouteProcess::computeAdjustments() {
                         }
                 }
         }
+}
 
-        fastRoute.initAuxVar();
+void FastRouteProcess::computeObstaclesAdjustments() {
+        std::map<int, std::vector<Bounds>> mapLayerObstacles;
+        for (Rsyn::Instance inst : module.allInstances()) {
+		if (inst.getType() != Rsyn::CELL)
+			continue;
+		Rsyn::Cell cell = inst.asCell();
+		Rsyn::PhysicalLibraryCell phLibCell = phDesign.getPhysicalLibraryCell(cell);
+		if (!phLibCell.hasObstacles())
+			continue;
+		Rsyn::PhysicalCell phCell = phDesign.getPhysicalCell(cell);
+		const Rsyn::PhysicalTransform &transform = phCell.getTransform(true);
+		DBUxy pos = phCell.getPosition();
+		Rsyn::PhysicalLayer upperBlockLayer;
+
+		for (Rsyn::PhysicalObstacle phObs : phLibCell.allObstacles()) {
+			Rsyn::PhysicalLayer phLayer = phObs.getLayer();
+			if (upperBlockLayer == nullptr) {
+				upperBlockLayer = phLayer;
+			} else if (phLayer.getIndex() > upperBlockLayer.getIndex()) {
+				upperBlockLayer = phLayer;
+			}
+		}
+                
+		for (Rsyn::PhysicalObstacle phObs : phLibCell.allObstacles()) {
+			Rsyn::PhysicalLayer phLayer = phObs.getLayer();
+			for (Bounds bds : phObs.allBounds()) {
+				bds = transform.apply(bds);
+				bds.translate(pos);
+				mapLayerObstacles[phLayer.getRelativeIndex()].push_back(bds);
+			} // end for 
+		} // end for 
+        }
+        
+        getSpecialNetsObstacles(mapLayerObstacles);
+        
+        for (std::map<int, std::vector<Bounds>>::iterator it=mapLayerObstacles.begin(); it!=mapLayerObstacles.end(); ++it) {
+                std::cout << "----Processing " << it->second.size() << " obstacles in Metal" << it->first+1 << "\n";
+                Rsyn::PhysicalLayer phLayer = phDesign.getPhysicalLayerByIndex(Rsyn::ROUTING, it->first);
+                bool horizontal = phLayer.getDirection() == Rsyn::HORIZONTAL ? 1 : 0;
+                std::pair<TILE, TILE> blockedTiles;
+                
+                DBU trackSpace;
+                for (PhysicalTracks phTracks : phDesign.allPhysicalTracks(phLayer)) {
+                        if (horizontal) {
+                                if (phTracks.getDirection() != (PhysicalTrackDirection)Rsyn::HORIZONTAL) {
+                                        trackSpace = phTracks.getSpace();
+                                        break;
+                                }
+                        } else {
+                                if (phTracks.getDirection() != (PhysicalTrackDirection)Rsyn::VERTICAL) {
+                                        trackSpace = phTracks.getSpace();
+                                        break;
+                                }
+                        }
+                }
+                
+                for (int b = 0; b < it->second.size(); b++) {
+                        Bounds &obs = it->second[b];
+                        Bounds firstTileBds;
+                        Bounds lastTileBds;
+                        
+                        blockedTiles = getBlockedTiles(obs, firstTileBds, lastTileBds);
+                        TILE &firstTile = blockedTiles.first;
+                        TILE &lastTile = blockedTiles.second;
+                        
+                        if (lastTile.x == grid.xGrids-1 || lastTile.y == grid.yGrids)
+                                continue;
+                        
+                        
+                        int firstTileReduce = computeTileReduce(obs, firstTileBds, trackSpace, true, horizontal);
+                        
+                        int lastTileReduce = computeTileReduce(obs, lastTileBds, trackSpace, false, horizontal);
+
+                        if (horizontal) { // If preferred direction is horizontal, only first and the last line will have specific adjustments                                
+                                for (int x = firstTile.x; x <= lastTile.x; x++) { // Setting capacities of completely blocked edges to zero
+                                        for (int y = firstTile.y; y <= lastTile.y; y++) {
+                                                if (y == firstTile.y) {
+                                                        int edgeCap = fastRoute.getEdgeCapacity(x, y, phLayer.getRelativeIndex()+1, x+1, y, phLayer.getRelativeIndex()+1);
+                                                        edgeCap -= firstTileReduce;
+                                                        if(edgeCap < 0)
+                                                                edgeCap = 0;
+                                                        fastRoute.addAdjustment(x, y, phLayer.getRelativeIndex()+1, 
+                                                                x+1, y, phLayer.getRelativeIndex()+1, edgeCap);
+                                                } else if (y == lastTile.y) {
+                                                        int edgeCap = fastRoute.getEdgeCapacity(x, y, phLayer.getRelativeIndex()+1, x+1, y, phLayer.getRelativeIndex()+1);
+                                                        edgeCap -= lastTileReduce;
+                                                        if(edgeCap < 0)
+                                                                edgeCap = 0;
+                                                        fastRoute.addAdjustment(x, y, phLayer.getRelativeIndex()+1, 
+                                                                x+1, y, phLayer.getRelativeIndex()+1, edgeCap);
+                                                } else {
+                                                        fastRoute.addAdjustment(x, y, phLayer.getRelativeIndex()+1, 
+                                                                x+1, y, phLayer.getRelativeIndex()+1, 0);
+                                                }
+                                        }
+                                }
+                        } else { // If preferred direction is vertical, only first and last columns will have specific adjustments
+                                for (int x = firstTile.x; x <= lastTile.x; x++) { // Setting capacities of completely blocked edges to zero
+                                        for (int y = firstTile.y; y <= lastTile.y; y++) {
+                                                if (x == firstTile.x) {
+                                                        int edgeCap = fastRoute.getEdgeCapacity(x, y, phLayer.getRelativeIndex()+1, x, y+1, phLayer.getRelativeIndex()+1);
+                                                        edgeCap -= firstTileReduce;
+                                                        if(edgeCap < 0)
+                                                                edgeCap = 0;
+                                                        fastRoute.addAdjustment(x, y, phLayer.getRelativeIndex()+1, 
+                                                                x, y+1, phLayer.getRelativeIndex()+1, edgeCap);
+                                                } else if (x == lastTile.x) {
+                                                        int edgeCap = fastRoute.getEdgeCapacity(x, y, phLayer.getRelativeIndex()+1, x, y+1, phLayer.getRelativeIndex()+1);
+                                                        edgeCap -= lastTileReduce;
+                                                        if(edgeCap < 0)
+                                                                edgeCap = 0;
+                                                        fastRoute.addAdjustment(x, y, phLayer.getRelativeIndex()+1, 
+                                                                x, y+1, phLayer.getRelativeIndex()+1, edgeCap);
+                                                } else {
+                                                        fastRoute.addAdjustment(x, y, phLayer.getRelativeIndex()+1, 
+                                                                x, y+1, phLayer.getRelativeIndex()+1, 0);
+                                                }
+                                        }
+                                }
+                        }
+                }
+        } 
 }
 
 void FastRouteProcess::writeGuides(const std::vector<FastRoute::NET> &globalRoute, std::string filename) {
@@ -418,7 +554,7 @@ void FastRouteProcess::writeGuides(const std::vector<FastRoute::NET> &globalRout
         guideFile.close();
 }
 
-void FastRouteProcess::getPinPosOnGrid(DBUxy &pos) {
+void FastRouteProcess::getPosOnGrid(DBUxy &pos) {
         DBU x = pos.x;
         DBU y = pos.y;
 
@@ -450,6 +586,115 @@ Bounds FastRouteProcess::globalRoutingToBounds(const FastRoute::ROUTE &route) {
 
         Bounds routeBds = Bounds(lowerLeft, upperRight);
         return routeBds;
+}
+
+std::pair<FastRouteProcess::TILE, FastRouteProcess::TILE> FastRouteProcess::getBlockedTiles(const Bounds &obs, Bounds &firstTileBds, Bounds &lastTileBds) {
+        std::pair<TILE, TILE> tiles;
+        FastRouteProcess::TILE firstTile;
+        FastRouteProcess::TILE lastTile;
+        
+        DBUxy lower = obs.getLower(); // lower bound of obstacle
+        DBUxy upper = obs.getUpper(); // upper bound of obstacle
+                
+        getPosOnGrid(lower); // translate lower bound of obstacle to the center of the tile where it is inside
+        getPosOnGrid(upper); // translate upper bound of obstacle to the center of the tile where it is inside
+        
+        // Get x and y indices of first blocked tile
+        firstTile.x = (lower.x - (grid.tile_width/2)) / grid.tile_width;
+        firstTile.y = (lower.y - (grid.tile_height/2)) / grid.tile_height;
+        
+        // Get x and y indices of last blocked tile
+        lastTile.x = (upper.x - (grid.tile_width/2)) / grid.tile_width;
+        lastTile.y = (upper.y - (grid.tile_height/2)) / grid.tile_height;
+        
+        tiles = std::make_pair(firstTile, lastTile);
+        
+        DBUxy llFirstTile = DBUxy(lower.x - (grid.tile_width/2), lower.y - (grid.tile_height/2));
+        DBUxy urFirstTile = DBUxy(lower.x + (grid.tile_width/2), lower.y + (grid.tile_height/2));
+        
+        DBUxy llLastTile = DBUxy(upper.x - (grid.tile_width/2), upper.y - (grid.tile_height/2));
+        DBUxy urLastTile = DBUxy(upper.x + (grid.tile_width/2), upper.y + (grid.tile_height/2));
+        
+        firstTileBds = Bounds(llFirstTile, urFirstTile);
+        lastTileBds = Bounds(llLastTile, urLastTile);
+        
+        return tiles;
+}
+
+int FastRouteProcess::computeTileReduce(const Bounds &obs, const Bounds &tile, DBU trackSpace, bool first, bool horizontal) {
+        int reduce = -1;
+        if (!horizontal) {
+                if (first) {
+                        reduce = floor(abs(tile.getUpper().x - obs.getLower().x) / trackSpace);
+                } else {
+                        reduce = floor(abs(obs.getUpper().x - tile.getLower().x) / trackSpace);
+                }
+        } else {
+                if (first) {
+                        reduce = floor(abs(tile.getUpper().y - obs.getLower().y) / trackSpace);
+                } else {
+                        reduce = floor(abs(obs.getUpper().y - tile.getLower().y) / trackSpace);
+                }
+        }
+        
+        if (reduce < 0) {
+                std::cout << "Error!!!\n";
+                std::exit(0);
+        }
+        return reduce;
+}
+
+void FastRouteProcess::getSpecialNetsObstacles(std::map<int, std::vector<Bounds>> &mapLayerObstacles) {
+        for (Rsyn::Net net : module.allNets()) {
+                if (net.getUse() == Rsyn::POWER && net.getUse() == Rsyn::GROUND) {
+                        Rsyn::PhysicalRouting phRouting = phDesign.getNetRouting(net);
+
+			for (Rsyn::PhysicalRoutingWire wire : phRouting.allWires()) { // adding special nets wires
+				int layer = wire.getLayer().getRelativeIndex();
+
+				DBU xmin = wire.getExtendedSourcePosition().x < wire.getExtendedTargetPosition().x ?
+					wire.getExtendedSourcePosition().x : wire.getExtendedTargetPosition().x;
+				DBU ymin = wire.getExtendedSourcePosition().y < wire.getExtendedTargetPosition().y ?
+					wire.getExtendedSourcePosition().y : wire.getExtendedTargetPosition().y;
+				DBU xmax = wire.getExtendedSourcePosition().x > wire.getExtendedTargetPosition().x ?
+					wire.getExtendedSourcePosition().x : wire.getExtendedTargetPosition().x;
+				DBU ymax = wire.getExtendedSourcePosition().y > wire.getExtendedTargetPosition().y ?
+					wire.getExtendedSourcePosition().y : wire.getExtendedTargetPosition().y;
+
+				xmin = (wire.getExtendedSourcePosition().x == wire.getExtendedTargetPosition().x) ?
+					xmin - (wire.getWidth() / 2) : xmin;
+				ymin = (wire.getExtendedSourcePosition().y == wire.getExtendedTargetPosition().y) ?
+					ymin - (wire.getWidth() / 2) : ymin;
+				xmax = (wire.getExtendedSourcePosition().x == wire.getExtendedTargetPosition().x) ?
+					xmax + (wire.getWidth() / 2) : xmax;
+				ymax = (wire.getExtendedSourcePosition().y == wire.getExtendedTargetPosition().y) ?
+					ymax + (wire.getWidth() / 2) : ymax;
+
+				Bounds bds(xmin, ymin, xmax, ymax);
+
+				mapLayerObstacles[layer].push_back(bds);
+                        }
+                        
+                        for (Rsyn::PhysicalRoutingVia phRoutingVia : phRouting.allVias()) { // adding special nets vias
+				for (Rsyn::PhysicalViaGeometry viaGeo : phRoutingVia.getVia().allBottomGeometries()) {
+					int layer = phRoutingVia.getBottomLayer().getRelativeIndex();
+
+					DBUxy lower = viaGeo.getBounds().getLower() + phRoutingVia.getPosition();
+					DBUxy upper = viaGeo.getBounds().getUpper() + phRoutingVia.getPosition();
+					Bounds bds(lower, upper);
+					mapLayerObstacles[layer].push_back(bds);
+				} // end for
+				for (Rsyn::PhysicalViaGeometry viaGeo : phRoutingVia.getVia().allTopGeometries()) {
+					int layer = phRoutingVia.getTopLayer().getRelativeIndex();
+					
+					DBUxy lower = viaGeo.getBounds().getLower() + phRoutingVia.getPosition();
+					DBUxy upper = viaGeo.getBounds().getUpper() + phRoutingVia.getPosition();
+					Bounds bds(lower, upper);
+					mapLayerObstacles[layer].push_back(bds);
+				} // end for
+			} // end for
+                }
+        }
 }
 
 }

@@ -21,6 +21,7 @@
 #include "session/Session.h"
 #include "session/Process.h"
 #include "fastroute/fastRoute.h"
+#include <utility>
 
 namespace Rsyn {
 
@@ -36,6 +37,11 @@ class FastRouteProcess : public Process {
                 bool perfect_regular_x;
                 bool perfect_regular_y;
         } GRID;
+        
+        typedef struct {
+                int x;
+                int y;
+        } TILE;
 
         Rsyn::Session session;
         Rsyn::Design design;
@@ -57,12 +63,16 @@ class FastRouteProcess : public Process {
         void setSpacingsAndMinWidth();
         void initNets();
         void setGridAdjustments();
-        void computeAdjustments();
+        void computeSimpleAdjustments();
+        void computeObstaclesAdjustments();
         void writeGuides(const std::vector<FastRoute::NET> &, std::string);
 
         // Aux functions
-        void getPinPosOnGrid(DBUxy &);
+        void getPosOnGrid(DBUxy &);
         Bounds globalRoutingToBounds(const FastRoute::ROUTE &);
+        std::pair<TILE, TILE> getBlockedTiles(const Bounds &, Bounds &, Bounds &);
+        int computeTileReduce(const Bounds &, const Bounds &, DBU, bool, bool);
+        void getSpecialNetsObstacles(std::map<int, std::vector<Bounds>> &);
 
        public:
         FastRouteProcess() = default;
