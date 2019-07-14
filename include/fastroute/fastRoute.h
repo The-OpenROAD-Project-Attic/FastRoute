@@ -49,6 +49,8 @@ class FT {
         void initAuxVar();
         std::vector<NET> getResults();
         int run(std::vector<NET> &);
+        
+        int getEdgeCapacity(long x1, long y1, int l1, long x2, long y2, int l2);
 };
 }  // namespace FastRoute
 #endif
