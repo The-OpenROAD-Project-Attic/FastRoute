@@ -29,6 +29,8 @@
 #include <fstream>
 #include <istream>
 #include <utility>
+#include <math.h>
+#include <vector>
 #define ADJ 0.20
 
 namespace Rsyn {
@@ -81,6 +83,10 @@ bool FastRouteProcess::run(const Rsyn::Json &params) {
         std::cout << "Writing guides...\n";
         writeGuides(result, outfile);
         std::cout << "Writing guides... Done!\n";
+        
+        std::cout << "Writing est...\n";
+        writeEst(result, outfile);
+        std::cout << "Writing est... Done!\n";
 
         return 0;
 }
@@ -220,6 +226,7 @@ void FastRouteProcess::initNets() {
                 for (Rsyn::Pin pin: net.allPins()) {
                         DBUxy pinPosition;
                         int pinLayer;
+                        int numOfLayers;
                         if (pin.getInstanceType() == Rsyn::CELL) {
                                 Rsyn::PhysicalLibraryPin phLibPin = phDesign.getPhysicalLibraryPin(pin);
                                 Rsyn::Cell cell = pin.getInstance().asCell();
@@ -230,6 +237,7 @@ void FastRouteProcess::initNets() {
                                 for (Rsyn::PhysicalPinGeometry pinGeo : phLibPin.allPinGeometries()) {
                                         if (!pinGeo.hasPinLayer())
                                                 continue;
+                                        numOfLayers = pinGeo.allPinLayers().size();
                                         for (Rsyn::PhysicalPinLayer phPinLayer : pinGeo.allPinLayers()) {
                                                 pinLayer = phPinLayer.getLayer().getRelativeIndex();
 
@@ -264,11 +272,13 @@ void FastRouteProcess::initNets() {
                                 pinPosition = portPos;
                                 pinLayer = phPort.getLayer().getRelativeIndex();
                         }
-                        FastRoute::PIN grPin;
-                        grPin.x = pinPosition.x;
-                        grPin.y = pinPosition.y;
-                        grPin.layer = pinLayer+1;
-                        pins.push_back(grPin);
+                        for (int l = numOfLayers-1; l >= 0; l--) {
+                                FastRoute::PIN grPin;
+                                grPin.x = pinPosition.x;
+                                grPin.y = pinPosition.y;
+                                grPin.layer = (pinLayer-l)+1;
+                                pins.push_back(grPin);
+                        }
                 }
                 FastRoute::PIN grPins[pins.size()];
 
@@ -513,7 +523,7 @@ void FastRouteProcess::computeObstaclesAdjustments() {
         } 
 }
 
-void FastRouteProcess::writeGuides(const std::vector<FastRoute::NET> &globalRoute, std::string filename) {
+void FastRouteProcess::writeGuides(std::vector<FastRoute::NET> &globalRoute, std::string filename) {
         std::ofstream guideFile;
         guideFile.open(filename);
         if (!guideFile.is_open()) {
@@ -521,8 +531,9 @@ void FastRouteProcess::writeGuides(const std::vector<FastRoute::NET> &globalRout
                 guideFile.close();
                 std::exit(0);
         }
-
+        
         for (FastRoute::NET netRoute : globalRoute) {
+                addRemainingGuides(netRoute);
                 guideFile << netRoute.name << "\n";
                 guideFile << "(\n";
                 for (FastRoute::ROUTE route : netRoute.route) {
@@ -543,7 +554,26 @@ void FastRouteProcess::writeGuides(const std::vector<FastRoute::NET> &globalRout
                                                 "non-adjacent layers";
                                         std::exit(0);
                                 } else {
-                                        continue;
+                                        Rsyn::PhysicalLayer phLayerI =
+                                                phDesign.getPhysicalLayerByIndex(Rsyn::ROUTING, route.initLayer-1);
+                                        Rsyn::PhysicalLayer phLayerF =
+                                                phDesign.getPhysicalLayerByIndex(Rsyn::ROUTING, route.finalLayer-1);
+
+                                        Bounds guideBdsI;
+                                        guideBdsI = globalRoutingToBounds(route);
+                                        guideFile << guideBdsI.getLower().x << " "
+                                                  << guideBdsI.getLower().y << " "
+                                                  << guideBdsI.getUpper().x << " "
+                                                  << guideBdsI.getUpper().y << " "
+                                                  << phLayerI.getName() << "\n";
+                                        
+                                        Bounds guideBdsF;
+                                        guideBdsF = globalRoutingToBounds(route);
+                                        guideFile << guideBdsF.getLower().x << " "
+                                                  << guideBdsF.getLower().y << " "
+                                                  << guideBdsF.getUpper().x << " "
+                                                  << guideBdsF.getUpper().y << " "
+                                                  << phLayerF.getName() << "\n";
                                 }
                         }
 
@@ -554,13 +584,38 @@ void FastRouteProcess::writeGuides(const std::vector<FastRoute::NET> &globalRout
         guideFile.close();
 }
 
+void FastRouteProcess::writeEst(const std::vector<FastRoute::NET> &globalRoute, std::string filename) {
+	std::ofstream estFile;
+	estFile.open(filename + ".est");
+
+	if (!estFile.is_open()) {
+	        std::cout << "Error in writeFile!" << std::endl;
+	        estFile.close();
+	        std::exit(0);
+	}
+
+	for (FastRoute::NET netRoute : globalRoute) {
+		estFile << netRoute.name << " " << netRoute.id <<
+			" " << netRoute.route.size()  << "\n";
+		for (FastRoute::ROUTE route : netRoute.route) {
+			estFile << "(" << route.initX << "," <<
+				route.initY << "," << route.initLayer <<
+				")-(" << route.finalX << "," << route.finalY <<
+				"," << route.finalLayer << ")\n";
+		}
+		estFile << "!\n";
+	}
+        
+        estFile.close();
+}
+
 void FastRouteProcess::getPosOnGrid(DBUxy &pos) {
         DBU x = pos.x;
         DBU y = pos.y;
 
         // Computing x and y center:
-        DBU gCellId_X = floor(x/grid.tile_width);
-        DBU gCellId_Y = floor(y/grid.tile_height);
+        int gCellId_X = floor((float)((x - grid.lower_left_x) / grid.tile_width));
+        int gCellId_Y = floor((float)((y - grid.lower_left_y) / grid.tile_height));
 
         if (gCellId_X >= grid.xGrids && grid.perfect_regular_x)
             gCellId_X--;
@@ -568,18 +623,46 @@ void FastRouteProcess::getPosOnGrid(DBUxy &pos) {
         if (gCellId_Y >= grid.yGrids && grid.perfect_regular_y)
             gCellId_Y--;
 
-        DBU centerX = (gCellId_X) * grid.tile_width + (grid.tile_width/2);
-        DBU centerY = (gCellId_Y) * grid.tile_height + (grid.tile_height/2);
+        DBU centerX = (gCellId_X * grid.tile_width) + (grid.tile_width/2) + grid.lower_left_x;
+        DBU centerY = (gCellId_Y * grid.tile_height) + (grid.tile_height/2) + grid.lower_left_y;
 
         pos = DBUxy(centerX, centerY);
 }
 
 Bounds FastRouteProcess::globalRoutingToBounds(const FastRoute::ROUTE &route) {
-        DBU llX = route.initX - (grid.tile_width/2);
-        DBU llY = route.initY - (grid.tile_height/2);
+        Rsyn::PhysicalDie phDie = phDesign.getPhysicalDie();
+        Bounds dieBounds = phDie.getBounds();
+        long initX, initY;
+        long finalX, finalY;
+        
+        if (route.initX < route.finalX) {
+                initX = route.initX;
+                finalX = route.finalX;
+        } else {
+                initX = route.finalX;
+                finalX = route.initX;
+        }
+        
+        if (route.initY < route.finalY) {
+                initY = route.initY;
+                finalY = route.finalY;
+        } else {
+                initY = route.finalY;
+                finalY = route.initY;
+        }
+        
+        DBU llX = initX - (grid.tile_width/2);
+        DBU llY = initY - (grid.tile_height/2);
 
-        DBU urX = route.finalX + (grid.tile_width/2);
-        DBU urY = route.finalY + (grid.tile_height/2);
+        DBU urX = finalX + (grid.tile_width/2);
+        DBU urY = finalY + (grid.tile_height/2);
+        
+        if (urX > dieBounds.getUpper().x) {
+                urX = dieBounds.getUpper().x;
+        }
+        if (urY > dieBounds.getUpper().y) {
+                urY = dieBounds.getUpper().y;
+        }
 
         DBUxy lowerLeft = DBUxy(llX, llY);
         DBUxy upperRight = DBUxy(urX, urY);
@@ -619,6 +702,113 @@ std::pair<FastRouteProcess::TILE, FastRouteProcess::TILE> FastRouteProcess::getB
         lastTileBds = Bounds(llLastTile, urLastTile);
         
         return tiles;
+}
+
+// WORKAROUND: FastRoute doesn't understand pins in other layers than metal1
+// This function inserts GCELLs over these pins, to generate a valid guide
+void FastRouteProcess::addRemainingGuides(FastRoute::NET &netRoute) {
+        std::string netName = netRoute.name;
+        Rsyn::Net net;
+        std::vector<FastRoute::PIN> pins;
+        for (Rsyn::Net n : module.allNets()) {
+                if (n.getName() == netName) {
+                        net = n;
+                        break;
+                }
+        }
+        
+        for (Rsyn::Pin pin: net.allPins()) {
+                DBUxy pinPosition;
+                int pinLayer;
+                int numOfLayers;
+                if (pin.getInstanceType() == Rsyn::CELL) {
+                        Rsyn::PhysicalLibraryPin phLibPin = phDesign.getPhysicalLibraryPin(pin);
+                        Rsyn::Cell cell = pin.getInstance().asCell();
+                        Rsyn::PhysicalCell phCell = phDesign.getPhysicalCell(cell);
+                        const DBUxy cellPos = phCell.getPosition();
+                        const Rsyn::PhysicalTransform &transform = phCell.getTransform(true);
+
+                        for (Rsyn::PhysicalPinGeometry pinGeo : phLibPin.allPinGeometries()) {
+                                if (!pinGeo.hasPinLayer())
+                                        continue;
+                                numOfLayers = pinGeo.allPinLayers().size();
+                                for (Rsyn::PhysicalPinLayer phPinLayer : pinGeo.allPinLayers()) {
+                                        pinLayer = phPinLayer.getLayer().getRelativeIndex();
+
+                                        std::vector<DBUxy> pinBdsPositions;
+                                        DBUxy bdsPosition;
+                                        for (Bounds bds : phPinLayer.allBounds()) {
+                                                bds = transform.apply(bds);
+                                                bds.translate(cellPos);
+                                                bdsPosition = bds.computeCenter();
+                                                getPosOnGrid(bdsPosition);
+                                                pinBdsPositions.push_back(bdsPosition);
+                                        }
+
+                                        int mostVoted = 0;
+
+                                        for (DBUxy pos : pinBdsPositions) {
+                                                int equals = std::count(pinBdsPositions.begin(),
+                                                                pinBdsPositions.end(), pos);
+                                                if (equals > mostVoted) {
+                                                        pinPosition = pos;
+                                                        mostVoted = equals;
+                                                }
+                                        }
+                                }
+                        }
+                } else if (pin.getInstanceType() == Rsyn::PORT) {
+                        Rsyn::PhysicalLibraryPin phLibPin = phDesign.getPhysicalLibraryPin(pin);
+                        Rsyn::Port port = pin.getInstance().asPort();
+                        Rsyn::PhysicalPort phPort = phDesign.getPhysicalPort(port);
+                        DBUxy portPos = phPort.getPosition();
+                        getPosOnGrid(portPos);
+                        pinPosition = portPos;
+                        pinLayer = phPort.getLayer().getRelativeIndex();
+                        numOfLayers = phPort.getLayer().getRelativeIndex() + 1;
+                }
+//                for (int l = numOfLayers-1; l >= 0; l--) {
+                        FastRoute::PIN grPin;
+                        grPin.x = pinPosition.x;
+                        grPin.y = pinPosition.y;
+                        grPin.layer = numOfLayers;
+                        pins.push_back(grPin);
+//                }
+        }
+        
+        int lastLayer = -1;
+        for (int p = 0; p < pins.size() - 1; p++)
+                if (pins[p].x == pins[p+1].x && pins[p].y == pins[p+1].y)
+                        if (pins[p].layer > lastLayer)
+                                lastLayer = pins[p].layer;
+        
+        if (netRoute.route.size() == 0) {
+                for (int l = 0; l <= lastLayer; l++) {
+                        FastRoute::ROUTE route;
+                        route.initLayer = l + 1;
+                        route.initX = pins[0].x;
+                        route.initY = pins[0].y;
+                        route.finalLayer = l;
+                        route.finalX = pins[0].x;
+                        route.finalX = pins[0].y;
+                        netRoute.route.push_back(route);
+                }
+        } else {
+                for (FastRoute::PIN pin : pins) {
+                        if (pin.layer > 1) {
+                                for(int l = 1; l <= pin.layer - 1; l++) {
+                                        FastRoute::ROUTE route;
+                                        route.initLayer = l;
+                                        route.initX = pin.x;
+                                        route.initY = pin.y;
+                                        route.finalLayer = l + 1;
+                                        route.finalX = pin.x;
+                                        route.finalX = pin.y;
+                                        netRoute.route.push_back(route);
+                                }
+                        }
+                }
+        }
 }
 
 int FastRouteProcess::computeTileReduce(const Bounds &obs, const Bounds &tile, DBU trackSpace, bool first, bool horizontal) {

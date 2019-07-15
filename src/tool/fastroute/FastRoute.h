@@ -65,7 +65,9 @@ class FastRouteProcess : public Process {
         void setGridAdjustments();
         void computeSimpleAdjustments();
         void computeObstaclesAdjustments();
-        void writeGuides(const std::vector<FastRoute::NET> &, std::string);
+        void writeGuides(std::vector<FastRoute::NET> &, std::string);
+        
+        void writeEst(const std::vector<FastRoute::NET> &, std::string);
 
         // Aux functions
         void getPosOnGrid(DBUxy &);
@@ -73,6 +75,7 @@ class FastRouteProcess : public Process {
         std::pair<TILE, TILE> getBlockedTiles(const Bounds &, Bounds &, Bounds &);
         int computeTileReduce(const Bounds &, const Bounds &, DBU, bool, bool);
         void getSpecialNetsObstacles(std::map<int, std::vector<Bounds>> &);
+        void addRemainingGuides(FastRoute::NET &);
 
        public:
         FastRouteProcess() = default;
