@@ -271,6 +271,7 @@ void FastRouteProcess::initNets() {
                                 getPosOnGrid(portPos);
                                 pinPosition = portPos;
                                 pinLayer = phPort.getLayer().getRelativeIndex();
+                                numOfLayers = 1;
                         }
                         for (int l = numOfLayers-1; l >= 0; l--) {
                                 FastRoute::PIN grPin;
@@ -781,14 +782,14 @@ void FastRouteProcess::addRemainingGuides(FastRoute::NET &netRoute) {
                 if (pins[p].x == pins[p+1].x && pins[p].y == pins[p+1].y)
                         if (pins[p].layer > lastLayer)
                                 lastLayer = pins[p].layer;
-        
+                
         if (netRoute.route.size() == 0) {
-                for (int l = 0; l <= lastLayer; l++) {
+                for (int l = 1; l <= lastLayer - 1; l++) {
                         FastRoute::ROUTE route;
-                        route.initLayer = l + 1;
+                        route.initLayer = l;
                         route.initX = pins[0].x;
                         route.initY = pins[0].y;
-                        route.finalLayer = l;
+                        route.finalLayer = l + 1;
                         route.finalX = pins[0].x;
                         route.finalX = pins[0].y;
                         netRoute.route.push_back(route);
