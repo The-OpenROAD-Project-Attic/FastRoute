@@ -5,6 +5,10 @@ FastRoute4-lefdef
 
 The algorithm base is from FastRoute4 and the underlying infrastructure comes from [Rsyn](https://github.com/RsynTeam/rsyn-x/)
 
+ 
+
+FastRoute4 version was received June 15, 2019 with the BSD-3 open source license as given in the [website](http://home.eng.iastate.edu/~cnchu/FastRoute.html#License).
+
 ## License
  
  Licensed under the Apache License, Version 2.0 (the "License");
