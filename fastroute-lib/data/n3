@@ -1,0 +1,524 @@
+No output file specified, FR will not generate output file
+
+Reading ../../grb/newblue3.kraftwerk80.3d.40.50.90.gr ...
+
+grid 973 1256 6
+Layer 0 vertical capacity 0, horizontal capacity 4
+Layer 1 vertical capacity 4, horizontal capacity 0
+Layer 2 vertical capacity 0, horizontal capacity 18
+Layer 3 vertical capacity 18, horizontal capacity 0
+Layer 4 vertical capacity 0, horizontal capacity 18
+Layer 5 vertical capacity 18, horizontal capacity 0
+total vertical capacity 40
+total horizontal capacity 40
+num net 551667
+the total net number is 551667
+
+num of Adjust is 2016672
+# valid nets: 442005
+# segments: 1475705
+maxDeg:     141
+
+Done getting input
+MD: 141, AD: 3.17, #nets: 551667, #routed nets: 442005
+TC is 97677880
+
+Reading Lookup Table ...
+
+Done reading table
+
+Reading Time: 4.940000 sec
+WIRELEN : 7390806, WIRELEN1 : 0
+NumSeg  : 1045598
+NumShift: 0
+totalnon 0
+Max 0.000000, Min 10000000.000000
+cnt1 0, cnt2 0, cnt3 0
+first L
+WIRELEN : 7451656, WIRELEN1 : 7451656
+NumSeg  : 1048818
+NumShift: 30027
+totalnon 0
+Max 0.000000, Min 10000000.000000
+cnt1 0, cnt2 0, cnt3 0
+total hCap    : 39491730
+total vCap    : 39788647
+total Usage   : 7451656
+Max H Overflow: 777
+Max V Overflow: 354
+Max Overflow  : 777
+Num Overflow e: 23046
+H   Overflow  : 72325
+V   Overflow  : 206627
+Final Overflow: 278952
+
+second L
+total hCap    : 39491730
+total vCap    : 39788647
+total Usage   : 7451656
+Max H Overflow: 773
+Max V Overflow: 368
+Max Overflow  : 773
+Num Overflow e: 22592
+H   Overflow  : 70534
+V   Overflow  : 203379
+Final Overflow: 273913
+
+first Z
+total hCap    : 39491730
+total vCap    : 39788647
+total Usage   : 7451656
+Max H Overflow: 445
+Max V Overflow: 760
+Max Overflow  : 760
+Num Overflow e: 20030
+H   Overflow  : 35880
+V   Overflow  : 143228
+Final Overflow: 179108
+
+LV routing round 1, enlarge 10 
+10 threshold, 10 expand
+total Usage   : 7573686
+Max H Overflow: 64
+Max V Overflow: 1283
+Max Overflow  : 1283
+Num Overflow e: 3892
+H   Overflow  : 6286
+V   Overflow  : 45490
+Final Overflow: 51776
+
+updateType 1
+max value 1283 stop 0
+LV routing round 2, enlarge 15 
+5 threshold, 15 expand
+total Usage   : 7565024
+Max H Overflow: 71
+Max V Overflow: 1456
+Max Overflow  : 1456
+Num Overflow e: 2660
+H   Overflow  : 3517
+V   Overflow  : 58107
+Final Overflow: 61624
+
+updateType 1
+max value 2739 stop 0
+LV routing round 3, enlarge 20 
+1 threshold, 20 expand
+total Usage   : 7568686
+Max H Overflow: 68
+Max V Overflow: 1519
+Max Overflow  : 1519
+Num Overflow e: 2207
+H   Overflow  : 2756
+V   Overflow  : 64951
+Final Overflow: 67707
+
+updateType 1
+max value 4258 stop 0
+LV Time: 16.520000 sec
+updateType 1
+max value 1519 stop 0
+iteration 4, enlarge 87, costheight 6, threshold 6 via cost 2 
+log_coef 0.241445, healingTrigger 0 cost_step 2 L 0 cost_type 1
+total Usage   : 7622844
+Max H Overflow: 636
+Max V Overflow: 537
+Max Overflow  : 636
+Num Overflow e: 2656
+H   Overflow  : 14378
+V   Overflow  : 19297
+Final Overflow: 33675
+
+updateType 1
+max value 2056 stop 0
+iteration 5, enlarge 159, costheight 8, threshold 2 via cost 2 
+log_coef 0.268269, healingTrigger 0 cost_step 2 L 0 cost_type 1
+total Usage   : 7640621
+Max H Overflow: 576
+Max V Overflow: 547
+Max Overflow  : 576
+Num Overflow e: 1916
+H   Overflow  : 10201
+V   Overflow  : 12381
+Final Overflow: 22582
+
+updateType 1
+max value 2602 stop 0
+iteration 6, enlarge 231, costheight 10, threshold 0 via cost 2 
+log_coef 0.271883, healingTrigger 0 cost_step 2 L 0 cost_type 1
+total Usage   : 7644368
+Max H Overflow: 559
+Max V Overflow: 543
+Max Overflow  : 559
+Num Overflow e: 1598
+H   Overflow  : 9272
+V   Overflow  : 11097
+Final Overflow: 20369
+
+updateType 1
+max value 3145 stop 0
+iteration 7, enlarge 303, costheight 17, threshold 0 via cost 2 
+log_coef 0.272995, healingTrigger 0 cost_step 2 L 0 cost_type 1
+total Usage   : 7668947
+Max H Overflow: 556
+Max V Overflow: 542
+Max Overflow  : 556
+Num Overflow e: 1444
+H   Overflow  : 9088
+V   Overflow  : 10652
+Final Overflow: 19740
+
+updateType 1
+max value 3687 stop 0
+iteration 8, enlarge 375, costheight 24, threshold 0 via cost 0 
+log_coef 1.330000, healingTrigger 0 cost_step 2 L 0 cost_type 1
+total Usage   : 7636465
+Max H Overflow: 554
+Max V Overflow: 543
+Max Overflow  : 554
+Num Overflow e: 1139
+H   Overflow  : 8894
+V   Overflow  : 9515
+Final Overflow: 18409
+
+updateType 2
+max value 554 stop 0
+iteration 9, enlarge 447, costheight 31, threshold 0 via cost 0 
+log_coef 1.330000, healingTrigger 0 cost_step 2 L 0 cost_type 1
+total Usage   : 7638376
+Max H Overflow: 554
+Max V Overflow: 543
+Max Overflow  : 554
+Num Overflow e: 1025
+H   Overflow  : 8811
+V   Overflow  : 9373
+Final Overflow: 18184
+
+updateType 2
+max value 1108 stop 0
+iteration 10, enlarge 486, costheight 38, threshold 0 via cost 0 
+log_coef 1.330000, healingTrigger 0 cost_step 2 L 0 cost_type 1
+total Usage   : 7639671
+Max H Overflow: 554
+Max V Overflow: 544
+Max Overflow  : 554
+Num Overflow e: 1025
+H   Overflow  : 8803
+V   Overflow  : 9294
+Final Overflow: 18097
+
+updateType 2
+max value 1662 stop 0
+iteration 11, enlarge 486, costheight 45, threshold 0 via cost 0 
+log_coef 1.330000, healingTrigger 0 cost_step 2 L 0 cost_type 1
+total Usage   : 7640903
+Max H Overflow: 554
+Max V Overflow: 543
+Max Overflow  : 554
+Num Overflow e: 1002
+H   Overflow  : 8789
+V   Overflow  : 9245
+Final Overflow: 18034
+
+updateType 2
+max value 2216 stop 0
+iteration 12, enlarge 486, costheight 52, threshold 0 via cost 0 
+log_coef 2.000000, healingTrigger 0 cost_step 2 L 0 cost_type 1
+total Usage   : 7639794
+Max H Overflow: 554
+Max V Overflow: 543
+Max Overflow  : 554
+Num Overflow e: 984
+H   Overflow  : 8777
+V   Overflow  : 9195
+Final Overflow: 17972
+
+updateType 2
+max value 2770 stop 0
+iteration 13, enlarge 486, costheight 59, threshold 0 via cost 0 
+log_coef 2.000000, healingTrigger 0 cost_step 2 L 0 cost_type 1
+total Usage   : 7640154
+Max H Overflow: 554
+Max V Overflow: 543
+Max Overflow  : 554
+Num Overflow e: 977
+H   Overflow  : 8778
+V   Overflow  : 9172
+Final Overflow: 17950
+
+updateType 2
+max value 3324 stop 0
+iteration 14, enlarge 486, costheight 66, threshold 0 via cost 0 
+log_coef 2.000000, healingTrigger 0 cost_step 2 L 0 cost_type 1
+total Usage   : 7640515
+Max H Overflow: 554
+Max V Overflow: 543
+Max Overflow  : 554
+Num Overflow e: 973
+H   Overflow  : 8775
+V   Overflow  : 9158
+Final Overflow: 17933
+
+updateType 2
+max value 3878 stop 0
+iteration 15, enlarge 486, costheight 73, threshold 0 via cost 0 
+log_coef 2.000000, healingTrigger 0 cost_step 2 L 0 cost_type 1
+total Usage   : 7640900
+Max H Overflow: 554
+Max V Overflow: 543
+Max Overflow  : 554
+Num Overflow e: 960
+H   Overflow  : 8780
+V   Overflow  : 9133
+Final Overflow: 17913
+
+updateType 2
+max value 4432 stop 0
+iteration 16, enlarge 486, costheight 80, threshold 0 via cost 0 
+log_coef 2.500000, healingTrigger 0 cost_step 2 L 0 cost_type 1
+total Usage   : 7640847
+Max H Overflow: 554
+Max V Overflow: 543
+Max Overflow  : 554
+Num Overflow e: 955
+H   Overflow  : 8768
+V   Overflow  : 9121
+Final Overflow: 17889
+
+updateType 2
+max value 4986 stop 0
+iteration 17, enlarge 486, costheight 87, threshold 0 via cost 0 
+log_coef 2.500000, healingTrigger 0 cost_step 2 L 0 cost_type 1
+total Usage   : 7640891
+Max H Overflow: 554
+Max V Overflow: 543
+Max Overflow  : 554
+Num Overflow e: 945
+H   Overflow  : 8760
+V   Overflow  : 9118
+Final Overflow: 17878
+
+updateType 2
+max value 5540 stop 0
+iteration 18, enlarge 486, costheight 94, threshold 0 via cost 0 
+log_coef 2.500000, healingTrigger 0 cost_step 2 L 0 cost_type 1
+total Usage   : 7640895
+Max H Overflow: 554
+Max V Overflow: 543
+Max Overflow  : 554
+Num Overflow e: 950
+H   Overflow  : 8760
+V   Overflow  : 9119
+Final Overflow: 17879
+
+updateType 2
+max value 6094 stop 0
+iteration 19, enlarge 486, costheight 101, threshold 0 via cost 0 
+log_coef 2.500000, healingTrigger 1 cost_step 2 L 0 cost_type 1
+total Usage   : 7640906
+Max H Overflow: 555
+Max V Overflow: 543
+Max Overflow  : 555
+Num Overflow e: 947
+H   Overflow  : 8758
+V   Overflow  : 9113
+Final Overflow: 17871
+
+updateType 2
+max value 6649 stop 0
+iteration 20, enlarge 486, costheight 108, threshold 0 via cost 0 
+log_coef 3.000000, healingTrigger 1 cost_step 2 L 0 cost_type 1
+total Usage   : 7640712
+Max H Overflow: 554
+Max V Overflow: 543
+Max Overflow  : 554
+Num Overflow e: 952
+H   Overflow  : 8763
+V   Overflow  : 9110
+Final Overflow: 17873
+
+updateType 2
+max value 7203 stop 0
+iteration 21, enlarge 486, costheight 115, threshold 0 via cost 0 
+log_coef 3.000000, healingTrigger 2 cost_step 2 L 0 cost_type 1
+total Usage   : 7640692
+Max H Overflow: 554
+Max V Overflow: 543
+Max Overflow  : 554
+Num Overflow e: 953
+H   Overflow  : 8763
+V   Overflow  : 9109
+Final Overflow: 17872
+
+updateType 2
+max value 7757 stop 0
+iteration 22, enlarge 486, costheight 122, threshold 0 via cost 0 
+log_coef 3.000000, healingTrigger 2 cost_step 2 L 0 cost_type 1
+total Usage   : 7640662
+Max H Overflow: 554
+Max V Overflow: 543
+Max Overflow  : 554
+Num Overflow e: 951
+H   Overflow  : 8759
+V   Overflow  : 9111
+Final Overflow: 17870
+
+updateType 2
+max value 8311 stop 0
+iteration 23, enlarge 486, costheight 129, threshold 0 via cost 0 
+log_coef 3.000000, healingTrigger 2 cost_step 2 L 0 cost_type 1
+total Usage   : 7640708
+Max H Overflow: 554
+Max V Overflow: 543
+Max Overflow  : 554
+Num Overflow e: 949
+H   Overflow  : 8756
+V   Overflow  : 9113
+Final Overflow: 17869
+
+updateType 2
+max value 8865 stop 0
+iteration 24, enlarge 486, costheight 136, threshold 0 via cost 0 
+log_coef 3.000000, healingTrigger 2 cost_step 2 L 0 cost_type 1
+total Usage   : 7640751
+Max H Overflow: 554
+Max V Overflow: 543
+Max Overflow  : 554
+Num Overflow e: 946
+H   Overflow  : 8755
+V   Overflow  : 9110
+Final Overflow: 17865
+
+updateType 2
+max value 9419 stop 0
+iteration 25, enlarge 486, costheight 143, threshold 0 via cost 0 
+log_coef 3.000000, healingTrigger 2 cost_step 2 L 0 cost_type 1
+total Usage   : 7640954
+Max H Overflow: 555
+Max V Overflow: 543
+Max Overflow  : 555
+Num Overflow e: 946
+H   Overflow  : 8767
+V   Overflow  : 9090
+Final Overflow: 17857
+
+updateType 2
+max value 9974 stop 0
+iteration 26, enlarge 486, costheight 150, threshold 0 via cost 0 
+log_coef 3.000000, healingTrigger 2 cost_step 2 L 0 cost_type 1
+total Usage   : 7641039
+Max H Overflow: 555
+Max V Overflow: 543
+Max Overflow  : 555
+Num Overflow e: 942
+H   Overflow  : 8766
+V   Overflow  : 9088
+Final Overflow: 17854
+
+updateType 2
+max value 10529 stop 0
+iteration 27, enlarge 486, costheight 157, threshold 0 via cost 0 
+log_coef 3.000000, healingTrigger 2 cost_step 2 L 0 cost_type 1
+total Usage   : 7641055
+Max H Overflow: 555
+Max V Overflow: 543
+Max Overflow  : 555
+Num Overflow e: 942
+H   Overflow  : 8767
+V   Overflow  : 9086
+Final Overflow: 17853
+
+updateType 2
+max value 11084 stop 0
+iteration 28, enlarge 486, costheight 164, threshold 0 via cost 0 
+log_coef 3.000000, healingTrigger 2 cost_step 2 L 0 cost_type 1
+total Usage   : 7641376
+Max H Overflow: 555
+Max V Overflow: 543
+Max Overflow  : 555
+Num Overflow e: 937
+H   Overflow  : 8763
+V   Overflow  : 9084
+Final Overflow: 17847
+
+updateType 2
+max value 11639 stop 0
+iteration 29, enlarge 486, costheight 171, threshold 0 via cost 0 
+log_coef 3.000000, healingTrigger 2 cost_step 2 L 0 cost_type 1
+total Usage   : 7641406
+Max H Overflow: 554
+Max V Overflow: 544
+Max Overflow  : 554
+Num Overflow e: 936
+H   Overflow  : 8760
+V   Overflow  : 9084
+Final Overflow: 17844
+
+updateType 2
+max value 12193 stop 0
+iteration 30, enlarge 486, costheight 178, threshold 0 via cost 0 
+log_coef 3.000000, healingTrigger 2 cost_step 2 L 0 cost_type 1
+total Usage   : 7641442
+Max H Overflow: 554
+Max V Overflow: 544
+Max Overflow  : 554
+Num Overflow e: 935
+H   Overflow  : 8759
+V   Overflow  : 9084
+Final Overflow: 17843
+
+updateType 2
+max value 12747 stop 0
+
+
+ minimal ofl 17843, occuring at round 30
+
+redundant edge component discovered
+redundant edge component discovered
+redundant edge component discovered
+redundant edge component discovered
+redundant edge component discovered
+redundant edge component discovered
+redundant edge component discovered
+redundant edge component discovered
+redundant edge component discovered
+redundant edge component discovered
+redundant edge component discovered
+usage checked
+maze routing finished
+P3 runtime: 9315.870117 sec
+Final 2D results: 
+total Usage   : 7641442
+Max H Overflow: 554
+Max V Overflow: 544
+Max Overflow  : 554
+Num Overflow e: 935
+H   Overflow  : 8759
+V   Overflow  : 9084
+Final Overflow: 17843
+
+
+Layer Assignment Beginsnode processing
+layer assignment
+Total number of via 478871
+layer assignment finished
+2D + Layer Assignment Runtime: 9341.589844 sec
+via related to pin nodes 2452219
+via related stiner nodes 154621
+total Usage   : 7641420
+Total Capacity: 79280377
+Max H Overflow: 219
+Max V Overflow: 161
+Max Overflow  : 219
+H   Overflow  : 8759
+V   Overflow  : 9084
+Final Overflow: 17843
+
+
+ threedvia result
+num of vias 3085711
+Final routing length : 7641420
+Final number of via  : 3085711
+Final total length 1 : 10727131
+Final total length 3 : 16898553
+3D runtime: 9342.250000 sec
