@@ -26,7 +26,7 @@ typedef struct
 
 typedef struct
 {
-        char name[18];  // net name
+        char name[200];  // net name
         int netIDorg;   // orginal net ID in the input file
         short numPins;  // number of pins in the net
         short deg;      // net degree (number of MazePoints connecting by the net, pins in same MazePoints count only 1)
