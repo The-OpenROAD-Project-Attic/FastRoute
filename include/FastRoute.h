@@ -2,6 +2,7 @@
 #define FASTROUTE_H
 #include <vector>
 #include <string>
+#include <map>
 
 namespace FastRoute {
 
@@ -25,6 +26,8 @@ typedef struct {
         int id;
         std::vector<ROUTE> route;
 } NET;
+
+std::map<std::string, std::vector<PIN>> allNets;
 
 class FT {
        public:
@@ -50,6 +53,7 @@ class FT {
         
         // aux functions
         int getEdgeCapacity(long x1, long y1, int l1, long x2, long y2, int l2);
+        std::map<std::string, std::vector<PIN>> getNets();
 };
 }  // namespace FastRoute
 #endif

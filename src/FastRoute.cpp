@@ -33,12 +33,12 @@ void FT::setGridsAndLayers(int x, int y, int nLayers) {
 }
 
 void FT::addVCapacity(int verticalCapacity, int layer) {
-        vCapacity3D[layer - 1] = verticalCapacity / 2;
+        vCapacity3D[layer - 1] = verticalCapacity;
         vCapacity += vCapacity3D[layer - 1];
 }
 
 void FT::addHCapacity(int horizontalCapacity, int layer) {
-        hCapacity3D[layer - 1] = horizontalCapacity / 2;
+        hCapacity3D[layer - 1] = horizontalCapacity;
         hCapacity += hCapacity3D[layer - 1];
 }
 
@@ -91,6 +91,14 @@ void FT::addNet(char *name, int netIdx, int nPins, int minWidth, PIN pins[]) {
         netID = netIdx;
         numPins = nPins;
         minwidth = minWidth;
+        
+        std::string netName(name);
+        std::vector<PIN> netPins;
+        for (int p = 0; p < numPins; p++) {
+                netPins.push_back(pins[p]);
+        }
+        allNets[netName] = netPins;
+        
         if (numPins < 1000) {
                 pinInd = 0;
                 for (j = 0; j < numPins; j++) {
@@ -147,6 +155,10 @@ void FT::addNet(char *name, int netIdx, int nPins, int minWidth, PIN pins[]) {
                         pinL = pins[j].layer;
                 }
         }
+}
+
+std::map<std::string, std::vector<PIN>> FT::getNets() {
+        return allNets;
 }
 
 void FT::initEdges() {
@@ -224,7 +236,7 @@ void FT::setNumAdjustments(int nAdjustments) {
 void FT::addAdjustment(long x1, long y1, int l1, long x2, long y2, int l2, int reducedCap) {
         int grid, k;
         int reduce, cap;
-        reducedCap = reducedCap / 2;
+        reducedCap = reducedCap;
 
         k = l1 - 1;
 

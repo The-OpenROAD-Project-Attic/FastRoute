@@ -7,7 +7,7 @@ namespace FastRoute {
 #define ACCURACY 10             // Default accuracy
 #define ROUTING 1               // 1 to construct routing, 0 to estimate WL only
 #define LOCAL_REFINEMENT 1      // Suggestion: Set to 1 if ACCURACY >= 5
-#define REMOVE_DUPLICATE_PIN 1  // Remove dup. pin for flute_wl() & flute()
+#define REMOVE_DUPLICATE_PIN 0  // Remove dup. pin for flute_wl() & flute()
 
 #ifndef DTYPE  // Data type for distance
 #define DTYPE int
