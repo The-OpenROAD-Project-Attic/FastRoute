@@ -45,6 +45,7 @@
 #include "util/DBU.h"
 #include "phy/PhysicalRouting.h"
 #include "core/RsynTypes.h"
+#include "util/Stepwatch.h"
 #include <cstring>
 #include <string>
 #include <iostream>
@@ -58,6 +59,7 @@
 namespace Rsyn {
 
 bool FastRouteProcess::run(const Rsyn::Json &params) {
+        Stepwatch watch("FastRoute...");
         std::vector<FastRoute::NET> result;
         std::string outfile = params.value("outfile", "out.guide");
         design = session.getDesign();
@@ -145,6 +147,12 @@ void FastRouteProcess::initGrid() {
 
         int xGrid = std::ceil((float)dieX / tileSize);
         int yGrid = std::ceil((float)dieY / tileSize);
+        
+        if ((xGrid*tileSize) == dieX)
+                grid.perfect_regular_x = true;
+        
+        if ((yGrid*tileSize) == dieY)
+                grid.perfect_regular_y = true;
 
         fastRoute.setLowerLeft(dieBounds[LOWER][X], dieBounds[LOWER][Y]);
         fastRoute.setTileSize(tileSize, tileSize);
@@ -342,13 +350,6 @@ void FastRouteProcess::setGridAdjustments() {
         int yBlocked = upperDieBounds.y % yGrids;
         float percentageBlockedX = xBlocked / grid.tile_width;
         float percentageBlockedY = yBlocked / grid.tile_height;
-
-        if (xBlocked == 0) {
-                grid.perfect_regular_x = true;
-        }
-        if (yBlocked == 0) {
-                grid.perfect_regular_y = true;
-        }
 
         for (Rsyn::PhysicalLayer phLayer : phDesign.allPhysicalLayers()) {
                 if (phLayer.getType() != Rsyn::ROUTING)
