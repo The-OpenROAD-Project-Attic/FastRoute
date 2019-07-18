@@ -77,6 +77,7 @@ class FastRouteProcess : public Process {
         int pitchesInTile = 15;
         int selectedMetal = 3;
         std::vector<FastRoute::NET> result;
+        std::map<std::string, int> netsDegree;
 
         // Main functions
         void initGrid();
@@ -97,7 +98,7 @@ class FastRouteProcess : public Process {
         std::pair<TILE, TILE> getBlockedTiles(const Bounds &, Bounds &, Bounds &);
         int computeTileReduce(const Bounds &, const Bounds &, DBU, bool, bool);
         void getSpecialNetsObstacles(std::map<int, std::vector<Bounds>> &);
-        void addRemainingGuides(FastRoute::NET &);
+        void addRemainingGuides(std::vector<FastRoute::NET> &);
 
        public:
         FastRouteProcess() = default;

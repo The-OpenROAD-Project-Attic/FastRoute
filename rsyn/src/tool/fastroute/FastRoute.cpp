@@ -244,6 +244,14 @@ void FastRouteProcess::initNets() {
         fastRoute.setNumberNets(numNets);
 
         for (Rsyn::Net net : module.allNets()) {
+                if (net.getNumPins() == 1)
+                        continue;
+
+                if (net.getUse() == Rsyn::POWER || net.getUse() == Rsyn::GROUND)
+                        continue;
+
+                netsDegree[net.getName()] = net.getNumPins();
+
                 std::vector<FastRoute::PIN> pins;
                 for (Rsyn::Pin pin : net.allPins()) {
                         DBUxy pinPosition;
@@ -554,8 +562,11 @@ void FastRouteProcess::writeGuides(std::vector<FastRoute::NET> &globalRoute, std
                 std::exit(0);
         }
 
+        addRemainingGuides(globalRoute);
+
+        std::cout << "Num routed nets: " << globalRoute.size() << "\n";
+
         for (FastRoute::NET netRoute : globalRoute) {
-                addRemainingGuides(netRoute);
                 guideFile << netRoute.name << "\n";
                 guideFile << "(\n";
                 for (FastRoute::ROUTE route : netRoute.route) {
@@ -723,107 +734,75 @@ std::pair<FastRouteProcess::TILE, FastRouteProcess::TILE> FastRouteProcess::getB
 
 // WORKAROUND: FastRoute doesn't understand pins in other layers than metal1
 // This function inserts GCELLs over these pins, to generate a valid guide
-void FastRouteProcess::addRemainingGuides(FastRoute::NET &netRoute) {
-        std::string netName = netRoute.name;
-        Rsyn::Net net;
-        std::vector<FastRoute::PIN> pins;
-        for (Rsyn::Net n : module.allNets()) {
-                if (n.getName() == netName) {
-                        net = n;
-                        break;
+void FastRouteProcess::addRemainingGuides(std::vector<FastRoute::NET> &globalRoute) {
+        std::map<std::string, std::vector<FastRoute::PIN>> allNets;
+        allNets = fastRoute.getNets();
+        int localNetsId = allNets.size();
+
+        for (FastRoute::NET &netRoute : globalRoute) {
+                std::vector<FastRoute::PIN> &pins = allNets[netRoute.name];
+
+                if (netsDegree[netRoute.name] < 2) {
+                        continue;
                 }
-        }
 
-        for (Rsyn::Pin pin : net.allPins()) {
-                DBUxy pinPosition;
-                int pinLayer;
-                int numOfLayers;
-                if (pin.getInstanceType() == Rsyn::CELL) {
-                        Rsyn::PhysicalLibraryPin phLibPin = phDesign.getPhysicalLibraryPin(pin);
-                        Rsyn::Cell cell = pin.getInstance().asCell();
-                        Rsyn::PhysicalCell phCell = phDesign.getPhysicalCell(cell);
-                        const DBUxy cellPos = phCell.getPosition();
-                        const Rsyn::PhysicalTransform &transform = phCell.getTransform(true);
+                int lastLayer = -1;
+                for (int p = 0; p < pins.size() - 1; p++)
+                        if (pins[p].x == pins[p + 1].x && pins[p].y == pins[p + 1].y)
+                                if (pins[p].layer > lastLayer)
+                                        lastLayer = pins[p].layer;
 
-                        for (Rsyn::PhysicalPinGeometry pinGeo : phLibPin.allPinGeometries()) {
-                                if (!pinGeo.hasPinLayer())
-                                        continue;
-                                numOfLayers = pinGeo.allPinLayers().size();
-                                for (Rsyn::PhysicalPinLayer phPinLayer : pinGeo.allPinLayers()) {
-                                        pinLayer = phPinLayer.getLayer().getRelativeIndex();
-
-                                        std::vector<DBUxy> pinBdsPositions;
-                                        DBUxy bdsPosition;
-                                        for (Bounds bds : phPinLayer.allBounds()) {
-                                                bds = transform.apply(bds);
-                                                bds.translate(cellPos);
-                                                bdsPosition = bds.computeCenter();
-                                                getPosOnGrid(bdsPosition);
-                                                pinBdsPositions.push_back(bdsPosition);
-                                        }
-
-                                        int mostVoted = 0;
-
-                                        for (DBUxy pos : pinBdsPositions) {
-                                                int equals = std::count(pinBdsPositions.begin(),
-                                                                        pinBdsPositions.end(), pos);
-                                                if (equals > mostVoted) {
-                                                        pinPosition = pos;
-                                                        mostVoted = equals;
-                                                }
+                if (netRoute.route.size() == 0) {
+                        for (int l = 1; l <= lastLayer - 1; l++) {
+                                FastRoute::ROUTE route;
+                                route.initLayer = l;
+                                route.initX = pins[0].x;
+                                route.initY = pins[0].y;
+                                route.finalLayer = l + 1;
+                                route.finalX = pins[0].x;
+                                route.finalY = pins[0].y;
+                                netRoute.route.push_back(route);
+                        }
+                } else {
+                        for (FastRoute::PIN pin : pins) {
+                                if (pin.layer > 1) {
+                                        for (int l = 1; l <= pin.layer - 1; l++) {
+                                                FastRoute::ROUTE route;
+                                                route.initLayer = l;
+                                                route.initX = pin.x;
+                                                route.initY = pin.y;
+                                                route.finalLayer = l + 1;
+                                                route.finalX = pin.x;
+                                                route.finalY = pin.y;
+                                                netRoute.route.push_back(route);
                                         }
                                 }
                         }
-                } else if (pin.getInstanceType() == Rsyn::PORT) {
-                        Rsyn::PhysicalLibraryPin phLibPin = phDesign.getPhysicalLibraryPin(pin);
-                        Rsyn::Port port = pin.getInstance().asPort();
-                        Rsyn::PhysicalPort phPort = phDesign.getPhysicalPort(port);
-                        DBUxy portPos = phPort.getPosition();
-                        getPosOnGrid(portPos);
-                        pinPosition = portPos;
-                        pinLayer = phPort.getLayer().getRelativeIndex();
-                        numOfLayers = phPort.getLayer().getRelativeIndex() + 1;
                 }
-                //                for (int l = numOfLayers-1; l >= 0; l--) {
-                FastRoute::PIN grPin;
-                grPin.x = pinPosition.x;
-                grPin.y = pinPosition.y;
-                grPin.layer = numOfLayers;
-                pins.push_back(grPin);
-                //                }
+                allNets.erase(netRoute.name);
         }
 
-        int lastLayer = -1;
-        for (int p = 0; p < pins.size() - 1; p++)
-                if (pins[p].x == pins[p + 1].x && pins[p].y == pins[p + 1].y)
-                        if (pins[p].layer > lastLayer)
-                                lastLayer = pins[p].layer;
+        if (allNets.size() > 0) {
+                for (std::map<std::string, std::vector<FastRoute::PIN>>::iterator
+                         it = allNets.begin();
+                     it != allNets.end(); ++it) {
+                        std::vector<FastRoute::PIN> &pins = it->second;
 
-        if (netRoute.route.size() == 0) {
-                for (int l = 1; l <= lastLayer - 1; l++) {
-                        FastRoute::ROUTE route;
-                        route.initLayer = l;
-                        route.initX = pins[0].x;
-                        route.initY = pins[0].y;
-                        route.finalLayer = l + 1;
-                        route.finalX = pins[0].x;
-                        route.finalX = pins[0].y;
-                        netRoute.route.push_back(route);
-                }
-        } else {
-                for (FastRoute::PIN pin : pins) {
-                        if (pin.layer > 1) {
-                                for (int l = 1; l <= pin.layer - 1; l++) {
-                                        FastRoute::ROUTE route;
-                                        route.initLayer = l;
-                                        route.initX = pin.x;
-                                        route.initY = pin.y;
-                                        route.finalLayer = l + 1;
-                                        route.finalX = pin.x;
-                                        route.finalX = pin.y;
-                                        netRoute.route.push_back(route);
-                                }
+                        FastRoute::NET localNet;
+                        localNet.id = localNetsId;
+                        localNetsId++;
+                        localNet.name = it->first;
+                        for (FastRoute::PIN pin : pins) {
+                                FastRoute::ROUTE route;
+                                route.initLayer = pin.layer;
+                                route.initX = pin.x;
+                                route.initY = pin.y;
+                                route.finalLayer = pin.layer;
+                                route.finalX = pin.x;
+                                route.finalY = pin.y;
+                                localNet.route.push_back(route);
                         }
+                        globalRoute.push_back(localNet);
                 }
         }
 }
@@ -853,7 +832,7 @@ int FastRouteProcess::computeTileReduce(const Bounds &obs, const Bounds &tile, D
 
 void FastRouteProcess::getSpecialNetsObstacles(std::map<int, std::vector<Bounds>> &mapLayerObstacles) {
         for (Rsyn::Net net : module.allNets()) {
-                if (net.getUse() == Rsyn::POWER && net.getUse() == Rsyn::GROUND) {
+                if (net.getUse() == Rsyn::POWER || net.getUse() == Rsyn::GROUND) {
                         Rsyn::PhysicalRouting phRouting = phDesign.getNetRouting(net);
 
                         for (Rsyn::PhysicalRoutingWire wire : phRouting.allWires()) {  // adding special nets wires
