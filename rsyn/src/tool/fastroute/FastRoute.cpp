@@ -566,22 +566,33 @@ void FastRouteProcess::writeGuides(std::vector<FastRoute::NET> &globalRoute, std
         addRemainingGuides(globalRoute);
 
         std::cout << "Num routed nets: " << globalRoute.size() << "\n";
-
+        Rsyn::PhysicalLayer phLayerF; 
+        int finalLayer;
         for (FastRoute::NET netRoute : globalRoute) {
                 guideFile << netRoute.name << "\n";
                 guideFile << "(\n";
+                std::vector<Bounds> guideBds;
+                finalLayer = -1;
                 for (FastRoute::ROUTE route : netRoute.route) {
+                       if (route.initLayer != finalLayer && finalLayer != -1) {
+                                mergeBounds(guideBds);
+                                for (Bounds guide : guideBds){
+                                        guideFile << guide.getLower().x << " "
+                                                  << guide.getLower().y << " "
+                                                  << guide.getUpper().x << " "
+                                                  << guide.getUpper().y << " "
+                                                  << phLayerF.getName() << "\n";
+                                }
+                                guideBds.clear();
+                                finalLayer = route.initLayer;
+                        }
                         if (route.initLayer == route.finalLayer) {
-                                Rsyn::PhysicalLayer phLayer =
-                                    phDesign.getPhysicalLayerByIndex(Rsyn::ROUTING, route.initLayer - 1);
-
-                                Bounds guideBds;
-                                guideBds = globalRoutingToBounds(route);
-                                guideFile << guideBds.getLower().x << " "
-                                          << guideBds.getLower().y << " "
-                                          << guideBds.getUpper().x << " "
-                                          << guideBds.getUpper().y << " "
-                                          << phLayer.getName() << "\n";
+                                Bounds bds;
+                                bds = globalRoutingToBounds(route);
+                                guideBds.push_back(bds);
+                                phLayerF =
+                                    phDesign.getPhysicalLayerByIndex(Rsyn::ROUTING, route.finalLayer - 1);
+                                finalLayer = route.finalLayer;
                         } else {
                                 if (abs(route.finalLayer - route.initLayer) > 1) {
                                         std::cout << "Error: connection between"
@@ -590,31 +601,57 @@ void FastRouteProcess::writeGuides(std::vector<FastRoute::NET> &globalRoute, std
                                 } else {
                                         Rsyn::PhysicalLayer phLayerI =
                                             phDesign.getPhysicalLayerByIndex(Rsyn::ROUTING, route.initLayer - 1);
-                                        Rsyn::PhysicalLayer phLayerF =
+                                        phLayerF =
                                             phDesign.getPhysicalLayerByIndex(Rsyn::ROUTING, route.finalLayer - 1);
+                                        finalLayer = route.finalLayer;
+                                        Bounds bds;
+                                        bds = globalRoutingToBounds(route);
+                                        guideBds.push_back(bds);
+                                        mergeBounds(guideBds);
+                                        for (Bounds guide : guideBds){
+                                                 guideFile << guide.getLower().x << " "
+                                                           << guide.getLower().y << " "
+                                                           << guide.getUpper().x << " "
+                                                           << guide.getUpper().y << " "
+                                                           << phLayerI.getName() << "\n";
+                                        }
+                                        guideBds.clear();
 
-                                        Bounds guideBdsI;
-                                        guideBdsI = globalRoutingToBounds(route);
-                                        guideFile << guideBdsI.getLower().x << " "
-                                                  << guideBdsI.getLower().y << " "
-                                                  << guideBdsI.getUpper().x << " "
-                                                  << guideBdsI.getUpper().y << " "
-                                                  << phLayerI.getName() << "\n";
-
-                                        Bounds guideBdsF;
-                                        guideBdsF = globalRoutingToBounds(route);
-                                        guideFile << guideBdsF.getLower().x << " "
-                                                  << guideBdsF.getLower().y << " "
-                                                  << guideBdsF.getUpper().x << " "
-                                                  << guideBdsF.getUpper().y << " "
-                                                  << phLayerF.getName() << "\n";
+                                        bds = globalRoutingToBounds(route);
+                                        guideBds.push_back(bds);
                                 }
                         }
+                }
+                mergeBounds(guideBds);
+                for (Bounds guide : guideBds){
+                         guideFile << guide.getLower().x << " "
+                                   << guide.getLower().y << " "
+                                   << guide.getUpper().x << " "
+                                   << guide.getUpper().y << " "
+                                   << phLayerF.getName() << "\n";
                 }
                 guideFile << ")\n";
         }
 
         guideFile.close();
+}
+
+void FastRouteProcess::mergeBounds(std::vector<Bounds> & guideBds){
+       std::vector<Bounds> finalBds;
+       finalBds.push_back(guideBds[0]);
+       for (int i=1; i < guideBds.size(); i++){
+               Bounds bds = guideBds[i];
+               Bounds & lastBds = finalBds.back();
+               if (lastBds.overlap(bds)){
+                      lastBds[LOWER][X] = std::min(lastBds[LOWER][X], bds[LOWER][X]); 
+                      lastBds[LOWER][Y] = std::min(lastBds[LOWER][Y], bds[LOWER][Y]); 
+                      lastBds[UPPER][X] = std::max(lastBds[UPPER][X], bds[UPPER][X]); 
+                      lastBds[UPPER][Y] = std::max(lastBds[UPPER][Y], bds[UPPER][Y]); 
+               } else
+                      finalBds.push_back(bds); 
+       } 
+       guideBds.clear();
+       guideBds = finalBds;
 }
 
 void FastRouteProcess::writeEst(const std::vector<FastRoute::NET> &globalRoute, std::string filename) {

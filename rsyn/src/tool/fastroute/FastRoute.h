@@ -99,6 +99,7 @@ class FastRouteProcess : public Process {
         int computeTileReduce(const Bounds &, const Bounds &, DBU, bool, bool);
         void getSpecialNetsObstacles(std::map<int, std::vector<Bounds>> &);
         void addRemainingGuides(std::vector<FastRoute::NET> &);
+        void mergeBounds(std::vector<Bounds> & guideBds);
 
        public:
         FastRouteProcess() = default;
