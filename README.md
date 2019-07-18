@@ -13,6 +13,29 @@ The FastRoute4 version was received June 15, 2019, with the BSD-3 open source li
 
 Any code additional to rsyn will clearly specify its license in each file and in this README. We ask contributors to seriously consider using the BSD-3 Licence.
 
+## Getting Started
+### Pre-Requisite
+
+- GCC compiler
+- boost library
+- cmake3.1
+
+### How to Compile
+
+````
+cd FastRoute4-lefdef/
+make PARALLEL=nthreads CMAKE_OPT='optional parameters for cmake'
+````
+
+### Basic Usage
+
+Your command line to run FastRoute4-lefdef should look like this:
+
+````
+./FRlefdef --no-gui --script path/to/script.rsyn
+````
+
+You can find a script example in `rsyn/support/fastroute/example.rsyn`
 
 Copyright (c) 2019, Federal University of Rio Grande do Sul (UFRGS)
 All rights reserved.
