@@ -222,6 +222,9 @@ void FastRouteProcess::initNets() {
         fastRoute.setNumberNets(numNets);
 
         for (Rsyn::Net net : module.allNets()) {
+                if (net.getNumPins() == 1) 
+                        continue;
+
                 if (net.getUse() == Rsyn::POWER || net.getUse() == Rsyn::GROUND) 
                         continue;
                 
@@ -540,6 +543,8 @@ void FastRouteProcess::writeGuides(std::vector<FastRoute::NET> &globalRoute, std
         
         addRemainingGuides(globalRoute);
         
+        std::cout << "Num routed nets: " << globalRoute.size() << "\n";
+        
         for (FastRoute::NET netRoute : globalRoute) {
                 guideFile << netRoute.name << "\n";
                 guideFile << "(\n";
@@ -716,6 +721,7 @@ std::pair<FastRouteProcess::TILE, FastRouteProcess::TILE> FastRouteProcess::getB
 void FastRouteProcess::addRemainingGuides(std::vector<FastRoute::NET> &globalRoute) {
         std::map<std::string, std::vector<FastRoute::PIN>> allNets;
         allNets = fastRoute.getNets();
+        int localNetsId = allNets.size();
         
         for (FastRoute::NET &netRoute : globalRoute) {
                 std::vector<FastRoute::PIN> &pins = allNets[netRoute.name];
@@ -738,7 +744,7 @@ void FastRouteProcess::addRemainingGuides(std::vector<FastRoute::NET> &globalRou
                                 route.initY = pins[0].y;
                                 route.finalLayer = l + 1;
                                 route.finalX = pins[0].x;
-                                route.finalX = pins[0].y;
+                                route.finalY = pins[0].y;
                                 netRoute.route.push_back(route);
                         }
                 } else {
@@ -751,11 +757,36 @@ void FastRouteProcess::addRemainingGuides(std::vector<FastRoute::NET> &globalRou
                                                 route.initY = pin.y;
                                                 route.finalLayer = l + 1;
                                                 route.finalX = pin.x;
-                                                route.finalX = pin.y;
+                                                route.finalY = pin.y;
                                                 netRoute.route.push_back(route);
                                         }
                                 }
                         }
+                }
+                allNets.erase(netRoute.name);
+        }
+        
+        if (allNets.size() > 0) {
+                for (std::map<std::string, std::vector<FastRoute::PIN>>::iterator
+                     it=allNets.begin(); it!=allNets.end(); ++it) {
+                        std::vector<FastRoute::PIN> &pins = it->second;
+                        
+                        FastRoute::NET localNet;
+                        localNet.id = localNetsId;
+                        localNetsId++;
+                        localNet.name = it->first;
+                        for (FastRoute::PIN pin : pins) {
+                                FastRoute::ROUTE route;
+                                route.initLayer = pin.layer;
+                                route.initX = pin.x;
+                                route.initY = pin.y;
+                                route.finalLayer = pin.layer;
+                                route.finalX = pin.x;
+                                route.finalY = pin.y;
+                                localNet.route.push_back(route);
+
+                        }
+                        globalRoute.push_back(localNet);
                 }
         }
 }
