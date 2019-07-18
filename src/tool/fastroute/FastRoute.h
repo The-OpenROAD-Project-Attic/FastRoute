@@ -37,7 +37,7 @@ class FastRouteProcess : public Process {
                 bool perfect_regular_x;
                 bool perfect_regular_y;
         } GRID;
-        
+
         typedef struct {
                 int x;
                 int y;
@@ -67,7 +67,7 @@ class FastRouteProcess : public Process {
         void computeSimpleAdjustments();
         void computeObstaclesAdjustments();
         void writeGuides(std::vector<FastRoute::NET> &, std::string);
-        
+
         void writeEst(const std::vector<FastRoute::NET> &, std::string);
 
         // Aux functions
