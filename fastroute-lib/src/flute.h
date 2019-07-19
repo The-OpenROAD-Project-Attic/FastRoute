@@ -1,3 +1,5 @@
+#ifndef __FLUTE_H__
+#define __FLUTE_H__
 /*****************************/
 /*  User-Defined Parameters  */
 /*****************************/
@@ -93,3 +95,4 @@ extern Tree flutes_RDP(int d, DTYPE xs[], DTYPE ys[], int s[], int acc);
 #define abs(x) ((x) < 0 ? (-x) : (x))
 #define ADIFF(x, y) ((x) > (y) ? (x - y) : (y - x))  // Absolute difference
 }  // namespace FastRoute
+#endif /* __FLUTE_H__ */

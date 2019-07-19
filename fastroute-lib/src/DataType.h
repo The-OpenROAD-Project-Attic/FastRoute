@@ -1,5 +1,5 @@
-#ifndef _DATATYPE_H_
-#define _DATATYPE_H_
+#ifndef __DATATYPE_H__
+#define __DATATYPE_H__
 
 #define MAXDEMAND 500   // MAX # Segments over an edge
 #define MAXLAYER 18     //MAX # Layer of a routing
@@ -152,4 +152,4 @@ typedef enum { NONE,
 
 }  // namespace FastRoute
 
-#endif /* _DATATYPE_H_ */
+#endif /* __DATATYPE_H__ */

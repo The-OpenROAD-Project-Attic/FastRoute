@@ -1,5 +1,5 @@
-#ifndef _MAZE3D_H_
-#define _MAZE3D_H_
+#ifndef __MAZE3D_H__
+#define __MAZE3D_H__
 
 namespace FastRoute {
 typedef struct
@@ -12,4 +12,4 @@ typedef struct
 void mazeRouteMSMDOrder3D(int expand, int ripupTHlb, int ripupTHub);
 
 }  // namespace FastRoute
-#endif /* _MAZE3D_H_ */
+#endif /* __MAZE3D_H__ */

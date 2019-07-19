@@ -1,5 +1,5 @@
-#ifndef DL_H
-#define DL_H
+#ifndef __DL_H__
+#define __DL_H__
 
 #include <string.h>
 #include <stdlib.h>
@@ -186,4 +186,4 @@ void dl_sort(dl_t dl, size_t el_size, int (*compar)(void *, void *));
         }
 
 }  // namespace FastRoute
-#endif
+#endif /* __DL_H__ */

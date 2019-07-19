@@ -1,5 +1,5 @@
-#ifndef _UTILITY_H_
-#define _UTILITY_H_
+#ifndef __UTILITY_H__
+#define __UTILITY_H__
 
 namespace FastRoute {
 
@@ -36,4 +36,4 @@ extern void freeRR(void);
 
 }  // namespace FastRoute
 
-#endif /* _UTILITY_H_ */
+#endif /* __UTILITY_H__ */

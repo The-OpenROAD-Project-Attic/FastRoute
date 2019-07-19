@@ -1,5 +1,5 @@
-#ifndef _ERR_H_
-#define _ERR_H_
+#ifndef __ERR_H__
+#define __ERR_H__
 
 namespace FastRoute {
 
@@ -10,4 +10,4 @@ void err_exit(
     char* msg);
 
 }  // namespace FastRoute
-#endif
+#endif /* __ERR_H__ */

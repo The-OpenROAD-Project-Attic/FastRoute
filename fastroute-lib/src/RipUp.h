@@ -1,5 +1,5 @@
-#ifndef _RIPUP_H_
-#define _RIPUP_H_
+#ifndef __RIPUP_H__
+#define __RIPUP_H__
 
 namespace FastRoute {
 
@@ -14,4 +14,4 @@ extern Bool newRipup3DType3(int netID, int edgeID);
 extern void newRipupNet(int netID);
 }  // namespace FastRoute
 
-#endif /* _RIPUP_H_ */
+#endif /* __RIPUP_H__ */

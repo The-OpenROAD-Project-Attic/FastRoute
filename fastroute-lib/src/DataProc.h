@@ -1,5 +1,5 @@
-#ifndef _DATAPROC_H_
-#define _DATAPROC_H_
+#ifndef __DATAPROC_H__
+#define __DATAPROC_H__
 
 #define BUFFERSIZE 800
 #define STRINGLEN 100
@@ -113,4 +113,4 @@ extern void readFile(char benchFile[]);
 extern void freeAllMemory();
 }  // namespace FastRoute
 
-#endif /* _DATAPROC_H_ */
+#endif /* __DATAPROC_H__ */

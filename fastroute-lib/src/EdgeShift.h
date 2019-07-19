@@ -1,8 +1,8 @@
-#ifndef _EDGESHIFT_H_
-#define _EDGESHIFT_H_
+#ifndef __EDGESHIFT_H__
+#define __EDGESHIFT_H__
 namespace FastRoute {
 extern int edgeShift(Tree *t, int net);
 extern int edgeShiftNew(Tree *t, int net);
 }  // namespace FastRoute
 
-#endif /* _EDGESHIFT_H_ */
+#endif /* __EDGESHIFT_H__ */

@@ -1,5 +1,5 @@
-#ifndef _DIST_H_
-#define _DIST_H_
+#ifndef __DIST_H__
+#define __DIST_H__
 
 #include "global.h"
 
@@ -13,4 +13,4 @@ long dist2(
     Point* q);
 
 }  // namespace FastRoute
-#endif
+#endif /* __DIST_H__ */

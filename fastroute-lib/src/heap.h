@@ -1,5 +1,5 @@
-#ifndef _HEAP_H_
-#define _HEAP_H_
+#ifndef __HEAP_H__
+#define __HEAP_H__
 
 #include "global.h"
 
@@ -29,4 +29,4 @@ void heap_insert(long p, long key);
 void heap_decrease_key(long p, long new_key);
 long heap_delete_min();
 }  // namespace FastRoute
-#endif /* _HEAP_H_ */
+#endif /* __HEAP_H__ */

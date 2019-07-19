@@ -1,5 +1,5 @@
-#ifndef _MAZE_H_
-#define _MAZE_H_
+#ifndef __MAZE_H__
+#define __MAZE_H__
 
 namespace FastRoute {
 
@@ -28,4 +28,4 @@ extern void InitLastUsage(int upType);
 extern void InitEstUsage();
 
 }  // namespace FastRoute
-#endif /* _MAZE_H_ */
+#endif /* __MAZE_H__ */

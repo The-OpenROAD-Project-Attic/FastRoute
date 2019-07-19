@@ -1,5 +1,5 @@
-#ifndef _ROUTE_H_
-#define _ROUTE_H_
+#ifndef __ROUTE_H__
+#define __ROUTE_H__
 
 namespace FastRoute {
 
@@ -21,4 +21,4 @@ extern void routeLVAll(int threshold, int expand);
 extern void spiralRouteAll();
 extern void newrouteLInMaze(int netID);
 }  // namespace FastRoute
-#endif /* _ROUTE_H_ */
+#endif /* __ROUTE_H__ */

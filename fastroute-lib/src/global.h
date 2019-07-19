@@ -1,5 +1,5 @@
-#ifndef _GLOBAL_H_
-#define _GLOBAL_H_
+#ifndef __GLOBAL_H__
+#define __GLOBAL_H__
 
 #include <stdio.h>
 
@@ -18,4 +18,4 @@ typedef struct point Point;
 typedef long nn_array[8];
 
 }  // namespace FastRoute
-#endif /* _GLOBAL_H_ */
+#endif /* __GLOBAL_H__ */

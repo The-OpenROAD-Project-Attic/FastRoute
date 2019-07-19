@@ -1,3 +1,5 @@
+#ifndef __NEIGHBORS_H__
+#define __NEIGHBORS_H__
 #include "global.h"
 
 namespace FastRoute {
@@ -16,3 +18,4 @@ void dq_nearest_neighbors(
     nn_array* nn);
 
 }  // namespace FastRoute
+#endif /* __NEIGHBORS_H__ */

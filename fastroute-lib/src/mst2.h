@@ -1,5 +1,5 @@
-#ifndef _MST2_H_
-#define _MST2_H_
+#ifndef __MST2_H__
+#define __MST2_H__
 
 #include "global.h"
 
@@ -11,4 +11,4 @@ void mst2(long n, Point* pt, long* parent);
 
 }  // namespace FastRoute
 
-#endif
+#endif /* __MST2_H__ */

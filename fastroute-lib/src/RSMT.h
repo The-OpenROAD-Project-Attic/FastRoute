@@ -1,5 +1,5 @@
-#ifndef _RSMT_H_
-#define _RSMT_H_
+#ifndef __RSMT_H__
+#define __RSMT_H__
 
 namespace FastRoute {
 extern int **V_table;
@@ -11,4 +11,4 @@ extern void fluteNormal(int netID, int d, DTYPE x[], DTYPE y[], int acc, float c
 extern void fluteCongest(int netID, int d, DTYPE x[], DTYPE y[], int acc, float coeffV, Tree *t);
 
 }  // namespace FastRoute
-#endif /* _RSMT_H_ */
+#endif /* __RSMT_H__ */
