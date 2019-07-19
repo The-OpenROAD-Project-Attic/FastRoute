@@ -35,14 +35,14 @@
 // POSSIBILITY OF SUCH DAMAGE.
 ////////////////////////////////////////////////////////////////////////////////
 
-#ifndef FASTROUTE
-#define FASTROUTE
+#ifndef __FASTROUTE_H__
+#define __FASTROUTE_H__
 
 #include "core/Rsyn.h"
 #include "phy/PhysicalDesign.h"
 #include "session/Session.h"
 #include "session/Process.h"
-#include "fastroute/fastRoute.h"
+#include "fastroute/FastRoute.h"
 #include <utility>
 
 namespace Rsyn {
@@ -111,4 +111,4 @@ class FastRouteProcess : public Process {
 
 }  // namespace Rsyn
 
-#endif
+#endif /* __FASTROUTE_H__ */
