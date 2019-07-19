@@ -1,9 +1,9 @@
 BUILD_DIR = build
 
 BIN_DIR = .
-
 BIN_NAME = FRlefdef
 
+CMAKE = cmake
 CMAKE_OPT =
 
 MAKE_OPT =
@@ -16,10 +16,10 @@ all: dirs compile bin_cp
 
 compile:
 	@( \
-		mkdir build ;\
-		cd build ;\
-		cmake .. $(CMAKE_OPT) ;\
-		make --no-print-directory -j$(PARALLEL) $(MAKE_OPT) ;\
+		mkdir -p $(BUILD_DIR) ;\
+		cd $(BUILD_DIR) ;\
+		$(CMAKE) .. $(CMAKE_OPT) ;\
+		$(MAKE) --no-print-directory -j$(PARALLEL) $(MAKE_OPT) ;\
 		)
 
 dirs:
