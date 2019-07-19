@@ -32,6 +32,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <string.h>
 
 int main(int ac, char *av[]) {
         int d = 10, tmp, i;

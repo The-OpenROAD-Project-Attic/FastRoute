@@ -133,7 +133,8 @@ void dl_sort(dl_t dl, size_t el_size, int (*compar)(void *, void *)) {
         first_list.first = dl->first;
         first_list.last = el->prev;
         first_list.count = len;
-        first_list.last->next = 0;
+        /* TODO:  <19-07-19, dereference to null pointer? > */
+        /* first_list.last->next = 0; */
 
         second_list.first = el;
         second_list.last = dl->last;

@@ -33,7 +33,6 @@
 #include <string.h>
 #include <stdlib.h>
 #include "global.h"
-#include "err.h"
 #include "dist.h"
 
 namespace FastRoute {
@@ -67,7 +66,8 @@ void allocate_nn_arrays(long n) {
                 sorted = (long*)realloc((void*)sorted, (size_t)n * sizeof(long));
                 aux = (long*)realloc((void*)aux, (size_t)n * sizeof(long));
                 if (!nn || !sheared || !sorted || !aux) {
-                        err_exit("Cannot allocate memory in allocate_nn_arrays!");
+                        printf("Cannot allocate memory in allocate_nn_arrays!\n");
+                        exit(1);
                 }
                 max_arrays_size = n;
         }

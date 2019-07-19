@@ -79,20 +79,9 @@ static void heapify3D(int **array, int heapSize, int i) {
         } while (!STOP);
 }
 
-// build heap for an list of grid
-static void buildHeap3D(int **array, int arrayLen) {
-        int i;
-
-        for (i = arrayLen / 2 - 1; i >= 0; i--)
-                heapify3D(array, arrayLen, i);
-}
-
 static void updateHeap3D(int **array, int arrayLen, int i) {
         int parent;
-        int *tmp, *tmpi;
-
-        //	printf("heap being updated");
-        //	fflush(stdout);
+        int *tmpi;
 
         tmpi = array[i];
         while (i > 0 && *(array[PARENT(i)]) > *tmpi) {
@@ -101,9 +90,6 @@ static void updateHeap3D(int **array, int arrayLen, int i) {
                 i = parent;
         }
         array[i] = tmpi;
-
-        //	printf("heap updated succedded");
-        //	fflush(stdout);
 }
 
 // extract the entry with minimum distance from Priority queue
@@ -115,39 +101,20 @@ static void extractMin3D(int **array, int arrayLen) {
 }
 
 void setupHeap3D(int netID, int edgeID, int *heapLen1, int *heapLen2, int regionX1, int regionX2, int regionY1, int regionY2) {
-        int i, j, k, l, d, numNodes, x1, y1, x2, y2, max_y, min_y, layer, topL, botL, n1, n2, nt, n1a, n2a;
-        int nbr, nbrX, nbrY, nbrL, cur, edge, edge_n1, edge_n2, edge_x1, edge_y1, edge_x2, edge_y2;
-        int grid, x_grid, y_grid, l_grid, heapcnt;
-        int queuehead, queuetail, routeLen;
-        //   Bool *heapVisited;
+        int i, j, l, d, numNodes, x1, y1, x2, y2, n1, n2, nt;
+        int nbr, nbrX, nbrY, cur, edge;
+        int x_grid, y_grid, l_grid, heapcnt;
+        int queuehead, queuetail;
         TreeEdge *treeedges;
         TreeNode *treenodes;
         Route *route;
-        //Bool **inRegion;  // the flag to check weather the node is in the enlarged region for maze routing
-
-        //inRegion = (Bool**) calloc(yGrid, sizeof(Bool*));
-        //for(i=0; i<yGrid; i++)
-        //inRegion[i] = (Bool*) calloc(xGrid, sizeof(Bool));
-
-        /*	for ( l = 0; l < numLayers; l++) {
-		for(i=regionY1; i<=regionY2; i++) {
-			for(j=regionX1; j<=regionX2; j++) {
-				corrEdge3D[l][i][j] = BIG_INT;
-			}
-		}
-	}*/
-
-        //return;
 
         treeedges = sttrees[netID].edges;
         treenodes = sttrees[netID].nodes;
         d = sttrees[netID].deg;
-        routeLen = treeedges[edgeID].route.routelen;
 
         n1 = treeedges[edgeID].n1;
         n2 = treeedges[edgeID].n2;
-        n1a = treeedges[edgeID].n1a;
-        n2a = treeedges[edgeID].n2a;
         x1 = treenodes[n1].x;
         y1 = treenodes[n1].y;
         x2 = treenodes[n2].x;
@@ -408,7 +375,7 @@ void setupHeap3D(int netID, int edgeID, int *heapLen1, int *heapLen2, int region
 }
 
 void newUpdateNodeLayers(TreeNode *treenodes, int edgeID, int n1, int lastL) {
-        int i, con;
+        int con;
 
         con = treenodes[n1].conCNT;
 
@@ -427,12 +394,12 @@ void newUpdateNodeLayers(TreeNode *treenodes, int edgeID, int n1, int lastL) {
 
 int copyGrids3D(TreeNode *treenodes, int n1, int n2, TreeEdge *treeedges, int edge_n1n2, int gridsX_n1n2[], int gridsY_n1n2[], int gridsL_n1n2[]) {
         int i, cnt;
-        int n1x, n1y, n2x, n2y, Zpoint, n1l, n2l;
+        int n1x, n1y, n1l;
 
         n1x = treenodes[n1].x;
         n1y = treenodes[n1].y;
-        n2x = treenodes[n2].x;
-        n2y = treenodes[n2].y;
+        /* TODO:  <19-07-19, should this be commented? will assign garbage
+         * below> */
         //n1l = treenodes[n1].l;
         //n2l = treenodes[n2].l;
 
@@ -446,8 +413,9 @@ int copyGrids3D(TreeNode *treenodes, int n1, int n2, TreeEdge *treeedges, int ed
                                 gridsL_n1n2[cnt] = treeedges[edge_n1n2].route.gridsL[i];
                                 cnt++;
                         }
-                }     // MAZEROUTE
-                else  // NOROUTE
+                }  // MAZEROUTE
+                else
+                // NOROUTE
                 {
                         fflush(stdout);
                         gridsX_n1n2[cnt] = n1x;
@@ -479,8 +447,8 @@ int copyGrids3D(TreeNode *treenodes, int n1, int n2, TreeEdge *treeedges, int ed
 }
 
 void updateRouteType13D(int netID, TreeNode *treenodes, int n1, int A1, int A2, int E1x, int E1y, TreeEdge *treeedges, int edge_n1A1, int edge_n1A2) {
-        int i, l, cnt, A1x, A1y, A1l, A2x, A2y, A2l, Zpoint;
-        int cnt_n1A1, cnt_n1A2, E1_pos1, E1_pos2, pos1L, pos2L, nodeADJ;
+        int i, l, cnt, A1x, A1y, A2x, A2y;
+        int cnt_n1A1, cnt_n1A2, E1_pos1, E1_pos2;
         int gridsX_n1A1[MAXLEN], gridsY_n1A1[MAXLEN], gridsL_n1A1[MAXLEN], gridsX_n1A2[MAXLEN], gridsY_n1A2[MAXLEN], gridsL_n1A2[MAXLEN];
 
         A1x = treenodes[A1].x;
@@ -500,20 +468,23 @@ void updateRouteType13D(int netID, TreeNode *treenodes, int n1, int A1, int A2, 
                 exit(0);
         }
 
+        E1_pos1 = -1;
         for (i = 0; i < cnt_n1A1; i++) {
                 if (gridsX_n1A1[i] == E1x && gridsY_n1A1[i] == E1y)  // reach the E1
                 {
                         E1_pos1 = i;
-                        pos1L = gridsL_n1A1[i];
                         break;
                 }
+        }
+
+        if (E1_pos1 == -1) {
+                exit(1);
         }
 
         for (i = cnt_n1A1 - 1; i >= 0; i--) {
                 if (gridsX_n1A1[i] == E1x && gridsY_n1A1[i] == E1y)  // reach the E1
                 {
                         E1_pos2 = i;
-                        pos2L = gridsL_n1A1[i];
                         break;
                 }
         }
@@ -608,7 +579,6 @@ void updateRouteType13D(int netID, TreeNode *treenodes, int n1, int A1, int A2, 
                 }
                 treeedges[edge_n1A2].n1 = n1;
                 treeedges[edge_n1A2].n2 = A2;
-                A2l = treeedges[edge_n1A2].route.gridsL[cnt - 1];
         } else {
                 cnt = 0;
                 for (i = cnt_n1A2 - 1; i >= 1; i--)  // 0 is n1 again, so no repeat
@@ -644,7 +614,6 @@ void updateRouteType13D(int netID, TreeNode *treenodes, int n1, int A1, int A2, 
                 }
                 treeedges[edge_n1A2].n1 = A2;
                 treeedges[edge_n1A2].n2 = n1;
-                A2l = treeedges[edge_n1A2].route.gridsL[0];
         }
         treeedges[edge_n1A2].route.type = MAZEROUTE;
         treeedges[edge_n1A2].route.routelen = cnt - 1;
@@ -655,19 +624,16 @@ void updateRouteType13D(int netID, TreeNode *treenodes, int n1, int A1, int A2, 
 }
 
 void updateRouteType23D(int netID, TreeNode *treenodes, int n1, int A1, int A2, int C1, int C2, int E1x, int E1y, TreeEdge *treeedges, int edge_n1A1, int edge_n1A2, int edge_C1C2) {
-        int i, cnt, A1x, A1y, A1l, A2x, A2y, A2l, C1x, C1y, C1l, C2x, C2y, C2l, Zpoint, extraLen, startIND;
+        int i, cnt, A1x, A1y, A2x, A2y, C1x, C1y, C2x, C2y, extraLen, startIND;
         int edge_n1C1, edge_n1C2, edge_A1A2;
         int cnt_n1A1, cnt_n1A2, cnt_C1C2, E1_pos1, E1_pos2;
-        int len_A1A2, len_n1C1, len_n1C2, distance;
+        int len_A1A2, len_n1C1, len_n1C2;
         int gridsX_n1A1[MAXLEN], gridsY_n1A1[MAXLEN], gridsL_n1A1[MAXLEN];
         int gridsX_n1A2[MAXLEN], gridsY_n1A2[MAXLEN], gridsL_n1A2[MAXLEN];
         int gridsX_C1C2[MAXLEN], gridsY_C1C2[MAXLEN], gridsL_C1C2[MAXLEN];
-        int gridsX_n1C1[MAXLEN], gridsY_n1C1[MAXLEN], gridsL_n1C1[MAXLEN];
-        int gridsX_n1C2[MAXLEN], gridsY_n1C2[MAXLEN], gridsL_n1C2[MAXLEN];
 
         A1x = treenodes[A1].x;
         A1y = treenodes[A1].y;
-        //A1l = treenodes[A1].l;
         A2x = treenodes[A2].x;
         A2y = treenodes[A2].y;
         C1x = treenodes[C1].x;
@@ -675,13 +641,10 @@ void updateRouteType23D(int netID, TreeNode *treenodes, int n1, int A1, int A2, 
         C2x = treenodes[C2].x;
         C2y = treenodes[C2].y;
 
-        //printf("orig edge_n1A1 %d edge_n1A2 %d edge_C1C2 %d\n",edge_n1A1,edge_n1A2,edge_C1C2 );
         edge_n1C1 = edge_n1A1;
         edge_n1C2 = edge_n1A2;
         edge_A1A2 = edge_C1C2;
 
-        // combine (n1, A1) and (n1, A2) into (A1, A2), A1 is the first node and A2 is the second
-        // grids order A1->n1->A2
         // copy (A1, n1)
         cnt_n1A1 = copyGrids3D(treenodes, A1, n1, treeedges, edge_n1A1, gridsX_n1A1, gridsY_n1A1, gridsL_n1A1);
 
@@ -767,11 +730,17 @@ void updateRouteType23D(int netID, TreeNode *treenodes, int n1, int A1, int A2, 
                 }
         }
 
+        E1_pos2 = -1;
+
         for (i = cnt_C1C2 - 1; i >= 0; i--) {
                 if (gridsX_C1C2[i] == E1x && gridsY_C1C2[i] == E1y) {
                         E1_pos2 = i;
                         break;
                 }
+        }
+
+        if (E1_pos2 == -1) {
+                exit(1);
         }
 
         // allocate memory for gridsX[] and gridsY[] of edge_n1C1 and edge_n1C2
@@ -822,23 +791,22 @@ void updateRouteType23D(int netID, TreeNode *treenodes, int n1, int A1, int A2, 
 
 void mazeRouteMSMDOrder3D(int expand, int ripupTHlb, int ripupTHub) {
         short *gridsLtmp, gridsX[MAXLEN], gridsY[MAXLEN], gridsL[MAXLEN], tmp_gridsX[MAXLEN], tmp_gridsY[MAXLEN], tmp_gridsL[MAXLEN];
-        int l, netID, enlarge, startIND, endIND;
+        int netID, enlarge, endIND;
         Bool *pop_heap23D;
 
         int i, j, k, deg, n1, n2, n1x, n1y, n2x, n2y, ymin, ymax, xmin, xmax, curX, curY, curL, crossX, crossY, crossL, tmpX, tmpY, tmpL, tmpi, min_x, min_y, *dtmp;
-        int segWidth, segHeight, regionX1, regionX2, regionY1, regionY2, regionWidth, regionHeight, routeLen;
-        int heapLen1, heapLen2, ind, ind1, ind2, tmpind, grid;
-        float costL1, costL2, tmp;
-        TreeEdge *treeedges, *treeedge, *curedge;
+        int regionX1, regionX2, regionY1, regionY2, routeLen;
+        int heapLen1, heapLen2, ind, ind1, tmpind, grid;
+        float tmp;
+        TreeEdge *treeedges, *treeedge;
         TreeNode *treenodes;
 
         int endpt1, endpt2, A1, A2, B1, B2, C1, C2, cnt, cnt_n1n2, remd;
         int edge_n1n2, edge_n1A1, edge_n1A2, edge_n1C1, edge_n1C2, edge_A1A2, edge_C1C2;
         int edge_n2B1, edge_n2B2, edge_n2D1, edge_n2D2, edge_B1B2, edge_D1D2, D1, D2;
-        int E1x, E1y, E1l, E2x, E2y, E2l, range, corE1, corE2, edgeID;
+        int E1x, E1y, E2x, E2y, range, corE1, corE2, edgeID;
 
-        int temp_dist, tmp_of, temp_cost;
-        Bool Horizontal, test, n1Shift, n2Shift, redundant;
+        Bool Horizontal, n1Shift, n2Shift, redundant;
         int lastL, origL, headRoom, tailRoom, newcnt_n1n2, numpoints, d, n1a, n2a, connectionCNT;
         int origEng, orderIndex;
 
@@ -875,7 +843,6 @@ void mazeRouteMSMDOrder3D(int expand, int ripupTHlb, int ripupTHub) {
                 pop_heap23D[i] = FALSE;
         }
 
-        startIND = numValidNets / 3;
         endIND = numValidNets * 0.9;
 
         for (orderIndex = 0; orderIndex < endIND; orderIndex++) {
@@ -897,8 +864,6 @@ void mazeRouteMSMDOrder3D(int expand, int ripupTHlb, int ripupTHub) {
                         treeedge = &(treeedges[edgeID]);
 
                         if (treeedge->len < ripupTHub && treeedge->len > ripupTHlb) {
-                                test = TRUE;
-
                                 n1 = treeedge->n1;
                                 n2 = treeedge->n2;
                                 n1x = treenodes[n1].x;
@@ -927,14 +892,10 @@ void mazeRouteMSMDOrder3D(int expand, int ripupTHlb, int ripupTHub) {
                                 if (newRipup3DType3(netID, edgeID)) {
                                         enlarge = minFlute(origEng, treeedge->route.routelen);
 
-                                        segWidth = xmax - xmin;
-                                        segHeight = ymax - ymin;
                                         regionX1 = maxFlute(0, xmin - enlarge);
                                         regionX2 = minFlute(xGrid - 1, xmax + enlarge);
                                         regionY1 = maxFlute(0, ymin - enlarge);
                                         regionY2 = minFlute(yGrid - 1, ymax + enlarge);
-                                        regionWidth = regionX2 - regionX1 + 1;
-                                        regionHeight = regionY2 - regionY1 + 1;
 
                                         n1Shift = FALSE;
                                         n2Shift = FALSE;
@@ -957,7 +918,6 @@ void mazeRouteMSMDOrder3D(int expand, int ripupTHlb, int ripupTHub) {
 
                                         // while loop to find shortest path
                                         ind1 = (heap13D[0] - (int *)d13D);
-                                        ind2 = (heap23D[0] - (short *)d23D);
 
                                         for (i = 0; i < heapLen2; i++)
                                                 pop_heap23D[(heap23D[i] - (short *)d23D)] = TRUE;
@@ -974,7 +934,7 @@ void mazeRouteMSMDOrder3D(int expand, int ripupTHlb, int ripupTHub) {
                                                 //pop_heap13D[ind1] = TRUE;
                                                 heapLen1--;
 
-                                                if (((curL%2)-layerOrientation) == 0) {
+                                                if (((curL % 2) - layerOrientation) == 0) {
                                                         Horizontal = TRUE;
                                                 } else {
                                                         Horizontal = FALSE;
@@ -1171,7 +1131,7 @@ void mazeRouteMSMDOrder3D(int expand, int ripupTHlb, int ripupTHub) {
                                                         }
                                                 }
 
-                                                // update ind1 and ind2 for next loop
+                                                // update ind1 for next loop
                                                 ind1 = (heap13D[0] - (int *)d13D);
                                         }  // while loop
 
@@ -1240,7 +1200,6 @@ void mazeRouteMSMDOrder3D(int expand, int ripupTHlb, int ripupTHub) {
                                         origL = gridsL[0];
 
                                         while (gridsX[headRoom] == E1x && gridsY[headRoom] == E1y) {
-                                                lastL = gridsL[headRoom];
                                                 headRoom++;
                                         }
                                         if (headRoom > 0) {
@@ -1295,7 +1254,6 @@ void mazeRouteMSMDOrder3D(int expand, int ripupTHlb, int ripupTHub) {
 
                                                         // update route for edge (n1, A1), (n1, A2)
                                                         updateRouteType13D(netID, treenodes, n1, A1, A2, E1x, E1y, treeedges, edge_n1A1, edge_n1A2);
-                                                        //newUpdateNodeLayers(treenodes, edge_n1n2,n1, lastL);
 
                                                         // update position for n1
 
@@ -1382,8 +1340,6 @@ void mazeRouteMSMDOrder3D(int expand, int ripupTHlb, int ripupTHub) {
 
                                         lastL = gridsL[tailRoom];
 
-                                        //updateNodeLayers(treenodes, edgeID, n2a, ntpL,nbtL,lastL);
-
                                         // (2) consider subtree2
                                         if (n2 >= deg && (E2x != n2x || E2y != n2y))
                                         // n2 is not a pin and E2!=n2, then make change to subtree2, otherwise, no change to subtree2
@@ -1428,7 +1384,6 @@ void mazeRouteMSMDOrder3D(int expand, int ripupTHlb, int ripupTHub) {
 
                                                         // update route for edge (n2, B1), (n2, B2)
                                                         updateRouteType13D(netID, treenodes, n2, B1, B2, E2x, E2y, treeedges, edge_n2B1, edge_n2B2);
-                                                        //newUpdateNodeLayers(treenodes, edge_n1n2,n2, lastL);
 
                                                         // update position for n2
                                                         treenodes[n2].assigned = TRUE;
@@ -1666,13 +1621,14 @@ void mazeRouteMSMDOrder3D(int expand, int ripupTHlb, int ripupTHub) {
 }
 
 void getLayerRange(TreeNode *treenodes, int edgeID, int n1, int deg) {
-        int i, k;
-        int ntpL, nbtL, nhID, nlID;
+        int i, ntpL, nbtL, nhID, nlID;
 
         ntpL = -1;
         nbtL = BIG_INT;
 
         if (treenodes[n1].conCNT > 1) {
+                nhID = -1;
+                nlID = -1;
                 for (i = 0; i < treenodes[n1].conCNT; i++) {
                         if (treenodes[n1].eID[i] != edgeID) {
                                 if (ntpL < treenodes[n1].heights[i]) {
@@ -1684,6 +1640,12 @@ void getLayerRange(TreeNode *treenodes, int edgeID, int n1, int deg) {
                                         nlID = treenodes[n1].eID[i];
                                 }
                         }
+                }
+                if (nlID == -1) {
+                        exit(1);
+                }
+                if (nhID == -1) {
+                        exit(1);
                 }
                 if (n1 < deg) {
                         nbtL = 0;

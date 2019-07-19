@@ -36,7 +36,6 @@
 #include "neighbors.h"
 #include "dist.h"
 #include "heap.h"
-#include "err.h"
 
 namespace FastRoute {
 void mst2_package_init(long n) {
@@ -44,18 +43,10 @@ void mst2_package_init(long n) {
         allocate_nn_arrays(n);
 }
 
-/****************************************************************************/
-/*
-*/
-
 void mst2_package_done() {
         deallocate_heap();
         deallocate_nn_arrays();
 }
-
-/****************************************************************************/
-/*
-*/
 
 void mst2(
     long n,
@@ -70,10 +61,8 @@ void mst2(
         //  brute_force_nearest_neighbors( n, pt, nn );
         dq_nearest_neighbors(n, pt, nn);
 
-        /*
-     Binary heap implementation of Prim's algorithm.
-     Runs in O(n*log(n)) time since at most 8n edges are considered
-  */
+        /* Binary heap implementation of Prim's algorithm. */
+        /* Runs in O(n*log(n)) time since at most 8n edges are considered */
 
         heap_init(n);
         heap_insert(root, 0);
@@ -88,9 +77,7 @@ void mst2(
                 assert(i >= 0);
 #endif
 
-                /*
-      pt[i] entered the tree, update heap keys for its neighbors
-    */
+                /* pt[i] entered the tree, update heap keys for its neighbors */
                 for (oct = 0; oct < 8; oct++) {
                         nn1 = nn[i][oct];
                         if (nn1 >= 0) {
@@ -107,6 +94,4 @@ void mst2(
         }
 }
 
-/****************************************************************************/
-/****************************************************************************/
 }  // namespace FastRoute

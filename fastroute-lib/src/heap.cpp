@@ -29,15 +29,10 @@
 // USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ////////////////////////////////////////////////////////////////////////////////
 
-/****************************************************************************/
-/*
-  Binary heap routines for use in Prim's algorithm, 
-  with points are numbered from 0 to n-1
-*/
+/* Binary heap routines for use in Prim's algorithm, with points are numbered from 0 to n-1 */
 
 #include <stdlib.h>
 #include "heap.h"
-#include "err.h"
 
 namespace FastRoute {
 
@@ -45,22 +40,16 @@ Heap* _heap = (Heap*)NULL;
 long _max_heap_size = 0;
 long _heap_size = 0;
 
-/****************************************************************************/
-/*
-*/
-
 void allocate_heap(long n) {
         if (_max_heap_size < n) {
                 _heap = (Heap*)realloc((void*)_heap, (size_t)(n + 1) * sizeof(Heap));
                 if (!_heap) {
-                        err_exit("Cannot reallocate memory in allocate_heap!");
+                        printf("Cannot reallocate memory in allocate_heap!\n");
+                        exit(1);
                 }
                 _max_heap_size = n;
         }
 }
-/****************************************************************************/
-/*
-*/
 
 void deallocate_heap() {
         _max_heap_size = 0;
@@ -69,8 +58,6 @@ void deallocate_heap() {
                 _heap = (Heap*)NULL;
         }
 }
-
-/****************************************************************************/
 
 void heap_init(long n) {
         register long p;
@@ -81,9 +68,7 @@ void heap_init(long n) {
                 heap_idx(p) = 0;
         }
 
-} /* END heap_init() */
-
-/****************************************************************************/
+}
 
 void heap_insert(
     long p,

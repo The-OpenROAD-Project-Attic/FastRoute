@@ -162,8 +162,6 @@ void extract_heap(node_pair *np) {
 }
 
 void init_param() {
-        int i;
-
         heap = (node_pair *)malloc(sizeof(node_pair) * (max_heap_size + 1));
 }
 
@@ -188,7 +186,7 @@ int cmp_branch(const void *a, const void *b) {
 void update_dist2(Tree t, DTYPE **dist, DTYPE longest,
                   int *host, int *min_node1, int *min_node2,
                   int **nb) {
-        int i, j, m, n, dd, node1, node2, node3, node4, p1, p2, pi, pn;
+        int i, j, m, n, dd, node1, node2, node3, node4, p1, p2;
         DTYPE min_dist, smallest;
         DTYPE x1, x2, x3, x4, y1, y2, y3, y4;
         DTYPE threshold_x, threshold_y;
@@ -385,6 +383,7 @@ void update_dist2(Tree t, DTYPE **dist, DTYPE longest,
 
                                 p1 = node1;
                                 p2 = node3;
+                                /* TODO:  <19-07-19, check smallest logic> */
                                 smallest = dist[p1][p2];
 
                                 if (dist[node2][node3] < smallest) {
@@ -617,11 +616,9 @@ Tree flute_mr(int d, DTYPE *xs, DTYPE *ys, int *s,
               int *best_round,
               int *min_node1, int *min_node2,
               int **nb) {
-        int i, j, k, m, n, itr, node1, node2;
-        DTYPE min_dist, longest;
-        DTYPE dist1, dist2;
+        int i, j, k, node1, node2;
+        DTYPE longest;
         Tree t, best_t, *subtree, ttmp;
-        DTYPE min_x, max_x;
 
 #if MR_FOR_SMALL_CASES_ONLY
         int num_subtree, subroot[MAXPART], suproot[MAXPART], isSuperRoot[D2M];
@@ -895,18 +892,10 @@ Tree flute_mr(int d, DTYPE *xs, DTYPE *ys, int *s,
 
 Tree flute_am(int d, DTYPE *xs, DTYPE *ys, int *s, int acc,
               DTYPE *threshold_x, DTYPE *threshold_y, DTYPE *threshold) {
-        int i, j, k, m, n, itr, node1, node2;
+        int i, j, k, node1, node2;
         DTYPE smallest_gap, gap;
         Tree t, t0, *subtree;
-        int prev_effort;
-        /*
-  int num_subtree, subroot[MAXPART], suproot[MAXPART], isSuperRoot[MAXD];
-  int tree_id[MAXD], tid, tree_size[MAXD], edges[2*MAXD];
-  int idx[MAXPART], offset[MAXPART], *order[MAXT],
-        order_base[MAXD+10]; //order_base[MAXT*MAXD];
-  DTYPE x[MAXD+MAXPART], y[MAXD+MAXPART];
-  int new_s[MAXD+MAXPART], si[MAXD], xmap[MAXD+MAXPART];
-  */
+
         DTYPE *x, *y;
         int num_subtree, subroot[3], suproot[3], *isSuperRoot;
         int *tree_id, tid, *tree_size, *edges;
@@ -1115,7 +1104,6 @@ Tree flutes_HD(int d, DTYPE *xs, DTYPE *ys, int *s, int acc) {
         DTYPE threshold, threshold_x, threshold_y;
         int best_round, min_node1, min_node2;
         int **nb;
-        DTYPE prev_len;
 
         //Chris
         if (d <= D2(acc)) {
@@ -1299,7 +1287,6 @@ int pickWin(Tree t, DTYPE cx, DTYPE cy, int inWin[]) {
    associated steiner nodes */
 Tree merge_into(Tree t1, Tree t2, int common[], int nc, int *o1, int *o2) {
         Tree t;
-        DTYPE cx, cy;
 #if MR_FOR_SMALL_CASES_ONLY
         int i, j, k, d, n, offset, map[2 * D2M], reachable[2 * D2M];
         int o[D2M + MAXPART];
@@ -1634,7 +1621,7 @@ Tree wmergetree(Tree t1, Tree t2, int *order1, int *order2,
                 DTYPE cx, DTYPE cy, int acc) {
         Tree t, t3, t4;
 #if MR_FOR_SMALL_CASES_ONLY
-        int s[D2M], inWin[2 * D2M], d, d2, i, ci, n;
+        int inWin[2 * D2M], d, d2, i, ci, n;
         int i1, i2, o[D2M], os[D2M], si[D2M];
         DTYPE x[D2M], y[D2M], tmp;
 #else
@@ -2330,10 +2317,7 @@ TreeNode *critical_edge(TreeNode *n1, TreeNode *n2, DTYPE *len, int *n2ton1) {
 }
 
 void splice2(TreeNode *n1, TreeNode *n2, TreeNode *e) {
-        TreeNode *curr, *prev, *next, *s;
-
-        //assert(n2->parent);
-        //assert(e->id==n2->id);
+        TreeNode *curr, *prev, *next;
 
         prev = n2;
         curr = n2->parent;
@@ -2437,7 +2421,7 @@ DTYPE exchange_branches_order_x(int num_nodes, TreeNode **nodes,
                                 DTYPE threshold_x, DTYPE threshold_y,
                                 DTYPE max_len) {
         int n2ton1;
-        TreeNode *n1, *p1, *n2, *p2, *node, *e, *s;
+        TreeNode *n1, *p1, *n2, *e;
         DTYPE x1, x2, y1, y2, min_dist, new_x, new_y, len;
         DTYPE gain = 0;
         int i, j, curr_row, next_header, num_rows, start, end, mid;
@@ -2593,7 +2577,7 @@ DTYPE exchange_branches_order_y(int num_nodes, TreeNode **nodes,
                                 DTYPE threshold_x, DTYPE threshold_y,
                                 DTYPE max_len) {
         int n2ton1;
-        TreeNode *n1, *p1, *n2, *p2, *node, *e, *s;
+        TreeNode *n1, *p1, *n2, *e;
         DTYPE x1, x2, y1, y2, min_dist, new_x, new_y, len;
         DTYPE gain = 0;
         int i, j, curr_row, next_header, num_rows, start, end, mid;

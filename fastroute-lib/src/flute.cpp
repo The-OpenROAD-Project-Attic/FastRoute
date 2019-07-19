@@ -163,7 +163,7 @@ void readLUT() {
 DTYPE flute_wl(int d, DTYPE x[], DTYPE y[], int acc) {
         DTYPE xs[MAXD], ys[MAXD], minval, l, xu, xl, yu, yl;
         int s[MAXD];
-        int i, j, k, minidx;
+        int i, j, minidx;
         struct point pt[MAXD], *ptp[MAXD], *tmpp;
 
         if (d == 2)
@@ -586,7 +586,7 @@ static int ordery(const void *a, const void *b) {
 Tree flute(int d, DTYPE x[], DTYPE y[], int acc) {
         DTYPE *xs, *ys, minval;
         int *s;
-        int i, j, k, minidx;
+        int i, j, minidx;
         struct point *pt, **ptp, *tmpp;
         Tree t;
 

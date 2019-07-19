@@ -138,7 +138,7 @@ void init_usage() {
 }
 
 void freeAllMemory() {
-        int i, j, deg, numEdges, edgeID;
+        int i, deg, numEdges, edgeID;
         TreeEdge* treeedge;
 
         for (i = 0; i < numValidNets; i++) {

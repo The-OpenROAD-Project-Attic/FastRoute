@@ -31,11 +31,8 @@
 
 #include "global.h"
 namespace FastRoute {
-/*********************************************************************/
-/*
-   Return the Manhattan distance between two points
-*/
 
+/* Return the Manhattan distance between two points */
 long dist(
     Point p,
     Point q) {
@@ -49,11 +46,7 @@ long dist(
         return dx + dy;
 }
 
-/*********************************************************************/
-/*
-   Return the Manhattan distance between two points
-*/
-
+/* Return the Manhattan distance between two points */
 long dist2(
     Point* p,
     Point* q) {
@@ -67,6 +60,4 @@ long dist2(
         return dx + dy;
 }
 
-/*********************************************************************/
-/*********************************************************************/
 }  // namespace FastRoute

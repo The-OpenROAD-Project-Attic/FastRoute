@@ -31,11 +31,11 @@
 
 #ifndef __FLUTE_H__
 #define __FLUTE_H__
+namespace FastRoute {
+
 /*****************************/
 /*  User-Defined Parameters  */
 /*****************************/
-namespace FastRoute {
-
 #define MAXD 1000               // max. degree that can be handled
 #define ACCURACY 10             // Default accuracy
 #define ROUTING 1               // 1 to construct routing, 0 to estimate WL only
@@ -113,8 +113,6 @@ extern Tree flutes_RDP(int d, DTYPE xs[], DTYPE ys[], int s[], int acc);
 #define flutes_ALLD(d, xs, ys, s, acc)    \
         (d <= D ? flutes_LD(d, xs, ys, s) \
                 : flutes_MD(d, xs, ys, s, acc))
-//          : (d<=D1(acc) ? flutes_MD(d, xs, ys, s, acc) \
-//                        : flutes_HD(d, xs, ys, s, acc)))
 
 #define flutes_wl_LMD(d, xs, ys, s, acc) \
         (d <= D ? flutes_wl_LD(d, xs, ys, s) : flutes_wl_MD(d, xs, ys, s, acc))
