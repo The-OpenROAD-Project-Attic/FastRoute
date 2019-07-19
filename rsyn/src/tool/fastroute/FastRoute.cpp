@@ -54,7 +54,6 @@
 #include <utility>
 #include <math.h>
 #include <vector>
-#define ADJ 0.20
 
 namespace Rsyn {
 
@@ -62,10 +61,20 @@ bool FastRouteProcess::run(const Rsyn::Json &params) {
         Stepwatch watch("FastRoute...");
         std::vector<FastRoute::NET> result;
         std::string outfile = params.value("outfile", "out.guide");
+        
+        adjustment = params.value("adjustment", 0.0);
+        maxRoutingLayer = params.value("maxRoutingLayer", -1);
         design = session.getDesign();
         module = design.getTopModule();
         phDesign = session.getPhysicalDesign();
-
+        
+        std::cout << "\n----------------\n";
+        std::cout << "Params: \n";
+        std::cout << "**** Output file: " << outfile << "\n";
+        std::cout << "**** Capacity adjustment: " << adjustment << "\n";
+        std::cout << "**** Max routing layer: " << maxRoutingLayer << "\n";
+        std::cout << "\n----------------\n";
+        
         std::cout << "Initing grid...\n";
         initGrid();
         std::cout << "Initing grid... Done!\n";
@@ -74,9 +83,9 @@ bool FastRouteProcess::run(const Rsyn::Json &params) {
         setCapacities();
         std::cout << "Setting capacities... Done!\n";
 
-        std::cout << "Setting orientation...\n";
+        std::cout << "Setting layer direction...\n";
         setLayerDirection();
-        std::cout << "Setting orientation... Done!\n";
+        std::cout << "Setting layer direction... Done!\n";
 
         std::cout << "Setting spacings and widths...\n";
         setSpacingsAndMinWidth();
@@ -90,14 +99,14 @@ bool FastRouteProcess::run(const Rsyn::Json &params) {
         setGridAdjustments();
         std::cout << "Adjusting grid... Done!\n";
 
-        //        std::cout << "Computing simple adjustments...\n";
-        //        computeSimpleAdjustments();
-        //        std::cout << "Computing adjustments... Done!\n";
-
         std::cout << "Computing obstacles adjustments...\n";
         computeObstaclesAdjustments();
         std::cout << "Computing obstacles adjustments... Done!\n";
 
+        std::cout << "Computing user defined adjustments...\n";
+        computeSimpleAdjustments();
+        std::cout << "Computing user defined adjustments... Done!\n";
+        
         fastRoute.initAuxVar();
 
         std::cout << "Running FastRoute...\n";
@@ -182,6 +191,9 @@ void FastRouteProcess::setCapacities() {
                                 }
                         }
 
+                        if (phLayer.getRelativeIndex() >= maxRoutingLayer && maxRoutingLayer > 0)
+                                hCapacity = 0;
+                        
                         fastRoute.addVCapacity(0, phLayer.getRelativeIndex() + 1);
                         fastRoute.addHCapacity(hCapacity, phLayer.getRelativeIndex() + 1);
 
@@ -194,6 +206,9 @@ void FastRouteProcess::setCapacities() {
                                         break;
                                 }
                         }
+                        
+                        if (phLayer.getRelativeIndex() >= maxRoutingLayer && maxRoutingLayer > 0)
+                                vCapacity = 0;
 
                         fastRoute.addVCapacity(vCapacity, phLayer.getRelativeIndex() + 1);
                         fastRoute.addHCapacity(0, phLayer.getRelativeIndex() + 1);
@@ -381,12 +396,15 @@ void FastRouteProcess::setGridAdjustments() {
 
 void FastRouteProcess::computeSimpleAdjustments() {
         // Temporary adjustment: fixed percentage per layer
+        if (adjustment == 0.0)
+                return;
+        
         int xGrids = grid.xGrids;
         int yGrids = grid.yGrids;
         int numAdjustments = 0;
 
-        float percentageBlockedX = ADJ;
-        float percentageBlockedY = ADJ;
+        float percentageBlockedX = adjustment;
+        float percentageBlockedY = adjustment;
 
         for (Rsyn::PhysicalLayer phLayer : phDesign.allPhysicalLayers()) {
                 if (phLayer.getType() != Rsyn::ROUTING)
@@ -407,15 +425,12 @@ void FastRouteProcess::computeSimpleAdjustments() {
                         continue;
 
                 int layerN = phLayer.getRelativeIndex() + 1;
-                int newVCapacity = std::floor((float)vCapacities[layerN - 1] * (1 - percentageBlockedX));
-                int newHCapacity = std::floor((float)hCapacities[layerN - 1] * (1 - percentageBlockedY));
-
-                vCapacities[layerN - 1] = newVCapacity;
-                hCapacities[layerN - 1] = newHCapacity;
 
                 if (hCapacities[layerN - 1] != 0) {
                         for (int y = 1; y < yGrids; y++) {
                                 for (int x = 1; x < xGrids; x++) {
+                                        int edgeCap = fastRoute.getEdgeCapacity(x - 1, y - 1, layerN, x, y - 1, layerN);
+                                        int newHCapacity = std::floor((float)edgeCap * (1 - percentageBlockedY));
                                         fastRoute.addAdjustment(x - 1, y - 1, layerN, x, y - 1, layerN, newHCapacity);
                                 }
                         }
@@ -424,6 +439,8 @@ void FastRouteProcess::computeSimpleAdjustments() {
                 if (vCapacities[layerN - 1] != 0) {
                         for (int x = 1; x < xGrids; x++) {
                                 for (int y = 1; y < yGrids; y++) {
+                                        int edgeCap = fastRoute.getEdgeCapacity(x - 1, y - 1, layerN, x - 1, y, layerN);
+                                        int newVCapacity = std::floor((float)edgeCap * (1 - percentageBlockedX));
                                         fastRoute.addAdjustment(x - 1, y - 1, layerN, x - 1, y, layerN, newVCapacity);
                                 }
                         }

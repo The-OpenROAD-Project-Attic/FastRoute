@@ -70,6 +70,8 @@ class FastRouteProcess : public Process {
         Rsyn::Module module;
         Rsyn::PhysicalDesign phDesign;
         FastRoute::FT fastRoute;
+        float adjustment;
+        int maxRoutingLayer;
 
         GRID grid;
         std::vector<int> vCapacities;
