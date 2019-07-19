@@ -3,4 +3,8 @@ open "generic" {
 	"defFiles" : "example.def"
 };
 
-run "rsyn.fastRoute" {"outfile" : "example.guide"};
+run "rsyn.fastRoute" {"outfile" : "example.guide", "adjustment" : 0.X, "maxRoutingLayer" : Y};
+
+# outfile: string. indicate the name of the generated guides file
+# adjustment: float. indicate the percentage reduction of each edge
+# maxRoutingLayer: integer. indicate the max routing layer available for FastRoute
