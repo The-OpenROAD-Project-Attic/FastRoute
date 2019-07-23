@@ -34,7 +34,7 @@
 
 #define BUFFERSIZE 800
 #define STRINGLEN 100
-#define MAXNETDEG 2000
+#define MAXNETDEG 4000
 #define MAXEDGES 10000000
 
 #define MAXLEN 20000
@@ -128,9 +128,9 @@ extern short **heap23D;
 extern float *h_costTable, *v_costTable;
 
 extern Bool stopDEC, errorPRONE;
-extern OrderNetEdge netEO[2000];
+extern OrderNetEdge netEO[4000];
 
-extern int xcor[2000], ycor[2000], dcor[2000];
+extern int xcor[4000], ycor[4000], dcor[4000];
 
 extern StTree *sttreesBK;
 

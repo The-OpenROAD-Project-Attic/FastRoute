@@ -136,7 +136,7 @@ void FT::addNet(char *name, int netIdx, int nPins, int minWidth, PIN pins[]) {
 
         allNets[netName] = netPins;
 
-        if (numPins < 1000) {
+       if (numPins < 2000) {
                 pinInd = 0;
                 for (j = 0; j < numPins; j++) {
                         pinX_in = pins[j].x;
@@ -208,7 +208,7 @@ void FT::initEdges() {
         vCapacity_ub = UB * vCapacity;
         hCapacity_ub = UB * hCapacity;
 
-        if ((pinInd > 1) && (pinInd < 1000)) {
+        if ((pinInd > 1) && (pinInd < 2000)) {
                 seglistIndex[newnetID] = segcount;  // the end pointer of the seglist
         }
         numValidNets = newnetID;

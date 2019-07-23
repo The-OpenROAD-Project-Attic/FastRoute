@@ -117,8 +117,8 @@ short** heap23D;
 
 float *h_costTable, *v_costTable;
 Bool stopDEC, errorPRONE;
-OrderNetEdge netEO[2000];
-int xcor[2000], ycor[2000], dcor[2000];
+OrderNetEdge netEO[4000];
+int xcor[4000], ycor[4000], dcor[4000];
 
 StTree* sttreesBK;
 
