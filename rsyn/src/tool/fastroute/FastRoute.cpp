@@ -45,6 +45,7 @@
 #include "phy/PhysicalRouting.h"
 #include "core/RsynTypes.h"
 #include "util/Stepwatch.h"
+#include "phy/obj/decl/PhysicalPinLayer.h"
 #include <cstring>
 #include <string>
 #include <iostream>
@@ -115,10 +116,6 @@ bool FastRouteProcess::run(const Rsyn::Json &params) {
         std::cout << "Writing guides...\n";
         writeGuides(result, outfile);
         std::cout << "Writing guides... Done!\n";
-
-        std::cout << "Writing est...\n";
-        writeEst(result, outfile);
-        std::cout << "Writing est... Done!\n";
 
         return 0;
 }
@@ -277,7 +274,7 @@ void FastRouteProcess::initNets() {
                 std::vector<FastRoute::PIN> pins;
                 for (Rsyn::Pin pin : net.allPins()) {
                         DBUxy pinPosition;
-                        int pinLayer;
+                        int pinLayer = -1;
                         int numOfLayers;
                         if (pin.getInstanceType() == Rsyn::CELL) {
                                 Rsyn::PhysicalLibraryPin phLibPin = phDesign.getPhysicalLibraryPin(pin);
@@ -291,7 +288,8 @@ void FastRouteProcess::initNets() {
                                                 continue;
                                         numOfLayers = pinGeo.allPinLayers().size();
                                         for (Rsyn::PhysicalPinLayer phPinLayer : pinGeo.allPinLayers()) {
-                                                pinLayer = phPinLayer.getLayer().getRelativeIndex();
+                                                if (pinLayer < phPinLayer.getLayer().getRelativeIndex())
+                                                        pinLayer = phPinLayer.getLayer().getRelativeIndex();
 
                                                 std::vector<DBUxy> pinBdsPositions;
                                                 DBUxy bdsPosition;
@@ -325,13 +323,11 @@ void FastRouteProcess::initNets() {
                                 pinLayer = phPort.getLayer().getRelativeIndex();
                                 numOfLayers = 1;
                         }
-                        for (int l = numOfLayers - 1; l >= 0; l--) {
-                                FastRoute::PIN grPin;
-                                grPin.x = pinPosition.x;
-                                grPin.y = pinPosition.y;
-                                grPin.layer = (pinLayer - l) + 1;
-                                pins.push_back(grPin);
-                        }
+                        FastRoute::PIN grPin;
+                        grPin.x = pinPosition.x;
+                        grPin.y = pinPosition.y;
+                        grPin.layer = pinLayer + 1;
+                        pins.push_back(grPin);
                 }
                 FastRoute::PIN grPins[pins.size()];
 
