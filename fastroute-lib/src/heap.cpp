@@ -1,12 +1,38 @@
-/****************************************************************************/
-/*
-  Binary heap routines for use in Prim's algorithm, 
-  with points are numbered from 0 to n-1
-*/
+////////////////////////////////////////////////////////////////////////////////
+// BSD 3-Clause License
+//
+// Copyright (c) 2018, Iowa State University All rights reserved.
+//
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions are met:
+//
+// * Redistributions of source code must retain the above copyright notice,
+// this list of conditions and the following disclaimer.
+//
+// * Redistributions in binary form must reproduce the above copyright notice,
+// this list of conditions and the following disclaimer in the documentation
+// and/or other materials provided with the distribution.
+//
+// * Neither the name of the copyright holder nor the names of its contributors
+// may be used to endorse or promote products derived from this software
+// without specific prior written permission.
+//
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+// AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+// IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+// DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+// FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+// DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+// SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+// CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+// OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
+// USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+////////////////////////////////////////////////////////////////////////////////
+
+/* Binary heap routines for use in Prim's algorithm, with points are numbered from 0 to n-1 */
 
 #include <stdlib.h>
 #include "heap.h"
-#include "err.h"
 
 namespace FastRoute {
 
@@ -14,22 +40,16 @@ Heap* _heap = (Heap*)NULL;
 long _max_heap_size = 0;
 long _heap_size = 0;
 
-/****************************************************************************/
-/*
-*/
-
 void allocate_heap(long n) {
         if (_max_heap_size < n) {
                 _heap = (Heap*)realloc((void*)_heap, (size_t)(n + 1) * sizeof(Heap));
                 if (!_heap) {
-                        err_exit("Cannot reallocate memory in allocate_heap!");
+                        printf("Cannot reallocate memory in allocate_heap!\n");
+                        exit(1);
                 }
                 _max_heap_size = n;
         }
 }
-/****************************************************************************/
-/*
-*/
 
 void deallocate_heap() {
         _max_heap_size = 0;
@@ -38,8 +58,6 @@ void deallocate_heap() {
                 _heap = (Heap*)NULL;
         }
 }
-
-/****************************************************************************/
 
 void heap_init(long n) {
         register long p;
@@ -50,9 +68,7 @@ void heap_init(long n) {
                 heap_idx(p) = 0;
         }
 
-} /* END heap_init() */
-
-/****************************************************************************/
+}
 
 void heap_insert(
     long p,

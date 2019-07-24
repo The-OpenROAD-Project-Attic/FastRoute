@@ -1,3 +1,34 @@
+////////////////////////////////////////////////////////////////////////////////
+// BSD 3-Clause License
+//
+// Copyright (c) 2018, Iowa State University All rights reserved.
+//
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions are met:
+//
+// * Redistributions of source code must retain the above copyright notice,
+// this list of conditions and the following disclaimer.
+//
+// * Redistributions in binary form must reproduce the above copyright notice,
+// this list of conditions and the following disclaimer in the documentation
+// and/or other materials provided with the distribution.
+//
+// * Neither the name of the copyright holder nor the names of its contributors
+// may be used to endorse or promote products derived from this software
+// without specific prior written permission.
+//
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+// AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+// IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+// DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+// FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+// DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+// SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+// CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+// OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
+// USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+////////////////////////////////////////////////////////////////////////////////
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
@@ -20,7 +51,7 @@ namespace FastRoute {
 
 void convertToMazerouteNet(int netID) {
         short *gridsX, *gridsY;
-        int i, j, grid, edgeID, edgelength;
+        int i, edgeID, edgelength;
         int n1, n2, x1, y1, x2, y2;
         int cnt, Zpoint;
         TreeEdge *treeedge;
@@ -164,11 +195,7 @@ void convertToMazerouteNet(int netID) {
 }
 
 void convertToMazeroute() {
-        int i, j, grid, netID, edgeID, edgelength, *gridsX, *gridsY;
-        int n1, n2, x1, y1, x2, y2;
-        int cnt, Zpoint;
-        TreeEdge *treeedge;
-        TreeNode *treenodes;
+        int i, j, grid, netID;
 
         for (netID = 0; netID < numValidNets; netID++) {
                 convertToMazerouteNet(netID);
@@ -229,7 +256,7 @@ void buildHeap(float **array, int arrayLen) {
 
 void updateHeap(float **array, int arrayLen, int i) {
         int parent;
-        float *tmp, *tmpi;
+        float *tmpi;
 
         tmpi = array[i];
         while (i > 0 && *(array[PARENT(i)]) > *tmpi) {
@@ -254,13 +281,9 @@ void extractMin(float **array, int arrayLen) {
  */
 
 void updateCongestionHistory(int round, int upType) {
-        int i, j, grid, uplimitH, uplimitV, maxlimit;
-        float over, overflow, max;
+        int i, j, grid, maxlimit, overflow;
 
-        max = 0;
         maxlimit = 0;
-        uplimitH = 100 * hCapacity - 1;
-        uplimitV = 100 * vCapacity - 1;
 
         printf("updateType %d\n", upType);
 
@@ -426,8 +449,6 @@ void updateCongestionHistory(int round, int upType) {
         }
 
         max_adj = maxlimit;
-
-        printf("max value %d stop %d\n", maxlimit, stopDEC);
 }
 
 // ripup a tree edge according to its ripup type and Z-route it
@@ -441,7 +462,7 @@ void updateCongestionHistory(int round, int upType) {
 void setupHeap(int netID, int edgeID, int *heapLen1, int *heapLen2, int regionX1, int regionX2, int regionY1, int regionY2) {
         int i, j, d, numNodes, n1, n2, x1, y1, x2, y2;
         int nbr, nbrX, nbrY, cur, edge;
-        int grid, x_grid, y_grid, heapcnt;
+        int x_grid, y_grid, heapcnt;
         int queuehead, queuetail, *queue;
         Bool *visited;
         TreeEdge *treeedges;
@@ -661,12 +682,10 @@ void setupHeap(int netID, int edgeID, int *heapLen1, int *heapLen2, int regionX1
 
 int copyGrids(TreeNode *treenodes, int n1, int n2, TreeEdge *treeedges, int edge_n1n2, int gridsX_n1n2[], int gridsY_n1n2[]) {
         int i, cnt;
-        int n1x, n1y, n2x, n2y, Zpoint;
+        int n1x, n1y;
 
         n1x = treenodes[n1].x;
         n1y = treenodes[n1].y;
-        n2x = treenodes[n2].x;
-        n2y = treenodes[n2].y;
 
         cnt = 0;
         if (treeedges[edge_n1n2].n1 == n1)  // n1 is the first node of (n1, n2)
@@ -706,12 +725,10 @@ int copyGrids(TreeNode *treenodes, int n1, int n2, TreeEdge *treeedges, int edge
 }
 
 void updateRouteType1(TreeNode *treenodes, int n1, int A1, int A2, int E1x, int E1y, TreeEdge *treeedges, int edge_n1A1, int edge_n1A2) {
-        int i, cnt, n1x, n1y, A1x, A1y, A2x, A2y, Zpoint;
-        int cnt_n1A1, cnt_n1A2, E1_pos, n2x, n2y, n2;
+        int i, cnt, A1x, A1y, A2x, A2y;
+        int cnt_n1A1, cnt_n1A2, E1_pos;
         int gridsX_n1A1[XRANGE + YRANGE], gridsY_n1A1[XRANGE + YRANGE], gridsX_n1A2[XRANGE + YRANGE], gridsY_n1A2[XRANGE + YRANGE];
 
-        n1x = treenodes[n1].x;
-        n1y = treenodes[n1].y;
         A1x = treenodes[A1].x;
         A1y = treenodes[A1].y;
         A2x = treenodes[A2].x;
@@ -726,12 +743,17 @@ void updateRouteType1(TreeNode *treenodes, int n1, int A1, int A2, int E1x, int 
 
         // update route for (n1, A1) and (n1, A2)
         // find the index of E1 in (n1, A1)
+        E1_pos = -1;
         for (i = 0; i < cnt_n1A1; i++) {
-                if (gridsX_n1A1[i] == E1x && gridsY_n1A1[i] == E1y)  // reach the E1
-                {
+                // reach the E1
+                if (gridsX_n1A1[i] == E1x && gridsY_n1A1[i] == E1y) {
                         E1_pos = i;
                         break;
                 }
+        }
+
+        if (E1_pos == -1) {
+                exit(1);
         }
 
         // reallocate memory for route.gridsX and route.gridsY
@@ -813,18 +835,14 @@ void updateRouteType1(TreeNode *treenodes, int n1, int A1, int A2, int E1x, int 
 }
 
 void updateRouteType2(TreeNode *treenodes, int n1, int A1, int A2, int C1, int C2, int E1x, int E1y, TreeEdge *treeedges, int edge_n1A1, int edge_n1A2, int edge_C1C2) {
-        int i, cnt, n1x, n1y, n2, n2x, n2y, A1x, A1y, A2x, A2y, C1x, C1y, C2x, C2y, Zpoint;
+        int i, cnt, A1x, A1y, A2x, A2y, C1x, C1y, C2x, C2y;
         int edge_n1C1, edge_n1C2, edge_A1A2;
         int cnt_n1A1, cnt_n1A2, cnt_C1C2, E1_pos;
         int len_A1A2, len_n1C1, len_n1C2;
         int gridsX_n1A1[XRANGE + YRANGE], gridsY_n1A1[XRANGE + YRANGE];
         int gridsX_n1A2[XRANGE + YRANGE], gridsY_n1A2[XRANGE + YRANGE];
         int gridsX_C1C2[XRANGE + YRANGE], gridsY_C1C2[XRANGE + YRANGE];
-        int gridsX_n1C1[XRANGE + YRANGE], gridsY_n1C1[XRANGE + YRANGE];
-        int gridsX_n1C2[XRANGE + YRANGE], gridsY_n1C2[XRANGE + YRANGE];
 
-        n1x = treenodes[n1].x;
-        n1y = treenodes[n1].y;
         A1x = treenodes[A1].x;
         A1y = treenodes[A1].y;
         A2x = treenodes[A2].x;
@@ -876,11 +894,16 @@ void updateRouteType2(TreeNode *treenodes, int n1, int A1, int A2, int C1, int C
         }
 
         // find the index of E1 in (C1, C2)
+        E1_pos = -1;
         for (i = 0; i < cnt_C1C2; i++) {
                 if (gridsX_C1C2[i] == E1x && gridsY_C1C2[i] == E1y) {
                         E1_pos = i;
                         break;
                 }
+        }
+
+        if (E1_pos == -1) {
+                exit(1);
         }
 
         // allocate memory for gridsX[] and gridsY[] of edge_n1C1 and edge_n1C2
@@ -960,7 +983,6 @@ void reInitTree(int netID) {
         //fflush(stdout);
         if (d > 3) {
                 edgeShiftNew(&rsmt, netID);
-                //printf("edge shifted\n");
         }
         //fflush(stdout);
         copyStTree(netID, rsmt);
@@ -981,24 +1003,23 @@ void reInitTree(int netID) {
 }
 
 void mazeRouteMSMD(int iter, int expand, float costHeight, int ripup_threshold, int mazeedge_Threshold, Bool Ordering, int cost_type) {
-        int l, grid, netID, nidRPC;
-        float total_usage;
-        float overflow, forange;
+        int grid, netID, nidRPC;
+        float forange;
 
         // maze routing for multi-source, multi-destination
-        Bool preD, hypered, enter, shifted;
-        int i, j, k, deg, edgeID, n1, n2, n1x, n1y, n2x, n2y, ymin, ymax, xmin, xmax, curX, curY, crossX, crossY, tmpX, tmpY, tmpi, min_x, min_y, num_edges;
-        int segWidth, segHeight, regionX1, regionX2, regionY1, regionY2, regionWidth, regionHeight;
-        int heapLen1, heapLen2, ind, ind1, ind2, tmpind, gridsX[XRANGE], gridsY[XRANGE], tmp_gridsX[XRANGE], tmp_gridsY[XRANGE];
+        Bool hypered, enter;
+        int i, j, deg, edgeID, n1, n2, n1x, n1y, n2x, n2y, ymin, ymax, xmin, xmax, curX, curY, crossX, crossY, tmpX, tmpY, tmpi, min_x, min_y, num_edges;
+        int regionX1, regionX2, regionY1, regionY2;
+        int heapLen1, heapLen2, ind, ind1, tmpind, gridsX[XRANGE], gridsY[XRANGE], tmp_gridsX[XRANGE], tmp_gridsY[XRANGE];
         int endpt1, endpt2, A1, A2, B1, B2, C1, C2, D1, D2, cnt, cnt_n1n2;
         int edge_n1n2, edge_n1A1, edge_n1A2, edge_n1C1, edge_n1C2, edge_A1A2, edge_C1C2;
         int edge_n2B1, edge_n2B2, edge_n2D1, edge_n2D2, edge_B1B2, edge_D1D2;
         int E1x, E1y, E2x, E2y;
-        int tmp_of, tmp_grid, tmp_cost;
+        int tmp_grid, tmp_cost;
         int preX, preY, origENG, edgeREC;
 
-        float costL1, costL2, tmp, *dtmp;
-        TreeEdge *treeedges, *treeedge, *curedge;
+        float tmp, *dtmp;
+        TreeEdge *treeedges, *treeedge;
         TreeNode *treenodes;
 
         // allocate memory for distance and parent and pop_heap
@@ -1101,16 +1122,11 @@ void mazeRouteMSMD(int iter, int expand, float costHeight, int ripup_threshold, 
                                                 xmax = n1x;
                                         }
 
-                                        shifted = FALSE;
                                         enlarge = minFlute(origENG, (iter / 6 + 3) * treeedge->route.routelen);
-                                        segWidth = xmax - xmin;
-                                        segHeight = ymax - ymin;
                                         regionX1 = maxFlute(0, xmin - enlarge);
                                         regionX2 = minFlute(xGrid - 1, xmax + enlarge);
                                         regionY1 = maxFlute(0, ymin - enlarge);
                                         regionY2 = minFlute(yGrid - 1, ymax + enlarge);
-                                        regionWidth = regionX2 - regionX1 + 1;
-                                        regionHeight = regionY2 - regionY1 + 1;
 
                                         // initialize d1[][] and d2[][] as BIG_INT
                                         for (i = regionY1; i <= regionY2; i++) {
@@ -1127,7 +1143,6 @@ void mazeRouteMSMD(int iter, int expand, float costHeight, int ripup_threshold, 
 
                                         // while loop to find shortest path
                                         ind1 = (heap1[0] - (float *)d1);
-                                        ind2 = (heap2[0] - (float *)d2);
                                         for (i = 0; i < heapLen2; i++)
                                                 pop_heap2[(heap2[i] - (float *)d2)] = TRUE;
 
@@ -1313,7 +1328,7 @@ void mazeRouteMSMD(int iter, int expand, float costHeight, int ripup_threshold, 
                                                         }
                                                 }
 
-                                                // update ind1 and ind2 for next loop
+                                                // update ind1 for next loop
                                                 ind1 = (heap1[0] - (float *)d1);
 
                                         }  // while loop
@@ -1381,7 +1396,6 @@ void mazeRouteMSMD(int iter, int expand, float costHeight, int ripup_threshold, 
                                         if (n1 >= deg && (E1x != n1x || E1y != n1y))
                                         // n1 is not a pin and E1!=n1, then make change to subtree1, otherwise, no change to subtree1
                                         {
-                                                shifted = TRUE;
                                                 // find the endpoints of the edge E1 is on
                                                 endpt1 = treeedges[corrEdge[E1y][E1x]].n1;
                                                 endpt2 = treeedges[corrEdge[E1y][E1x]].n2;
@@ -1491,7 +1505,6 @@ void mazeRouteMSMD(int iter, int expand, float costHeight, int ripup_threshold, 
                                         if (n2 >= deg && (E2x != n2x || E2y != n2y))
                                         // n2 is not a pin and E2!=n2, then make change to subtree2, otherwise, no change to subtree2
                                         {
-                                                shifted = TRUE;
                                                 // find the endpoints of the edge E1 is on
                                                 endpt1 = treeedges[corrEdge[E2y][E2x]].n1;
                                                 endpt2 = treeedges[corrEdge[E2y][E2x]].n2;
@@ -1642,12 +1655,18 @@ void mazeRouteMSMD(int iter, int expand, float costHeight, int ripup_threshold, 
 }
 
 int getOverflow2Dmaze(int *maxOverflow, int *tUsage) {
-        int i, j, grid, overflow, max_overflow, H_overflow, max_H_overflow, V_overflow, max_V_overflow, numedges;
-        int total_usage, H_usage, V_usage, total_cap, hCap, vCap;
-
-        // get overflow
-        overflow = max_overflow = H_overflow = max_H_overflow = V_overflow = max_V_overflow = 0;
-        hCap = vCap = numedges = 0;
+        int H_overflow = 0;
+        int V_overflow = 0;
+        int grid = 0;
+        int i = 0;
+        int j = 0;
+        int max_H_overflow = 0;
+        int max_V_overflow = 0;
+        int max_overflow = 0;
+        int numedges = 0;
+        int overflow = 0;
+        int total_cap = 0;
+        int total_usage = 0;
 
         total_usage = 0;
         total_cap = 0;
@@ -1707,7 +1726,7 @@ int getOverflow2Dmaze(int *maxOverflow, int *tUsage) {
 
 int getOverflow2D(int *maxOverflow) {
         int i, j, grid, overflow, max_overflow, H_overflow, max_H_overflow, V_overflow, max_V_overflow, numedges;
-        int total_usage, H_usage, V_usage, total_cap, hCap, vCap;
+        int total_usage, total_cap, hCap, vCap;
 
         // get overflow
         overflow = max_overflow = H_overflow = max_H_overflow = V_overflow = max_V_overflow = 0;
@@ -1772,7 +1791,7 @@ int getOverflow2D(int *maxOverflow) {
 
 int getOverflow3D(void) {
         int i, j, k, grid, overflow, max_overflow, H_overflow, max_H_overflow, V_overflow, max_V_overflow;
-        int H_usage, V_usage, cap;
+        int cap;
         int total_usage;
 
         // get overflow
@@ -1905,7 +1924,7 @@ void str_accu(int rnd) {
 }
 
 void InitLastUsage(int upType) {
-        int i, j, grid, overflow;
+        int i, j, grid;
         for (i = 0; i < yGrid; i++) {
                 for (j = 0; j < xGrid - 1; j++) {
                         grid = i * (xGrid - 1) + j;
@@ -1938,8 +1957,6 @@ void InitLastUsage(int upType) {
                 for (i = 0; i < yGrid; i++) {
                         for (j = 0; j < xGrid - 1; j++) {
                                 grid = i * (xGrid - 1) + j;
-                                overflow = h_edges[grid].usage - h_edges[grid].cap;
-                                //if (overflow > 0)
                                 h_edges[grid].last_usage = h_edges[grid].last_usage * 0.2;
                         }
                 }
@@ -1947,8 +1964,6 @@ void InitLastUsage(int upType) {
                 for (i = 0; i < yGrid - 1; i++) {
                         for (j = 0; j < xGrid; j++) {
                                 grid = i * xGrid + j;
-                                overflow = v_edges[grid].usage - v_edges[grid].cap;
-                                //	if (overflow > 0)
                                 v_edges[grid].last_usage = v_edges[grid].last_usage * 0.2;
                         }
                 }

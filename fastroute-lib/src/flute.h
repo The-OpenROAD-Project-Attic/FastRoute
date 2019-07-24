@@ -1,8 +1,41 @@
+////////////////////////////////////////////////////////////////////////////////
+// BSD 3-Clause License
+//
+// Copyright (c) 2018, Iowa State University All rights reserved.
+//
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions are met:
+//
+// * Redistributions of source code must retain the above copyright notice,
+// this list of conditions and the following disclaimer.
+//
+// * Redistributions in binary form must reproduce the above copyright notice,
+// this list of conditions and the following disclaimer in the documentation
+// and/or other materials provided with the distribution.
+//
+// * Neither the name of the copyright holder nor the names of its contributors
+// may be used to endorse or promote products derived from this software
+// without specific prior written permission.
+//
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+// AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+// IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+// DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+// FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+// DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+// SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+// CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+// OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
+// USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+////////////////////////////////////////////////////////////////////////////////
+
+#ifndef __FLUTE_H__
+#define __FLUTE_H__
+namespace FastRoute {
+
 /*****************************/
 /*  User-Defined Parameters  */
 /*****************************/
-namespace FastRoute {
-
 #define MAXD 1000               // max. degree that can be handled
 #define ACCURACY 10             // Default accuracy
 #define ROUTING 1               // 1 to construct routing, 0 to estimate WL only
@@ -80,8 +113,6 @@ extern Tree flutes_RDP(int d, DTYPE xs[], DTYPE ys[], int s[], int acc);
 #define flutes_ALLD(d, xs, ys, s, acc)    \
         (d <= D ? flutes_LD(d, xs, ys, s) \
                 : flutes_MD(d, xs, ys, s, acc))
-//          : (d<=D1(acc) ? flutes_MD(d, xs, ys, s, acc) \
-//                        : flutes_HD(d, xs, ys, s, acc)))
 
 #define flutes_wl_LMD(d, xs, ys, s, acc) \
         (d <= D ? flutes_wl_LD(d, xs, ys, s) : flutes_wl_MD(d, xs, ys, s, acc))
@@ -93,3 +124,4 @@ extern Tree flutes_RDP(int d, DTYPE xs[], DTYPE ys[], int s[], int acc);
 #define abs(x) ((x) < 0 ? (-x) : (x))
 #define ADIFF(x, y) ((x) > (y) ? (x - y) : (y - x))  // Absolute difference
 }  // namespace FastRoute
+#endif /* __FLUTE_H__ */

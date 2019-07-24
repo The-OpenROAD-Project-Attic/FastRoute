@@ -37,5 +37,34 @@ Your command line to run FastRoute4-lefdef should look like this:
 
 You can find a script example in `rsyn/support/fastroute/example.rsyn`
 
+#### Script details
+
+The basic format of a script to run FastRoute is show below:
+
+````
+open "generic" {
+	"lefFiles" : "example.lef",
+	"defFiles" : "example.def"
+};
+run "rsyn.fastRoute" {"outfile" : "example.guide", "adjustment" : 0.X, "maxRoutingLayer" : Y};
+````
+
+FastRoute have three parameters. Details of each one of them can be found below:
+- outfile: name of the file with the generated guides
+- adjustment: percentage reduction in capacity of each edge
+- maxRoutingLayer: maximum routing layer available for FastRoute
+
+If you need more than one LEF/DEF file, you can write a script like that:
+
+````
+open "generic" {
+	"lefFiles" : ["example1.lef", "example2.lef", ..., "exampleN.lef"],
+	"defFiles" : ["example1.def", "example2.def", ..., "exampleN.def"]
+};
+run "rsyn.fastRoute" {"outfile" : "example.guide", "adjustment" : 0.X, "maxRoutingLayer" : Y};
+````
+
+You can use either the absolute path or the relative path (relative to the script file) for LEF/DEF files.
+
 Copyright (c) 2019, Federal University of Rio Grande do Sul (UFRGS)
 All rights reserved.
