@@ -41,8 +41,6 @@ set(CMAKE_CXX_STANDARD 11)
 
 set(PATH_RSYN ${CMAKE_CURRENT_SOURCE_DIR}/src)
 
-set(PATH_QT ${CMAKE_CURRENT_SOURCE_DIR}/src/gui)
-
 ###################
 # Warnings/Errors #
 ###################
@@ -54,14 +52,9 @@ set(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -Werror=return-type")
 ######################
 
 find_package(Boost COMPONENTS system filesystem program_options REQUIRED)
-find_package(PNG REQUIRED)
 
 # OpenMP (work around)
 set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -fopenmp")
-
-find_package(Qt5Widgets REQUIRED)
-find_package(Qt5PrintSupport REQUIRED)
-find_package(Qt5OpenGL REQUIRED)
 
 ###############
 # Source Code #
@@ -71,29 +64,6 @@ file(GLOB_RECURSE SRC_FILES
         ${PATH_RSYN}/*.cpp
         ${PATH_RSYN}/*.cc
         ${PATH_RSYN}/*.c)
-
-#####################
-# Qt Pre-Processing #
-#####################
-
-file(GLOB_RECURSE UI_FILES
-        ${PATH_QT}/ui/*.ui)
-
-file(GLOB_RECURSE QRC_FILES
-        ${PATH_QT}/resource/*.qrc)
-
-# Generate code from ui files
-qt5_wrap_ui(UI_HEADERS ${UI_FILES})
-
-# Generate rules for building source files from the resources
-qt5_add_resources(QRCS ${QRC_FILES})
-
-# Tell CMake to create the executable
-list(APPEND SRC_FILES ${UI_HEADERS})
-list(APPEND SRC_FILES ${QRCS})
-list(APPEND SRC_FILES ${GUI_FILES})
-
-#message(STATUS ${SRC_FILES})
 
 #################
 # Library Paths #
@@ -130,6 +100,7 @@ target_include_directories(rsyn PUBLIC "./src/contests")
 
 target_compile_options(rsyn PUBLIC "-O3")
 target_compile_options(rsyn PUBLIC "-Wno-unused-result -Wno-format -Wno-return-type -Wno-unused-local-typedefs")
+target_compile_options(rsyn PUBLIC "-DRSYN_NO_GUI")
 
 #################
 # Linker Flags  #
@@ -143,12 +114,3 @@ target_link_libraries(rsyn db)
 # Boost
 target_include_directories(rsyn PUBLIC ${Boost_INCLUDE_DIR})
 target_link_libraries(rsyn ${Boost_LIBRARIES})
-
-# PNG
-target_include_directories(rsyn PUBLIC ${PNG_INCLUDE_DIR})
-target_link_libraries(rsyn ${PNG_LIBRARY})
-
-# Qt5 Widgets for linking
-target_link_libraries(rsyn Qt5::Widgets)
-target_link_libraries(rsyn Qt5::PrintSupport)
-target_link_libraries(rsyn Qt5::OpenGL)
