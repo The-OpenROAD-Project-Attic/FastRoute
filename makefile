@@ -39,6 +39,9 @@ BUILD_DIR = build
 BIN_DIR = .
 BIN_NAME = FRlefdef
 
+BENCHMARKS_DIR = benchmarks
+SUPPORT_DIR = support
+
 CMAKE = cmake
 CMAKE_OPT =
 
@@ -70,6 +73,20 @@ bin_cp:
 		cp fastroute-lib/POST9.dat $(BIN_DIR)/ ;\
 		cp fastroute-lib/POWV9.dat $(BIN_DIR)/ ;\
 		)
+
+unit_test: download
+	@bash ./support/unit_test.sh
+
+download:
+	@( \
+		if [ ! -d $(BENCHMARKS_DIR) ] ; then \
+			echo Could not find $(BENCHMARKS_DIR) folder ; \
+			mkdir -p $(BENCHMARKS_DIR) ; \
+			echo Downloading $(BENCHMARKS_DIR) ; \
+			bash ./support/download_ispd18.sh $(BENCHMARKS_DIR) ; \
+		fi ; \
+	)
+	@cp -r $(SUPPORT_DIR)/ispd18/* $(BENCHMARKS_DIR)
 
 clean:
 	rm -rf $(BUILD_DIR)

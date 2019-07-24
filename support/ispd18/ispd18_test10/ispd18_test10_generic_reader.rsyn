@@ -1,0 +1,6 @@
+open "generic" {
+	"lefFiles" : "ispd18_test10.input.lef",
+	"defFiles" : "ispd18_test10.input.def"
+};
+
+run "rsyn.fastRoute" {"outfile" : "ispd18_test10.guide"};
