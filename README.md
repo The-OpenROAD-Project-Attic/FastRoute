@@ -3,15 +3,15 @@ FastRoute4-lefdef
 
 **FastRoute4-lefdef** is an open-source global router.
 
-The algorithm base is from FastRoute4, and the underlying infrastructure comes from [Rsyn](https://github.com/RsynTeam/rsyn-x/)
+The algorithm base is from FastRoute4.1, and the underlying infrastructure comes from [Rsyn](https://github.com/RsynTeam/rsyn-x/)
 
 
 
-The FastRoute4 version was received June 15, 2019, with the BSD-3 open source license as given in the [website](http://home.eng.iastate.edu/~cnchu/FastRoute.html#License).
+The FastRoute4.1 version was received from <yuexu@iastate.edu> on June 15, 2019, with the BSD-3 open source license as given in the [website](http://home.eng.iastate.edu/~cnchu/FastRoute.html#License).
 
-[Rsyn](https://github.com/RsynTeam/rsyn-x/) version is based on commit `1087c918e4fa14db84fc3b4c91210db96b07bb4c` and release under Apache License, Version 2.0 as given in its [repository](https://github.com/RsynTeam/rsyn-x/blob/master/README.md).
+[Rsyn](https://github.com/RsynTeam/rsyn-x/) version is based on commit `1087c918e4fa14db84fc3b4c91210db96b07bb4c` and released under Apache License, Version 2.0 as given in its [repository](https://github.com/RsynTeam/rsyn-x/blob/master/README.md).
 
-Any code additional to rsyn will clearly specify its license in each file and in this README. We ask contributors to seriously consider using the BSD-3 Licence.
+Any code additional to Rsyn will clearly specify its license in each file and in this README. We ask contributors to seriously consider using the BSD-3 Licence.
 
 ## Getting Started
 ### Pre-Requisite
@@ -39,7 +39,7 @@ You can find a script example in `rsyn/support/fastroute/example.rsyn`
 
 #### Script details
 
-The basic format of a script to run FastRoute is show below:
+The basic format of a script to run FastRoute is shown below:
 
 ````
 open "generic" {
@@ -49,12 +49,12 @@ open "generic" {
 run "rsyn.fastRoute" {"outfile" : "example.guide", "adjustment" : 0.X, "maxRoutingLayer" : Y};
 ````
 
-FastRoute have three parameters. Details of each one of them can be found below:
+FastRoute has three main parameters. These are:
 - outfile: name of the file with the generated guides
-- adjustment: percentage reduction in capacity of each edge
-- maxRoutingLayer: maximum routing layer available for FastRoute
+- adjustment: percentage reduction in capacity of each edge in the global routing gridgraph
+- maxRoutingLayer: maximum (i.e., highest) routing layer available for FastRoute to use
 
-If you need more than one LEF/DEF file, you can write a script like that:
+If you need more than one LEF/DEF file, you can script for this case as:  
 
 ````
 open "generic" {
