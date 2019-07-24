@@ -7,7 +7,7 @@ The algorithm base is from FastRoute4.1, and the underlying infrastructure comes
 
 
 
-The FastRoute4.1 version was received from <yuexu@iastate.edu> on June 15, 2019, with the BSD-3 open source license as given in the [website](http://home.eng.iastate.edu/~cnchu/FastRoute.html#License).
+The FastRoute4.1 version was received from <yuexu@iastate.edu> on June 15, 2019, with the BSD-3 open source license as given in the FastRoute [website](http://home.eng.iastate.edu/~cnchu/FastRoute.html#License).
 
 [Rsyn](https://github.com/RsynTeam/rsyn-x/) version is based on commit `1087c918e4fa14db84fc3b4c91210db96b07bb4c` and released under Apache License, Version 2.0 as given in its [repository](https://github.com/RsynTeam/rsyn-x/blob/master/README.md).
 
