@@ -3,4 +3,4 @@ open "generic" {
 	"defFiles" : "ispd18_sample.input.def"
 };
 
-run "rsyn.fastRoute" {"outfile" : "ispd18_sample.guide"};
+run "rsyn.fastRoute" {"outfile" : "benchmarks/ispd18_sample/ispd18_sample.guide"};
