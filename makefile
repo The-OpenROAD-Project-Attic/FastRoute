@@ -39,18 +39,23 @@ BUILD_DIR = build
 BIN_DIR = .
 BIN_NAME = FRlefdef
 
+SUPPORT_DIR = support
+BENCHMARKS_DIR = $(SUPPORT_DIR)/ispd18
+
 CMAKE = cmake
 CMAKE_OPT =
-
 MAKE_OPT =
 
 PARALLEL = 1
 
-.PHONY: all dirs bin_cp
+.PHONY: compile
+compile: dirs build bin_cp
 
-all: dirs compile bin_cp
+.PHONY: all
+all: compile ispd18_unit_test
 
-compile:
+.PHONY: build
+build:
 	@( \
 		mkdir -p $(BUILD_DIR) ;\
 		cd $(BUILD_DIR) ;\
@@ -58,23 +63,35 @@ compile:
 		$(MAKE) --no-print-directory -j$(PARALLEL) $(MAKE_OPT) ;\
 		)
 
+.PHONY: dirs
 dirs:
-	@( \
-		echo Create $(BUILD_DIR) ;\
-		mkdir -p $(BUILD_DIR) ;\
-		)
+	@echo Create $(BUILD_DIR)
+	@mkdir -p $(BUILD_DIR)
 
+.PHONY: bin_cp
 bin_cp:
-	@( \
-		cp build/rsyn/bin/rsyn $(BIN_DIR)/$(BIN_NAME) ;\
-		cp fastroute-lib/POST9.dat $(BIN_DIR)/ ;\
-		cp fastroute-lib/POWV9.dat $(BIN_DIR)/ ;\
-		)
+	@cp build/third_party/rsyn/bin/rsyn $(BIN_DIR)/$(BIN_NAME)
+	@cp $(SUPPORT_DIR)/POST9.dat $(BIN_DIR)/
+	@cp $(SUPPORT_DIR)/POWV9.dat $(BIN_DIR)/
 
+.PHONY: ispd18_unit_test
+ispd18_unit_test:
+	@bash $(SUPPORT_DIR)/ispd18_unit_test.sh $(BENCHMARKS_DIR)
+
+.PHONY: ispd18_download
+ispd18_download:
+	@bash $(SUPPORT_DIR)/ispd18_download.sh $(BENCHMARKS_DIR)
+
+.PHONY: ispd18_clean
+ispd18_clean:
+	git clean -xdf $(SUPPORT_DIR)/ispd18
+
+.PHONY: clean
 clean:
 	rm -rf $(BUILD_DIR)
 	rm -rf $(LOG_DIR)
 
-clean_all:
+.PHONY: clean_all
+clean_all: ispd18_clean
 	rm -rf $(BUILD_DIR)
 	rm -rf $(BIN_NAME)
