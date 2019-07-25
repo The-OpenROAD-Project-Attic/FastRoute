@@ -48,11 +48,11 @@ MAKE_OPT =
 
 PARALLEL = 1
 
-.PHONY: compile
-compile: dirs build bin_cp
-
 .PHONY: all
 all: compile ispd18_unit_test
+
+.PHONY: compile
+compile: dirs build bin_cp
 
 .PHONY: build
 build:
