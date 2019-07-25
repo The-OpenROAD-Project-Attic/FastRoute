@@ -34,8 +34,8 @@
 // POSSIBILITY OF SUCH DAMAGE.
 ////////////////////////////////////////////////////////////////////////////////
 
-#ifndef FASTROUTE_H
-#define FASTROUTE_H
+#ifndef __FASTROUTE_API__
+#define __FASTROUTE_API__
 #include <vector>
 #include <string>
 #include <map>
@@ -91,4 +91,4 @@ class FT {
         std::map<std::string, std::vector<PIN>> getNets();
 };
 }  // namespace FastRoute
-#endif
+#endif /* __FASTROUTE_API__ */
