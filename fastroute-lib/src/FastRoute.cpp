@@ -270,7 +270,7 @@ void FT::setNumAdjustments(int nAdjustments) {
         numAdjust = nAdjustments;
 }
 
-void FT::addAdjustment(long x1, long y1, int l1, long x2, long y2, int l2, int reducedCap) {
+void FT::addAdjustment(long x1, long y1, int l1, long x2, long y2, int l2, int reducedCap, bool isReduce) {
         int grid, k;
         int reduce, cap;
         reducedCap = reducedCap;
@@ -283,8 +283,10 @@ void FT::addAdjustment(long x1, long y1, int l1, long x2, long y2, int l2, int r
                 cap = h_edges3D[grid].cap;
 
                 if (((int)cap - reducedCap) < 0) {
-                        std::cout << "Warning: underflow in reduce\n";
-                        std::cout << "cap, reducedCap: " << cap << ", " << reducedCap << "\n";
+                        if (isReduce) {
+                                std::cout << "Warning: underflow in reduce\n";
+                                std::cout << "cap, reducedCap: " << cap << ", " << reducedCap << "\n";
+                        }
                         reduce = 0;
                 } else {
                         reduce = cap - reducedCap;
@@ -303,8 +305,10 @@ void FT::addAdjustment(long x1, long y1, int l1, long x2, long y2, int l2, int r
                 reduce = cap - reducedCap;
 
                 if (((int)cap - reducedCap) < 0) {
-                        std::cout << "Warning: underflow in reduce\n";
-                        std::cout << "cap, reducedCap: " << cap << ", " << reducedCap << "\n";
+                        if (isReduce) {
+                                std::cout << "Warning: underflow in reduce\n";
+                                std::cout << "cap, reducedCap: " << cap << ", " << reducedCap << "\n";
+                        }
                         reduce = 0;
                 } else {
                         reduce = cap - reducedCap;
