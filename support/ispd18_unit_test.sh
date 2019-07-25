@@ -1,23 +1,17 @@
 #!/bin/bash
 
-support_folder=$1
-export support_folder
-export bin_path=./FRlefdef
+support_dir="support/ispd18"
+bin_path=./FRlefdef
+test_num=1
 
-cd "$(dirname "$0")/../" || exit
+cd "$(dirname "$0")/../$support_dir" || exit
 
-par_run()
-{
-        "$bin_path" --no-gui --script "$support_folder/ispd18_test${1}/ispd18_test${1}_generic_reader.rsyn"
-}
-export -f par_run
+fname="ispd18_test${test_num}"
 
-if [[ ! "$(command -v parallel >/dev/null)" ]]
-then
-        parallel par_run ::: "$(seq 1 10)"
-else
-        for num in $(seq 1 10)
-        do
-                par_run "$num"
-        done
+if [[ ! -f "${fname}/${fname}.input.lef" ]] || [[ ! -f "${fname}/${fname}.input.def" ]]; then
+        wget "http://www.ispd.cc/contests/18/${fname}.tgz"
+        mkdir -p "${fname}"
+        tar zxvf "${fname}.tgz" -C "./$fname/"
 fi
+
+"$bin_path" --no-gui --script "$support_dir/ispd18_test${test_num}/ispd18_test${test_num}_generic_reader.rsyn"
