@@ -80,7 +80,7 @@ class FT {
         void addNet(char *name, int netIdx, int nPIns, int minWIdth, PIN pins[]);
         void initEdges();
         void setNumAdjustments(int nAdjustements);
-        void addAdjustment(long x1, long y1, int l1, long x2, long y2, int l2, int reducedCap);
+        void addAdjustment(long x1, long y1, int l1, long x2, long y2, int l2, int reducedCap, bool isReduce = true);
         void initAuxVar();
         int run(std::vector<NET> &);
         std::vector<NET> getResults();

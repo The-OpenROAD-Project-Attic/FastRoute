@@ -78,6 +78,11 @@ bool FastRouteProcess::run(const Rsyn::Json &params) {
         std::cout << "Initing grid...\n";
         initGrid();
         std::cout << "Initing grid... Done!\n";
+        
+        std::cout << "\n************\n----Grid info:\n";
+        std::cout << "--------Lower left: " << grid.lower_left_x << ", " << grid.lower_left_y << "\n";
+        std::cout << "--------xGrids, yGrids: " << grid.xGrids << ", " << grid.yGrids << "\n";
+        std::cout << "--------Width, height: " << grid.tile_width << ", " << grid.tile_height << "\n************\n";
 
         std::cout << "Setting capacities...\n";
         setCapacities();
@@ -150,8 +155,8 @@ void FastRouteProcess::initGrid() {
         DBU dieX = dieBounds[UPPER][X] - dieBounds[LOWER][X];
         DBU dieY = dieBounds[UPPER][Y] - dieBounds[LOWER][Y];
 
-        int xGrid = std::ceil((float)dieX / tileSize);
-        int yGrid = std::ceil((float)dieY / tileSize);
+        int xGrid = std::floor((float)dieX / tileSize);
+        int yGrid = std::floor((float)dieY / tileSize);
         
         if ((xGrid*tileSize) == dieX)
                 grid.perfect_regular_x = true;
@@ -347,27 +352,26 @@ void FastRouteProcess::initNets() {
 }
 
 void FastRouteProcess::setGridAdjustments() {
-        grid.perfect_regular_x = false;
-        grid.perfect_regular_y = false;
-
         Rsyn::PhysicalDie phDie = phDesign.getPhysicalDie();
         Bounds dieBounds = phDie.getBounds();
         DBUxy upperDieBounds = dieBounds[UPPER];
-
+        
         int xGrids = grid.xGrids;
         int yGrids = grid.yGrids;
-        int xBlocked = upperDieBounds.x % xGrids;
-        int yBlocked = upperDieBounds.y % yGrids;
-        float percentageBlockedX = xBlocked / grid.tile_width;
-        float percentageBlockedY = yBlocked / grid.tile_height;
+
+        DBUxy upperGridBounds = DBUxy(grid.xGrids*grid.tile_width, grid.yGrids*grid.tile_height);
+        float xExtra = (float)(upperDieBounds.x - upperGridBounds.x)/grid.tile_width;
+        float yExtra = (float)(upperDieBounds.y - upperGridBounds.y)/grid.tile_height;
+//        float percentageBlockedX = xBlocked / grid.tile_width;
+//        float percentageBlockedY = yBlocked / grid.tile_height;
 
         for (Rsyn::PhysicalLayer phLayer : phDesign.allPhysicalLayers()) {
                 if (phLayer.getType() != Rsyn::ROUTING)
                         continue;
 
                 int layerN = phLayer.getRelativeIndex() + 1;
-                int newVCapacity = std::floor((float)vCapacities[layerN - 1] * percentageBlockedX);
-                int newHCapacity = std::floor((float)hCapacities[layerN - 1] * percentageBlockedY);
+                int newVCapacity = vCapacities[layerN - 1] + std::floor(vCapacities[layerN - 1] * xExtra);
+                int newHCapacity = hCapacities[layerN - 1] + std::floor(hCapacities[layerN - 1] * yExtra);
 
                 int numAdjustments = 0;
                 for (int i = 1; i < yGrids; i++)
@@ -378,14 +382,18 @@ void FastRouteProcess::setGridAdjustments() {
 
                 if (!grid.perfect_regular_x) {
                         for (int i = 1; i < yGrids; i++) {
-                                fastRoute.addAdjustment(xGrids - 1, i - 1, layerN, xGrids - 1, i, layerN, newVCapacity);
+                                fastRoute.addAdjustment(xGrids - 1, i - 1, layerN, xGrids - 1, i, layerN, newVCapacity, false);
                         }
                 }
                 if (!grid.perfect_regular_y) {
                         for (int i = 1; i < xGrids; i++) {
-                                fastRoute.addAdjustment(i - 1, yGrids - 1, layerN, i, yGrids - 1, layerN, newHCapacity);
+                                fastRoute.addAdjustment(i - 1, yGrids - 1, layerN, i, yGrids - 1, layerN, newHCapacity, false);
                         }
                 }
+                std::cout << "----Layer " << layerN << "\n";
+                std::cout << "Extras (x, y): " << xExtra << ", " << yExtra << "\n";
+                std::cout << "----Capacity h (before and after): " << hCapacities[layerN - 1] << ", " << newHCapacity << "\n";
+                std::cout << "----Capacity v (before and after): " << vCapacities[layerN - 1] << ", " << newVCapacity << "\n";
         }
 }
 
@@ -695,10 +703,10 @@ void FastRouteProcess::getPosOnGrid(DBUxy &pos) {
         int gCellId_X = floor((float)((x - grid.lower_left_x) / grid.tile_width));
         int gCellId_Y = floor((float)((y - grid.lower_left_y) / grid.tile_height));
 
-        if (gCellId_X >= grid.xGrids && grid.perfect_regular_x)
+        if (gCellId_X >= grid.xGrids)
                 gCellId_X--;
 
-        if (gCellId_Y >= grid.yGrids && grid.perfect_regular_y)
+        if (gCellId_Y >= grid.yGrids)
                 gCellId_Y--;
 
         DBU centerX = (gCellId_X * grid.tile_width) + (grid.tile_width / 2) + grid.lower_left_x;
@@ -735,10 +743,10 @@ Bounds FastRouteProcess::globalRoutingToBounds(const FastRoute::ROUTE &route) {
         DBU urX = finalX + (grid.tile_width / 2);
         DBU urY = finalY + (grid.tile_height / 2);
 
-        if (urX > dieBounds.getUpper().x) {
+        if ((dieBounds.getUpper().x - urX)/grid.tile_width < 1) {
                 urX = dieBounds.getUpper().x;
         }
-        if (urY > dieBounds.getUpper().y) {
+        if ((dieBounds.getUpper().y - urY)/grid.tile_height < 1) {
                 urY = dieBounds.getUpper().y;
         }
 
@@ -753,6 +761,9 @@ std::pair<FastRouteProcess::TILE, FastRouteProcess::TILE> FastRouteProcess::getB
         std::pair<TILE, TILE> tiles;
         FastRouteProcess::TILE firstTile;
         FastRouteProcess::TILE lastTile;
+        
+        Rsyn::PhysicalDie phDie = phDesign.getPhysicalDie();
+        Bounds dieBounds = phDie.getBounds();
 
         DBUxy lower = obs.getLower();  // lower bound of obstacle
         DBUxy upper = obs.getUpper();  // upper bound of obstacle
@@ -775,6 +786,13 @@ std::pair<FastRouteProcess::TILE, FastRouteProcess::TILE> FastRouteProcess::getB
 
         DBUxy llLastTile = DBUxy(upper.x - (grid.tile_width / 2), upper.y - (grid.tile_height / 2));
         DBUxy urLastTile = DBUxy(upper.x + (grid.tile_width / 2), upper.y + (grid.tile_height / 2));
+        
+        if ((dieBounds.getUpper().x - urLastTile.x)/grid.tile_width < 1) {
+                urLastTile.x = dieBounds.getUpper().x;
+        }
+        if ((dieBounds.getUpper().y - urLastTile.y)/grid.tile_height < 1) {
+                urLastTile.y = dieBounds.getUpper().y;
+        }
 
         firstTileBds = Bounds(llFirstTile, urFirstTile);
         lastTileBds = Bounds(llLastTile, urLastTile);
