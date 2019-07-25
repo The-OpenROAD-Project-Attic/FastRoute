@@ -61,28 +61,23 @@ bool FastRouteProcess::run(const Rsyn::Json &params) {
         Stepwatch watch("FastRoute...");
         std::vector<FastRoute::NET> result;
         std::string outfile = params.value("outfile", "out.guide");
-        
+
         adjustment = params.value("adjustment", 0.0);
         maxRoutingLayer = params.value("maxRoutingLayer", -1);
         design = session.getDesign();
         module = design.getTopModule();
         phDesign = session.getPhysicalDesign();
-        
+
         std::cout << "\n----------------\n";
         std::cout << "Params: \n";
         std::cout << "**** Output file: " << outfile << "\n";
         std::cout << "**** Capacity adjustment: " << adjustment << "\n";
         std::cout << "**** Max routing layer: " << maxRoutingLayer << "\n";
         std::cout << "\n----------------\n";
-        
+
         std::cout << "Initing grid...\n";
         initGrid();
         std::cout << "Initing grid... Done!\n";
-        
-        std::cout << "\n************\n----Grid info:\n";
-        std::cout << "--------Lower left: " << grid.lower_left_x << ", " << grid.lower_left_y << "\n";
-        std::cout << "--------xGrids, yGrids: " << grid.xGrids << ", " << grid.yGrids << "\n";
-        std::cout << "--------Width, height: " << grid.tile_width << ", " << grid.tile_height << "\n************\n";
 
         std::cout << "Setting capacities...\n";
         setCapacities();
@@ -111,7 +106,7 @@ bool FastRouteProcess::run(const Rsyn::Json &params) {
         std::cout << "Computing user defined adjustments...\n";
         computeSimpleAdjustments();
         std::cout << "Computing user defined adjustments... Done!\n";
-        
+
         fastRoute.initAuxVar();
 
         std::cout << "Running FastRoute...\n";
@@ -194,7 +189,7 @@ void FastRouteProcess::setCapacities() {
 
                         if (phLayer.getRelativeIndex() >= maxRoutingLayer && maxRoutingLayer > 0)
                                 hCapacity = 0;
-                        
+
                         fastRoute.addVCapacity(0, phLayer.getRelativeIndex() + 1);
                         fastRoute.addHCapacity(hCapacity, phLayer.getRelativeIndex() + 1);
 
@@ -207,7 +202,7 @@ void FastRouteProcess::setCapacities() {
                                         break;
                                 }
                         }
-                        
+
                         if (phLayer.getRelativeIndex() >= maxRoutingLayer && maxRoutingLayer > 0)
                                 vCapacity = 0;
 
@@ -355,15 +350,13 @@ void FastRouteProcess::setGridAdjustments() {
         Rsyn::PhysicalDie phDie = phDesign.getPhysicalDie();
         Bounds dieBounds = phDie.getBounds();
         DBUxy upperDieBounds = dieBounds[UPPER];
-        
+
         int xGrids = grid.xGrids;
         int yGrids = grid.yGrids;
 
         DBUxy upperGridBounds = DBUxy(grid.xGrids*grid.tile_width, grid.yGrids*grid.tile_height);
         float xExtra = (float)(upperDieBounds.x - upperGridBounds.x)/grid.tile_width;
         float yExtra = (float)(upperDieBounds.y - upperGridBounds.y)/grid.tile_height;
-//        float percentageBlockedX = xBlocked / grid.tile_width;
-//        float percentageBlockedY = yBlocked / grid.tile_height;
 
         for (Rsyn::PhysicalLayer phLayer : phDesign.allPhysicalLayers()) {
                 if (phLayer.getType() != Rsyn::ROUTING)
@@ -390,18 +383,13 @@ void FastRouteProcess::setGridAdjustments() {
                                 fastRoute.addAdjustment(i - 1, yGrids - 1, layerN, i, yGrids - 1, layerN, newHCapacity, false);
                         }
                 }
-                std::cout << "----Layer " << layerN << "\n";
-                std::cout << "Extras (x, y): " << xExtra << ", " << yExtra << "\n";
-                std::cout << "----Capacity h (before and after): " << hCapacities[layerN - 1] << ", " << newHCapacity << "\n";
-                std::cout << "----Capacity v (before and after): " << vCapacities[layerN - 1] << ", " << newVCapacity << "\n";
         }
 }
 
 void FastRouteProcess::computeSimpleAdjustments() {
-        // Temporary adjustment: fixed percentage per layer
         if (adjustment == 0.0)
                 return;
-        
+
         int xGrids = grid.xGrids;
         int yGrids = grid.yGrids;
         int numAdjustments = 0;
@@ -761,7 +749,7 @@ std::pair<FastRouteProcess::TILE, FastRouteProcess::TILE> FastRouteProcess::getB
         std::pair<TILE, TILE> tiles;
         FastRouteProcess::TILE firstTile;
         FastRouteProcess::TILE lastTile;
-        
+
         Rsyn::PhysicalDie phDie = phDesign.getPhysicalDie();
         Bounds dieBounds = phDie.getBounds();
 
@@ -786,7 +774,7 @@ std::pair<FastRouteProcess::TILE, FastRouteProcess::TILE> FastRouteProcess::getB
 
         DBUxy llLastTile = DBUxy(upper.x - (grid.tile_width / 2), upper.y - (grid.tile_height / 2));
         DBUxy urLastTile = DBUxy(upper.x + (grid.tile_width / 2), upper.y + (grid.tile_height / 2));
-        
+
         if ((dieBounds.getUpper().x - urLastTile.x)/grid.tile_width < 1) {
                 urLastTile.x = dieBounds.getUpper().x;
         }
