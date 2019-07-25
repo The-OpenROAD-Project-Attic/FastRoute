@@ -11,7 +11,7 @@ The FastRoute4.1 version was received from <yuexu@iastate.edu> on June 15, 2019,
 
 [Rsyn](https://github.com/RsynTeam/rsyn-x/) version is based on commit `1087c918e4fa14db84fc3b4c91210db96b07bb4c` and released under Apache License, Version 2.0 as given in its [repository](https://github.com/RsynTeam/rsyn-x/blob/master/README.md).
 
-Any code additional to Rsyn will clearly specify its license in each file and in this README. We ask contributors to seriously consider using the BSD-3 Licence.
+Any third party code such as Rsyn will clearly specify its license in each file and in this README. We ask contributors to seriously consider using the BSD-3 Licence.
 
 ## Getting Started
 ### Pre-Requisite
