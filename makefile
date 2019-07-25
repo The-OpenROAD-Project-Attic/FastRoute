@@ -75,12 +75,16 @@ bin_cp:
 	@cp $(SUPPORT_DIR)/POWV9.dat $(BIN_DIR)/
 
 .PHONY: ispd18_unit_test
-ispd18_unit_test: ispd18_download
+ispd18_unit_test:
 	@bash $(SUPPORT_DIR)/ispd18_unit_test.sh $(BENCHMARKS_DIR)
 
 .PHONY: ispd18_download
 ispd18_download:
 	@bash $(SUPPORT_DIR)/ispd18_download.sh $(BENCHMARKS_DIR)
+
+.PHONY: ispd18_clean
+ispd18_clean:
+	git clean -xdf $(SUPPORT_DIR)/ispd18
 
 .PHONY: clean
 clean:
@@ -88,6 +92,6 @@ clean:
 	rm -rf $(LOG_DIR)
 
 .PHONY: clean_all
-clean_all:
+clean_all: ispd18_clean
 	rm -rf $(BUILD_DIR)
 	rm -rf $(BIN_NAME)

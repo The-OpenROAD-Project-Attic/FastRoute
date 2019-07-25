@@ -2,3 +2,4 @@ build
 FRlefdef
 *.dat
 support/ispd18/*
+*.log
