@@ -51,5 +51,5 @@ message(STATUS ${CMAKE_CURRENT_SOURCE_DIR})
 project(fastroute-lefdef)
 
 # Add db as a sub-project
-add_subdirectory(fastroute-lib)
-add_subdirectory(rsyn)
+add_subdirectory(third_party/fastroute)
+add_subdirectory(third_party/rsyn)

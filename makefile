@@ -39,21 +39,22 @@ BUILD_DIR = build
 BIN_DIR = .
 BIN_NAME = FRlefdef
 
-BENCHMARKS_DIR = benchmarks
 SUPPORT_DIR = support
+BENCHMARKS_DIR = $(SUPPORT_DIR)/ispd18
 
 CMAKE = cmake
 CMAKE_OPT =
-
 MAKE_OPT =
 
 PARALLEL = 1
 
-.PHONY: all dirs bin_cp
+.PHONY: all compile dirs bin_cp
 
-all: dirs compile bin_cp
+compile: dirs build bin_cp
 
-compile:
+all: compile ispd18_unit_test
+
+build:
 	@( \
 		mkdir -p $(BUILD_DIR) ;\
 		cd $(BUILD_DIR) ;\
@@ -62,31 +63,21 @@ compile:
 		)
 
 dirs:
-	@( \
-		echo Create $(BUILD_DIR) ;\
-		mkdir -p $(BUILD_DIR) ;\
-		)
+	@echo Create $(BUILD_DIR)
+	@mkdir -p $(BUILD_DIR)
 
 bin_cp:
-	@( \
-		cp build/rsyn/bin/rsyn $(BIN_DIR)/$(BIN_NAME) ;\
-		cp fastroute-lib/POST9.dat $(BIN_DIR)/ ;\
-		cp fastroute-lib/POWV9.dat $(BIN_DIR)/ ;\
-		)
+	@cp build/third_party/rsyn/bin/rsyn $(BIN_DIR)/$(BIN_NAME)
+	@cp $(SUPPORT_DIR)/POST9.dat $(BIN_DIR)/
+	@cp $(SUPPORT_DIR)/POWV9.dat $(BIN_DIR)/
 
-unit_test: download
-	@bash ./support/unit_test.sh
+.PHONY: ispd18_unit_test
+ispd18_unit_test: ispd18_download
+	@bash $(SUPPORT_DIR)/ispd18_unit_test.sh $(BENCHMARKS_DIR)
 
-download:
-	@( \
-		if [ ! -d $(BENCHMARKS_DIR) ] ; then \
-			echo Could not find $(BENCHMARKS_DIR) folder ; \
-			mkdir -p $(BENCHMARKS_DIR) ; \
-			echo Downloading $(BENCHMARKS_DIR) ; \
-			bash ./support/download_ispd18.sh $(BENCHMARKS_DIR) ; \
-		fi ; \
-	)
-	@cp -r $(SUPPORT_DIR)/ispd18/* $(BENCHMARKS_DIR)
+.PHONY: ispd18_download
+ispd18_download:
+	@bash $(SUPPORT_DIR)/ispd18_download.sh $(BENCHMARKS_DIR)
 
 clean:
 	rm -rf $(BUILD_DIR)
