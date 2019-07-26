@@ -645,25 +645,25 @@ void FastRouteProcess::writeGuides(std::vector<FastRoute::NET> &globalRoute, std
 }
 
 void FastRouteProcess::mergeBounds(std::vector<Bounds> & guideBds){
-       std::vector<Bounds> finalBds;
-       if (guideBds.size() < 1) {
-               std::cout << "Error: guides vector is empty!!!\n";
-               std::exit(0);
-       }
-       finalBds.push_back(guideBds[0]);
-       for (int i=1; i < guideBds.size(); i++){
-               Bounds bds = guideBds[i];
-               Bounds & lastBds = finalBds.back();
-               if (lastBds.overlap(bds)){
-                      lastBds[LOWER][X] = std::min(lastBds[LOWER][X], bds[LOWER][X]); 
-                      lastBds[LOWER][Y] = std::min(lastBds[LOWER][Y], bds[LOWER][Y]); 
-                      lastBds[UPPER][X] = std::max(lastBds[UPPER][X], bds[UPPER][X]); 
-                      lastBds[UPPER][Y] = std::max(lastBds[UPPER][Y], bds[UPPER][Y]); 
-               } else
-                      finalBds.push_back(bds); 
-       } 
-       guideBds.clear();
-       guideBds = finalBds;
+        std::vector<Bounds> finalBds;
+        if (guideBds.size() < 1) {
+                std::cout << "Error: guides vector is empty!!!\n";
+                std::exit(0);
+        }
+        finalBds.push_back(guideBds[0]);
+        for (int i=1; i < guideBds.size(); i++){
+                Bounds bds = guideBds[i];
+                Bounds & lastBds = finalBds.back();
+                if (lastBds.overlap(bds)){
+                       lastBds[LOWER][X] = std::min(lastBds[LOWER][X], bds[LOWER][X]); 
+                       lastBds[LOWER][Y] = std::min(lastBds[LOWER][Y], bds[LOWER][Y]); 
+                       lastBds[UPPER][X] = std::max(lastBds[UPPER][X], bds[UPPER][X]); 
+                       lastBds[UPPER][Y] = std::max(lastBds[UPPER][Y], bds[UPPER][Y]); 
+                } else
+                       finalBds.push_back(bds); 
+        } 
+        guideBds.clear();
+        guideBds = finalBds;
 }
 
 void FastRouteProcess::writeEst(const std::vector<FastRoute::NET> &globalRoute, std::string filename) {
