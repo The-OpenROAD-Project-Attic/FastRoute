@@ -144,7 +144,7 @@ void FT::addNet(char *name, int netIdx, int nPins, int minWidth, PIN pins[]) {
                         pinL = pins[j].layer;
                         pinX = (int)((pinX_in - xcorner) / wTile);
                         pinY = (int)((pinY_in - ycorner) / hTile);
-                        if (!(pinX < 0 || pinX >= xGrid || pinY < -1 || pinY >= yGrid || pinL >= numLayers || pinL < 0)) {
+                        if (!(pinX < 0 || pinX >= xGrid || pinY < -1 || pinY >= yGrid || pinL > numLayers || pinL <= 0)) {
                                 remove = FALSE;
                                 for (k = 0; k < pinInd; k++) {
                                         if (pinX == pinXarray[k] && pinY == pinYarray[k] && pinL == pinLarray[k]) {

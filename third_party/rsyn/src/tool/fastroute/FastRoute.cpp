@@ -645,21 +645,25 @@ void FastRouteProcess::writeGuides(std::vector<FastRoute::NET> &globalRoute, std
 }
 
 void FastRouteProcess::mergeBounds(std::vector<Bounds> & guideBds){
-       std::vector<Bounds> finalBds;
-       finalBds.push_back(guideBds[0]);
-       for (int i=1; i < guideBds.size(); i++){
-               Bounds bds = guideBds[i];
-               Bounds & lastBds = finalBds.back();
-               if (lastBds.overlap(bds)){
-                      lastBds[LOWER][X] = std::min(lastBds[LOWER][X], bds[LOWER][X]); 
-                      lastBds[LOWER][Y] = std::min(lastBds[LOWER][Y], bds[LOWER][Y]); 
-                      lastBds[UPPER][X] = std::max(lastBds[UPPER][X], bds[UPPER][X]); 
-                      lastBds[UPPER][Y] = std::max(lastBds[UPPER][Y], bds[UPPER][Y]); 
-               } else
-                      finalBds.push_back(bds); 
-       } 
-       guideBds.clear();
-       guideBds = finalBds;
+        std::vector<Bounds> finalBds;
+        if (guideBds.size() < 1) {
+                std::cout << "Error: guides vector is empty!!!\n";
+                std::exit(0);
+        }
+        finalBds.push_back(guideBds[0]);
+        for (int i=1; i < guideBds.size(); i++){
+                Bounds bds = guideBds[i];
+                Bounds & lastBds = finalBds.back();
+                if (lastBds.overlap(bds)){
+                       lastBds[LOWER][X] = std::min(lastBds[LOWER][X], bds[LOWER][X]); 
+                       lastBds[LOWER][Y] = std::min(lastBds[LOWER][Y], bds[LOWER][Y]); 
+                       lastBds[UPPER][X] = std::max(lastBds[UPPER][X], bds[UPPER][X]); 
+                       lastBds[UPPER][Y] = std::max(lastBds[UPPER][Y], bds[UPPER][Y]); 
+                } else
+                       finalBds.push_back(bds); 
+        } 
+        guideBds.clear();
+        guideBds = finalBds;
 }
 
 void FastRouteProcess::writeEst(const std::vector<FastRoute::NET> &globalRoute, std::string filename) {
@@ -802,13 +806,12 @@ void FastRouteProcess::addRemainingGuides(std::vector<FastRoute::NET> &globalRou
                         continue;
                 }
 
-                int lastLayer = -1;
-                for (int p = 0; p < pins.size() - 1; p++)
-                        if (pins[p].x == pins[p + 1].x && pins[p].y == pins[p + 1].y)
+                if (netRoute.route.size() == 0) {
+                        int lastLayer = -1;
+                        for (int p = 0; p < pins.size(); p++)
                                 if (pins[p].layer > lastLayer)
                                         lastLayer = pins[p].layer;
 
-                if (netRoute.route.size() == 0) {
                         for (int l = 1; l <= lastLayer - 1; l++) {
                                 FastRoute::ROUTE route;
                                 route.initLayer = l;
