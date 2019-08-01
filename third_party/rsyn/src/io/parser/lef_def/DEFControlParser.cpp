@@ -37,6 +37,7 @@
 extern void freeCB(void* name);
 extern void* mallocCB(size_t size);
 extern void* reallocCB(void* name, size_t size);
+int noDirectionPinCounter = 0;
 
 #include "ispd13/global.h"
 #include "util/Bounds.h"
@@ -217,7 +218,16 @@ int defPin(defrCallbackType_e, defiPin* pin, defiUserData userData) {
 
         defPin.clsName = pin->pinName();
         defPin.clsNetName = pin->netName();
-        defPin.clsDirection = pin->direction();
+        if (pin->direction() != NULL)
+                defPin.clsDirection = pin->direction();
+        else {
+                if (noDirectionPinCounter < 10)
+                        std::cout << "WARNING: PIN " << pin->pinName() << " doesn't have"
+                                " direction. Setting UNKNOWN_DIRECTION\n";
+                else if (noDirectionPinCounter == 10)
+                        std::cout << "Omitting further warnings for pin with unknown direction\n";
+                noDirectionPinCounter++;
+        }
         defPin.clsPos[X] = pin->placementX();
         defPin.clsPos[Y] = pin->placementY();
         defPin.clsICCADPos = defPin.clsPos;
