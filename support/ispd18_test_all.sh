@@ -1,6 +1,7 @@
 #!/bin/bash
 
 support_folder=$1
+max_par=${2:-4}
 export support_folder
 export bin_path=./FRlefdef
 
@@ -14,7 +15,7 @@ export -f par_run
 
 if [[ ! "$(command -v parallel >/dev/null)" ]]
 then
-        parallel par_run ::: "$(seq 1 10)"
+        parallel -j"$max_par" par_run ::: "$(seq 1 10)"
 else
         for num in $(seq 1 10)
         do
