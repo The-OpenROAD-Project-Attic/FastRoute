@@ -107,8 +107,6 @@ parent3D*** pr3D;
 
 int mazeedge_Threshold;
 Bool inRegion[YRANGE][XRANGE];
-Bool heapVisited[MAXNETDEG];
-int heapQueue[MAXNETDEG];
 
 int gridHV, gridH, gridV, gridHs[MAXLAYER], gridVs[MAXLAYER];
 
@@ -117,8 +115,8 @@ short** heap23D;
 
 float *h_costTable, *v_costTable;
 Bool stopDEC, errorPRONE;
-OrderNetEdge netEO[4000];
-int xcor[4000], ycor[4000], dcor[4000];
+OrderNetEdge *netEO;
+int *xcor, *ycor, *dcor;
 
 StTree* sttreesBK;
 

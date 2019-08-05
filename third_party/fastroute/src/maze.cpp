@@ -947,7 +947,10 @@ void reInitTree(int netID) {
         int deg, numEdges, edgeID, d, j;
         TreeEdge *treeedge;
         Tree rsmt;
-        int x[MAXNETDEG], y[MAXNETDEG];
+
+        // TODO: check this size
+        int x[nets[netID]->numPins];
+        int y[nets[netID]->numPins];
 
         //printf("re init tree for net %d\n",netID);
 
@@ -1641,6 +1644,8 @@ void mazeRouteMSMD(int iter, int expand, float costHeight, int ripup_threshold, 
 
                                         if (checkRoute2DTree(netID)) {
                                                 reInitTree(netID);
+                                                free(netEO);
+                                                netEO = NULL;
                                                 return;
                                         }
                                 }  // congested route
@@ -1648,8 +1653,16 @@ void mazeRouteMSMD(int iter, int expand, float costHeight, int ripup_threshold, 
                 }                  // loop edgeID
         }
 
-        free(h_costTable);
-        free(v_costTable);
+        // TODO: check this frees
+        if (!netEO) {
+                free(netEO);
+        }
+        if (!h_costTable) {
+                free(h_costTable);
+        }
+        if (!v_costTable) {
+                free(v_costTable);
+        }
 
         // free memory
 }
