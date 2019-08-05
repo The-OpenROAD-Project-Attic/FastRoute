@@ -3,7 +3,8 @@
 bin_path=./FRlefdef
 test_num=1
 
-repo_base_dir=$(realpath "$(dirname "$0")"/../)
+cd "$(dirname "$0")"/../ || exit
+repo_base_dir="$PWD"
 support_dir="$repo_base_dir/support/ispd18"
 
 cd "$support_dir" || exit
