@@ -2,6 +2,8 @@
 
 export support_dir="support/ispd18"
 
+max_par=${1:-4}
+
 cd "$(dirname "$0")/../"
 
 cd "$support_dir" || exit
@@ -18,14 +20,15 @@ par_download()
 }
 export -f par_download
 
-if [[ ! $(command -v parallel >/dev/null) ]]
+command -v parallel >/dev/null
+if [[ $? ]]
 then
-        parallel par_download ::: "$(seq 1 10)"
-else
         for num in $(seq 1 10)
         do
                 par_download "$num"
         done
+else
+        parallel par_download ::: "$(seq 1 10)"
 fi
 
 wait
