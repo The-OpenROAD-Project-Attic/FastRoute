@@ -350,21 +350,39 @@ void FastRouteProcess::setGridAdjustments() {
         Rsyn::PhysicalDie phDie = phDesign.getPhysicalDie();
         Bounds dieBounds = phDie.getBounds();
         DBUxy upperDieBounds = dieBounds[UPPER];
+        DBU hSpace;
+        DBU vSpace;
 
         int xGrids = grid.xGrids;
         int yGrids = grid.yGrids;
 
         DBUxy upperGridBounds = DBUxy(grid.xGrids*grid.tile_width, grid.yGrids*grid.tile_height);
-        float xExtra = (float)(upperDieBounds.x - upperGridBounds.x)/grid.tile_width;
-        float yExtra = (float)(upperDieBounds.y - upperGridBounds.y)/grid.tile_height;
+        DBU xExtra = upperDieBounds.x - upperGridBounds.x;
+        DBU yExtra = upperDieBounds.y - upperGridBounds.y;
 
         for (Rsyn::PhysicalLayer phLayer : phDesign.allPhysicalLayers()) {
                 if (phLayer.getType() != Rsyn::ROUTING)
                         continue;
 
+                if (phLayer.getDirection() == Rsyn::HORIZONTAL) {
+                        for (PhysicalTracks phTracks : phDesign.allPhysicalTracks(phLayer)) {
+                                if (phTracks.getDirection() != (PhysicalTrackDirection)Rsyn::HORIZONTAL) {
+                                        hSpace =  phTracks.getSpace();
+                                        break;
+                                }
+                        }
+                } else {
+                        for (PhysicalTracks phTracks : phDesign.allPhysicalTracks(phLayer)) {
+                                if (phTracks.getDirection() != (PhysicalTrackDirection)Rsyn::VERTICAL) {
+                                        vSpace = phTracks.getSpace();
+                                        break;
+                                }
+                        }
+                }
+
                 int layerN = phLayer.getRelativeIndex() + 1;
-                int newVCapacity = vCapacities[layerN - 1] + std::floor(vCapacities[layerN - 1] * xExtra);
-                int newHCapacity = hCapacities[layerN - 1] + std::floor(hCapacities[layerN - 1] * yExtra);
+                int newVCapacity = std::floor((grid.tile_width + xExtra)/vSpace);
+                int newHCapacity = std::floor((grid.tile_height + yExtra)/hSpace);
 
                 int numAdjustments = 0;
                 for (int i = 1; i < yGrids; i++)
