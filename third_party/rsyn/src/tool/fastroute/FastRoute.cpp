@@ -74,6 +74,10 @@ bool FastRouteProcess::run(const Rsyn::Json &params) {
         std::cout << "**** Capacity adjustment: " << adjustment << "\n";
         std::cout << "**** Max routing layer: " << maxRoutingLayer << "\n";
         std::cout << "\n----------------\n";
+        
+        std::cout << "Checking pin placement...\n";
+        checkPinPlacement();
+        std::cout << "Checking pin placement... Done!\n";
 
         std::cout << "Initing grid...\n";
         initGrid();
@@ -887,6 +891,53 @@ int FastRouteProcess::computeTileReduce(const Bounds &obs, const Bounds &tile, D
                 std::exit(0);
         }
         return reduce;
+}
+
+void FastRouteProcess::checkPinPlacement() {
+        int numPins = 0;
+        std::map<DBU, int> posToNumPins;
+
+        for (Rsyn::Port port : module.allPorts()) {
+                Rsyn::PhysicalPort phPort = phDesign.getPhysicalPort(port);
+                DBUxy pos = port.getPosition();
+                DBU layer = phPort.getLayer().getRelativeIndex();
+                
+                DBU posPairing = ((pos.x + pos.y)*(pos.x + pos.y + 1))/2 + 1;
+                DBU finalPairing = ((posPairing + layer)*(posPairing + layer + 1))/2 + 1;
+                posToNumPins[finalPairing] = 0;
+        }
+
+        for (Rsyn::Port port : module.allPorts()) {
+                Rsyn::PhysicalPort phPort = phDesign.getPhysicalPort(port);
+                DBUxy pos = port.getPosition();
+                DBU layer = phPort.getLayer().getRelativeIndex();
+                
+                DBU posPairing = ((pos.x + pos.y)*(pos.x + pos.y + 1))/2 + 1;
+                DBU finalPairing = ((posPairing + layer)*(posPairing + layer + 1))/2 + 1;
+                
+                posToNumPins[finalPairing] += 1;
+        }
+
+        bool invalid = false;
+        for (Rsyn::Port port : module.allPorts()) {
+                Rsyn::PhysicalPort phPort = phDesign.getPhysicalPort(port);
+                DBUxy pos = port.getPosition();
+                DBU layer = phPort.getLayer().getRelativeIndex();
+                
+                DBU posPairing = ((pos.x + pos.y)*(pos.x + pos.y + 1))/2 + 1;
+                DBU finalPairing = ((posPairing + layer)*(posPairing + layer + 1))/2 + 1;
+                
+                if (posToNumPins[finalPairing] > 1) {
+                        std::cout << "ERROR: " << posToNumPins[finalPairing] << " pins in position " <<
+                                pos << ", layer " << layer+1 << "\n";
+                        posToNumPins[finalPairing] = 1;
+                        invalid = true;
+                }
+        }
+        
+        if (invalid) {
+                std::exit(0);
+        }
 }
 
 void FastRouteProcess::getSpecialNetsObstacles(std::map<int, std::vector<Bounds>> &mapLayerObstacles) {

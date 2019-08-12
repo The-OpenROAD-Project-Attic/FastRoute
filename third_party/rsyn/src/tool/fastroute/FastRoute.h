@@ -103,6 +103,9 @@ class FastRouteProcess : public Process {
         void addRemainingGuides(std::vector<FastRoute::NET> &);
         void mergeBounds(std::vector<Bounds> & guideBds);
 
+        // Detect functions
+        void checkPinPlacement();
+
        public:
         FastRouteProcess() = default;
         bool run(const Rsyn::Json &params) override;
