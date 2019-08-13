@@ -95,6 +95,7 @@ class FastRouteProcess : public Process {
         void writeEst(const std::vector<FastRoute::NET> &, std::string);
 
         // Aux functions
+        void checkMacros();
         void getPosOnGrid(DBUxy &);
         Bounds globalRoutingToBounds(const FastRoute::ROUTE &);
         std::pair<TILE, TILE> getBlockedTiles(const Bounds &, Bounds &, Bounds &);
