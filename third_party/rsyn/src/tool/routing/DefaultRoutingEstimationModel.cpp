@@ -17,7 +17,7 @@
 
 #include "session/Session.h"
 #include "phy/PhysicalDesign.h"
-#include "flute/flute.h"
+#include "flute.h"
 #include "util/Stopwatch.h"
 
 #include "DefaultRoutingEstimationModel.h"
