@@ -23,6 +23,7 @@ Any third party code such as Rsyn will clearly specify its license in each file 
 ### How to Compile
 
 ````
+git clone --recursive https://github.com/The-OpenROAD-Project/FastRoute4-lefdef
 cd FastRoute4-lefdef/
 make PARALLEL=nthreads CMAKE_OPT='optional parameters for cmake'
 ````
