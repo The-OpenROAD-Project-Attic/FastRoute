@@ -1,6 +1,6 @@
 [submodule "third_party/rsyn/third_party/def"]
 	path = third_party/rsyn/third_party/def
-	url = mgh:The-OpenROAD-Project/def
+	url = https://github.com/The-OpenROAD-Project/def
 [submodule "third_party/rsyn/third_party/lef"]
 	path = third_party/rsyn/third_party/lef
-	url = mgh:The-OpenROAD-Project/lef
+	url = https://github.com/The-OpenROAD-Project/lef
