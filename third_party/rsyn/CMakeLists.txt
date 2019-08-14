@@ -23,6 +23,9 @@ project(rsyn)
 
 # Add db as a sub-project
 add_subdirectory(db)
+add_subdirectory(third_party/lef)
+add_subdirectory(third_party/def)
+add_subdirectory(third_party/flute)
 
 if (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
         set(WINDOWS true)
@@ -64,19 +67,11 @@ set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -fopenmp")
 file(GLOB_RECURSE SRC_FILES
         ${PATH_RSYN}/*.cpp
         ${PATH_RSYN}/*.cc
-        ${PATH_RSYN}/*.c)
-
-#################
-# Library Paths #
-#################
-
-if(LINUX)
-        link_directories(${CMAKE_CURRENT_SOURCE_DIR}/lib/linux)
-endif()
-
-if(MACOSX)
-        link_directories(${CMAKE_CURRENT_SOURCE_DIR}/lib/macosx)
-endif()
+        ${PATH_RSYN}/*.c
+        ${PATH_RSYN}/../third_party/liberty/*.c
+        ${PATH_RSYN}/../third_party/liberty/*.cc
+        ${PATH_RSYN}/../third_party/liberty/*.cpp
+        )
 
 ###########
 # Targets #
@@ -88,12 +83,15 @@ add_executable(rsyn ${SRC_FILES})
 # Include Directories #
 #######################
 
-target_include_directories(rsyn PUBLIC "./db")
-target_include_directories(rsyn PUBLIC "./include")
-target_include_directories(rsyn PUBLIC "./include/def")
-target_include_directories(rsyn PUBLIC "./include/lef")
-target_include_directories(rsyn PUBLIC "./src")
-target_include_directories(rsyn PUBLIC "./src/contests")
+target_include_directories(rsyn PUBLIC
+        "./db"
+        "./include"
+        "./third_party/lef/lef"
+        "./third_party/def/def"
+        "./third_party/flute"
+        "./src"
+        "./src/contests"
+        )
 
 ##################
 # Compiler Flags #
@@ -107,10 +105,13 @@ target_compile_options(rsyn PUBLIC "-DRSYN_NO_GUI")
 # Linker Flags  #
 #################
 
-target_link_libraries(rsyn def lef)
-target_link_libraries(rsyn liberty flute)
-target_link_libraries(rsyn FastRoute)
-target_link_libraries(rsyn db)
+target_link_libraries(rsyn
+        FastRoute
+        db
+        lef
+        def
+        flute
+        )
 
 # Boost
 target_include_directories(rsyn PUBLIC ${Boost_INCLUDE_DIR})
