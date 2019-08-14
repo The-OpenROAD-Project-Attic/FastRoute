@@ -88,6 +88,7 @@ class FastRouteProcess : public Process {
         void setSpacingsAndMinWidth();
         void initNets();
         void setGridAdjustments();
+        void setTrackAdjustments();
         void computeSimpleAdjustments();
         void computeObstaclesAdjustments();
         void writeGuides(std::vector<FastRoute::NET> &, std::string);
