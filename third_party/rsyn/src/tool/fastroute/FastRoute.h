@@ -103,6 +103,7 @@ class FastRouteProcess : public Process {
         void getSpecialNetsObstacles(std::map<int, std::vector<Bounds>> &);
         void addRemainingGuides(std::vector<FastRoute::NET> &);
         void mergeBounds(std::vector<Bounds> & guideBds);
+        void setMaxNetDegree();
 
         // Detect functions
         void checkPinPlacement();

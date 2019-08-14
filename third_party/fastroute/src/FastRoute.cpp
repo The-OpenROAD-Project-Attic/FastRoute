@@ -341,6 +341,10 @@ int FT::getEdgeCapacity(long x1, long y1, int l1, long x2, long y2, int l2) {
         return cap;
 }
 
+void FT::setMaxNetDegree(int deg) {
+        maxNetDegree = deg;
+}
+
 void FT::initAuxVar() {
         int k, i;
         treeOrderCong = NULL;
@@ -456,6 +460,8 @@ int FT::run(std::vector<NET> &result) {
         int updateType, minofl, minoflrnd, mazeRound, upType, cost_type, bmfl, bwcnt;
         Bool goingLV, healingNeed, noADJ, extremeNeeded, needOUTPUT;
 
+        // TODO: check this size
+        int maxPin = maxNetDegree;
         Bool input, WriteOut;
         input = WriteOut = 0;
 

@@ -82,6 +82,10 @@ bool FastRouteProcess::run(const Rsyn::Json &params) {
         std::cout << "Initing grid...\n";
         initGrid();
         std::cout << "Initing grid... Done!\n";
+        
+        std::cout << "Setting max net degree...\n";
+        setMaxNetDegree();
+        std::cout << "Setting max net degree... Done!\n";
 
         std::cout << "Setting capacities...\n";
         setCapacities();
@@ -837,6 +841,21 @@ void FastRouteProcess::mergeBounds(std::vector<Bounds> & guideBds){
         } 
         guideBds.clear();
         guideBds = finalBds;
+}
+
+void FastRouteProcess::setMaxNetDegree() {
+        int maxDeg = -1;
+        for (Rsyn::Net net : module.allNets()) {
+                if (net.getNumPins() > maxDeg)
+                        maxDeg = net.getNumPins();
+        }
+        
+        if (maxDeg < 1) {
+                std::cout << "ERROR: nets with no pin\n";
+                std::exit(-1);
+        }
+        
+        fastRoute.setMaxNetDegree(maxDeg);
 }
 
 void FastRouteProcess::writeEst(const std::vector<FastRoute::NET> &globalRoute, std::string filename) {
