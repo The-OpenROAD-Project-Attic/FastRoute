@@ -52,7 +52,7 @@ PARALLEL = 1
 all: compile ispd18_unit_test
 
 .PHONY: compile
-compile: dirs build bin_cp
+compile: setup build bin_cp
 
 .PHONY: build
 build:
@@ -62,6 +62,18 @@ build:
 		$(CMAKE) .. $(CMAKE_OPT) ;\
 		$(MAKE) --no-print-directory -j$(PARALLEL) $(MAKE_OPT) ;\
 		)
+
+.PHONY: setup
+setup: check_submodules dirs
+
+.PHONY: check_submodules
+check_submodules:
+	@( \
+		echo "Initialize submodules" ;\
+		git submodule init ;\
+		echo "Update submodules" ;\
+		git submodule update ;\
+	)
 
 .PHONY: dirs
 dirs:
