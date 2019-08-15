@@ -34,22 +34,31 @@
 ## POSSIBILITY OF SUCH DAMAGE.
 ################################################################################
 
-# FastRoute4.1 Lef/Def version
-
-#########
-# Setup #
-#########
-
-# Specify the minimum version for CMake
 cmake_minimum_required(VERSION 3.1)
 
-# Message
+project(FastRoute4-lefdef)
+set(BIN_NAME "FRlefdef")
 message(STATUS "FastRoute4.1 Lef/Def version")
 message(STATUS ${CMAKE_CURRENT_SOURCE_DIR})
 
-# Project's name
-project(fastroute-lefdef)
+# Print info on build
+if( CMAKE_BUILD_TYPE MATCHES "[Dd][Ee][Bb][Uu][Gg]" )
+        message( "INFO: DEBUG BUILD" )
+        # for debug type builds, turn on verbose makefiles
+        set(CMAKE_VERBOSE_MAKEFILE ON)
 
-# Add db as a sub-project
+        # Tell other CMake files that we're doing a debug build
+        set(DEBUG_BUILD 1)
+
+        # Tell C/C++ that we're doing a debug build
+        add_definitions(-DDEBUG)
+endif()
+if( CMAKE_BUILD_TYPE MATCHES "[Rr][Ee][Ll][Ee][Aa][Ss][Ee]" )
+        message( "INFO: RELEASE BUILD" )
+endif()
+
+set(EXECUTABLE_OUTPUT_PATH ${CMAKE_BINARY_DIR})
+set(LIBRARY_OUTPUT_PATH ${CMAKE_BINARY_DIR})
+
 add_subdirectory(third_party/fastroute)
 add_subdirectory(third_party/rsyn)
