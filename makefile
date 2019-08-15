@@ -69,7 +69,7 @@ release: setup
 	@echo Remove old binary
 	@rm -f $(BIN_NAME)
 	@echo Copy binary
-	@cp $(BUILD_DIR)/$@/$(OUTPUT_FILE) $(BIN_NAME)
+	@ln -f -s $(BUILD_DIR)/$@/$(OUTPUT_FILE) $(BIN_NAME)
 
 .PHONY: debug
 debug: setup
@@ -81,12 +81,12 @@ debug: setup
 	@echo Remove old binary
 	@rm -f $(BIN_NAME)
 	@echo Copy binary
-	@cp $(BUILD_DIR)/$@/$(OUTPUT_FILE) $(BIN_NAME)
+	@ln -f -s $(BUILD_DIR)/$@/$(OUTPUT_FILE) $(BIN_NAME)
 
 .PHONY: setup
 setup: check_submodules dirs
-	@cp $(SUPPORT_DIR)/POST9.dat $(BIN_DIR)/
-	@cp $(SUPPORT_DIR)/POWV9.dat $(BIN_DIR)/
+	@ln -f -s $(SUPPORT_DIR)/POST9.dat $(BIN_DIR)/
+	@ln -f -s $(SUPPORT_DIR)/POWV9.dat $(BIN_DIR)/
 
 .PHONY: check_submodules
 check_submodules:
