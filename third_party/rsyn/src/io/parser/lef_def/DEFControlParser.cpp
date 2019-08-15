@@ -38,6 +38,7 @@ extern void freeCB(void* name);
 extern void* mallocCB(size_t size);
 extern void* reallocCB(void* name, size_t size);
 int noDirectionPinCounter = 0;
+std::map<std::string, int> mapPinToNumNets;
 
 #include "ispd13/global.h"
 #include "util/Bounds.h"
@@ -302,11 +303,22 @@ int defNet(defrCallbackType_e c, defiNet* net, defiUserData ud) {
                 netDscp.clsUse = use;
         }  // end if
         netDscp.clsConnections.resize(net->numConnections());
+
+        for (int i = 0; i < net->numConnections(); i++) {
+                std::string pinName = DEFControlParser::unescape(net->instance(i)) + "/" + net->pin(i);
+                if (mapPinToNumNets[pinName] == 1) {
+                        std::cout << "ERROR: pin " << pinName << " is connected to more than one net\n";
+                        std::exit(-1);
+                }
+        }
+
         for (int i = 0; i < net->numConnections(); i++) {
                 DefNetConnection& connection = netDscp.clsConnections[i];
                 connection.clsPinName = net->pin(i);
                 connection.clsComponentName =
                     DEFControlParser::unescape(net->instance(i));
+                std::string pinName = DEFControlParser::unescape(net->instance(i)) + "/" + net->pin(i);
+                mapPinToNumNets[pinName] += 1;
         }  // end for
 
         netDscp.clsWires.resize(net->numWires());
