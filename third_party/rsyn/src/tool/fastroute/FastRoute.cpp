@@ -79,10 +79,6 @@ bool FastRouteProcess::run(const Rsyn::Json &params) {
         checkPinPlacement();
         std::cout << "Checking pin placement... Done!\n";
 
-        std::cout << "Checking macros...\n";
-        checkMacros();
-        std::cout << "Checking macros... Done!\n";
-
         std::cout << "Initing grid...\n";
         initGrid();
         std::cout << "Initing grid... Done!\n";
@@ -132,35 +128,6 @@ bool FastRouteProcess::run(const Rsyn::Json &params) {
         return 0;
 }
 
-void FastRouteProcess::checkMacros(){
-        bool success = true;
-        std::vector<Bounds> checkOverlap;
-        Rsyn::PhysicalDie phDie = phDesign.getPhysicalDie();
-        Bounds dieBounds = phDie.getBounds();
-
-        for (Rsyn::Instance inst : module.allInstances()) {
-                if (!inst.isMacroBlock())
-                        continue;
-                Bounds cellBounds = inst.getBounds();
-                checkOverlap.push_back(cellBounds);
-                if (!dieBounds.inside(cellBounds)){
-                        success = false;
-                        std::cout << "ERROR: There are macros outside the die area.\n";
-                 }
-        }
-
-        for (int i =0; i < checkOverlap.size(); i++){
-                for (int j = i+1; j < checkOverlap.size(); j++){
-                        if (checkOverlap[i].overlap(checkOverlap[j])){
-                                success = false;
-                                std::cout << "ERROR: There are macros that overlap eachother.\n";
-                        }
-                }
-        }
-        if (!success)
-                exit(-2);
-}
-
 void FastRouteProcess::initGrid() {
         int nLayers = 0;
         DBU trackSpacing;
@@ -193,10 +160,10 @@ void FastRouteProcess::initGrid() {
 
         int xGrid = std::floor((float)dieX / tileSize);
         int yGrid = std::floor((float)dieY / tileSize);
-
+        
         if ((xGrid*tileSize) == dieX)
                 grid.perfect_regular_x = true;
-
+        
         if ((yGrid*tileSize) == dieY)
                 grid.perfect_regular_y = true;
 
