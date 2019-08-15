@@ -115,15 +115,20 @@ void FT::addNet(char *name, int netIdx, int nPins, int minWidth, PIN pins[]) {
         int i, j, k;
         int pinX, pinY, pinL, netID, numPins, minwidth;
         long pinX_in, pinY_in;
-        int maxDeg = 0;
-        int pinXarray[MAXNETDEG], pinYarray[MAXNETDEG], pinLarray[MAXNETDEG];
         Bool remove;
+
+        // TODO: check this size
+        int pinXarray[nPins];
+        int pinYarray[nPins];
+        int pinLarray[nPins];
+
         if (nets == NULL) {
                 nets = (Net **)malloc(numNets * sizeof(Net *));
                 for (i = 0; i < numNets; i++)
                         nets[i] = (Net *)malloc(sizeof(Net));
                 seglistIndex = (int *)malloc(numNets * sizeof(int));
         }
+
         netID = netIdx;
         numPins = nPins;
         minwidth = minWidth;
@@ -136,62 +141,52 @@ void FT::addNet(char *name, int netIdx, int nPins, int minWidth, PIN pins[]) {
 
         allNets[netName] = netPins;
 
-       if (numPins < 2000) {
-                pinInd = 0;
-                for (j = 0; j < numPins; j++) {
-                        pinX_in = pins[j].x;
-                        pinY_in = pins[j].y;
-                        pinL = pins[j].layer;
-                        pinX = (int)((pinX_in - xcorner) / wTile);
-                        pinY = (int)((pinY_in - ycorner) / hTile);
-                        if (!(pinX < 0 || pinX >= xGrid || pinY < -1 || pinY >= yGrid || pinL > numLayers || pinL <= 0)) {
-                                remove = FALSE;
-                                for (k = 0; k < pinInd; k++) {
-                                        if (pinX == pinXarray[k] && pinY == pinYarray[k] && pinL == pinLarray[k]) {
-                                                remove = TRUE;
-                                                break;
-                                        }
-                                }
-                                if (!remove)  // the pin is in different grid from other pins
-                                {
-                                        pinXarray[pinInd] = pinX;
-                                        pinYarray[pinInd] = pinY;
-                                        pinLarray[pinInd] = pinL;
-                                        pinInd++;
+        // TODO: check this, there was an if pinInd < 2000
+        pinInd = 0;
+        for (j = 0; j < numPins; j++) {
+                pinX_in = pins[j].x;
+                pinY_in = pins[j].y;
+                pinL = pins[j].layer;
+                pinX = (int)((pinX_in - xcorner) / wTile);
+                pinY = (int)((pinY_in - ycorner) / hTile);
+                if (!(pinX < 0 || pinX >= xGrid || pinY < -1 || pinY >= yGrid || pinL > numLayers || pinL <= 0)) {
+                        remove = FALSE;
+                        for (k = 0; k < pinInd; k++) {
+                                if (pinX == pinXarray[k] && pinY == pinYarray[k] && pinL == pinLarray[k]) {
+                                        remove = TRUE;
+                                        break;
                                 }
                         }
-                }
-                if (pinInd > 1)  // valid net
-                {
-                        MD = maxFlute(MD, pinInd);
-                        TD += pinInd;
-                        strcpy(nets[newnetID]->name, name);
-                        nets[newnetID]->netIDorg = netID;
-                        nets[newnetID]->numPins = numPins;
-                        nets[newnetID]->deg = pinInd;
-                        nets[newnetID]->pinX = (short *)malloc(pinInd * sizeof(short));
-                        nets[newnetID]->pinY = (short *)malloc(pinInd * sizeof(short));
-                        nets[newnetID]->pinL = (short *)malloc(pinInd * sizeof(short));
-
-                        for (j = 0; j < pinInd; j++) {
-                                nets[newnetID]->pinX[j] = pinXarray[j];
-                                nets[newnetID]->pinY[j] = pinYarray[j];
-                                nets[newnetID]->pinL[j] = pinLarray[j];
+                        if (!remove)  // the pin is in different grid from other pins
+                        {
+                                pinXarray[pinInd] = pinX;
+                                pinYarray[pinInd] = pinY;
+                                pinLarray[pinInd] = pinL;
+                                pinInd++;
                         }
-                        maxDeg = pinInd > maxDeg ? pinInd : maxDeg;
-                        seglistIndex[newnetID] = segcount;
-                        newnetID++;
-                        segcount += 2 * pinInd - 3;  // at most (2*numPins-2) nodes, (2*numPins-3) nets for a net
-                }                                    // if
-        }                                            //if
-
-        else {
-                for (j = 0; j < numPins; j++) {
-                        pinX_in = pins[j].x;
-                        pinY_in = pins[j].y;
-                        pinL = pins[j].layer;
                 }
         }
+        if (pinInd > 1)  // valid net
+        {
+                MD = maxFlute(MD, pinInd);
+                TD += pinInd;
+                strcpy(nets[newnetID]->name, name);
+                nets[newnetID]->netIDorg = netID;
+                nets[newnetID]->numPins = numPins;
+                nets[newnetID]->deg = pinInd;
+                nets[newnetID]->pinX = (short *)malloc(pinInd * sizeof(short));
+                nets[newnetID]->pinY = (short *)malloc(pinInd * sizeof(short));
+                nets[newnetID]->pinL = (short *)malloc(pinInd * sizeof(short));
+
+                for (j = 0; j < pinInd; j++) {
+                        nets[newnetID]->pinX[j] = pinXarray[j];
+                        nets[newnetID]->pinY[j] = pinYarray[j];
+                        nets[newnetID]->pinL[j] = pinLarray[j];
+                }
+                seglistIndex[newnetID] = segcount;
+                newnetID++;
+                segcount += 2 * pinInd - 3;  // at most (2*numPins-2) nodes, (2*numPins-3) nets for a net
+        }                                    // if
 }
 
 std::map<std::string, std::vector<PIN>> FT::getNets() {
@@ -208,7 +203,8 @@ void FT::initEdges() {
         vCapacity_ub = UB * vCapacity;
         hCapacity_ub = UB * hCapacity;
 
-        if ((pinInd > 1) && (pinInd < 2000)) {
+        // TODO: check this, there was an if pinInd > 1 && pinInd < 2000
+        if (pinInd > 1) {
                 seglistIndex[newnetID] = segcount;  // the end pointer of the seglist
         }
         numValidNets = newnetID;
@@ -341,6 +337,10 @@ int FT::getEdgeCapacity(long x1, long y1, int l1, long x2, long y2, int l2) {
         return cap;
 }
 
+void FT::setMaxNetDegree(int deg) {
+        maxNetDegree = deg;
+}
+
 void FT::initAuxVar() {
         int k, i;
         treeOrderCong = NULL;
@@ -455,6 +455,15 @@ int FT::run(std::vector<NET> &result) {
         int maxOverflow, past_cong, last_cong, finallength, numVia, ripupTH3D, newTH, healingTrigger;
         int updateType, minofl, minoflrnd, mazeRound, upType, cost_type, bmfl, bwcnt;
         Bool goingLV, healingNeed, noADJ, extremeNeeded, needOUTPUT;
+
+        // TODO: check this size
+        int maxPin = maxNetDegree;
+        maxPin = 2* maxPin;
+        xcor = (int*)calloc(maxPin, sizeof(*xcor));
+        ycor = (int*)calloc(maxPin, sizeof(*ycor));
+        dcor = (int*)calloc(maxPin, sizeof(*dcor));
+        netEO = (OrderNetEdge*)calloc(maxPin, sizeof(*netEO));
+
 
         Bool input, WriteOut;
         input = WriteOut = 0;

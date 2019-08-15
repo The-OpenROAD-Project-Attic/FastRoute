@@ -31,12 +31,14 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+
 #include "DataType.h"
 #include "flute.h"
 #include "DataProc.h"
 #include "route.h"
 #include "RipUp.h"
 #include "EdgeShift.h"
+
 namespace FastRoute {
 #define HORIZONTAL 1
 #define VERTICAL 0
@@ -44,13 +46,18 @@ namespace FastRoute {
 int edgeShift(Tree *t, int net) {
         int i, j, k, l, m, deg, root, x, y, n, n1, n2, n3;
         int maxX, minX, maxY, minY, maxX1, minX1, maxY1, minY1, maxX2, minX2, maxY2, minY2, bigX, smallX, bigY, smallY, grid, grid1, grid2;
-        int nbr[MAXNETDEG * 2][3], nbrCnt[MAXNETDEG * 2];
-        int pairCnt, pairN1[MAXNETDEG], pairN2[MAXNETDEG];
+        int pairCnt;
         int benefit, bestBenefit, bestCost;
-        int cost1, cost2, *costH, *costV, bestPair, Pos, bestPos, numShift = 0;
+        int cost1, cost2, bestPair, Pos, bestPos, numShift = 0;
 
-        costH = (int *)malloc(yGrid * sizeof(int));
-        costV = (int *)malloc(xGrid * sizeof(int));
+        // TODO: check this size
+        const int sizeV = 2 * nets[net]->numPins;
+        int nbr[sizeV][3];
+        int nbrCnt[sizeV];
+        int pairN1[nets[net]->numPins];
+        int pairN2[nets[net]->numPins];
+        int costH[yGrid];
+        int costV[xGrid];
 
         deg = t->deg;
         // find root of the tree
@@ -384,24 +391,24 @@ int edgeShift(Tree *t, int net) {
                 }
         }  // while(bestBenefit>0)
 
-        free(costH);
-        free(costV);
-
         return (numShift);
 }
 
 // exchange Steiner nodes at the same position, then call edgeShift()
 int edgeShiftNew(Tree *t, int net) {
         int i, j, n;
-        int deg, pairCnt, pairN1[MAXNETDEG], pairN2[MAXNETDEG], cur_pairN1, cur_pairN2;
+        int deg, pairCnt, cur_pairN1, cur_pairN2;
         int N1nbrH, N1nbrV, N2nbrH, N2nbrV, iter;
         int numShift;
         Bool isPair;
-        //printf("net[%d]\n", net); getchar();
+
         numShift = edgeShift(t, net);
         deg = t->deg;
 
-        //if(net==3){printtree(*t);getchar();}
+        const int sizeV = nets[net]->numPins;
+        int pairN1[sizeV];
+        int pairN2[sizeV];
+
         iter = 0;
         cur_pairN1 = cur_pairN2 = -1;
         while (iter < 3) {

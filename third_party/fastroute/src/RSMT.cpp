@@ -151,9 +151,13 @@ int mapxy(int nx, int xs[], int nxs[], int d) {
 
 void copyStTree(int ind, Tree rsmt) {
         int i, d, numnodes, numedges;
-        int n, x1, y1, x2, y2, edgecnt, nbrcnt[2 * MAXNETDEG];
+        int n, x1, y1, x2, y2, edgecnt;
         TreeEdge *treeedges;
         TreeNode *treenodes;
+
+        // TODO: check this size
+        const int sizeV = 2 * nets[ind]->numPins;
+        int nbrcnt[sizeV];
 
         d = rsmt.deg;
         sttrees[ind].deg = d;
@@ -738,13 +742,11 @@ float coeffADJ(int netID) {
 }
 
 void gen_brk_RSMT(Bool congestionDriven, Bool reRoute, Bool genTree, Bool newType, Bool noADJ) {
-        int i, j, k, d, n, seg, hedge, vedge, grid, netID, n1, n2;
+        int i, j, d, n, n1, n2;
         int x1, y1, x2, y2;
-        int x[MAXNETDEG], y[MAXNETDEG];
         int segPos, segcnt;
         Tree rsmt;
         int wl, wl1, numShift = 0, cnt1, cnt2, cnt3;
-        float costL1, costL2, tmp;
         float coeffV, coefMax, coefMin;
 
         coefMax = 0;
@@ -761,13 +763,11 @@ void gen_brk_RSMT(Bool congestionDriven, Bool reRoute, Bool genTree, Bool newTyp
 
         cnt1 = cnt2 = cnt3 = 0;
 
-        /*if (congestionDriven) {
-		netpinOrderInc();
-	} */
-
-        for (netID = 0; netID < numValidNets; netID++) {
-                i = netID;
+        for (i = 0; i < numValidNets; i++) {
                 coeffV = 1.36;
+                int sizeV = nets[i]->numPins;
+                int x[sizeV];
+                int y[sizeV];
 
                 if (congestionDriven) {
                         coeffV = coeffADJ(i);

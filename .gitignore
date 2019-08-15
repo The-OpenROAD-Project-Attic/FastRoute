@@ -1,5 +1,10 @@
 build
 FRlefdef
+FlexRoute*
+flexroute*
+TritonRoute*
 *.dat
-support/ispd18/*
 *.log
+*.param
+support/ispd18/*
+.gdb_history
