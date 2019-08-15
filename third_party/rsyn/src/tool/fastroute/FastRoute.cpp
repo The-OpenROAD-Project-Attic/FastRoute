@@ -79,6 +79,10 @@ bool FastRouteProcess::run(const Rsyn::Json &params) {
         checkPinPlacement();
         std::cout << "Checking pin placement... Done!\n";
 
+        std::cout << "Checking macros...\n";
+        checkMacros();
+        std::cout << "Checking macros... Done!\n";
+
         std::cout << "Initing grid...\n";
         initGrid();
         std::cout << "Initing grid... Done!\n";
@@ -132,6 +136,64 @@ bool FastRouteProcess::run(const Rsyn::Json &params) {
         return 0;
 }
 
+void FastRouteProcess::checkMacros(){
+        std::map<int, std::vector<Bounds>> mapLayerObstacles;
+        std::map<int, std::vector<std::string>> macroName;
+        bool success = true;
+        std::vector<Bounds> checkOverlap;
+        std::vector<std::string> name;
+        Rsyn::PhysicalDie phDie = phDesign.getPhysicalDie();
+        Bounds dieBounds = phDie.getBounds();
+
+        for (Rsyn::Instance inst : module.allInstances()) {
+                bool setBds = true;
+                if (!inst.isMacroBlock())
+                        continue;
+                Rsyn::Cell cell = inst.asCell();
+                Rsyn::PhysicalLibraryCell phLibCell = phDesign.getPhysicalLibraryCell(cell);
+                if (!phLibCell.hasObstacles())
+                        continue;
+                Rsyn::PhysicalCell phCell = phDesign.getPhysicalCell(cell);
+                const Rsyn::PhysicalTransform &transform = phCell.getTransform(true);
+                DBUxy pos = phCell.getPosition();
+                for (Rsyn::PhysicalObstacle phObs : phLibCell.allObstacles()) {
+                        Rsyn::PhysicalLayer phLayer = phObs.getLayer();
+                        for (Bounds bds : phObs.allBounds()) {
+                                bds = transform.apply(bds);
+                                bds.translate(pos);
+                                if (setBds){
+                                        setBds = false;
+                                        checkOverlap.push_back(bds);
+                                        name.push_back(inst.getName());
+                                }
+                                Bounds & layerBds = checkOverlap.back();
+                                layerBds[LOWER][X] = std::min(layerBds[LOWER][X], bds[LOWER][X]);
+                                layerBds[LOWER][Y] = std::min(layerBds[LOWER][Y], bds[LOWER][Y]);
+                                layerBds[UPPER][X] = std::max(layerBds[UPPER][X], bds[UPPER][X]);
+                                layerBds[UPPER][Y] = std::max(layerBds[UPPER][Y], bds[UPPER][Y]);
+
+                        }  // end for
+                }          // end for
+                if (!dieBounds.inside(checkOverlap.back())){
+                        success = false;
+                        std::cout << "ERROR: Macro " << inst.getName() << " is outside the die area.\n";
+                }
+        }
+
+
+                for (int k = 0; k < checkOverlap.size(); k++){
+                        for (int j = k+1; j < checkOverlap.size(); j++){
+                                if (checkOverlap[k].overlap(checkOverlap[j])){
+                                        success = false;
+                                        std::cout << "ERROR: Macros "<< name[k] << " and " << name[j] << " overlap eachother.\n";
+                                }
+                        }
+                }
+
+        if (!success)
+                exit(-2);
+}
+
 void FastRouteProcess::initGrid() {
         int nLayers = 0;
         DBU trackSpacing;
@@ -164,10 +226,10 @@ void FastRouteProcess::initGrid() {
 
         int xGrid = std::floor((float)dieX / tileSize);
         int yGrid = std::floor((float)dieY / tileSize);
-        
+
         if ((xGrid*tileSize) == dieX)
                 grid.perfect_regular_x = true;
-        
+
         if ((yGrid*tileSize) == dieY)
                 grid.perfect_regular_y = true;
 
