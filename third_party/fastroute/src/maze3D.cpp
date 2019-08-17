@@ -101,24 +101,27 @@ static void extractMin3D(int **array, int arrayLen) {
 }
 
 void setupHeap3D(int netID, int edgeID, int *heapLen1, int *heapLen2, int regionX1, int regionX2, int regionY1, int regionY2) {
-        int i, j, l, d, numNodes, x1, y1, x2, y2, n1, n2, nt;
-        int nbr, nbrX, nbrY, cur, edge;
+        int nt, nbr, nbrX, nbrY, cur, edge;
         int x_grid, y_grid, l_grid, heapcnt;
         int queuehead, queuetail;
-        TreeEdge *treeedges;
-        TreeNode *treenodes;
         Route *route;
 
-        treeedges = sttrees[netID].edges;
-        treenodes = sttrees[netID].nodes;
-        d = sttrees[netID].deg;
+        TreeEdge * treeedges = sttrees[netID].edges;
+        TreeNode * treenodes = sttrees[netID].nodes;
 
-        n1 = treeedges[edgeID].n1;
-        n2 = treeedges[edgeID].n2;
-        x1 = treenodes[n1].x;
-        y1 = treenodes[n1].y;
-        x2 = treenodes[n2].x;
-        y2 = treenodes[n2].y;
+        int d = sttrees[netID].deg;
+        // TODO: check this size
+        int numNodes = 2 * d - 2;
+        int heapVisited[numNodes];
+        int heapQueue[numNodes];
+
+        // TODO: check this size
+        int n1 = treeedges[edgeID].n1;
+        int n2 = treeedges[edgeID].n2;
+        int x1 = treenodes[n1].x;
+        int y1 = treenodes[n1].y;
+        int x2 = treenodes[n2].x;
+        int y2 = treenodes[n2].y;
 
         if (d == 2)  // 2-pin net
         {
@@ -133,28 +136,24 @@ void setupHeap3D(int netID, int edgeID, int *heapLen1, int *heapLen2, int region
                 *heapLen2 = 1;
         } else  // net with more than 2 pins
         {
-                for (i = regionY1; i <= regionY2; i++) {
-                        for (j = regionX1; j <= regionX2; j++) {
+                for (int i = regionY1; i <= regionY2; i++) {
+                        for (int j = regionX1; j <= regionX2; j++) {
                                 inRegion[i][j] = TRUE;
                         }
                 }
 
-                numNodes = 2 * d - 2;
-
-                for (i = 0; i < numNodes; i++)
+                for (int i = 0; i < numNodes; i++)
                         heapVisited[i] = FALSE;
 
                 // find all the grids on tree edges in subtree t1 (connecting to n1) and put them into heap13D
                 if (n1 < d)  // n1 is a Pin node
                 {
-                        //			getLayerRange(treenodes, treeedges ,n1, edgeID, &topL, &botL);
-
                         // just need to put n1 itself into heap13D
                         heapcnt = 0;
 
                         nt = treenodes[n1].stackAlias;
 
-                        for (l = treenodes[nt].botL; l <= treenodes[nt].topL; l++) {
+                        for (int l = treenodes[nt].botL; l <= treenodes[nt].topL; l++) {
                                 d13D[l][y1][x1] = 0;
                                 heap13D[heapcnt] = &(d13D[l][y1][x1]);
                                 directions3D[l][y1][x1] = ORIGIN;
@@ -168,12 +167,10 @@ void setupHeap3D(int netID, int edgeID, int *heapLen1, int *heapLen2, int region
                         heapcnt = 0;
                         queuehead = queuetail = 0;
 
-                        //			getLayerRange(treenodes, treeedges ,n1, edgeID, &topL, &botL);
-
                         nt = treenodes[n1].stackAlias;
 
                         // add n1 into heap13D
-                        for (l = treenodes[nt].botL; l <= treenodes[nt].topL; l++) {
+                        for (int l = treenodes[nt].botL; l <= treenodes[nt].topL; l++) {
                                 d13D[l][y1][x1] = 0;
                                 directions3D[l][y1][x1] = ORIGIN;
                                 heap13D[heapcnt] = &(d13D[l][y1][x1]);
@@ -193,7 +190,7 @@ void setupHeap3D(int netID, int edgeID, int *heapLen1, int *heapLen2, int region
                                 heapVisited[cur] = TRUE;
                                 if (cur >= d)  // cur node is a Steiner node
                                 {
-                                        for (i = 0; i < 3; i++) {
+                                        for (int i = 0; i < 3; i++) {
                                                 nbr = treenodes[cur].nbr[i];
                                                 edge = treenodes[cur].edge[i];
                                                 if (nbr != n2)  // not n2
@@ -207,7 +204,7 @@ void setupHeap3D(int netID, int edgeID, int *heapLen1, int *heapLen2, int region
                                                                                 nbrX = treenodes[nbr].x;
                                                                                 nbrY = treenodes[nbr].y;
                                                                                 nt = treenodes[nbr].stackAlias;
-                                                                                for (l = treenodes[nt].botL; l <= treenodes[nt].topL; l++) {
+                                                                                for (int l = treenodes[nt].botL; l <= treenodes[nt].topL; l++) {
                                                                                         d13D[l][nbrY][nbrX] = 0;
                                                                                         directions3D[l][nbrY][nbrX] = ORIGIN;
                                                                                         heap13D[heapcnt] = &(d13D[l][nbrY][nbrX]);
@@ -220,7 +217,7 @@ void setupHeap3D(int netID, int edgeID, int *heapLen1, int *heapLen2, int region
 
                                                                         route = &(treeedges[edge].route);
                                                                         if (route->type == MAZEROUTE) {
-                                                                                for (j = 1; j < route->routelen; j++)  // don't put edge_n1 and edge_n2 into heap13D
+                                                                                for (int j = 1; j < route->routelen; j++)  // don't put edge_n1 and edge_n2 into heap13D
                                                                                 {
                                                                                         x_grid = route->gridsX[j];
                                                                                         y_grid = route->gridsY[j];
@@ -257,7 +254,7 @@ void setupHeap3D(int netID, int edgeID, int *heapLen1, int *heapLen2, int region
                         //*heapLen2 = 0;
                         heapcnt = 0;
 
-                        for (l = treenodes[nt].botL; l <= treenodes[nt].topL; l++) {
+                        for (int l = treenodes[nt].botL; l <= treenodes[nt].topL; l++) {
                                 // just need to put n1 itself into heap13D
                                 d23D[l][y2][x2] = 0;
                                 directions3D[l][y2][x2] = ORIGIN;
@@ -274,7 +271,7 @@ void setupHeap3D(int netID, int edgeID, int *heapLen1, int *heapLen2, int region
 
                         nt = treenodes[n2].stackAlias;
                         // add n2 into heap23D
-                        for (l = treenodes[nt].botL; l <= treenodes[nt].topL; l++) {
+                        for (int l = treenodes[nt].botL; l <= treenodes[nt].topL; l++) {
                                 d23D[l][y2][x2] = 0;
                                 directions3D[l][y2][x2] = ORIGIN;
                                 heap23D[heapcnt] = &(d23D[l][y2][x2]);
@@ -295,7 +292,7 @@ void setupHeap3D(int netID, int edgeID, int *heapLen1, int *heapLen2, int region
 
                                 if (cur >= d)  // cur node is a Steiner node
                                 {
-                                        for (i = 0; i < 3; i++) {
+                                        for (int i = 0; i < 3; i++) {
                                                 nbr = treenodes[cur].nbr[i];
                                                 edge = treenodes[cur].edge[i];
                                                 if (nbr != n1)  // not n1
@@ -309,7 +306,7 @@ void setupHeap3D(int netID, int edgeID, int *heapLen1, int *heapLen2, int region
                                                                                 nbrX = treenodes[nbr].x;
                                                                                 nbrY = treenodes[nbr].y;
                                                                                 nt = treenodes[nbr].stackAlias;
-                                                                                for (l = treenodes[nt].botL; l <= treenodes[nt].topL; l++) {
+                                                                                for (int l = treenodes[nt].botL; l <= treenodes[nt].topL; l++) {
                                                                                         //nbrL = treenodes[nbr].l;
 
                                                                                         d23D[l][nbrY][nbrX] = 0;
@@ -324,7 +321,7 @@ void setupHeap3D(int netID, int edgeID, int *heapLen1, int *heapLen2, int region
 
                                                                         route = &(treeedges[edge].route);
                                                                         if (route->type == MAZEROUTE) {
-                                                                                for (j = 1; j < route->routelen; j++)  // don't put edge_n1 and edge_n2 into heap23D
+                                                                                for (int j = 1; j < route->routelen; j++)  // don't put edge_n1 and edge_n2 into heap23D
                                                                                 {
                                                                                         x_grid = route->gridsX[j];
                                                                                         y_grid = route->gridsY[j];
@@ -353,25 +350,13 @@ void setupHeap3D(int netID, int edgeID, int *heapLen1, int *heapLen2, int region
                         *heapLen2 = heapcnt;               // record the length of heap23D
                 }                                          // else n2 is not a Pin node
 
-                //	printf("queuetail %d, numnodes %d\n", queuetail, numNodes);
-                //	fflush(stdout);
-                //   free(heapQueue);
-                //   free(heapVisited);
-
-                //	printf("there after\n", queuetail, numNodes);
-                //	fflush(stdout);
-
-                for (i = regionY1; i <= regionY2; i++) {
-                        for (j = regionX1; j <= regionX2; j++) {
+                for (int i = regionY1; i <= regionY2; i++) {
+                        for (int j = regionX1; j <= regionX2; j++) {
                                 inRegion[i][j] = FALSE;
                         }
                 }
         }  // net with more than two pins
 
-        //for(i=0; i<yGrid; i++) {
-        //free(inRegion[i]);
-        //}
-        //free(inRegion);
 }
 
 void newUpdateNodeLayers(TreeNode *treenodes, int edgeID, int n1, int lastL) {
@@ -848,11 +833,10 @@ void mazeRouteMSMDOrder3D(int expand, int ripupTHlb, int ripupTHub) {
         for (orderIndex = 0; orderIndex < endIND; orderIndex++) {
                 netID = treeOrderPV[orderIndex].treeIndex;
 
-                //printf("netID %d\n",netID);
-                //fflush(stdout);
-                if (netID == 53757) {
-                        continue;
-                }
+                /* TODO:  <14-08-19, uncomment this to reproduce ispd18_test6> */
+                /* if (netID == 53757) { */
+                /*         continue; */
+                /* } */
 
                 enlarge = expand;
                 deg = sttrees[netID].deg;

@@ -25,18 +25,19 @@ Any third party code such as Rsyn will clearly specify its license in each file 
 ````
 git clone --recursive https://github.com/The-OpenROAD-Project/FastRoute4-lefdef
 cd FastRoute4-lefdef/
-make PARALLEL=nthreads CMAKE_OPT='optional parameters for cmake'
+make PARALLEL=nthreads
 ````
+NOTE: use `PARALLEL=nthreads` instead of `-j nthreads`
 
 ### Basic Usage
 
 Your command line to run FastRoute4-lefdef should look like this:
 
 ````
-./FRlefdef --no-gui --script path/to/script.rsyn
+./FRlefdef --no-gui --script /path/to/script.rsyn
 ````
 
-You can find a script example in `rsyn/support/fastroute/example.rsyn`
+You can find a script example in `third_party/rsyn/support/fastroute/example.rsyn`
 
 #### Script details
 
@@ -55,7 +56,7 @@ FastRoute has three main parameters. These are:
 - adjustment: percentage reduction in capacity of each edge in the global routing gridgraph
 - maxRoutingLayer: maximum (i.e., highest) routing layer available for FastRoute to use
 
-If you need more than one LEF/DEF file, you can script for this case as:  
+If you need more than one LEF/DEF file, you can script for this case as:
 
 ````
 open "generic" {

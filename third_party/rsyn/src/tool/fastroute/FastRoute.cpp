@@ -79,9 +79,17 @@ bool FastRouteProcess::run(const Rsyn::Json &params) {
         checkPinPlacement();
         std::cout << "Checking pin placement... Done!\n";
 
+        std::cout << "Checking macros...\n";
+        checkMacros();
+        std::cout << "Checking macros... Done!\n";
+
         std::cout << "Initing grid...\n";
         initGrid();
         std::cout << "Initing grid... Done!\n";
+        
+        std::cout << "Setting max net degree...\n";
+        setMaxNetDegree();
+        std::cout << "Setting max net degree... Done!\n";
 
         std::cout << "Setting capacities...\n";
         setCapacities();
@@ -128,6 +136,64 @@ bool FastRouteProcess::run(const Rsyn::Json &params) {
         return 0;
 }
 
+void FastRouteProcess::checkMacros(){
+        std::map<int, std::vector<Bounds>> mapLayerObstacles;
+        std::map<int, std::vector<std::string>> macroName;
+        bool success = true;
+        std::vector<Bounds> checkOverlap;
+        std::vector<std::string> name;
+        Rsyn::PhysicalDie phDie = phDesign.getPhysicalDie();
+        Bounds dieBounds = phDie.getBounds();
+
+        for (Rsyn::Instance inst : module.allInstances()) {
+                bool setBds = true;
+                if (!inst.isMacroBlock())
+                        continue;
+                Rsyn::Cell cell = inst.asCell();
+                Rsyn::PhysicalLibraryCell phLibCell = phDesign.getPhysicalLibraryCell(cell);
+                if (!phLibCell.hasObstacles())
+                        continue;
+                Rsyn::PhysicalCell phCell = phDesign.getPhysicalCell(cell);
+                const Rsyn::PhysicalTransform &transform = phCell.getTransform(true);
+                DBUxy pos = phCell.getPosition();
+                for (Rsyn::PhysicalObstacle phObs : phLibCell.allObstacles()) {
+                        Rsyn::PhysicalLayer phLayer = phObs.getLayer();
+                        for (Bounds bds : phObs.allBounds()) {
+                                bds = transform.apply(bds);
+                                bds.translate(pos);
+                                if (setBds){
+                                        setBds = false;
+                                        checkOverlap.push_back(bds);
+                                        name.push_back(inst.getName());
+                                }
+                                Bounds & layerBds = checkOverlap.back();
+                                layerBds[LOWER][X] = std::min(layerBds[LOWER][X], bds[LOWER][X]);
+                                layerBds[LOWER][Y] = std::min(layerBds[LOWER][Y], bds[LOWER][Y]);
+                                layerBds[UPPER][X] = std::max(layerBds[UPPER][X], bds[UPPER][X]);
+                                layerBds[UPPER][Y] = std::max(layerBds[UPPER][Y], bds[UPPER][Y]);
+
+                        }  // end for
+                }          // end for
+                if (!dieBounds.inside(checkOverlap.back())){
+                        success = false;
+                        std::cout << "ERROR: Macro " << inst.getName() << " is outside the die area.\n";
+                }
+        }
+
+
+                for (int k = 0; k < checkOverlap.size(); k++){
+                        for (int j = k+1; j < checkOverlap.size(); j++){
+                                if (checkOverlap[k].overlap(checkOverlap[j])){
+                                        success = false;
+                                        std::cout << "ERROR: Macros "<< name[k] << " and " << name[j] << " overlap eachother.\n";
+                                }
+                        }
+                }
+
+        if (!success)
+                exit(-2);
+}
+
 void FastRouteProcess::initGrid() {
         int nLayers = 0;
         DBU trackSpacing;
@@ -160,10 +226,10 @@ void FastRouteProcess::initGrid() {
 
         int xGrid = std::floor((float)dieX / tileSize);
         int yGrid = std::floor((float)dieY / tileSize);
-        
+
         if ((xGrid*tileSize) == dieX)
                 grid.perfect_regular_x = true;
-        
+
         if ((yGrid*tileSize) == dieY)
                 grid.perfect_regular_y = true;
 
@@ -438,58 +504,60 @@ void FastRouteProcess::setTrackAdjustments() {
                                 }
                         }
 
-                        DBU finalTrackLocation = trackLocation + (trackSpace * (numTracks-1));
-                        DBU remainingFinalSpace = upperDieBounds[Y] - finalTrackLocation;
-                        DBU extraSpace = upperDieBounds[Y] - (grid.tile_height * grid.yGrids);
-                        if (grid.perfect_regular_y)
-                                numFinalAdjustments = std::ceil((float)remainingFinalSpace/grid.tile_height);
-                        else{
-                                if (remainingFinalSpace != 0){
-                                        DBU finalSpace = remainingFinalSpace - extraSpace;
-                                        if (finalSpace <= 0)
-                                                numFinalAdjustments = 1;
+                        if (numTracks < 0){
+                                DBU finalTrackLocation = trackLocation + (trackSpace * (numTracks-1));
+                                DBU remainingFinalSpace = upperDieBounds[Y] - finalTrackLocation;
+                                DBU extraSpace = upperDieBounds[Y] - (grid.tile_height * grid.yGrids);
+                                if (grid.perfect_regular_y)
+                                        numFinalAdjustments = std::ceil((float)remainingFinalSpace/grid.tile_height);
+                                else{
+                                        if (remainingFinalSpace != 0){
+                                                DBU finalSpace = remainingFinalSpace - extraSpace;
+                                                if (finalSpace <= 0)
+                                                        numFinalAdjustments = 1;
+                                                else
+                                                        numFinalAdjustments = std::ceil((float)finalSpace/grid.tile_height);
+                                        }
                                         else
-                                                numFinalAdjustments = std::ceil((float)finalSpace/grid.tile_height);
+                                                numFinalAdjustments = 0;
                                 }
-                                else
-                                        numFinalAdjustments = 0;
-                        }
 
-                        numFinalAdjustments *= grid.xGrids;
-                        numInitAdjustments = std::ceil((float)trackLocation/grid.tile_height);
-                        numInitAdjustments *= grid.xGrids;
-                        fastRoute.setNumAdjustments(numInitAdjustments + numFinalAdjustments);
-                        int y = 0;
-                        while (trackLocation >= grid.tile_height){
-                                for (int x = 1; x < grid.xGrids; x++){
-                                        fastRoute.addAdjustment(x - 1, y, layerN, x, y, layerN, 0);
+                                numFinalAdjustments *= grid.xGrids;
+                                numInitAdjustments = std::ceil((float)trackLocation/grid.tile_height);
+                                numInitAdjustments *= grid.xGrids;
+                                fastRoute.setNumAdjustments(numInitAdjustments + numFinalAdjustments);
+                                int y = 0;
+                                while (trackLocation >= grid.tile_height){
+                                        for (int x = 1; x < grid.xGrids; x++){
+                                                fastRoute.addAdjustment(x - 1, y, layerN, x, y, layerN, 0);
+                                        }
+                                        y++;
+                                        trackLocation -= grid.tile_height;
                                 }
-                                y++;
-                                trackLocation -= grid.tile_height;
-                        }
-                        if (trackLocation > 0){
-                                DBU remainingTile = grid.tile_height - trackLocation;
-                                int newCapacity = std::floor((float)remainingTile/trackSpace);
-                                for (int x = 1; x < grid.xGrids; x++){
-                                        fastRoute.addAdjustment(x - 1, y, layerN, x, y, layerN, newCapacity);
+                                if (trackLocation > 0){
+                                        DBU remainingTile = grid.tile_height - trackLocation;
+                                        int newCapacity = std::floor((float)remainingTile/trackSpace);
+                                        for (int x = 1; x < grid.xGrids; x++){
+                                                fastRoute.addAdjustment(x - 1, y, layerN, x, y, layerN, newCapacity);
+                                        }
                                 }
-                        }
 
-                        y = grid.yGrids -1;
-                        while (remainingFinalSpace >= grid.tile_height + extraSpace){
-                                for (int x = 1; x < grid.xGrids; x++){
-                                        fastRoute.addAdjustment(x - 1, y, layerN, x, y, layerN, 0);
+                                y = grid.yGrids -1;
+                                while (remainingFinalSpace >= grid.tile_height + extraSpace){
+                                        for (int x = 1; x < grid.xGrids; x++){
+                                                fastRoute.addAdjustment(x - 1, y, layerN, x, y, layerN, 0);
+                                        }
+                                        y--;
+                                        remainingFinalSpace -= (grid.tile_height + extraSpace);
+                                        extraSpace = 0;
                                 }
-                                y--;
-                                remainingFinalSpace -= (grid.tile_height + extraSpace);
-                                extraSpace = 0;
-                        }
-                        if (remainingFinalSpace > 0){
-                               DBU remainingTile = (grid.tile_height + extraSpace) - remainingFinalSpace;
-                               int newCapacity = std::floor((float)remainingTile/trackSpace);
-                               for (int x = 1; x < grid.xGrids; x++){
-                                        fastRoute.addAdjustment(x - 1, y, layerN, x, y, layerN, newCapacity);
-                              }
+                                if (remainingFinalSpace > 0){
+                                        DBU remainingTile = (grid.tile_height + extraSpace) - remainingFinalSpace;
+                                        int newCapacity = std::floor((float)remainingTile/trackSpace);
+                                        for (int x = 1; x < grid.xGrids; x++){
+                                                fastRoute.addAdjustment(x - 1, y, layerN, x, y, layerN, newCapacity);
+                                        }
+                                }
                         }
                 } else {
                         for (PhysicalTracks phTracks : phDesign.allPhysicalTracks(phLayer)) {
@@ -500,61 +568,63 @@ void FastRouteProcess::setTrackAdjustments() {
                                         break;
                                 }
                         }
+                        if (numTracks > 0){
 
-                        DBU finalTrackLocation = trackLocation + (trackSpace * (numTracks-1));
-                        DBU remainingFinalSpace = upperDieBounds[X] - finalTrackLocation;
-                        DBU extraSpace = upperDieBounds[X] - (grid.tile_width * grid.xGrids);
-                        if (grid.perfect_regular_x)
-                                numFinalAdjustments = std::ceil((float)remainingFinalSpace/grid.tile_width);
-                        else{
-                                if (remainingFinalSpace != 0){
-                                        DBU finalSpace = remainingFinalSpace - extraSpace;
-                                        if (finalSpace <= 0)
-                                                numFinalAdjustments = 1;
+                                DBU finalTrackLocation = trackLocation + (trackSpace * (numTracks-1));
+                                DBU remainingFinalSpace = upperDieBounds[X] - finalTrackLocation;
+                                DBU extraSpace = upperDieBounds[X] - (grid.tile_width * grid.xGrids);
+                                if (grid.perfect_regular_x)
+                                        numFinalAdjustments = std::ceil((float)remainingFinalSpace/grid.tile_width);
+                                else{
+                                        if (remainingFinalSpace != 0){
+                                                DBU finalSpace = remainingFinalSpace - extraSpace;
+                                                if (finalSpace <= 0)
+                                                        numFinalAdjustments = 1;
+                                                else
+                                                        numFinalAdjustments = std::ceil((float)finalSpace/grid.tile_width);
+                                        }
                                         else
-                                                numFinalAdjustments = std::ceil((float)finalSpace/grid.tile_width);
+                                                numFinalAdjustments = 0;
                                 }
-                                else
-                                        numFinalAdjustments = 0;
-                        }
 
-                        numFinalAdjustments *= grid.yGrids;
-                        numInitAdjustments = std::ceil((float)trackLocation/grid.tile_width);
-                        numInitAdjustments *= grid.yGrids;
-                        fastRoute.setNumAdjustments(numInitAdjustments + numFinalAdjustments);
-                        int x = 0;
-                        while (trackLocation >= grid.tile_width){
-                                for (int y = 1; y < grid.yGrids; y++){
-                                        fastRoute.addAdjustment(x, y - 1, layerN, x, y, layerN, 0);
+                                numFinalAdjustments *= grid.yGrids;
+                                numInitAdjustments = std::ceil((float)trackLocation/grid.tile_width);
+                                numInitAdjustments *= grid.yGrids;
+                                fastRoute.setNumAdjustments(numInitAdjustments + numFinalAdjustments);
+                                int x = 0;
+                                while (trackLocation >= grid.tile_width){
+                                        for (int y = 1; y < grid.yGrids; y++){
+                                                fastRoute.addAdjustment(x, y - 1, layerN, x, y, layerN, 0);
+                                        }
+                                        x++;
+                                        trackLocation -= grid.tile_width;
                                 }
-                                x++;
-                                trackLocation -= grid.tile_width;
-                        }
-                        if (trackLocation > 0){
-                               DBU remainingTile = grid.tile_width - trackLocation;
-                               int newCapacity = std::floor((float)remainingTile/trackSpace);
-                               for (int y = 1; y < grid.yGrids; y++){
-                                        fastRoute.addAdjustment(x, y - 1, layerN, x, y, layerN, newCapacity);
+                                if (trackLocation > 0){
+                                        DBU remainingTile = grid.tile_width - trackLocation;
+                                        int newCapacity = std::floor((float)remainingTile/trackSpace);
+                                        for (int y = 1; y < grid.yGrids; y++){
+                                                fastRoute.addAdjustment(x, y - 1, layerN, x, y, layerN, newCapacity);
+                                        }
                                 }
-                        }
 
-                        x = grid.xGrids -1;
-                        while (remainingFinalSpace >= grid.tile_width + extraSpace){
-                                for (int y = 1; y < grid.yGrids; y++){
-                                        fastRoute.addAdjustment(x, y - 1, layerN, x, y, layerN, 0);
+                                x = grid.xGrids -1;
+                                while (remainingFinalSpace >= grid.tile_width + extraSpace){
+                                        for (int y = 1; y < grid.yGrids; y++){
+                                                fastRoute.addAdjustment(x, y - 1, layerN, x, y, layerN, 0);
+                                        }
+                                        x--;
+                                        remainingFinalSpace -= (grid.tile_width + extraSpace);
+                                        extraSpace = 0;
                                 }
-                                x--;
-                                remainingFinalSpace -= (grid.tile_width + extraSpace);
-                                extraSpace = 0;
-                        }
-                        if (remainingFinalSpace > 0){
-                               DBU remainingTile = (grid.tile_width + extraSpace) - remainingFinalSpace;
-                               int newCapacity = std::floor((float)remainingTile/trackSpace);
-                               for (int y = 1; y < grid.yGrids; y++){
-                                        fastRoute.addAdjustment(x, y - 1, layerN, x, y, layerN, newCapacity);
-                               }
-                        }
+                                if (remainingFinalSpace > 0){
+                                        DBU remainingTile = (grid.tile_width + extraSpace) - remainingFinalSpace;
+                                        int newCapacity = std::floor((float)remainingTile/trackSpace);
+                                        for (int y = 1; y < grid.yGrids; y++){
+                                                fastRoute.addAdjustment(x, y - 1, layerN, x, y, layerN, newCapacity);
+                                        }
+                                }
 
+                        }
                 }
         }
 }
@@ -837,6 +907,21 @@ void FastRouteProcess::mergeBounds(std::vector<Bounds> & guideBds){
         } 
         guideBds.clear();
         guideBds = finalBds;
+}
+
+void FastRouteProcess::setMaxNetDegree() {
+        int maxDeg = -1;
+        for (Rsyn::Net net : module.allNets()) {
+                if (net.getNumPins() > maxDeg)
+                        maxDeg = net.getNumPins();
+        }
+        
+        if (maxDeg < 1) {
+                std::cout << "ERROR: nets with no pin\n";
+                std::exit(-1);
+        }
+        
+        fastRoute.setMaxNetDegree(maxDeg);
 }
 
 void FastRouteProcess::writeEst(const std::vector<FastRoute::NET> &globalRoute, std::string filename) {

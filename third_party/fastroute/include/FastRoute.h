@@ -64,6 +64,7 @@ typedef struct {
 } NET;
 
 std::map<std::string, std::vector<PIN>> allNets;
+int maxNetDegree;
 
 class FT {
        public:
@@ -89,6 +90,7 @@ class FT {
 
         int getEdgeCapacity(long x1, long y1, int l1, long x2, long y2, int l2);
         std::map<std::string, std::vector<PIN>> getNets();
+        void setMaxNetDegree(int);
 };
 }  // namespace FastRoute
 #endif /* __FASTROUTE_API__ */

@@ -34,7 +34,6 @@
 
 #define BUFFERSIZE 800
 #define STRINGLEN 100
-#define MAXNETDEG 4000
 #define MAXEDGES 10000000
 
 #define MAXLEN 20000
@@ -117,8 +116,6 @@ extern parent3D ***pr3D;
 
 extern int mazeedge_Threshold;
 extern Bool inRegion[YRANGE][XRANGE];
-extern Bool heapVisited[MAXNETDEG];
-extern int heapQueue[MAXNETDEG];
 
 extern int gridHV, gridH, gridV, gridHs[MAXLAYER], gridVs[MAXLAYER];
 
@@ -128,9 +125,9 @@ extern short **heap23D;
 extern float *h_costTable, *v_costTable;
 
 extern Bool stopDEC, errorPRONE;
-extern OrderNetEdge netEO[4000];
+extern OrderNetEdge *netEO;
 
-extern int xcor[4000], ycor[4000], dcor[4000];
+extern int *xcor, *ycor, *dcor;
 
 extern StTree *sttreesBK;
 

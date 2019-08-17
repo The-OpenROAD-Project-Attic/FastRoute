@@ -12,7 +12,7 @@ using std::make_pair;
 // Modified - Guilherme Flach - 18/Mar/2017 ------------------------------------
 // Added to ignore some warning messages in this file.
 #pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wint-conversion"
+/* #pragma GCC diagnostic ignored "-Wint-conversion" */
 #pragma GCC diagnostic ignored "-Wfloat-conversion"
 
 // Modified - Guilherme Flach - 21/Aug/2014 ------------------------------------

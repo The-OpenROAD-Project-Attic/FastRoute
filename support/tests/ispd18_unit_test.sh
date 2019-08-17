@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/bash
 
 ################################################################################
 ## Authors: Vitor Bandeira, Eder Matheus Monteiro e Isadora Oliveira
@@ -36,49 +36,57 @@
 ## POSSIBILITY OF SUCH DAMAGE.
 ################################################################################
 
-base_dir=./third_party/fastroute
 
-bin_path="$base_dir/FRlefdef"
-log_folder="$base_dir/logs"
-gold_folder="$base_dir/logs_gold"
-data_folder="$base_dir"/data
+cd "$(dirname "$0")"/../../ || exit
 
-input_files=(a1 a2 a3 a5 b1 b2 b3 b4 n1 n2 n3 n4 n5 n6)
+bin_path=./FRlefdef
+test_name="ispd18_test1"
 
-cd ..
+base_dir="$PWD"
+support_dir="$base_dir/support"
+test_dir="$support_dir/ispd18/${test_name}"
 
-mkdir -p "$log_folder"
-for f in "${input_files[@]}"
-do
-         "$bin_path" "$data_folder/$f" -o "$log_folder/$f.output" | grep -vi time &> "$log_folder/$f.log"
-done
+output_file="${test_dir}/${test_name}.guide"
+gold_dir="${support_dir}/gold"
+gold_file="${gold_dir}/${test_name}.guide"
 
-failed=0
-suceeded=0
-for f in "${input_files[@]}"
-do
-        out=$(diff -q "$log_folder/$f.log" "$gold_folder/$f.log")
-        if [[ "$out" != "" ]]; then
-                diff "$log_folder/$f.log" "$gold_folder/$f.log" > "$log_folder/$f.diff"
-                echo "Test $f failed"
-                failed=$((failed+1))
-        else
-                echo "Test $f suceeded"
-                suceeded=$((suceeded+1))
-        fi
-        rm "$log_folder/$f.output"
-done
+if [[ ! -f "${test_dir}/${test_name}.input.lef" ]] || [[ ! -f "${test_dir}/${test_name}.input.def" ]]; then
+        mkdir -p "${test_dir}"
+        cd "$test_dir" || exit
+        wget "http://www.ispd.cc/contests/18/${test_name}.tgz"
+        tar zxvf "${test_name}.tgz"
+        cd - || exit
+fi
 
-total=$((failed+suceeded))
+cd "${base_dir}" || exit
 
-cat << HEREDOC
+fail()
+{
+        echo
+        echo
+        echo "Unit test failed, please check end of log file"
+        echo
+        echo
+        diff  "${output_file}" "${gold_file}" >> "$base_dir/unit_test.log"
+        exit 1
+}
 
-###############################################################################
-#                                 TEST REPORT                                 #
-###############################################################################
+"$bin_path" --no-gui --script "${support_dir}/rsyn/${test_name}.rsyn" > "$base_dir/unit_test.log"
 
-Total tests $total
-Failed = $failed ($((100*failed/total))%)
-Suceeded = $suceeded ($((100*suceeded/total))%)
+if [[ $? != 0 ]]; then
+        echo "Runtime error"
+        fail
+fi
 
-HEREDOC
+cmp "${output_file}" "${gold_file}"
+
+if [[ $? != 0 ]]; then
+        echo "Output missmatch"
+        fail
+fi
+
+echo
+echo
+echo "Passed unit test"
+echo
+echo
