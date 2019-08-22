@@ -1063,12 +1063,19 @@ void FastRouteProcess::addRemainingGuides(std::vector<FastRoute::NET> &globalRou
                 if (netsDegree[netRoute.name] < 2) {
                         continue;
                 }
-
                 if (netRoute.route.size() == 0) {
                         int lastLayer = -1;
-                        for (int p = 0; p < pins.size(); p++)
+                        for (int p = 0; p < pins.size(); p++){
+                                if (p > 0){
+                                        if (pins[p].x != pins[p-1].x ||
+                                                pins[p].y != pins[p-1].y){
+                                                std::cout << "ERROR: Net " << netRoute.name << " not properly covered.";
+                                                exit(-1);
+                                        }
+                                }
                                 if (pins[p].layer > lastLayer)
                                         lastLayer = pins[p].layer;
+                        }
 
                         for (int l = 1; l <= lastLayer - 1; l++) {
                                 FastRoute::ROUTE route;
