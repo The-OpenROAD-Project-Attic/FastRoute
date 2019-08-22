@@ -504,7 +504,7 @@ void FastRouteProcess::setTrackAdjustments() {
                                 }
                         }
 
-                        if (numTracks < 0){
+                        if (numTracks > 0){
                                 DBU finalTrackLocation = trackLocation + (trackSpace * (numTracks-1));
                                 DBU remainingFinalSpace = upperDieBounds[Y] - finalTrackLocation;
                                 DBU extraSpace = upperDieBounds[Y] - (grid.tile_height * grid.yGrids);
