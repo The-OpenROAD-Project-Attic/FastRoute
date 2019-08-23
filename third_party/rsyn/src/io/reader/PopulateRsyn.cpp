@@ -362,6 +362,10 @@ void PopulateRsyn::populateRsyn(const LefDscp &lefDscp, const DefDscp &defDscp,
                                 Rsyn::Design rsynDesign) {
         bool keepWarning;
         int keepWarningCounter;
+        std::map<std::string, std::vector<DefNetConnection>> mapNetToConn;
+        std::map<std::string, bool> multiDefinedNets;
+        std::map<std::string, bool> multiDefinedSpecialNets;
+        std::map<std::string, bool> skippedSpecialNets;
 
         Rsyn::Module top = rsynDesign.getTopModule();
         rsynDesign.updateName(defDscp.clsDesignName);
@@ -393,8 +397,47 @@ void PopulateRsyn::populateRsyn(const LefDscp &lefDscp, const DefDscp &defDscp,
                 top.createCell(lcell, component.clsName);
         }  // end for
 
+        // check NETS with same name
+        for (const DefNetDscp &net : defDscp.clsNets) {
+                if (mapNetToConn.find(net.clsName) != mapNetToConn.end()) {
+                        multiDefinedNets[net.clsName] = true;
+                }
+                
+                for (const DefNetConnection &connection : net.clsConnections) {
+                        mapNetToConn[net.clsName].push_back(connection);
+                }
+        } // end for
+        
+        // check NETS and SPECIALNETS with same name
+        for (const DefSpecialNetDscp &net : defDscp.clsSpecialNets) {         
+                if (mapNetToConn.find(net.clsName) != mapNetToConn.end()) {
+                        const string use = net.clsUse;
+                        if (net.clsUse == "POWER" || net.clsUse == "GROUND"
+                            && net.clsConnections.size() > 0) {
+                                skippedSpecialNets[net.clsName] = true;
+                                
+                                for (const DefNetConnection &connection : net.clsConnections) {
+                                        std::cout << "WARNING: Failed to connect pin " << 
+                                                connection.clsComponentName << "/" <<
+                                                connection.clsPinName << " to " <<
+                                                net.clsUse << "\n";
+                                }
+                        } else {
+                                multiDefinedNets[net.clsName] = true;
+
+                                for (const DefNetConnection &connection : net.clsConnections) {
+                                        mapNetToConn[net.clsName].push_back(connection);
+                                }
+                        }
+                }
+        } // end for
+
         // Creates nets and connections.
         for (const DefNetDscp &net : defDscp.clsNets) {
+                if (multiDefinedNets.find(net.clsName) != multiDefinedNets.end() &&
+                    multiDefinedNets[net.clsName] == false)
+                        continue;
+                
                 if (net.clsName == "") {
                         std::cout << "[ERROR] Empty net name.\n";
                         for (unsigned i = 0; i < net.clsConnections.size();
@@ -429,7 +472,14 @@ void PopulateRsyn::populateRsyn(const LefDscp &lefDscp, const DefDscp &defDscp,
                         rsynNet.setUse(Rsyn::TIEOFF);
                 }  // end if
 
-                for (const DefNetConnection &connection : net.clsConnections) {
+                std::vector<DefNetConnection> netConnections;
+                if (multiDefinedNets.find(net.clsName) == multiDefinedNets.end()) {
+                        netConnections = net.clsConnections;
+                } else {
+                        netConnections = mapNetToConn[net.clsName];
+                        multiDefinedNets[net.clsName] = false;
+                }
+                for (const DefNetConnection &connection : netConnections) {
                         if (connection.clsComponentName == "PIN") {
                                 Rsyn::Port rsynCell = rsynDesign.findPortByName(
                                     connection.clsPinName);
@@ -459,9 +509,44 @@ void PopulateRsyn::populateRsyn(const LefDscp &lefDscp, const DefDscp &defDscp,
                                 rsynPin.connect(rsynNet);
                         }  // end else
                 }          // end for
+                for (const DefPortDscp port : defDscp.clsPorts) {
+                        bool isConnected = false;
+                        if (port.clsNetName == net.clsName) {
+                                for (const DefNetConnection &connection : netConnections) {
+                                        if (connection.clsComponentName != "PIN")
+                                                continue;
+
+                                        if (connection.clsPinName == port.clsName) {
+                                                isConnected = true;
+                                        }
+                                }
+                                if (!isConnected) {
+                                        Rsyn::Port rsynCell = rsynDesign.findPortByName(
+                                        port.clsName);
+
+                                        if (!rsynCell) {
+                                                std::cout << "[ERROR] The primary "
+                                                             "input/ouput port '"
+                                                          << port.clsName
+                                                          << "' not found.\n";
+                                                exit(1);
+                                        }  // end if
+
+                                        Rsyn::Pin rsynPin = rsynCell.getInnerPin();
+                                        rsynPin.connect(rsynNet);
+                                }
+                        }                        
+                }
         }                  // end for
 
         for (const DefSpecialNetDscp &net : defDscp.clsSpecialNets) {
+                if (skippedSpecialNets.find(net.clsName) != skippedSpecialNets.end()) {
+                        continue;
+                }
+                if (multiDefinedNets.find(net.clsName) != multiDefinedNets.end() &&
+                    multiDefinedNets[net.clsName] == false)                            
+                        continue;
+                
                 if (net.clsName == "") {
                         std::cout << "[ERROR] Empty net name.\n";
                         for (unsigned i = 0; i < net.clsConnections.size();
@@ -494,7 +579,7 @@ void PopulateRsyn::populateRsyn(const LefDscp &lefDscp, const DefDscp &defDscp,
                         rsynNet.setUse(Rsyn::SIGNAL);
                 } else if (use == "TIEOFF") {
                         rsynNet.setUse(Rsyn::TIEOFF);
-                }  // end if
+                } // end if
 
                 for (const DefNetConnection &connection : net.clsConnections) {
                         if (connection.clsComponentName == "PIN") {
@@ -536,6 +621,34 @@ void PopulateRsyn::populateRsyn(const LefDscp &lefDscp, const DefDscp &defDscp,
                                 rsynPin.connect(rsynNet);
                         }  // end else
                 }          // end for
+                for (const DefPortDscp port : defDscp.clsPorts) {
+                        bool isConnected = false;
+                        if (port.clsNetName == net.clsName) {
+                                for (const DefNetConnection &connection : net.clsConnections) {
+                                        if (connection.clsComponentName != "PIN")
+                                                continue;
+
+                                        if (connection.clsPinName == port.clsName) {
+                                                isConnected = true;
+                                        }
+                                }
+                                if (!isConnected) {
+                                        Rsyn::Port rsynCell = rsynDesign.findPortByName(
+                                        port.clsName);
+
+                                        if (!rsynCell) {
+                                                std::cout << "[ERROR] The primary "
+                                                             "input/ouput port '"
+                                                          << port.clsName
+                                                          << "' not found.\n";
+                                                exit(1);
+                                        }  // end if
+
+                                        Rsyn::Pin rsynPin = rsynCell.getInnerPin();
+                                        rsynPin.connect(rsynNet);
+                                }
+                        }                        
+                }
         }                  // end for
 }  // end method
 
