@@ -851,22 +851,44 @@ void FastRouteProcess::writeGuides(std::vector<FastRoute::NET> &globalRoute, std
                                 finalLayer = route.initLayer;
                         }
                         if (route.initLayer == route.finalLayer) {
+                                if (route.initLayer < minRoutingLayer && 
+                                    route.initX != route.finalX && route.initY != route.finalX) {
+                                        std::cout << "WARNING: routing with guides in blocked metal\n"
+                                                "---- Net: " << netRoute.name << "\n";
+                                        std::exit(0);
+                                }
                                 Bounds bds;
                                 bds = globalRoutingToBounds(route);
                                 guideBds.push_back(bds);
-                                phLayerF =
-                                    phDesign.getPhysicalLayerByIndex(Rsyn::ROUTING, route.finalLayer - 1);
+                                if (route.finalLayer < minRoutingLayer) {
+                                        phLayerF =
+                                            phDesign.getPhysicalLayerByIndex(Rsyn::ROUTING, (route.finalLayer + (minRoutingLayer - route.finalLayer)) - 1);
+                                } else {
+                                        phLayerF =
+                                            phDesign.getPhysicalLayerByIndex(Rsyn::ROUTING, route.finalLayer - 1);
+                                }
                                 finalLayer = route.finalLayer;
                         } else {
                                 if (abs(route.finalLayer - route.initLayer) > 1) {
-                                        std::cout << "Error: connection between"
+                                        std::cout << "ERROR: connection between"
                                                      "non-adjacent layers";
                                         std::exit(0);
                                 } else {
-                                        Rsyn::PhysicalLayer phLayerI =
-                                            phDesign.getPhysicalLayerByIndex(Rsyn::ROUTING, route.initLayer - 1);
-                                        phLayerF =
-                                            phDesign.getPhysicalLayerByIndex(Rsyn::ROUTING, route.finalLayer - 1);
+                                        Rsyn::PhysicalLayer phLayerI;
+                                        if (route.initLayer < minRoutingLayer) {
+                                                phLayerI =
+                                                    phDesign.getPhysicalLayerByIndex(Rsyn::ROUTING, (route.initLayer + (minRoutingLayer - route.initLayer)) - 1);
+                                        } else {
+                                                phLayerI =
+                                                    phDesign.getPhysicalLayerByIndex(Rsyn::ROUTING, route.initLayer - 1);
+                                        }
+                                        if (route.finalLayer < minRoutingLayer) {
+                                                phLayerF =
+                                                    phDesign.getPhysicalLayerByIndex(Rsyn::ROUTING, (route.finalLayer + (minRoutingLayer - route.finalLayer)) - 1);
+                                        } else {
+                                                phLayerF =
+                                                    phDesign.getPhysicalLayerByIndex(Rsyn::ROUTING, route.finalLayer - 1);
+                                        }
                                         finalLayer = route.finalLayer;
                                         Bounds bds;
                                         bds = globalRoutingToBounds(route);
@@ -1090,7 +1112,7 @@ void FastRouteProcess::addRemainingGuides(std::vector<FastRoute::NET> &globalRou
                                         lastLayer = pins[p].layer;
                         }
 
-                        for (int l = 1; l <= lastLayer - 1; l++) {
+                        for (int l = minRoutingLayer; l <= lastLayer - 1; l++) {
                                 FastRoute::ROUTE route;
                                 route.initLayer = l;
                                 route.initX = pins[0].x;
@@ -1103,7 +1125,7 @@ void FastRouteProcess::addRemainingGuides(std::vector<FastRoute::NET> &globalRou
                 } else {
                         for (FastRoute::PIN pin : pins) {
                                 if (pin.layer > 1) {
-                                        for (int l = 1; l <= pin.layer - 1; l++) {
+                                        for (int l = minRoutingLayer; l <= pin.layer - 1; l++) {
                                                 FastRoute::ROUTE route;
                                                 route.initLayer = l;
                                                 route.initX = pin.x;
