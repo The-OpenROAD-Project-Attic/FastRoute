@@ -77,6 +77,11 @@ bool FastRouteProcess::run(const Rsyn::Json &params) {
         std::cout << "**** Max routing layer: " << maxRoutingLayer << "\n";
         std::cout << "\n----------------\n";
         
+        if (minRoutingLayer >= maxRoutingLayer && (minRoutingLayer > 0 && maxRoutingLayer > 0)) {
+                std::cout << "ERROR: Min routing layer is greater or equal to max routing layer!!!\n";
+                std::exit(0);
+        }
+        
         std::cout << "Checking pin placement...\n";
         checkPinPlacement();
         std::cout << "Checking pin placement... Done!\n";
