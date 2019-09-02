@@ -65,6 +65,7 @@ bool FastRouteProcess::run(const Rsyn::Json &params) {
         adjustment = params.value("adjustment", 0.0);
         minRoutingLayer = params.value("minRoutingLayer", 1);
         maxRoutingLayer = params.value("maxRoutingLayer", -1);
+        unidirectionalRoute = params.value("unidirectionalRoute", false);
         design = session.getDesign();
         module = design.getTopModule();
         phDesign = session.getPhysicalDesign();
@@ -75,11 +76,17 @@ bool FastRouteProcess::run(const Rsyn::Json &params) {
         std::cout << "**** Capacity adjustment: " << adjustment << "\n";
         std::cout << "**** Min routing layer: " << minRoutingLayer << "\n";
         std::cout << "**** Max routing layer: " << maxRoutingLayer << "\n";
+        std::cout << "**** Unidirectional routing: " << unidirectionalRoute << "\n";
         std::cout << "\n----------------\n";
         
         if (minRoutingLayer >= maxRoutingLayer && (minRoutingLayer > 0 && maxRoutingLayer > 0)) {
                 std::cout << "ERROR: Min routing layer is greater or equal to max routing layer!!!\n";
                 std::exit(0);
+        }
+        
+        if (unidirectionalRoute) {
+                minRoutingLayer = 2;
+                fixLayer = 1;
         }
         
         std::cout << "Checking pin placement...\n";
@@ -868,7 +875,7 @@ void FastRouteProcess::writeGuides(std::vector<FastRoute::NET> &globalRoute, std
                                 Bounds bds;
                                 bds = globalRoutingToBounds(route);
                                 guideBds.push_back(bds);
-                                if (route.finalLayer < minRoutingLayer) {
+                                if (route.finalLayer < minRoutingLayer && !unidirectionalRoute) {
                                         phLayerF =
                                             phDesign.getPhysicalLayerByIndex(Rsyn::ROUTING, (route.finalLayer + (minRoutingLayer - route.finalLayer)) - 1);
                                 } else {
@@ -883,14 +890,14 @@ void FastRouteProcess::writeGuides(std::vector<FastRoute::NET> &globalRoute, std
                                         std::exit(0);
                                 } else {
                                         Rsyn::PhysicalLayer phLayerI;
-                                        if (route.initLayer < minRoutingLayer) {
+                                        if (route.initLayer < minRoutingLayer && !unidirectionalRoute) {
                                                 phLayerI =
                                                     phDesign.getPhysicalLayerByIndex(Rsyn::ROUTING, (route.initLayer + (minRoutingLayer - route.initLayer)) - 1);
                                         } else {
                                                 phLayerI =
                                                     phDesign.getPhysicalLayerByIndex(Rsyn::ROUTING, route.initLayer - 1);
                                         }
-                                        if (route.finalLayer < minRoutingLayer) {
+                                        if (route.finalLayer < minRoutingLayer && !unidirectionalRoute) {
                                                 phLayerF =
                                                     phDesign.getPhysicalLayerByIndex(Rsyn::ROUTING, (route.finalLayer + (minRoutingLayer - route.finalLayer)) - 1);
                                         } else {
@@ -1120,7 +1127,7 @@ void FastRouteProcess::addRemainingGuides(std::vector<FastRoute::NET> &globalRou
                                         lastLayer = pins[p].layer;
                         }
 
-                        for (int l = minRoutingLayer; l <= lastLayer - 1; l++) {
+                        for (int l = minRoutingLayer - fixLayer; l <= lastLayer - 1; l++) {
                                 FastRoute::ROUTE route;
                                 route.initLayer = l;
                                 route.initX = pins[0].x;
@@ -1133,7 +1140,7 @@ void FastRouteProcess::addRemainingGuides(std::vector<FastRoute::NET> &globalRou
                 } else {
                         for (FastRoute::PIN pin : pins) {
                                 if (pin.layer > 1) {
-                                        for (int l = minRoutingLayer; l <= pin.layer - 1; l++) {
+                                        for (int l = minRoutingLayer - fixLayer; l <= pin.layer - 1; l++) {
                                                 FastRoute::ROUTE route;
                                                 route.initLayer = l;
                                                 route.initX = pin.x;
