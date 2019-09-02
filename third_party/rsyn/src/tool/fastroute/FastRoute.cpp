@@ -135,11 +135,11 @@ bool FastRouteProcess::run(const Rsyn::Json &params) {
         std::cout << "Running FastRoute...\n";
         fastRoute.run(result);
         std::cout << "Running FastRoute... Done!\n";
-
+        
         std::cout << "Writing guides...\n";
         writeGuides(result, outfile);
         std::cout << "Writing guides... Done!\n";
-
+        
         return 0;
 }
 
@@ -448,6 +448,10 @@ void FastRouteProcess::setGridAdjustments() {
         DBU yExtra = upperDieBounds.y - upperGridBounds.y;
 
         for (Rsyn::PhysicalLayer phLayer : phDesign.allPhysicalLayers()) {
+                if (phLayer.getRelativeIndex() < (minRoutingLayer - 1) ||
+                    phLayer.getRelativeIndex() >= (maxRoutingLayer) && maxRoutingLayer > 0)
+                        continue;
+                
                 if (phLayer.getType() != Rsyn::ROUTING)
                         continue;
 
@@ -507,6 +511,10 @@ void FastRouteProcess::setTrackAdjustments() {
                 if (phLayer.getType() != Rsyn::ROUTING)
                         continue;
 
+                if (phLayer.getRelativeIndex() < (minRoutingLayer - 1) ||
+                    phLayer.getRelativeIndex() >= (maxRoutingLayer))
+                        continue;
+                
                 if (phLayer.getDirection() == Rsyn::HORIZONTAL) {
                         for (PhysicalTracks phTracks : phDesign.allPhysicalTracks(phLayer)) {
                                 if (phTracks.getDirection() != (PhysicalTrackDirection)Rsyn::HORIZONTAL) {
