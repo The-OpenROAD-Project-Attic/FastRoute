@@ -63,6 +63,7 @@ bool FastRouteProcess::run(const Rsyn::Json &params) {
         std::string outfile = params.value("outfile", "out.guide");
 
         adjustment = params.value("adjustment", 0.0);
+        minRoutingLayer = params.value("minRoutingLayer", 1);
         maxRoutingLayer = params.value("maxRoutingLayer", -1);
         design = session.getDesign();
         module = design.getTopModule();
@@ -72,6 +73,7 @@ bool FastRouteProcess::run(const Rsyn::Json &params) {
         std::cout << "Params: \n";
         std::cout << "**** Output file: " << outfile << "\n";
         std::cout << "**** Capacity adjustment: " << adjustment << "\n";
+        std::cout << "**** Min routing layer: " << minRoutingLayer << "\n";
         std::cout << "**** Max routing layer: " << maxRoutingLayer << "\n";
         std::cout << "\n----------------\n";
         
@@ -263,6 +265,9 @@ void FastRouteProcess::setCapacities() {
 
                         if (phLayer.getRelativeIndex() >= maxRoutingLayer && maxRoutingLayer > 0)
                                 hCapacity = 0;
+                        
+                        if (phLayer.getRelativeIndex() < (minRoutingLayer - 1) && minRoutingLayer > 0)
+                                hCapacity = 0;
 
                         fastRoute.addVCapacity(0, phLayer.getRelativeIndex() + 1);
                         fastRoute.addHCapacity(hCapacity, phLayer.getRelativeIndex() + 1);
@@ -278,6 +283,9 @@ void FastRouteProcess::setCapacities() {
                         }
 
                         if (phLayer.getRelativeIndex() >= maxRoutingLayer && maxRoutingLayer > 0)
+                                vCapacity = 0;
+                        
+                        if (phLayer.getRelativeIndex() < (minRoutingLayer - 1) && minRoutingLayer > 0)
                                 vCapacity = 0;
 
                         fastRoute.addVCapacity(vCapacity, phLayer.getRelativeIndex() + 1);

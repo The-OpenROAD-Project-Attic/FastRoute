@@ -71,6 +71,7 @@ class FastRouteProcess : public Process {
         Rsyn::PhysicalDesign phDesign;
         FastRoute::FT fastRoute;
         float adjustment;
+        int minRoutingLayer;
         int maxRoutingLayer;
 
         GRID grid;
