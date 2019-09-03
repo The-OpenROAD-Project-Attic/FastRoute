@@ -48,14 +48,17 @@ open "generic" {
 	"lefFiles" : "example.lef",
 	"defFiles" : "example.def"
 };
-run "rsyn.fastRoute" {"outfile" : "example.guide", "adjustment" : 0.X, "minRoutingLayer" : Y, "maxRoutingLayer" : Z};
+run "rsyn.fastRoute" {"outfile" : "example.guide", "adjustment" : 0.X, "minRoutingLayer" : Y, "maxRoutingLayer" : Z, "unidirectionalRoute" : bool};
 ````
 
-FastRoute has three main parameters. These are:
+FastRoute has five main parameters. These are:
 - outfile: name of the file with the generated guides
 - adjustment: percentage reduction in capacity of each edge in the global routing grid
 - minRoutingLayer: minimum (i.e., lowest) routing layer available for FastRoute to use
 - maxRoutingLayer: maximum (i.e., highest) routing layer available for FastRoute to use
+- unidirectionalRoute: indicate if unidirectional routing is activated
+
+NOTE: if you set unidirectionalRoute as "true", the minimum routing layer will be assigned as "2" automatically
 
 If you need more than one LEF/DEF file, you can script for this case as:
 
@@ -64,7 +67,7 @@ open "generic" {
 	"lefFiles" : ["example1.lef", "example2.lef", ..., "exampleN.lef"],
 	"defFiles" : ["example1.def", "example2.def", ..., "exampleN.def"]
 };
-run "rsyn.fastRoute" {"outfile" : "example.guide", "adjustment" : 0.X, "minRoutingLayer" : Y, "maxRoutingLayer" : Z};
+run "rsyn.fastRoute" {"outfile" : "example.guide", "adjustment" : 0.X, "minRoutingLayer" : Y, "maxRoutingLayer" : Z, "unidirectionalRoute" : B};
 ````
 
 You can use either the absolute path or the relative path (relative to the script file) for LEF/DEF files.
