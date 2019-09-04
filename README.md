@@ -84,44 +84,44 @@ You can use either the absolute path or the relative path (relative to the scrip
         - Assigned not read
     - Indentation/code-style for readability
 
-- Setting maximum number of routing layers to 18
-    **Previous setting**: Maximum of 8 routing layers
-    **Reason**: Support for OpenRoad benchmarks
+- Setting maximum number of routing layers to 18 \
+ &nbsp; &nbsp;&nbsp; &nbsp;   **Previous setting**: Maximum of 8 routing layers \
+ &nbsp; &nbsp;&nbsp; &nbsp;   **Reason**: Support for OpenRoad benchmarks
 
-- Added auxiliary function to set layers preferred directions:
-    **Previous setting**: Hardcoded layers preferred directions
-    **Reason**: Set layers preferred directions according to each benchmark specification
+- Added auxiliary function to set layers preferred directions: \
+  &nbsp; &nbsp;&nbsp; &nbsp;  **Previous setting**: Hardcoded layers preferred directions \
+  &nbsp; &nbsp;&nbsp; &nbsp;  **Reason**: Set layers preferred directions according to each benchmark specification
 
-- Added auxiliary function to get edges capacities
-    **Previous setting**: Cannot get the capacity of a specific edge
-    **Reason**: Access specific edge capacity to verify consistency in capacity adjustments
+- Added auxiliary function to get edges capacities \
+   &nbsp; &nbsp;&nbsp; &nbsp; **Previous setting**: Cannot get the capacity of a specific edge \
+   &nbsp; &nbsp;&nbsp; &nbsp; **Reason**: Access specific edge capacity to verify consistency in capacity adjustments
 
-- Added auxiliary function to get all nets from FastRoute4 data structures
-    **Previous setting**: Cannot access nets from FastRoute4 data structures
-    **Reason**: Access nets added to FastRoute4 data structures in order to verify if all nets of the design were routed
+- Added auxiliary function to get all nets from FastRoute4 data structures \
+   &nbsp; &nbsp;&nbsp; &nbsp; **Previous setting**: Cannot access nets from FastRoute4 data structures \
+   &nbsp; &nbsp;&nbsp; &nbsp;  **Reason**: Access nets added to FastRoute4 data structures in order to verify if all nets of the design were routed
 
-- Increase maximum net name length
-    **Previous setting**: Nets added to FastRoute4 data structures can have at most 18 characters
-    **Reason**: Increasing net name limit to 200 characters, avoiding issues with net names of OpenRoad benchmarks
+- Increase maximum net name length \
+  &nbsp; &nbsp;&nbsp; &nbsp;  **Previous setting**: Nets added to FastRoute4 data structures can have at most 18 characters \
+  &nbsp; &nbsp;&nbsp; &nbsp;  **Reason**: Increasing net name limit to 200 characters, avoiding issues with net names of OpenRoad benchmarks
 
-- Added flag in addAdjustments function allowing capacity increase
-    **Previous setting**: Capacities adjustments only decrease the original edges capacities
-    **Reason**: Allow edges capacities increase
+- Added flag in addAdjustments function allowing capacity increase \
+  &nbsp; &nbsp;&nbsp; &nbsp;  **Previous setting**: Capacities adjustments only decrease the original edges capacities \
+  &nbsp; &nbsp;&nbsp; &nbsp;  **Reason**: Allow edges capacities increase
 
-- Removing net degree limitation for FastRoute4
-    **Previous setting**: Nets can have at most 1000 pins, or they will be ignored
-    **Reason**: Dynamically memory allocation for data structures dependents on the nets degree, allowing nets to have any degree
+- Removing net degree limitation for FastRoute4 \
+  &nbsp; &nbsp;&nbsp; &nbsp;  **Previous setting**: Nets can have at most 1000 pins, or they will be ignored \
+  &nbsp; &nbsp;&nbsp; &nbsp;  **Reason**: Dynamically memory allocation for data structures dependents on the nets degree, allowing nets to have any degree
 
-- Removing net degree limitation for Flute
-    **Previous setting**: Nets can have at most 1000 pins, or generates a segfault
-    **Reason**: Dynamically memory allocation for data structures dependents on the nets degree, allowing nets to have any degree
+- Removing net degree limitation for Flute \
+  &nbsp; &nbsp;&nbsp; &nbsp;  **Previous setting**: Nets can have at most 1000 pins, or generates a segfault \
+  &nbsp; &nbsp;&nbsp; &nbsp;  **Reason**: Dynamically memory allocation for data structures dependents on the nets degree, allowing nets to have any degree
 
 ## FastRoute API
 
-- Implemented API to access FastRoute4 as a static library
-    - Declarations of the functions are in the following path: 	
+Implemented API to access FastRoute4 as a static library
+- Declarations of the functions are in the following path: 	\
         `FastRoute4-lefdef/third_party/fastroute/include/FastRoute.h`
-    - Implementation of the functions are in the following path: 
+- Implementation of the functions are in the following path: \
         `FastRoute4-lefdef/third_party/fastroute/src/FastRoute.cpp`
 
 The following functions were implemented:
