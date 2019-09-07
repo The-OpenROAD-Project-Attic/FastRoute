@@ -39,6 +39,7 @@
 #include <string.h>
 #include <math.h>
 #include <time.h>
+#include <algorithm>
 #include "DataType.h"
 #include "flute.h"
 #include "DataProc.h"
@@ -168,7 +169,7 @@ void FT::addNet(char *name, int netIdx, int nPins, int minWidth, PIN pins[]) {
         }
         if (pinInd > 1)  // valid net
         {
-                MD = Flute::maxFlute<float>(MD, pinInd);
+                MD = std::max(MD, pinInd);
                 TD += pinInd;
                 strcpy(nets[newnetID]->name, name);
                 nets[newnetID]->netIDorg = netID;
@@ -544,7 +545,7 @@ int FT::run(std::vector<NET> &result) {
         }
 
         for (i = 0; i < LVIter; i++) {
-                LOGIS_COF = Flute::maxFlute<float>(2.0 / (1 + log(maxOverflow)), LOGIS_COF);
+                LOGIS_COF = std::max<float>(2.0 / (1 + log(maxOverflow)), LOGIS_COF);
                 LOGIS_COF = 2.0 / (1 + log(maxOverflow));
                 printf("LV routing round %d, enlarge %d \n", i, enlarge);
                 routeLVAll(newTH, enlarge);
@@ -606,7 +607,7 @@ int FT::run(std::vector<NET> &result) {
                 }
 
                 if (totalOverflow > 15000 && maxOverflow > 400) {
-                        enlarge = Flute::maxFlute<int>(xGrid, yGrid) / 30;
+                        enlarge = std::max(xGrid, yGrid) / 30;
                         slope = BIG_INT;
                         if (i == 5) {
                                 VIA = 0;
@@ -628,14 +629,14 @@ int FT::run(std::vector<NET> &result) {
                         }
                 }
 
-                enlarge = Flute::minFlute(enlarge, xGrid / 2);
+                enlarge = std::min(enlarge, xGrid / 2);
                 costheight += cost_step;
                 mazeedge_Threshold = THRESH_M;
 
                 if (upType == 3) {
-                        LOGIS_COF = Flute::maxFlute<float>(2.0 / (1 + log(maxOverflow + max_adj)), LOGIS_COF);
+                        LOGIS_COF = std::max<float>(2.0 / (1 + log(maxOverflow + max_adj)), LOGIS_COF);
                 } else {
-                        LOGIS_COF = Flute::maxFlute<float>(2.0 / (1 + log(maxOverflow)), LOGIS_COF);
+                        LOGIS_COF = std::max<float>(2.0 / (1 + log(maxOverflow)), LOGIS_COF);
                 }
 
                 if (i == 8) {

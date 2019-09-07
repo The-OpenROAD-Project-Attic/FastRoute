@@ -32,6 +32,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
+#include <algorithm>
 #include "DataType.h"
 #include "flute.h"
 #include "DataProc.h"
@@ -240,8 +241,8 @@ void fluteNormal(int netID, int d, FLUTE_DTYPE x[], FLUTE_DTYPE y[], int acc, fl
                 if (x[0] < x[1]) {
                         if (x[0] < x[2]) {
                                 x_min = x[0];
-                                x_mid = Flute::minFlute(x[1], x[2]);
-                                x_max = Flute::maxFlute(x[1], x[2]);
+                                x_mid = std::min(x[1], x[2]);
+                                x_max = std::max(x[1], x[2]);
                         } else {
                                 x_min = x[2];
                                 x_mid = x[0];
@@ -253,16 +254,16 @@ void fluteNormal(int netID, int d, FLUTE_DTYPE x[], FLUTE_DTYPE y[], int acc, fl
                                 x_mid = x[0];
                                 x_max = x[2];
                         } else {
-                                x_min = Flute::minFlute(x[1], x[2]);
-                                x_mid = Flute::maxFlute(x[1], x[2]);
+                                x_min = std::min(x[1], x[2]);
+                                x_mid = std::max(x[1], x[2]);
                                 x_max = x[0];
                         }
                 }
                 if (y[0] < y[1]) {
                         if (y[0] < y[2]) {
                                 y_min = y[0];
-                                y_mid = Flute::minFlute(y[1], y[2]);
-                                y_max = Flute::maxFlute(y[1], y[2]);
+                                y_mid = std::min(y[1], y[2]);
+                                y_max = std::max(y[1], y[2]);
                         } else {
                                 y_min = y[2];
                                 y_mid = y[0];
@@ -274,8 +275,8 @@ void fluteNormal(int netID, int d, FLUTE_DTYPE x[], FLUTE_DTYPE y[], int acc, fl
                                 y_mid = y[0];
                                 y_max = y[2];
                         } else {
-                                y_min = Flute::minFlute(y[1], y[2]);
-                                y_mid = Flute::maxFlute(y[1], y[2]);
+                                y_min = std::min(y[1], y[2]);
+                                y_mid = std::max(y[1], y[2]);
                                 y_max = y[0];
                         }
                 }
@@ -429,8 +430,8 @@ void fluteCongest(int netID, int d, FLUTE_DTYPE x[], FLUTE_DTYPE y[], int acc, f
                 if (x[0] < x[1]) {
                         if (x[0] < x[2]) {
                                 x_min = x[0];
-                                x_mid = Flute::minFlute(x[1], x[2]);
-                                x_max = Flute::maxFlute(x[1], x[2]);
+                                x_mid = std::min(x[1], x[2]);
+                                x_max = std::max(x[1], x[2]);
                         } else {
                                 x_min = x[2];
                                 x_mid = x[0];
@@ -442,16 +443,16 @@ void fluteCongest(int netID, int d, FLUTE_DTYPE x[], FLUTE_DTYPE y[], int acc, f
                                 x_mid = x[0];
                                 x_max = x[2];
                         } else {
-                                x_min = Flute::minFlute(x[1], x[2]);
-                                x_mid = Flute::maxFlute(x[1], x[2]);
+                                x_min = std::min(x[1], x[2]);
+                                x_mid = std::max(x[1], x[2]);
                                 x_max = x[0];
                         }
                 }
                 if (y[0] < y[1]) {
                         if (y[0] < y[2]) {
                                 y_min = y[0];
-                                y_mid = Flute::minFlute(y[1], y[2]);
-                                y_max = Flute::maxFlute(y[1], y[2]);
+                                y_mid = std::min(y[1], y[2]);
+                                y_max = std::max(y[1], y[2]);
                         } else {
                                 y_min = y[2];
                                 y_mid = y[0];
@@ -463,8 +464,8 @@ void fluteCongest(int netID, int d, FLUTE_DTYPE x[], FLUTE_DTYPE y[], int acc, f
                                 y_mid = y[0];
                                 y_max = y[2];
                         } else {
-                                y_min = Flute::minFlute(y[1], y[2]);
-                                y_mid = Flute::maxFlute(y[1], y[2]);
+                                y_min = std::min(y[1], y[2]);
+                                y_mid = std::max(y[1], y[2]);
                                 y_max = y[0];
                         }
                 }
@@ -517,7 +518,7 @@ void fluteCongest(int netID, int d, FLUTE_DTYPE x[], FLUTE_DTYPE y[], int acc, f
                         }
                         if (x_seg[i] != 0 && usageH != 0) {
                                 x_seg[i] *= coeffH * usageH / ((xs[i + 1] - xs[i]) * height * hCapacity);
-                                x_seg[i] = Flute::maxFlute(1, x_seg[i]);  // the segment len is at least 1 if original segment len > 0
+                                x_seg[i] = std::max(1, x_seg[i]);  // the segment len is at least 1 if original segment len > 0
                         }
                         usageV = 0;
                         for (j = ys[i]; j < ys[i + 1]; j++) {
@@ -527,7 +528,7 @@ void fluteCongest(int netID, int d, FLUTE_DTYPE x[], FLUTE_DTYPE y[], int acc, f
                         }
                         if (y_seg[i] != 0 && usageV != 0) {
                                 y_seg[i] *= coeffV * usageV / ((ys[i + 1] - ys[i]) * width * vCapacity);
-                                y_seg[i] = Flute::maxFlute(1, y_seg[i]);  // the segment len is at least 1 if original segment len > 0
+                                y_seg[i] = std::max(1, y_seg[i]);  // the segment len is at least 1 if original segment len > 0
                         }
                 }
 
