@@ -126,8 +126,7 @@ DBU DefaultRoutingEstimationModel::generateSteinerTree(
 
                 // Build the FLUTE tree.
                 Flute::Tree flutetree =
-                    Flute::flute(numPins, x, y, FLUTE_ACCURACY,
-                                 mapPinNodeIndexToFluteNodeIndex);
+                    Flute::flute(numPins, x, y, FLUTE_ACCURACY);
 
                 // FLUTE may return steiner points at the same position of
                 // regular
@@ -355,7 +354,7 @@ void DefaultRoutingEstimationModel::generateFluteAvgRuntimeTable(
 
                         // Build the FLUTE tree.
                         Flute::Tree tree =
-                            Flute::flute(n, x, y, FLUTE_ACCURACY, mapping);
+                            Flute::flute(n, x, y, FLUTE_ACCURACY);
 
                         // Compute wirelength.
                         const DBU wl = Flute::wirelength(tree);
