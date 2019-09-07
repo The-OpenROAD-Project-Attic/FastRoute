@@ -62,3 +62,4 @@ set(LIBRARY_OUTPUT_PATH ${CMAKE_BINARY_DIR})
 
 add_subdirectory(third_party/fastroute)
 add_subdirectory(third_party/rsyn)
+add_subdirectory(third_party/flute)
