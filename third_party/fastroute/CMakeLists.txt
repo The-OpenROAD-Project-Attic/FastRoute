@@ -51,4 +51,9 @@ set(LIBRARY_OUTPUT_PATH ${CMAKE_BINARY_DIR})
 add_definitions(-DLIBRARY_MODE)
 add_LIBRARY(${LIB_NAME} STATIC ${SRC_FILES})
 
-target_include_directories(${LIB_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
+target_include_directories(${LIB_NAME} PUBLIC
+                           ${CMAKE_CURRENT_SOURCE_DIR}/include
+                           ${CMAKE_CURRENT_SOURCE_DIR}/../flute)
+
+target_link_libraries(FastRoute
+                    flute)
