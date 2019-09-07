@@ -104,10 +104,10 @@ void plotTree(int netID) {
                         y1 = treenodes[n1].y;
                         x2 = treenodes[n2].x;
                         y2 = treenodes[n2].y;
-                        xmin = minFlute(xmin, minFlute(x1, x2));
-                        xmax = maxFlute(xmax, maxFlute(x1, x2));
-                        ymin = minFlute(ymin, minFlute(y1, y2));
-                        ymax = maxFlute(ymax, maxFlute(y1, y2));
+                        xmin = Flute::minFlute(xmin, Flute::minFlute(x1, x2));
+                        xmax = Flute::maxFlute(xmax, Flute::maxFlute(x1, x2));
+                        ymin = Flute::minFlute(ymin, Flute::minFlute(y1, y2));
+                        ymax = Flute::maxFlute(ymax, Flute::maxFlute(y1, y2));
 
                         routetype = treeedge->route.type;
 
@@ -468,13 +468,13 @@ void assignEdge(int netID, int edgeID, Bool processDIR) {
 
         for (k = 0; k < routelen; k++) {
                 if (gridsX[k] == gridsX[k + 1]) {
-                        min_y = minFlute(gridsY[k], gridsY[k + 1]);
+                        min_y = Flute::minFlute(gridsY[k], gridsY[k + 1]);
                         for (l = 0; l < numLayers; l++) {
                                 grid = l * gridV + min_y * xGrid + gridsX[k];
                                 layerGrid[l][k] = v_edges3D[grid].cap - v_edges3D[grid].usage;
                         }
                 } else {
-                        min_x = minFlute(gridsX[k], gridsX[k + 1]);
+                        min_x = Flute::minFlute(gridsX[k], gridsX[k + 1]);
                         for (l = 0; l < numLayers; l++) {
                                 grid = l * gridH + gridsY[k] * (xGrid - 1) + min_x;
                                 layerGrid[l][k] = h_edges3D[grid].cap - h_edges3D[grid].usage;
@@ -497,15 +497,15 @@ void assignEdge(int netID, int edgeID, Bool processDIR) {
                                 for (i = 0; i < numLayers; i++) {
                                         if (k == 0) {
                                                 if (l != i) {
-                                                        if (gridD[i][k] > gridD[l][k] + ADIFF(i, l) * 2) {
-                                                                gridD[i][k] = gridD[l][k] + ADIFF(i, l) * 2;
+                                                        if (gridD[i][k] > gridD[l][k] + Flute::ADIFF(i, l) * 2) {
+                                                                gridD[i][k] = gridD[l][k] + Flute::ADIFF(i, l) * 2;
                                                                 viaLink[i][k] = l;
                                                         }
                                                 }
                                         } else {
                                                 if (l != i) {
-                                                        if (gridD[i][k] > gridD[l][k] + ADIFF(i, l) * 3) {
-                                                                gridD[i][k] = gridD[l][k] + ADIFF(i, l) * 3;
+                                                        if (gridD[i][k] > gridD[l][k] + Flute::ADIFF(i, l) * 3) {
+                                                                gridD[i][k] = gridD[l][k] + Flute::ADIFF(i, l) * 3;
                                                                 viaLink[i][k] = l;
                                                         }
                                                 }
@@ -524,8 +524,8 @@ void assignEdge(int netID, int edgeID, Bool processDIR) {
                 for (l = 0; l < numLayers; l++) {
                         for (i = 0; i < numLayers; i++) {
                                 if (l != i) {
-                                        if (gridD[i][k] > gridD[l][k] + ADIFF(i, l) * 1) {    //+ ADIFF(i,l) * 3 ) {
-                                                gridD[i][k] = gridD[l][k] + ADIFF(i, l) * 1;  //+ ADIFF(i,l) * 3 ;
+                                        if (gridD[i][k] > gridD[l][k] + Flute::ADIFF(i, l) * 1) {    //+ Flute::ADIFF(i,l) * 3 ) {
+                                                gridD[i][k] = gridD[l][k] + Flute::ADIFF(i, l) * 1;  //+ Flute::ADIFF(i,l) * 3 ;
                                                 viaLink[i][k] = l;
                                         }
                                 }
@@ -587,8 +587,8 @@ void assignEdge(int netID, int edgeID, Bool processDIR) {
 
                 } else {
                         //treenodes[n2a].assigned = TRUE;
-                        treenodes[n2a].topL = gridsL[routelen];  //maxFlute(endLayer, gridsL[routelen]);
-                        treenodes[n2a].botL = gridsL[routelen];  //minFlute(endLayer, gridsL[routelen]);
+                        treenodes[n2a].topL = gridsL[routelen];  //Flute::maxFlute(endLayer, gridsL[routelen]);
+                        treenodes[n2a].botL = gridsL[routelen];  //Flute::minFlute(endLayer, gridsL[routelen]);
                         treenodes[n2a].lID = treenodes[n2a].hID = edgeID;
                 }
 
@@ -610,15 +610,15 @@ void assignEdge(int netID, int edgeID, Bool processDIR) {
                                 for (i = 0; i < numLayers; i++) {
                                         if (k == routelen) {
                                                 if (l != i) {
-                                                        if (gridD[i][k] > gridD[l][k] + ADIFF(i, l) * 2) {
-                                                                gridD[i][k] = gridD[l][k] + ADIFF(i, l) * 2;
+                                                        if (gridD[i][k] > gridD[l][k] + Flute::ADIFF(i, l) * 2) {
+                                                                gridD[i][k] = gridD[l][k] + Flute::ADIFF(i, l) * 2;
                                                                 viaLink[i][k] = l;
                                                         }
                                                 }
                                         } else {
                                                 if (l != i) {
-                                                        if (gridD[i][k] > gridD[l][k] + ADIFF(i, l) * 3) {
-                                                                gridD[i][k] = gridD[l][k] + ADIFF(i, l) * 3;
+                                                        if (gridD[i][k] > gridD[l][k] + Flute::ADIFF(i, l) * 3) {
+                                                                gridD[i][k] = gridD[l][k] + Flute::ADIFF(i, l) * 3;
                                                                 viaLink[i][k] = l;
                                                         }
                                                 }
@@ -637,8 +637,8 @@ void assignEdge(int netID, int edgeID, Bool processDIR) {
                 for (l = 0; l < numLayers; l++) {
                         for (i = 0; i < numLayers; i++) {
                                 if (l != i) {
-                                        if (gridD[i][0] > gridD[l][0] + ADIFF(i, l) * 1) {
-                                                gridD[i][0] = gridD[l][0] + ADIFF(i, l) * 1;
+                                        if (gridD[i][0] > gridD[l][0] + Flute::ADIFF(i, l) * 1) {
+                                                gridD[i][0] = gridD[l][0] + Flute::ADIFF(i, l) * 1;
                                                 viaLink[i][0] = l;
                                         }
                                 }
@@ -697,8 +697,8 @@ void assignEdge(int netID, int edgeID, Bool processDIR) {
 
                 } else {
                         //treenodes[n1a].assigned = TRUE;
-                        treenodes[n1a].topL = gridsL[0];  //maxFlute(endLayer, gridsL[0]);
-                        treenodes[n1a].botL = gridsL[0];  //minFlute(endLayer, gridsL[0]);
+                        treenodes[n1a].topL = gridsL[0];  //Flute::maxFlute(endLayer, gridsL[0]);
+                        treenodes[n1a].botL = gridsL[0];  //Flute::minFlute(endLayer, gridsL[0]);
                         treenodes[n1a].lID = treenodes[n1a].hID = edgeID;
                 }
         }
@@ -706,7 +706,7 @@ void assignEdge(int netID, int edgeID, Bool processDIR) {
 
         for (k = 0; k < routelen; k++) {
                 if (gridsX[k] == gridsX[k + 1]) {
-                        min_y = minFlute(gridsY[k], gridsY[k + 1]);
+                        min_y = Flute::minFlute(gridsY[k], gridsY[k + 1]);
                         grid = gridsL[k] * gridV + min_y * xGrid + gridsX[k];
 
                         if (v_edges3D[grid].usage < v_edges3D[grid].cap) {
@@ -717,7 +717,7 @@ void assignEdge(int netID, int edgeID, Bool processDIR) {
                         }
 
                 } else {
-                        min_x = minFlute(gridsX[k], gridsX[k + 1]);
+                        min_x = Flute::minFlute(gridsX[k], gridsX[k + 1]);
                         grid = gridsL[k] * gridH + gridsY[k] * (xGrid - 1) + min_x;
 
                         if (h_edges3D[grid].usage < h_edges3D[grid].cap) {
@@ -1035,7 +1035,7 @@ void checkRoute3D() {
                                 printEdge3D(netID, edgeID);
                         }
                         for (i = 0; i < treeedge->route.routelen; i++) {
-                                distance = ADIFF(gridsX[i + 1], gridsX[i]) + ADIFF(gridsY[i + 1], gridsY[i]) + ADIFF(gridsL[i + 1], gridsL[i]);
+                                distance = Flute::ADIFF(gridsX[i + 1], gridsX[i]) + Flute::ADIFF(gridsY[i + 1], gridsY[i]) + Flute::ADIFF(gridsL[i + 1], gridsL[i]);
                                 if (distance > 1 || distance < 0) {
                                         gridFlag = TRUE;
                                         printf("net[%d] edge[%d] maze route wrong, distance %d, i %d\n", netID, edgeID, distance, i);
@@ -1145,14 +1145,14 @@ void StNetOrder() {
                         for (i = 0; i <= treeedge->route.routelen; i++) {
                                 if (gridsX[i] == gridsX[i + 1])  // a vertical edge
                                 {
-                                        min_y = minFlute(gridsY[i], gridsY[i + 1]);
+                                        min_y = Flute::minFlute(gridsY[i], gridsY[i + 1]);
                                         grid = min_y * xGrid + gridsX[i];
-                                        treeOrderCong[j].xmin += maxFlute(0, v_edges[grid].usage - v_edges[grid].cap);
+                                        treeOrderCong[j].xmin += Flute::maxFlute(0, v_edges[grid].usage - v_edges[grid].cap);
                                 } else  ///if(gridsY[i]==gridsY[i+1])// a horizontal edge
                                 {
-                                        min_x = minFlute(gridsX[i], gridsX[i + 1]);
+                                        min_x = Flute::minFlute(gridsX[i], gridsX[i + 1]);
                                         grid = gridsY[i] * (xGrid - 1) + min_x;
-                                        treeOrderCong[j].xmin += maxFlute(0, h_edges[grid].usage - h_edges[grid].cap);
+                                        treeOrderCong[j].xmin += Flute::maxFlute(0, h_edges[grid].usage - h_edges[grid].cap);
                                 }
                         }
                 }
@@ -1222,12 +1222,12 @@ void recoverEdge(int netID, int edgeID) {
                 if (gridsL[i] == gridsL[i + 1]) {
                         if (gridsX[i] == gridsX[i + 1])  // a vertical edge
                         {
-                                ymin = minFlute(gridsY[i], gridsY[i + 1]);
+                                ymin = Flute::minFlute(gridsY[i], gridsY[i + 1]);
                                 grid = gridsL[i] * gridV + ymin * xGrid + gridsX[i];
                                 v_edges3D[grid].usage += 1;
                         } else if (gridsY[i] == gridsY[i + 1])  // a horizontal edge
                         {
-                                xmin = minFlute(gridsX[i], gridsX[i + 1]);
+                                xmin = Flute::minFlute(gridsX[i], gridsX[i + 1]);
                                 grid = gridsL[i] * gridH + gridsY[i] * (xGrid - 1) + xmin;
                                 h_edges3D[grid].usage += 1;
                         }
@@ -1391,7 +1391,7 @@ Bool checkRoute2DTree(int netID) {
                                 STHwrong = TRUE;
                         }
                         for (i = 0; i < treeedge->route.routelen; i++) {
-                                distance = ADIFF(gridsX[i + 1], gridsX[i]) + ADIFF(gridsY[i + 1], gridsY[i]);
+                                distance = Flute::ADIFF(gridsX[i + 1], gridsX[i]) + Flute::ADIFF(gridsY[i + 1], gridsY[i]);
                                 if (distance != 1) {
                                         printf("net[%d] edge[%d] maze route wrong, distance %d, i %d\n", netID, edgeID, distance, i);
                                         gridFlag = TRUE;
@@ -1627,11 +1627,11 @@ void copyBR(void) {
                                         for (i = 0; i < sttrees[netID].edges[edgeID].route.routelen; i++) {
                                                 if (gridsX[i] == gridsX[i + 1])  // a vertical edge
                                                 {
-                                                        min_y = minFlute(gridsY[i], gridsY[i + 1]);
+                                                        min_y = Flute::minFlute(gridsY[i], gridsY[i + 1]);
                                                         v_edges[min_y * xGrid + gridsX[i]].usage += 1;
                                                 } else  ///if(gridsY[i]==gridsY[i+1])// a horizontal edge
                                                 {
-                                                        min_x = minFlute(gridsX[i], gridsX[i + 1]);
+                                                        min_x = Flute::minFlute(gridsX[i], gridsX[i + 1]);
                                                         h_edges[gridsY[i] * (xGrid - 1) + min_x].usage += 1;
                                                 }
                                         }

@@ -71,7 +71,7 @@ void convertToMazerouteNet(int netID) {
                 treeedge->route.gridsY = (short *)calloc((edgelength + 1), sizeof(short));
                 gridsX = treeedge->route.gridsX;
                 gridsY = treeedge->route.gridsY;
-                treeedge->len = ADIFF(x1, x2) + ADIFF(y1, y2);
+                treeedge->len = Flute::ADIFF(x1, x2) + Flute::ADIFF(y1, y2);
 
                 cnt = 0;
                 if (treeedge->route.type == NOROUTE) {
@@ -301,7 +301,7 @@ void updateCongestionHistory(int round, int upType) {
                                                 h_edges[grid].last_usage = h_edges[grid].last_usage * 0.9;
                                         }
                                 }
-                                maxlimit = maxFlute(maxlimit, h_edges[grid].last_usage);
+                                maxlimit = Flute::maxFlute<int>(maxlimit, h_edges[grid].last_usage);
                         }
                 }
 
@@ -318,7 +318,7 @@ void updateCongestionHistory(int round, int upType) {
                                                 v_edges[grid].last_usage = v_edges[grid].last_usage * 0.9;
                                         }
                                 }
-                                maxlimit = maxFlute(maxlimit, v_edges[grid].last_usage);
+                                maxlimit = Flute::maxFlute<int>(maxlimit, v_edges[grid].last_usage);
                         }
                 }
         } else if (upType == 2) {
@@ -338,11 +338,11 @@ void updateCongestionHistory(int round, int upType) {
                                 } else {
                                         if (!stopDEC) {
                                                 h_edges[grid].congCNT--;
-                                                h_edges[grid].congCNT = maxFlute(0, h_edges[grid].congCNT);
+                                                h_edges[grid].congCNT = Flute::maxFlute<int>(0, h_edges[grid].congCNT);
                                                 h_edges[grid].last_usage = h_edges[grid].last_usage * 0.9;
                                         }
                                 }
-                                maxlimit = maxFlute(maxlimit, h_edges[grid].last_usage);
+                                maxlimit = Flute::maxFlute<int>(maxlimit, h_edges[grid].last_usage);
                         }
                 }
 
@@ -357,11 +357,11 @@ void updateCongestionHistory(int round, int upType) {
                                 } else {
                                         if (!stopDEC) {
                                                 v_edges[grid].congCNT--;
-                                                v_edges[grid].congCNT = maxFlute(0, v_edges[grid].congCNT);
+                                                v_edges[grid].congCNT = Flute::maxFlute<int>(0, v_edges[grid].congCNT);
                                                 v_edges[grid].last_usage = v_edges[grid].last_usage * 0.9;
                                         }
                                 }
-                                maxlimit = maxFlute(maxlimit, v_edges[grid].last_usage);
+                                maxlimit = Flute::maxFlute<int>(maxlimit, v_edges[grid].last_usage);
                         }
                 }
 
@@ -377,12 +377,12 @@ void updateCongestionHistory(int round, int upType) {
                                 } else {
                                         if (!stopDEC) {
                                                 h_edges[grid].congCNT--;
-                                                h_edges[grid].congCNT = maxFlute(0, h_edges[grid].congCNT);
+                                                h_edges[grid].congCNT = Flute::maxFlute<int>(0, h_edges[grid].congCNT);
                                                 h_edges[grid].last_usage += overflow;
-                                                h_edges[grid].last_usage = maxFlute(h_edges[grid].last_usage, 0);
+                                                h_edges[grid].last_usage = Flute::maxFlute<int>(h_edges[grid].last_usage, 0);
                                         }
                                 }
-                                maxlimit = maxFlute(maxlimit, h_edges[grid].last_usage);
+                                maxlimit = Flute::maxFlute<int>(maxlimit, h_edges[grid].last_usage);
                         }
                 }
 
@@ -398,10 +398,10 @@ void updateCongestionHistory(int round, int upType) {
                                         if (!stopDEC) {
                                                 v_edges[grid].congCNT--;
                                                 v_edges[grid].last_usage += overflow;
-                                                v_edges[grid].last_usage = maxFlute(v_edges[grid].last_usage, 0);
+                                                v_edges[grid].last_usage = Flute::maxFlute<int>(v_edges[grid].last_usage, 0);
                                         }
                                 }
-                                maxlimit = maxFlute(maxlimit, v_edges[grid].last_usage);
+                                maxlimit = Flute::maxFlute<int>(maxlimit, v_edges[grid].last_usage);
                         }
                 }
 
@@ -417,11 +417,11 @@ void updateCongestionHistory(int round, int upType) {
                                 } else {
                                         if (!stopDEC) {
                                                 h_edges[grid].congCNT--;
-                                                h_edges[grid].congCNT = maxFlute(0, h_edges[grid].congCNT);
+                                                h_edges[grid].congCNT = Flute::maxFlute<int>(0, h_edges[grid].congCNT);
                                                 h_edges[grid].last_usage = h_edges[grid].last_usage * 0.9;
                                         }
                                 }
-                                maxlimit = maxFlute(maxlimit, h_edges[grid].last_usage);
+                                maxlimit = Flute::maxFlute<int>(maxlimit, h_edges[grid].last_usage);
                         }
                 }
 
@@ -436,11 +436,11 @@ void updateCongestionHistory(int round, int upType) {
                                 } else {
                                         if (!stopDEC) {
                                                 v_edges[grid].congCNT--;
-                                                v_edges[grid].congCNT = maxFlute(0, v_edges[grid].congCNT);
+                                                v_edges[grid].congCNT = Flute::maxFlute<int>(0, v_edges[grid].congCNT);
                                                 v_edges[grid].last_usage = v_edges[grid].last_usage * 0.9;
                                         }
                                 }
-                                maxlimit = maxFlute(maxlimit, v_edges[grid].last_usage);
+                                maxlimit = Flute::maxFlute<int>(maxlimit, v_edges[grid].last_usage);
                         }
                 }
                 //	if (maxlimit < 20) {
@@ -787,7 +787,7 @@ void updateRouteType1(TreeNode *treenodes, int n1, int A1, int A2, int E1x, int 
 
         treeedges[edge_n1A1].route.type = MAZEROUTE;
         treeedges[edge_n1A1].route.routelen = E1_pos;
-        treeedges[edge_n1A1].len = ADIFF(A1x, E1x) + ADIFF(A1y, E1y);
+        treeedges[edge_n1A1].len = Flute::ADIFF(A1x, E1x) + Flute::ADIFF(A1y, E1y);
 
         // reallocate memory for route.gridsX and route.gridsY
         if (treeedges[edge_n1A2].route.type == MAZEROUTE)  // if originally allocated, free them first
@@ -831,7 +831,7 @@ void updateRouteType1(TreeNode *treenodes, int n1, int A1, int A2, int E1x, int 
         }
         treeedges[edge_n1A2].route.type = MAZEROUTE;
         treeedges[edge_n1A2].route.routelen = cnt - 1;
-        treeedges[edge_n1A2].len = ADIFF(A2x, E1x) + ADIFF(A2y, E1y);
+        treeedges[edge_n1A2].len = Flute::ADIFF(A2x, E1x) + Flute::ADIFF(A2y, E1y);
 }
 
 void updateRouteType2(TreeNode *treenodes, int n1, int A1, int A2, int C1, int C2, int E1x, int E1y, TreeEdge *treeedges, int edge_n1A1, int edge_n1A2, int edge_C1C2) {
@@ -878,7 +878,7 @@ void updateRouteType2(TreeNode *treenodes, int n1, int A1, int A2, int C1, int C
         treeedges[edge_A1A2].route.gridsX = (short *)calloc(len_A1A2, sizeof(short));
         treeedges[edge_A1A2].route.gridsY = (short *)calloc(len_A1A2, sizeof(short));
         treeedges[edge_A1A2].route.routelen = len_A1A2 - 1;
-        treeedges[edge_A1A2].len = ADIFF(A1x, A2x) + ADIFF(A1y, A2y);
+        treeedges[edge_A1A2].len = Flute::ADIFF(A1x, A2x) + Flute::ADIFF(A1y, A2y);
 
         cnt = 0;
         for (i = 0; i < cnt_n1A1; i++) {
@@ -915,7 +915,7 @@ void updateRouteType2(TreeNode *treenodes, int n1, int A1, int A2, int C1, int C
         treeedges[edge_n1C1].route.gridsX = (short *)calloc(len_n1C1, sizeof(short));
         treeedges[edge_n1C1].route.gridsY = (short *)calloc(len_n1C1, sizeof(short));
         treeedges[edge_n1C1].route.routelen = len_n1C1 - 1;
-        treeedges[edge_n1C1].len = ADIFF(C1x, E1x) + ADIFF(C1y, E1y);
+        treeedges[edge_n1C1].len = Flute::ADIFF(C1x, E1x) + Flute::ADIFF(C1y, E1y);
 
         if (treeedges[edge_n1C2].route.type == MAZEROUTE) {
                 free(treeedges[edge_n1C2].route.gridsX);
@@ -925,7 +925,7 @@ void updateRouteType2(TreeNode *treenodes, int n1, int A1, int A2, int C1, int C
         treeedges[edge_n1C2].route.gridsX = (short *)calloc(len_n1C2, sizeof(short));
         treeedges[edge_n1C2].route.gridsY = (short *)calloc(len_n1C2, sizeof(short));
         treeedges[edge_n1C2].route.routelen = len_n1C2 - 1;
-        treeedges[edge_n1C2].len = ADIFF(C2x, E1x) + ADIFF(C2y, E1y);
+        treeedges[edge_n1C2].len = Flute::ADIFF(C2x, E1x) + Flute::ADIFF(C2y, E1y);
 
         // split original (C1, C2) to (C1, n1) and (n1, C2)
         cnt = 0;
@@ -946,7 +946,7 @@ void updateRouteType2(TreeNode *treenodes, int n1, int A1, int A2, int C1, int C
 void reInitTree(int netID) {
         int deg, numEdges, edgeID, d, j;
         TreeEdge *treeedge;
-        Tree rsmt;
+        Flute::Tree rsmt;
 
         // TODO: check this size
         int x[nets[netID]->numPins];
@@ -1101,7 +1101,7 @@ void mazeRouteMSMD(int iter, int expand, float costHeight, int ripup_threshold, 
                         n1y = treenodes[n1].y;
                         n2x = treenodes[n2].x;
                         n2y = treenodes[n2].y;
-                        treeedge->len = ADIFF(n2x, n1x) + ADIFF(n2y, n1y);
+                        treeedge->len = Flute::ADIFF(n2x, n1x) + Flute::ADIFF(n2y, n1y);
 
                         if (treeedge->len > mazeedge_Threshold)  // only route the non-degraded edges (len>0)
                         {
@@ -1125,11 +1125,11 @@ void mazeRouteMSMD(int iter, int expand, float costHeight, int ripup_threshold, 
                                                 xmax = n1x;
                                         }
 
-                                        enlarge = minFlute(origENG, (iter / 6 + 3) * treeedge->route.routelen);
-                                        regionX1 = maxFlute(0, xmin - enlarge);
-                                        regionX2 = minFlute(xGrid - 1, xmax + enlarge);
-                                        regionY1 = maxFlute(0, ymin - enlarge);
-                                        regionY2 = minFlute(yGrid - 1, ymax + enlarge);
+                                        enlarge = Flute::minFlute(origENG, (iter / 6 + 3) * treeedge->route.routelen);
+                                        regionX1 = Flute::maxFlute<int>(0, xmin - enlarge);
+                                        regionX2 = Flute::minFlute(xGrid - 1, xmax + enlarge);
+                                        regionY1 = Flute::maxFlute<int>(0, ymin - enlarge);
+                                        regionY2 = Flute::minFlute(yGrid - 1, ymax + enlarge);
 
                                         // initialize d1[][] and d2[][] as BIG_INT
                                         for (i = regionY1; i <= regionY2; i++) {
@@ -1622,7 +1622,7 @@ void mazeRouteMSMD(int iter, int expand, float costHeight, int ripup_threshold, 
                                         treeedges[edge_n1n2].route.gridsY = (short *)calloc(cnt_n1n2, sizeof(short));
                                         treeedges[edge_n1n2].route.type = MAZEROUTE;
                                         treeedges[edge_n1n2].route.routelen = cnt_n1n2 - 1;
-                                        treeedges[edge_n1n2].len = ADIFF(E1x, E2x) + ADIFF(E1y, E2y);
+                                        treeedges[edge_n1n2].len = Flute::ADIFF(E1x, E2x) + Flute::ADIFF(E1y, E2y);
 
                                         for (i = 0; i < cnt_n1n2; i++) {
                                                 treeedges[edge_n1n2].route.gridsX[i] = gridsX[i];
@@ -1633,11 +1633,11 @@ void mazeRouteMSMD(int iter, int expand, float costHeight, int ripup_threshold, 
                                         for (i = 0; i < cnt_n1n2 - 1; i++) {
                                                 if (gridsX[i] == gridsX[i + 1])  // a vertical edge
                                                 {
-                                                        min_y = minFlute(gridsY[i], gridsY[i + 1]);
+                                                        min_y = Flute::minFlute(gridsY[i], gridsY[i + 1]);
                                                         v_edges[min_y * xGrid + gridsX[i]].usage += 1;
                                                 } else  ///if(gridsY[i]==gridsY[i+1])// a horizontal edge
                                                 {
-                                                        min_x = minFlute(gridsX[i], gridsX[i + 1]);
+                                                        min_x = Flute::minFlute(gridsX[i], gridsX[i + 1]);
                                                         h_edges[gridsY[i] * (xGrid - 1) + min_x].usage += 1;
                                                 }
                                         }
@@ -1693,7 +1693,7 @@ int getOverflow2Dmaze(int *maxOverflow, int *tUsage) {
                         total_cap += h_edges[grid].cap;
                         if (overflow > 0) {
                                 H_overflow += overflow;
-                                max_H_overflow = maxFlute(max_H_overflow, overflow);
+                                max_H_overflow = Flute::maxFlute<int>(max_H_overflow, overflow);
                                 numedges++;
                         }
                 }
@@ -1707,13 +1707,13 @@ int getOverflow2Dmaze(int *maxOverflow, int *tUsage) {
                         total_cap += v_edges[grid].cap;
                         if (overflow > 0) {
                                 V_overflow += overflow;
-                                max_V_overflow = maxFlute(max_V_overflow, overflow);
+                                max_V_overflow = Flute::maxFlute<int>(max_V_overflow, overflow);
                                 numedges++;
                         }
                 }
         }
 
-        max_overflow = maxFlute(max_H_overflow, max_V_overflow);
+        max_overflow = Flute::maxFlute<int>(max_H_overflow, max_V_overflow);
         totalOverflow = H_overflow + V_overflow;
         *maxOverflow = max_overflow;
 
@@ -1757,7 +1757,7 @@ int getOverflow2D(int *maxOverflow) {
                         hCap += h_edges[grid].cap;
                         if (overflow > 0) {
                                 H_overflow += overflow;
-                                max_H_overflow = maxFlute(max_H_overflow, overflow);
+                                max_H_overflow = Flute::maxFlute<int>(max_H_overflow, overflow);
                                 numedges++;
                         }
                 }
@@ -1772,13 +1772,13 @@ int getOverflow2D(int *maxOverflow) {
                         vCap += v_edges[grid].cap;
                         if (overflow > 0) {
                                 V_overflow += overflow;
-                                max_V_overflow = maxFlute(max_V_overflow, overflow);
+                                max_V_overflow = Flute::maxFlute<int>(max_V_overflow, overflow);
                                 numedges++;
                         }
                 }
         }
 
-        max_overflow = maxFlute(max_H_overflow, max_V_overflow);
+        max_overflow = Flute::maxFlute<int>(max_H_overflow, max_V_overflow);
         totalOverflow = H_overflow + V_overflow;
         *maxOverflow = max_overflow;
 
@@ -1824,7 +1824,7 @@ int getOverflow3D(void) {
 
                                 if (overflow > 0) {
                                         H_overflow += overflow;
-                                        max_H_overflow = maxFlute(max_H_overflow, overflow);
+                                        max_H_overflow = Flute::maxFlute<int>(max_H_overflow, overflow);
                                 }
                         }
                 }
@@ -1837,13 +1837,13 @@ int getOverflow3D(void) {
 
                                 if (overflow > 0) {
                                         V_overflow += overflow;
-                                        max_V_overflow = maxFlute(max_V_overflow, overflow);
+                                        max_V_overflow = Flute::maxFlute<int>(max_V_overflow, overflow);
                                 }
                         }
                 }
         }
 
-        max_overflow = maxFlute(max_H_overflow, max_V_overflow);
+        max_overflow = Flute::maxFlute<int>(max_H_overflow, max_V_overflow);
         totalOverflow = H_overflow + V_overflow;
 
         printf("total Usage   : %d\n", total_usage);

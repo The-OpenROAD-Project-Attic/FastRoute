@@ -89,11 +89,11 @@ extern int *seglistIndex;  // the index for the segments for each net
 extern int *seglistCnt;    // the number of segements for each net
 extern int *segOrder;      // the order of segments for routing
 
-extern Tree *trees;      // the tree topologies
+extern Flute::Tree *trees;      // the tree topologies
 extern StTree *sttrees;  // the Steiner trees
-extern DTYPE **gxs;      // the copy of xs for nets, used for second FLUTE
-extern DTYPE **gys;      // the copy of xs for nets, used for second FLUTE
-extern DTYPE **gs;       // the copy of vertical sequence for nets, used for second FLUTE
+extern FLUTE_DTYPE **gxs;      // the copy of xs for nets, used for second FLUTE
+extern FLUTE_DTYPE **gys;      // the copy of xs for nets, used for second FLUTE
+extern FLUTE_DTYPE **gs;       // the copy of vertical sequence for nets, used for second FLUTE
 
 extern OrderNetPin *treeOrderPV;
 extern OrderTree *treeOrderCong;

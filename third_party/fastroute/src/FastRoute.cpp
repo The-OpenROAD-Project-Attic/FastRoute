@@ -168,7 +168,7 @@ void FT::addNet(char *name, int netIdx, int nPins, int minWidth, PIN pins[]) {
         }
         if (pinInd > 1)  // valid net
         {
-                MD = maxFlute(MD, pinInd);
+                MD = Flute::maxFlute<float>(MD, pinInd);
                 TD += pinInd;
                 strcpy(nets[newnetID]->name, name);
                 nets[newnetID]->netIDorg = netID;
@@ -348,11 +348,11 @@ void FT::initAuxVar() {
 
         seglistCnt = (int *)malloc(numValidNets * sizeof(int));
         seglist = (Segment *)malloc(segcount * sizeof(Segment));
-        trees = (Tree *)malloc(numValidNets * sizeof(Tree));
+        trees = (Flute::Tree *)malloc(numValidNets * sizeof(Flute::Tree));
         sttrees = (StTree *)malloc(numValidNets * sizeof(StTree));
-        gxs = (DTYPE **)malloc(numValidNets * sizeof(DTYPE *));
-        gys = (DTYPE **)malloc(numValidNets * sizeof(DTYPE *));
-        gs = (DTYPE **)malloc(numValidNets * sizeof(DTYPE *));
+        gxs = (FLUTE_DTYPE **)malloc(numValidNets * sizeof(FLUTE_DTYPE *));
+        gys = (FLUTE_DTYPE **)malloc(numValidNets * sizeof(FLUTE_DTYPE *));
+        gs = (FLUTE_DTYPE **)malloc(numValidNets * sizeof(FLUTE_DTYPE *));
 
         gridHV = XRANGE * YRANGE;
         gridH = (xGrid - 1) * yGrid;
@@ -501,7 +501,7 @@ int FT::run(std::vector<NET> &result) {
 
         t1 = clock();
         printf("\nReading Lookup Table ...\n");
-        readLUT();
+        Flute::readLUT();
         printf("\nDone reading table\n\n");
         t2 = clock();
         reading_Time = (float)(t2 - t1) / CLOCKS_PER_SEC;
@@ -544,7 +544,7 @@ int FT::run(std::vector<NET> &result) {
         }
 
         for (i = 0; i < LVIter; i++) {
-                LOGIS_COF = maxFlute(2.0 / (1 + log(maxOverflow)), LOGIS_COF);
+                LOGIS_COF = Flute::maxFlute<float>(2.0 / (1 + log(maxOverflow)), LOGIS_COF);
                 LOGIS_COF = 2.0 / (1 + log(maxOverflow));
                 printf("LV routing round %d, enlarge %d \n", i, enlarge);
                 routeLVAll(newTH, enlarge);
@@ -606,7 +606,7 @@ int FT::run(std::vector<NET> &result) {
                 }
 
                 if (totalOverflow > 15000 && maxOverflow > 400) {
-                        enlarge = maxFlute(xGrid, yGrid) / 30;
+                        enlarge = Flute::maxFlute<int>(xGrid, yGrid) / 30;
                         slope = BIG_INT;
                         if (i == 5) {
                                 VIA = 0;
@@ -628,14 +628,14 @@ int FT::run(std::vector<NET> &result) {
                         }
                 }
 
-                enlarge = minFlute(enlarge, xGrid / 2);
+                enlarge = Flute::minFlute(enlarge, xGrid / 2);
                 costheight += cost_step;
                 mazeedge_Threshold = THRESH_M;
 
                 if (upType == 3) {
-                        LOGIS_COF = maxFlute(2.0 / (1 + log(maxOverflow + max_adj)), LOGIS_COF);
+                        LOGIS_COF = Flute::maxFlute<float>(2.0 / (1 + log(maxOverflow + max_adj)), LOGIS_COF);
                 } else {
-                        LOGIS_COF = maxFlute(2.0 / (1 + log(maxOverflow)), LOGIS_COF);
+                        LOGIS_COF = Flute::maxFlute<float>(2.0 / (1 + log(maxOverflow)), LOGIS_COF);
                 }
 
                 if (i == 8) {

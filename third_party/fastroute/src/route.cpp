@@ -934,8 +934,8 @@ void routeMonotonic(int netID, int edgeID, int threshold) {
                         // ripup the original routing
                         newRipup(treeedge, treenodes, x1, y1, x2, y2);
 
-                        segWidth = ADIFF(x1, x2);
-                        segHeight = ADIFF(y1, y2);
+                        segWidth = Flute::ADIFF(x1, x2);
+                        segHeight = Flute::ADIFF(y1, y2);
                         if (x1 <= x2) {
                                 xl = x1;
                                 yl = y1;
@@ -962,7 +962,7 @@ void routeMonotonic(int netID, int edgeID, int threshold) {
                                 cost[0][0] = 0;
                                 grid = yl * xGrid;
                                 for (j = 0; j < segHeight; j++) {
-                                        cost[j + 1][0] = cost[j][0] + maxFlute(0, v_edges[grid + xl].red + v_edges[grid + xl].est_usage - vCapacity_lb);
+                                        cost[j + 1][0] = cost[j][0] + Flute::maxFlute<float>(0, v_edges[grid + xl].red + v_edges[grid + xl].est_usage - vCapacity_lb);
                                         parent[j + 1][0] = SAMEX;
                                         grid += xGrid;
                                 }
@@ -972,7 +972,7 @@ void routeMonotonic(int netID, int edgeID, int threshold) {
                                         // update the cost of a column of grids by h-edges
                                         grid = yl * xGrid_1;
                                         for (j = 0; j <= segHeight; j++) {
-                                                tmp = maxFlute(0, h_edges[grid + x].red + h_edges[grid + x].est_usage - hCapacity_lb);
+                                                tmp = Flute::maxFlute<float>(0, h_edges[grid + x].red + h_edges[grid + x].est_usage - hCapacity_lb);
                                                 cost[j][i + 1] = cost[j][i] + tmp;
                                                 parent[j][i + 1] = SAMEY;
                                                 grid += xGrid - 1;
@@ -983,7 +983,7 @@ void routeMonotonic(int netID, int edgeID, int threshold) {
                                         ind_i = i + 1;
                                         for (j = 0; j < segHeight; j++) {
                                                 ind_j = j + 1;
-                                                tmp = cost[j][ind_i] + maxFlute(0, v_edges[grid + ind_x].red + v_edges[grid + ind_x].est_usage - vCapacity_lb);
+                                                tmp = cost[j][ind_i] + Flute::maxFlute<float>(0, v_edges[grid + ind_x].red + v_edges[grid + ind_x].est_usage - vCapacity_lb);
                                                 if (cost[ind_j][ind_i] > tmp) {
                                                         cost[ind_j][ind_i] = tmp;
                                                         parent[ind_j][ind_i] = SAMEX;
@@ -1026,7 +1026,7 @@ void routeMonotonic(int netID, int edgeID, int threshold) {
                                 cost[segHeight][0] = 0;
                                 grid = (yl - 1) * xGrid;
                                 for (j = segHeight - 1; j >= 0; j--) {
-                                        cost[j][0] = cost[j + 1][0] + maxFlute(0, v_edges[grid + xl].red + v_edges[grid + xl].est_usage - vCapacity_lb);
+                                        cost[j][0] = cost[j + 1][0] + Flute::maxFlute<float>(0, v_edges[grid + xl].red + v_edges[grid + xl].est_usage - vCapacity_lb);
                                         parent[j][0] = SAMEX;
                                         grid -= xGrid;
                                 }
@@ -1037,7 +1037,7 @@ void routeMonotonic(int netID, int edgeID, int threshold) {
                                         grid = yl * (xGrid - 1);
                                         ind_i = i + 1;
                                         for (j = segHeight; j >= 0; j--) {
-                                                tmp = maxFlute(0, h_edges[grid + x].red + h_edges[grid + x].est_usage - hCapacity_lb);
+                                                tmp = Flute::maxFlute<float>(0, h_edges[grid + x].red + h_edges[grid + x].est_usage - hCapacity_lb);
                                                 cost[j][ind_i] = cost[j][i] + tmp;
                                                 parent[j][ind_i] = SAMEY;
                                                 grid -= xGrid - 1;
@@ -1046,7 +1046,7 @@ void routeMonotonic(int netID, int edgeID, int threshold) {
                                         grid = (yl - 1) * xGrid;
                                         ind_x = x + 1;
                                         for (j = segHeight - 1; j >= 0; j--) {
-                                                tmp = cost[j + 1][ind_i] + maxFlute(0, v_edges[grid + ind_x].red + v_edges[grid + ind_x].est_usage - vCapacity_lb);
+                                                tmp = cost[j + 1][ind_i] + Flute::maxFlute<float>(0, v_edges[grid + ind_x].red + v_edges[grid + ind_x].est_usage - vCapacity_lb);
                                                 if (cost[j][ind_i] > tmp) {
                                                         cost[j][ind_i] = tmp;
                                                         parent[j][ind_i] = SAMEX;
@@ -1469,17 +1469,17 @@ void routeLVEnew(int netID, int edgeID, int threshold, int enlarge) {
                 // ripup the original routing
                 if (newRipupCheck(treeedge, x1, y1, x2, y2, threshold, netID, edgeID)) {
                         deg = sttrees[netID].deg;
-                        xmin = maxFlute(x1 - enlarge, 0);
-                        xmax = minFlute(xGrid - 1, x2 + enlarge);
+                        xmin = Flute::maxFlute<int>(x1 - enlarge, 0);
+                        xmax = Flute::minFlute(xGrid - 1, x2 + enlarge);
 
                         if (y1 < y2) {
-                                ymin = maxFlute(y1 - enlarge, 0);
-                                ymax = minFlute(yGrid - 1, y2 + enlarge);
+                                ymin = Flute::maxFlute<int>(y1 - enlarge, 0);
+                                ymax = Flute::minFlute(yGrid - 1, y2 + enlarge);
                                 yminorig = y1;
                                 ymaxorig = y2;
                         } else {
-                                ymin = maxFlute(y2 - enlarge, 0);
-                                ymax = minFlute(yGrid - 1, y1 + enlarge);
+                                ymin = Flute::maxFlute<int>(y2 - enlarge, 0);
+                                ymax = Flute::minFlute(yGrid - 1, y1 + enlarge);
                                 yminorig = y2;
                                 ymaxorig = y1;
                         }
@@ -1536,10 +1536,10 @@ void routeLVEnew(int netID, int edgeID, int threshold, int enlarge) {
 
                         for (j = ymin; j <= ymax; j++) {
                                 for (i = xmin; i <= xmax; i++) {
-                                        tmp1 = ADIFF(d2[j][x1], d2[y1][x1]) + ADIFF(d1[j][i], d1[j][x1]);  // yfirst for point 1
-                                        tmp2 = ADIFF(d2[j][i], d2[y1][i]) + ADIFF(d1[y1][i], d1[y1][x1]);
-                                        tmp3 = ADIFF(d2[y2][i], d2[j][i]) + ADIFF(d1[y2][i], d1[y2][x2]);
-                                        tmp4 = ADIFF(d2[y2][x2], d2[j][x2]) + ADIFF(d1[j][x2], d1[j][i]);  // xifrst for mid point
+                                        tmp1 = Flute::ADIFF(d2[j][x1], d2[y1][x1]) + Flute::ADIFF(d1[j][i], d1[j][x1]);  // yfirst for point 1
+                                        tmp2 = Flute::ADIFF(d2[j][i], d2[y1][i]) + Flute::ADIFF(d1[y1][i], d1[y1][x1]);
+                                        tmp3 = Flute::ADIFF(d2[y2][i], d2[j][i]) + Flute::ADIFF(d1[y2][i], d1[y2][x2]);
+                                        tmp4 = Flute::ADIFF(d2[y2][x2], d2[j][x2]) + Flute::ADIFF(d1[j][x2], d1[j][i]);  // xifrst for mid point
 
                                         tmp = tmp1 + tmp4;
                                         LH1 = FALSE;

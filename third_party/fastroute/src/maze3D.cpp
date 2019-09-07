@@ -506,7 +506,7 @@ void updateRouteType13D(int netID, TreeNode *treenodes, int n1, int A1, int A2, 
                 treeedges[edge_n1A1].n1 = n1;
                 treeedges[edge_n1A1].n2 = A1;
         }
-        treeedges[edge_n1A1].len = ADIFF(A1x, E1x) + ADIFF(A1y, E1y);
+        treeedges[edge_n1A1].len = Flute::ADIFF(A1x, E1x) + Flute::ADIFF(A1y, E1y);
 
         treeedges[edge_n1A1].route.type = MAZEROUTE;
         treeedges[edge_n1A1].route.routelen = E1_pos1;
@@ -520,9 +520,9 @@ void updateRouteType13D(int netID, TreeNode *treenodes, int n1, int A1, int A2, 
         }
 
         if (cnt_n1A2 > 1) {
-                treeedges[edge_n1A2].route.gridsX = (short *)calloc((cnt_n1A1 + cnt_n1A2 - E1_pos2 - 1 + ADIFF(gridsL_n1A1[cnt_n1A1 - 1], gridsL_n1A2[0])), sizeof(short));
-                treeedges[edge_n1A2].route.gridsY = (short *)calloc((cnt_n1A1 + cnt_n1A2 - E1_pos2 - 1 + ADIFF(gridsL_n1A1[cnt_n1A1 - 1], gridsL_n1A2[0])), sizeof(short));
-                treeedges[edge_n1A2].route.gridsL = (short *)calloc((cnt_n1A1 + cnt_n1A2 - E1_pos2 - 1 + ADIFF(gridsL_n1A1[cnt_n1A1 - 1], gridsL_n1A2[0])), sizeof(short));
+                treeedges[edge_n1A2].route.gridsX = (short *)calloc((cnt_n1A1 + cnt_n1A2 - E1_pos2 - 1 + Flute::ADIFF(gridsL_n1A1[cnt_n1A1 - 1], gridsL_n1A2[0])), sizeof(short));
+                treeedges[edge_n1A2].route.gridsY = (short *)calloc((cnt_n1A1 + cnt_n1A2 - E1_pos2 - 1 + Flute::ADIFF(gridsL_n1A1[cnt_n1A1 - 1], gridsL_n1A2[0])), sizeof(short));
+                treeedges[edge_n1A2].route.gridsL = (short *)calloc((cnt_n1A1 + cnt_n1A2 - E1_pos2 - 1 + Flute::ADIFF(gridsL_n1A1[cnt_n1A1 - 1], gridsL_n1A2[0])), sizeof(short));
         } else {
                 treeedges[edge_n1A2].route.gridsX = (short *)calloc((cnt_n1A1 + cnt_n1A2 - E1_pos2 - 1), sizeof(short));
                 treeedges[edge_n1A2].route.gridsY = (short *)calloc((cnt_n1A1 + cnt_n1A2 - E1_pos2 - 1), sizeof(short));
@@ -602,7 +602,7 @@ void updateRouteType13D(int netID, TreeNode *treenodes, int n1, int A1, int A2, 
         }
         treeedges[edge_n1A2].route.type = MAZEROUTE;
         treeedges[edge_n1A2].route.routelen = cnt - 1;
-        treeedges[edge_n1A2].len = ADIFF(A2x, E1x) + ADIFF(A2y, E1y);
+        treeedges[edge_n1A2].len = Flute::ADIFF(A2x, E1x) + Flute::ADIFF(A2y, E1y);
 
         treenodes[n1].x = E1x;
         treenodes[n1].y = E1y;
@@ -650,18 +650,18 @@ void updateRouteType23D(int netID, TreeNode *treenodes, int n1, int A1, int A2, 
 
         if (len_A1A2 == 1) {
                 treeedges[edge_A1A2].route.routelen = len_A1A2 - 1;
-                treeedges[edge_A1A2].len = ADIFF(A1x, A2x) + ADIFF(A1y, A2y);
+                treeedges[edge_A1A2].len = Flute::ADIFF(A1x, A2x) + Flute::ADIFF(A1y, A2y);
         } else {
                 extraLen = 0;
                 if (cnt_n1A1 > 1 && cnt_n1A2 > 1) {
-                        extraLen = ADIFF(gridsL_n1A1[cnt_n1A1 - 1], gridsL_n1A2[0]);
+                        extraLen = Flute::ADIFF(gridsL_n1A1[cnt_n1A1 - 1], gridsL_n1A2[0]);
                         len_A1A2 += extraLen;
                 }
                 treeedges[edge_A1A2].route.gridsX = (short *)calloc(len_A1A2, sizeof(short));
                 treeedges[edge_A1A2].route.gridsY = (short *)calloc(len_A1A2, sizeof(short));
                 treeedges[edge_A1A2].route.gridsL = (short *)calloc(len_A1A2, sizeof(short));
                 treeedges[edge_A1A2].route.routelen = len_A1A2 - 1;
-                treeedges[edge_A1A2].len = ADIFF(A1x, A2x) + ADIFF(A1y, A2y);
+                treeedges[edge_A1A2].len = Flute::ADIFF(A1x, A2x) + Flute::ADIFF(A1y, A2y);
 
                 cnt = 0;
                 startIND = 0;
@@ -740,7 +740,7 @@ void updateRouteType23D(int netID, TreeNode *treenodes, int n1, int A1, int A2, 
         treeedges[edge_n1C1].route.gridsY = (short *)calloc(len_n1C1, sizeof(short));
         treeedges[edge_n1C1].route.gridsL = (short *)calloc(len_n1C1, sizeof(short));
         treeedges[edge_n1C1].route.routelen = len_n1C1 - 1;
-        treeedges[edge_n1C1].len = ADIFF(C1x, E1x) + ADIFF(C1y, E1y);
+        treeedges[edge_n1C1].len = Flute::ADIFF(C1x, E1x) + Flute::ADIFF(C1y, E1y);
 
         if (treeedges[edge_n1C2].route.type == MAZEROUTE && treeedges[edge_n1C2].route.routelen > 0) {
                 free(treeedges[edge_n1C2].route.gridsX);
@@ -753,7 +753,7 @@ void updateRouteType23D(int netID, TreeNode *treenodes, int n1, int A1, int A2, 
         treeedges[edge_n1C2].route.gridsY = (short *)calloc(len_n1C2, sizeof(short));
         treeedges[edge_n1C2].route.gridsL = (short *)calloc(len_n1C2, sizeof(short));
         treeedges[edge_n1C2].route.routelen = len_n1C2 - 1;
-        treeedges[edge_n1C2].len = ADIFF(C2x, E1x) + ADIFF(C2y, E1y);
+        treeedges[edge_n1C2].len = Flute::ADIFF(C2x, E1x) + Flute::ADIFF(C2y, E1y);
 
         // split original (C1, C2) to (C1, n1) and (n1, C2)
         cnt = 0;
@@ -874,12 +874,12 @@ void mazeRouteMSMDOrder3D(int expand, int ripupTHlb, int ripupTHub) {
 
                                 // ripup the routing for the edge
                                 if (newRipup3DType3(netID, edgeID)) {
-                                        enlarge = minFlute(origEng, treeedge->route.routelen);
+                                        enlarge = Flute::minFlute(origEng, treeedge->route.routelen);
 
-                                        regionX1 = maxFlute(0, xmin - enlarge);
-                                        regionX2 = minFlute(xGrid - 1, xmax + enlarge);
-                                        regionY1 = maxFlute(0, ymin - enlarge);
-                                        regionY2 = minFlute(yGrid - 1, ymax + enlarge);
+                                        regionX1 = Flute::maxFlute(0, xmin - enlarge);
+                                        regionX2 = Flute::minFlute(xGrid - 1, xmax + enlarge);
+                                        regionY1 = Flute::maxFlute(0, ymin - enlarge);
+                                        regionY2 = Flute::minFlute(yGrid - 1, ymax + enlarge);
 
                                         n1Shift = FALSE;
                                         n2Shift = FALSE;
@@ -1455,7 +1455,7 @@ void mazeRouteMSMDOrder3D(int expand, int ripupTHlb, int ripupTHub) {
                                         treeedges[edge_n1n2].route.gridsL = (short *)calloc(newcnt_n1n2, sizeof(short));
                                         treeedges[edge_n1n2].route.type = MAZEROUTE;
                                         treeedges[edge_n1n2].route.routelen = newcnt_n1n2 - 1;
-                                        treeedges[edge_n1n2].len = ADIFF(E1x, E2x) + ADIFF(E1y, E2y);
+                                        treeedges[edge_n1n2].len = Flute::ADIFF(E1x, E2x) + Flute::ADIFF(E1y, E2y);
 
                                         j = headRoom;
                                         for (i = 0; i < newcnt_n1n2; i++) {
@@ -1470,11 +1470,11 @@ void mazeRouteMSMDOrder3D(int expand, int ripupTHlb, int ripupTHub) {
                                                 if (gridsL[i] == gridsL[i + 1]) {
                                                         if (gridsX[i] == gridsX[i + 1])  // a vertical edge
                                                         {
-                                                                min_y = minFlute(gridsY[i], gridsY[i + 1]);
+                                                                min_y = Flute::minFlute(gridsY[i], gridsY[i + 1]);
                                                                 v_edges3D[gridsL[i] * gridV + min_y * xGrid + gridsX[i]].usage += 1;
                                                         } else  ///if(gridsY[i]==gridsY[i+1])// a horizontal edge
                                                         {
-                                                                min_x = minFlute(gridsX[i], gridsX[i + 1]);
+                                                                min_x = Flute::minFlute(gridsX[i], gridsX[i + 1]);
                                                                 h_edges3D[gridsL[i] * gridH + gridsY[i] * (xGrid - 1) + min_x].usage += 1;
                                                         }
                                                 }

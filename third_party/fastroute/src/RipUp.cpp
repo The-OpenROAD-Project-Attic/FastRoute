@@ -196,11 +196,11 @@ void newRipup(TreeEdge *treeedge, TreeNode *treenodes, int x1, int y1, int x2, i
                 for (i = 0; i < treeedge->route.routelen; i++) {
                         if (gridsX[i] == gridsX[i + 1])  // a vertical edge
                         {
-                                ymin = minFlute(gridsY[i], gridsY[i + 1]);
+                                ymin = Flute::minFlute(gridsY[i], gridsY[i + 1]);
                                 v_edges[ymin * xGrid + gridsX[i]].est_usage -= 1;
                         } else if (gridsY[i] == gridsY[i + 1])  // a horizontal edge
                         {
-                                xmin = minFlute(gridsX[i], gridsX[i + 1]);
+                                xmin = Flute::minFlute(gridsX[i], gridsX[i + 1]);
                                 h_edges[gridsY[i] * (xGrid - 1) + xmin].est_usage -= 1;
                         } else {
                                 printf("MAZE RIPUP WRONG\n");
@@ -325,7 +325,7 @@ Bool newRipupCheck(TreeEdge *treeedge, int x1, int y1, int x2, int y2, int ripup
                 for (i = 0; i < treeedge->route.routelen; i++) {
                         if (gridsX[i] == gridsX[i + 1])  // a vertical edge
                         {
-                                ymin = minFlute(gridsY[i], gridsY[i + 1]);
+                                ymin = Flute::minFlute(gridsY[i], gridsY[i + 1]);
                                 grid = ymin * xGrid + gridsX[i];
                                 if (v_edges[grid].usage + v_edges[grid].red >= vCapacity - ripup_threshold) {
                                         needRipup = TRUE;
@@ -333,7 +333,7 @@ Bool newRipupCheck(TreeEdge *treeedge, int x1, int y1, int x2, int y2, int ripup
                                 }
                         } else if (gridsY[i] == gridsY[i + 1])  // a horizontal edge
                         {
-                                xmin = minFlute(gridsX[i], gridsX[i + 1]);
+                                xmin = Flute::minFlute(gridsX[i], gridsX[i + 1]);
                                 grid = gridsY[i] * (xGrid - 1) + xmin;
                                 if (h_edges[grid].usage + h_edges[grid].red >= hCapacity - ripup_threshold) {
                                         needRipup = TRUE;
@@ -346,11 +346,11 @@ Bool newRipupCheck(TreeEdge *treeedge, int x1, int y1, int x2, int y2, int ripup
                         for (i = 0; i < treeedge->route.routelen; i++) {
                                 if (gridsX[i] == gridsX[i + 1])  // a vertical edge
                                 {
-                                        ymin = minFlute(gridsY[i], gridsY[i + 1]);
+                                        ymin = Flute::minFlute(gridsY[i], gridsY[i + 1]);
                                         v_edges[ymin * xGrid + gridsX[i]].usage -= 1;
                                 } else  ///if(gridsY[i]==gridsY[i+1])// a horizontal edge
                                 {
-                                        xmin = minFlute(gridsX[i], gridsX[i + 1]);
+                                        xmin = Flute::minFlute(gridsX[i], gridsX[i + 1]);
                                         h_edges[gridsY[i] * (xGrid - 1) + xmin].usage -= 1;
                                 }
                         }
@@ -478,12 +478,12 @@ Bool newRipup3DType3(int netID, int edgeID) {
                 if (gridsL[i] == gridsL[i + 1]) {
                         if (gridsX[i] == gridsX[i + 1])  // a vertical edge
                         {
-                                ymin = minFlute(gridsY[i], gridsY[i + 1]);
+                                ymin = Flute::minFlute(gridsY[i], gridsY[i + 1]);
                                 grid = gridsL[i] * gridV + ymin * xGrid + gridsX[i];
                                 v_edges3D[grid].usage -= 1;
                         } else if (gridsY[i] == gridsY[i + 1])  // a horizontal edge
                         {
-                                xmin = minFlute(gridsX[i], gridsX[i + 1]);
+                                xmin = Flute::minFlute(gridsX[i], gridsX[i + 1]);
                                 grid = gridsL[i] * gridH + gridsY[i] * (xGrid - 1) + xmin;
                                 h_edges3D[grid].usage -= 1;
                         } else {
@@ -581,11 +581,11 @@ void newRipupNet(int netID) {
                                 for (i = 0; i < treeedge->route.routelen; i++) {
                                         if (gridsX[i] == gridsX[i + 1])  // a vertical edge
                                         {
-                                                ymin = minFlute(gridsY[i], gridsY[i + 1]);
+                                                ymin = Flute::minFlute(gridsY[i], gridsY[i + 1]);
                                                 v_edges[ymin * xGrid + gridsX[i]].est_usage -= 1;
                                         } else if (gridsY[i] == gridsY[i + 1])  // a horizontal edge
                                         {
-                                                xmin = minFlute(gridsX[i], gridsX[i + 1]);
+                                                xmin = Flute::minFlute(gridsX[i], gridsX[i + 1]);
                                                 h_edges[gridsY[i] * (xGrid - 1) + xmin].est_usage -= 1;
                                         } else {
                                                 printf("MAZE RIPUP WRONG in newRipupNet\n");
