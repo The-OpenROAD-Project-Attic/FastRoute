@@ -109,13 +109,13 @@ DBU DefaultRoutingEstimationModel::generateSteinerTree(
                 topology.setNodePosition(1, x[1], y[1]);
 
         } else {
-                FLUTE_DTYPE *x = new FLUTE_DTYPE[numPins];
-                FLUTE_DTYPE *y = new FLUTE_DTYPE[numPins];
+                Flute::DTYPE *x = new Flute::DTYPE[numPins];
+                Flute::DTYPE *y = new Flute::DTYPE[numPins];
                 for (Rsyn::Pin pin : net.allPins()) {
                         const DBUxy pinPos =
                             clsPhysicalDesign.getPinPosition(pin);
-                        x[counter] = (FLUTE_DTYPE)(pinPos[X]);
-                        y[counter] = (FLUTE_DTYPE)(pinPos[Y]);
+                        x[counter] = (Flute::DTYPE)(pinPos[X]);
+                        y[counter] = (Flute::DTYPE)(pinPos[Y]);
 
                         if (pin.isOutput()) {
                                 offset2driver = counter;
@@ -140,7 +140,7 @@ DBU DefaultRoutingEstimationModel::generateSteinerTree(
                 // that we
                 // never merge to regular points at same position.
 
-                map<pair<FLUTE_DTYPE, FLUTE_DTYPE>, int>
+                map<pair<Flute::DTYPE, Flute::DTYPE>, int>
                     mapCoordToFluteNodeIndex;
 
                 counter = 0;
@@ -173,10 +173,10 @@ DBU DefaultRoutingEstimationModel::generateSteinerTree(
                         // several
                         // points at same position.
 
-                        const std::pair<FLUTE_DTYPE, FLUTE_DTYPE> point_j =
+                        const std::pair<Flute::DTYPE, Flute::DTYPE> point_j =
                             std::make_pair(flutetree.branch[j].x,
                                            flutetree.branch[j].y);
-                        const std::pair<FLUTE_DTYPE, FLUTE_DTYPE> point_i =
+                        const std::pair<Flute::DTYPE, Flute::DTYPE> point_i =
                             std::make_pair(flutetree.branch[i].x,
                                            flutetree.branch[i].y);
 
@@ -325,8 +325,8 @@ void DefaultRoutingEstimationModel::generateFluteAvgRuntimeTable(
 
         Stopwatch watch;
 
-        FLUTE_DTYPE *x = new FLUTE_DTYPE[N];
-        FLUTE_DTYPE *y = new FLUTE_DTYPE[N];
+        Flute::DTYPE *x = new Flute::DTYPE[N];
+        Flute::DTYPE *y = new Flute::DTYPE[N];
         int *mapping = new int[N];
 
         const int W1 = 7;
@@ -348,8 +348,8 @@ void DefaultRoutingEstimationModel::generateFluteAvgRuntimeTable(
                         counter++;
 
                         for (int i = 0; i < n; i++) {
-                                x[i] = (FLUTE_DTYPE)(randomNumber(generator));
-                                y[i] = (FLUTE_DTYPE)(randomNumber(generator));
+                                x[i] = (Flute::DTYPE)(randomNumber(generator));
+                                y[i] = (Flute::DTYPE)(randomNumber(generator));
                         }  // end for
 
                         // Build the FLUTE tree.
