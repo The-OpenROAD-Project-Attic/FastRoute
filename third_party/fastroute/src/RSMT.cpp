@@ -46,7 +46,7 @@ namespace FastRoute {
 #define FLUTEACCURACY 2
 
 struct pnt {
-        FLUTE_DTYPE x, y;
+        Flute::DTYPE x, y;
         int o;
 };
 
@@ -193,7 +193,7 @@ void copyStTree(int ind, Flute::Tree rsmt) {
                 }
                 if (n != i)  // not root
                 {
-                        treeedges[edgecnt].len = Flute::ADIFF(x1, x2) + Flute::ADIFF(y1, y2);
+                        treeedges[edgecnt].len = ADIFF(x1, x2) + ADIFF(y1, y2);
                         // make x1 always less than x2
                         if (x1 < x2) {
                                 treeedges[edgecnt].n1 = i;
@@ -220,15 +220,15 @@ void copyStTree(int ind, Flute::Tree rsmt) {
         }
 }
 
-void fluteNormal(int netID, int d, FLUTE_DTYPE x[], FLUTE_DTYPE y[], int acc, float coeffV, Flute::Tree *t) {
-        FLUTE_DTYPE *xs, *ys, minval, x_max, x_min, x_mid, y_max, y_min, y_mid, *tmp_xs, *tmp_ys;
+void fluteNormal(int netID, int d, Flute::DTYPE x[], Flute::DTYPE y[], int acc, float coeffV, Flute::Tree *t) {
+        Flute::DTYPE *xs, *ys, minval, x_max, x_min, x_mid, y_max, y_min, y_mid, *tmp_xs, *tmp_ys;
         int *s;
         int i, j, k, minidx;
         struct pnt *pt, **ptp, *tmpp;
 
         if (d == 2) {
                 t->deg = 2;
-                t->length = Flute::ADIFF(x[0], x[1]) + Flute::ADIFF(y[0], y[1]);
+                t->length = ADIFF(x[0], x[1]) + ADIFF(y[0], y[1]);
                 t->branch = (Flute::Branch *)malloc(2 * sizeof(Flute::Branch));
                 t->branch[0].x = x[0];
                 t->branch[0].y = y[0];
@@ -281,7 +281,7 @@ void fluteNormal(int netID, int d, FLUTE_DTYPE x[], FLUTE_DTYPE y[], int acc, fl
                         }
                 }
 
-                t->length = Flute::ADIFF(x_max, x_min) + Flute::ADIFF(y_max, y_min);
+                t->length = ADIFF(x_max, x_min) + ADIFF(y_max, y_min);
                 t->branch = (Flute::Branch *)malloc(4 * sizeof(Flute::Branch));
                 t->branch[0].x = x[0];
                 t->branch[0].y = y[0];
@@ -296,11 +296,11 @@ void fluteNormal(int netID, int d, FLUTE_DTYPE x[], FLUTE_DTYPE y[], int acc, fl
                 t->branch[3].y = y_mid;
                 t->branch[3].n = 3;
         } else {
-                xs = (FLUTE_DTYPE *)malloc(sizeof(FLUTE_DTYPE) * (d));
-                ys = (FLUTE_DTYPE *)malloc(sizeof(FLUTE_DTYPE) * (d));
+                xs = (Flute::DTYPE *)malloc(sizeof(Flute::DTYPE) * (d));
+                ys = (Flute::DTYPE *)malloc(sizeof(Flute::DTYPE) * (d));
 
-                tmp_xs = (FLUTE_DTYPE *)malloc(sizeof(FLUTE_DTYPE) * (d));
-                tmp_ys = (FLUTE_DTYPE *)malloc(sizeof(FLUTE_DTYPE) * (d));
+                tmp_xs = (Flute::DTYPE *)malloc(sizeof(Flute::DTYPE) * (d));
+                tmp_ys = (Flute::DTYPE *)malloc(sizeof(Flute::DTYPE) * (d));
 
                 s = (int *)malloc(sizeof(int) * (d));
                 pt = (struct pnt *)malloc(sizeof(struct pnt) * (d + 1));
@@ -376,9 +376,9 @@ void fluteNormal(int netID, int d, FLUTE_DTYPE x[], FLUTE_DTYPE y[], int acc, fl
                         }
                 }
 
-                gxs[netID] = (FLUTE_DTYPE *)malloc(d * sizeof(FLUTE_DTYPE));
-                gys[netID] = (FLUTE_DTYPE *)malloc(d * sizeof(FLUTE_DTYPE));
-                gs[netID] = (FLUTE_DTYPE *)malloc(d * sizeof(FLUTE_DTYPE));
+                gxs[netID] = (Flute::DTYPE *)malloc(d * sizeof(Flute::DTYPE));
+                gys[netID] = (Flute::DTYPE *)malloc(d * sizeof(Flute::DTYPE));
+                gs[netID] = (Flute::DTYPE *)malloc(d * sizeof(Flute::DTYPE));
 
                 for (i = 0; i < d; i++) {
                         gxs[netID][i] = xs[i];
@@ -406,18 +406,18 @@ void fluteNormal(int netID, int d, FLUTE_DTYPE x[], FLUTE_DTYPE y[], int acc, fl
         }
 }
 
-void fluteCongest(int netID, int d, FLUTE_DTYPE x[], FLUTE_DTYPE y[], int acc, float coeffV, Flute::Tree *t) {
-        FLUTE_DTYPE *xs, *ys, *nxs, *nys, *x_seg, *y_seg, minval, x_max, x_min, x_mid, y_max, y_min, y_mid;
+void fluteCongest(int netID, int d, Flute::DTYPE x[], Flute::DTYPE y[], int acc, float coeffV, Flute::Tree *t) {
+        Flute::DTYPE *xs, *ys, *nxs, *nys, *x_seg, *y_seg, minval, x_max, x_min, x_mid, y_max, y_min, y_mid;
         int *s;
         int i, j, k, minidx, grid;
-        FLUTE_DTYPE height, width;
+        Flute::DTYPE height, width;
         int usageH, usageV;
         float coeffH = 1;
         //	float coeffV = 2;//1.36;//hCapacity/vCapacity;//1;//
 
         if (d == 2) {
                 t->deg = 2;
-                t->length = Flute::ADIFF(x[0], x[1]) + Flute::ADIFF(y[0], y[1]);
+                t->length = ADIFF(x[0], x[1]) + ADIFF(y[0], y[1]);
                 t->branch = (Flute::Branch *)malloc(2 * sizeof(Flute::Branch));
                 t->branch[0].x = x[0];
                 t->branch[0].y = y[0];
@@ -470,7 +470,7 @@ void fluteCongest(int netID, int d, FLUTE_DTYPE x[], FLUTE_DTYPE y[], int acc, f
                         }
                 }
 
-                t->length = Flute::ADIFF(x_max, x_min) + Flute::ADIFF(y_max, y_min);
+                t->length = ADIFF(x_max, x_min) + ADIFF(y_max, y_min);
                 t->branch = (Flute::Branch *)malloc(4 * sizeof(Flute::Branch));
                 t->branch[0].x = x[0];
                 t->branch[0].y = y[0];
@@ -485,12 +485,12 @@ void fluteCongest(int netID, int d, FLUTE_DTYPE x[], FLUTE_DTYPE y[], int acc, f
                 t->branch[3].y = y_mid;
                 t->branch[3].n = 3;
         } else {
-                xs = (FLUTE_DTYPE *)malloc(sizeof(FLUTE_DTYPE) * (d));
-                ys = (FLUTE_DTYPE *)malloc(sizeof(FLUTE_DTYPE) * (d));
-                nxs = (FLUTE_DTYPE *)malloc(sizeof(FLUTE_DTYPE) * (d));
-                nys = (FLUTE_DTYPE *)malloc(sizeof(FLUTE_DTYPE) * (d));
-                x_seg = (FLUTE_DTYPE *)malloc(sizeof(FLUTE_DTYPE) * (d - 1));
-                y_seg = (FLUTE_DTYPE *)malloc(sizeof(FLUTE_DTYPE) * (d - 1));
+                xs = (Flute::DTYPE *)malloc(sizeof(Flute::DTYPE) * (d));
+                ys = (Flute::DTYPE *)malloc(sizeof(Flute::DTYPE) * (d));
+                nxs = (Flute::DTYPE *)malloc(sizeof(Flute::DTYPE) * (d));
+                nys = (Flute::DTYPE *)malloc(sizeof(Flute::DTYPE) * (d));
+                x_seg = (Flute::DTYPE *)malloc(sizeof(Flute::DTYPE) * (d - 1));
+                y_seg = (Flute::DTYPE *)malloc(sizeof(Flute::DTYPE) * (d - 1));
                 s = (int *)malloc(sizeof(int) * (d));
 
                 for (i = 0; i < d; i++) {
@@ -846,7 +846,7 @@ void gen_brk_RSMT(Bool congestionDriven, Bool reRoute, Bool genTree, Bool newTyp
                         x2 = rsmt.branch[n].x;
                         y2 = rsmt.branch[n].y;
 
-                        wl += Flute::ADIFF(x1, x2) + Flute::ADIFF(y1, y2);
+                        wl += ADIFF(x1, x2) + ADIFF(y1, y2);
 
                         if (x1 != x2 || y1 != y2)  // the branch is not degraded (a point)
                         {

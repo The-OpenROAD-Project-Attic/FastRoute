@@ -83,9 +83,9 @@ int* seglistCnt;    // the number of segements for each net
 int* segOrder;      // the order of segments for routing
 Flute::Tree* trees;        // the tree topologies
 StTree* sttrees;    // the Steiner trees
-FLUTE_DTYPE** gxs;        // the copy of xs for nets, used for second FLUTE
-FLUTE_DTYPE** gys;        // the copy of xs for nets, used for second FLUTE
-FLUTE_DTYPE** gs;         // the copy of vertical sequence for nets, used for second FLUTE
+Flute::DTYPE** gxs;        // the copy of xs for nets, used for second FLUTE
+Flute::DTYPE** gys;        // the copy of xs for nets, used for second FLUTE
+Flute::DTYPE** gs;         // the copy of vertical sequence for nets, used for second FLUTE
 Edge3D* h_edges3D;
 Edge3D* v_edges3D;
 

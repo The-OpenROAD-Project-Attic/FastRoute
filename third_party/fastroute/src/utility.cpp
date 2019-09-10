@@ -497,15 +497,15 @@ void assignEdge(int netID, int edgeID, Bool processDIR) {
                                 for (i = 0; i < numLayers; i++) {
                                         if (k == 0) {
                                                 if (l != i) {
-                                                        if (gridD[i][k] > gridD[l][k] + Flute::ADIFF(i, l) * 2) {
-                                                                gridD[i][k] = gridD[l][k] + Flute::ADIFF(i, l) * 2;
+                                                        if (gridD[i][k] > gridD[l][k] + ADIFF(i, l) * 2) {
+                                                                gridD[i][k] = gridD[l][k] + ADIFF(i, l) * 2;
                                                                 viaLink[i][k] = l;
                                                         }
                                                 }
                                         } else {
                                                 if (l != i) {
-                                                        if (gridD[i][k] > gridD[l][k] + Flute::ADIFF(i, l) * 3) {
-                                                                gridD[i][k] = gridD[l][k] + Flute::ADIFF(i, l) * 3;
+                                                        if (gridD[i][k] > gridD[l][k] + ADIFF(i, l) * 3) {
+                                                                gridD[i][k] = gridD[l][k] + ADIFF(i, l) * 3;
                                                                 viaLink[i][k] = l;
                                                         }
                                                 }
@@ -524,8 +524,8 @@ void assignEdge(int netID, int edgeID, Bool processDIR) {
                 for (l = 0; l < numLayers; l++) {
                         for (i = 0; i < numLayers; i++) {
                                 if (l != i) {
-                                        if (gridD[i][k] > gridD[l][k] + Flute::ADIFF(i, l) * 1) {    //+ Flute::ADIFF(i,l) * 3 ) {
-                                                gridD[i][k] = gridD[l][k] + Flute::ADIFF(i, l) * 1;  //+ Flute::ADIFF(i,l) * 3 ;
+                                        if (gridD[i][k] > gridD[l][k] + ADIFF(i, l) * 1) {    //+ ADIFF(i,l) * 3 ) {
+                                                gridD[i][k] = gridD[l][k] + ADIFF(i, l) * 1;  //+ ADIFF(i,l) * 3 ;
                                                 viaLink[i][k] = l;
                                         }
                                 }
@@ -610,15 +610,15 @@ void assignEdge(int netID, int edgeID, Bool processDIR) {
                                 for (i = 0; i < numLayers; i++) {
                                         if (k == routelen) {
                                                 if (l != i) {
-                                                        if (gridD[i][k] > gridD[l][k] + Flute::ADIFF(i, l) * 2) {
-                                                                gridD[i][k] = gridD[l][k] + Flute::ADIFF(i, l) * 2;
+                                                        if (gridD[i][k] > gridD[l][k] + ADIFF(i, l) * 2) {
+                                                                gridD[i][k] = gridD[l][k] + ADIFF(i, l) * 2;
                                                                 viaLink[i][k] = l;
                                                         }
                                                 }
                                         } else {
                                                 if (l != i) {
-                                                        if (gridD[i][k] > gridD[l][k] + Flute::ADIFF(i, l) * 3) {
-                                                                gridD[i][k] = gridD[l][k] + Flute::ADIFF(i, l) * 3;
+                                                        if (gridD[i][k] > gridD[l][k] + ADIFF(i, l) * 3) {
+                                                                gridD[i][k] = gridD[l][k] + ADIFF(i, l) * 3;
                                                                 viaLink[i][k] = l;
                                                         }
                                                 }
@@ -637,8 +637,8 @@ void assignEdge(int netID, int edgeID, Bool processDIR) {
                 for (l = 0; l < numLayers; l++) {
                         for (i = 0; i < numLayers; i++) {
                                 if (l != i) {
-                                        if (gridD[i][0] > gridD[l][0] + Flute::ADIFF(i, l) * 1) {
-                                                gridD[i][0] = gridD[l][0] + Flute::ADIFF(i, l) * 1;
+                                        if (gridD[i][0] > gridD[l][0] + ADIFF(i, l) * 1) {
+                                                gridD[i][0] = gridD[l][0] + ADIFF(i, l) * 1;
                                                 viaLink[i][0] = l;
                                         }
                                 }
@@ -1035,7 +1035,7 @@ void checkRoute3D() {
                                 printEdge3D(netID, edgeID);
                         }
                         for (i = 0; i < treeedge->route.routelen; i++) {
-                                distance = Flute::ADIFF(gridsX[i + 1], gridsX[i]) + Flute::ADIFF(gridsY[i + 1], gridsY[i]) + Flute::ADIFF(gridsL[i + 1], gridsL[i]);
+                                distance = ADIFF(gridsX[i + 1], gridsX[i]) + ADIFF(gridsY[i + 1], gridsY[i]) + ADIFF(gridsL[i + 1], gridsL[i]);
                                 if (distance > 1 || distance < 0) {
                                         gridFlag = TRUE;
                                         printf("net[%d] edge[%d] maze route wrong, distance %d, i %d\n", netID, edgeID, distance, i);
@@ -1391,7 +1391,7 @@ Bool checkRoute2DTree(int netID) {
                                 STHwrong = TRUE;
                         }
                         for (i = 0; i < treeedge->route.routelen; i++) {
-                                distance = Flute::ADIFF(gridsX[i + 1], gridsX[i]) + Flute::ADIFF(gridsY[i + 1], gridsY[i]);
+                                distance = ADIFF(gridsX[i + 1], gridsX[i]) + ADIFF(gridsY[i + 1], gridsY[i]);
                                 if (distance != 1) {
                                         printf("net[%d] edge[%d] maze route wrong, distance %d, i %d\n", netID, edgeID, distance, i);
                                         gridFlag = TRUE;

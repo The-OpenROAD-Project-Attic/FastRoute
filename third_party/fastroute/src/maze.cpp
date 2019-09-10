@@ -72,7 +72,7 @@ void convertToMazerouteNet(int netID) {
                 treeedge->route.gridsY = (short *)calloc((edgelength + 1), sizeof(short));
                 gridsX = treeedge->route.gridsX;
                 gridsY = treeedge->route.gridsY;
-                treeedge->len = Flute::ADIFF(x1, x2) + Flute::ADIFF(y1, y2);
+                treeedge->len = ADIFF(x1, x2) + ADIFF(y1, y2);
 
                 cnt = 0;
                 if (treeedge->route.type == NOROUTE) {
@@ -788,7 +788,7 @@ void updateRouteType1(TreeNode *treenodes, int n1, int A1, int A2, int E1x, int 
 
         treeedges[edge_n1A1].route.type = MAZEROUTE;
         treeedges[edge_n1A1].route.routelen = E1_pos;
-        treeedges[edge_n1A1].len = Flute::ADIFF(A1x, E1x) + Flute::ADIFF(A1y, E1y);
+        treeedges[edge_n1A1].len = ADIFF(A1x, E1x) + ADIFF(A1y, E1y);
 
         // reallocate memory for route.gridsX and route.gridsY
         if (treeedges[edge_n1A2].route.type == MAZEROUTE)  // if originally allocated, free them first
@@ -832,7 +832,7 @@ void updateRouteType1(TreeNode *treenodes, int n1, int A1, int A2, int E1x, int 
         }
         treeedges[edge_n1A2].route.type = MAZEROUTE;
         treeedges[edge_n1A2].route.routelen = cnt - 1;
-        treeedges[edge_n1A2].len = Flute::ADIFF(A2x, E1x) + Flute::ADIFF(A2y, E1y);
+        treeedges[edge_n1A2].len = ADIFF(A2x, E1x) + ADIFF(A2y, E1y);
 }
 
 void updateRouteType2(TreeNode *treenodes, int n1, int A1, int A2, int C1, int C2, int E1x, int E1y, TreeEdge *treeedges, int edge_n1A1, int edge_n1A2, int edge_C1C2) {
@@ -879,7 +879,7 @@ void updateRouteType2(TreeNode *treenodes, int n1, int A1, int A2, int C1, int C
         treeedges[edge_A1A2].route.gridsX = (short *)calloc(len_A1A2, sizeof(short));
         treeedges[edge_A1A2].route.gridsY = (short *)calloc(len_A1A2, sizeof(short));
         treeedges[edge_A1A2].route.routelen = len_A1A2 - 1;
-        treeedges[edge_A1A2].len = Flute::ADIFF(A1x, A2x) + Flute::ADIFF(A1y, A2y);
+        treeedges[edge_A1A2].len = ADIFF(A1x, A2x) + ADIFF(A1y, A2y);
 
         cnt = 0;
         for (i = 0; i < cnt_n1A1; i++) {
@@ -916,7 +916,7 @@ void updateRouteType2(TreeNode *treenodes, int n1, int A1, int A2, int C1, int C
         treeedges[edge_n1C1].route.gridsX = (short *)calloc(len_n1C1, sizeof(short));
         treeedges[edge_n1C1].route.gridsY = (short *)calloc(len_n1C1, sizeof(short));
         treeedges[edge_n1C1].route.routelen = len_n1C1 - 1;
-        treeedges[edge_n1C1].len = Flute::ADIFF(C1x, E1x) + Flute::ADIFF(C1y, E1y);
+        treeedges[edge_n1C1].len = ADIFF(C1x, E1x) + ADIFF(C1y, E1y);
 
         if (treeedges[edge_n1C2].route.type == MAZEROUTE) {
                 free(treeedges[edge_n1C2].route.gridsX);
@@ -926,7 +926,7 @@ void updateRouteType2(TreeNode *treenodes, int n1, int A1, int A2, int C1, int C
         treeedges[edge_n1C2].route.gridsX = (short *)calloc(len_n1C2, sizeof(short));
         treeedges[edge_n1C2].route.gridsY = (short *)calloc(len_n1C2, sizeof(short));
         treeedges[edge_n1C2].route.routelen = len_n1C2 - 1;
-        treeedges[edge_n1C2].len = Flute::ADIFF(C2x, E1x) + Flute::ADIFF(C2y, E1y);
+        treeedges[edge_n1C2].len = ADIFF(C2x, E1x) + ADIFF(C2y, E1y);
 
         // split original (C1, C2) to (C1, n1) and (n1, C2)
         cnt = 0;
@@ -1102,7 +1102,7 @@ void mazeRouteMSMD(int iter, int expand, float costHeight, int ripup_threshold, 
                         n1y = treenodes[n1].y;
                         n2x = treenodes[n2].x;
                         n2y = treenodes[n2].y;
-                        treeedge->len = Flute::ADIFF(n2x, n1x) + Flute::ADIFF(n2y, n1y);
+                        treeedge->len = ADIFF(n2x, n1x) + ADIFF(n2y, n1y);
 
                         if (treeedge->len > mazeedge_Threshold)  // only route the non-degraded edges (len>0)
                         {
@@ -1623,7 +1623,7 @@ void mazeRouteMSMD(int iter, int expand, float costHeight, int ripup_threshold, 
                                         treeedges[edge_n1n2].route.gridsY = (short *)calloc(cnt_n1n2, sizeof(short));
                                         treeedges[edge_n1n2].route.type = MAZEROUTE;
                                         treeedges[edge_n1n2].route.routelen = cnt_n1n2 - 1;
-                                        treeedges[edge_n1n2].len = Flute::ADIFF(E1x, E2x) + Flute::ADIFF(E1y, E2y);
+                                        treeedges[edge_n1n2].len = ADIFF(E1x, E2x) + ADIFF(E1y, E2y);
 
                                         for (i = 0; i < cnt_n1n2; i++) {
                                                 treeedges[edge_n1n2].route.gridsX[i] = gridsX[i];

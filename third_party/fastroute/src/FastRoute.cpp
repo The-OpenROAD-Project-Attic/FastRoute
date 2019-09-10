@@ -351,9 +351,9 @@ void FT::initAuxVar() {
         seglist = (Segment *)malloc(segcount * sizeof(Segment));
         trees = (Flute::Tree *)malloc(numValidNets * sizeof(Flute::Tree));
         sttrees = (StTree *)malloc(numValidNets * sizeof(StTree));
-        gxs = (FLUTE_DTYPE **)malloc(numValidNets * sizeof(FLUTE_DTYPE *));
-        gys = (FLUTE_DTYPE **)malloc(numValidNets * sizeof(FLUTE_DTYPE *));
-        gs = (FLUTE_DTYPE **)malloc(numValidNets * sizeof(FLUTE_DTYPE *));
+        gxs = (Flute::DTYPE **)malloc(numValidNets * sizeof(Flute::DTYPE *));
+        gys = (Flute::DTYPE **)malloc(numValidNets * sizeof(Flute::DTYPE *));
+        gs = (Flute::DTYPE **)malloc(numValidNets * sizeof(Flute::DTYPE *));
 
         gridHV = XRANGE * YRANGE;
         gridH = (xGrid - 1) * yGrid;

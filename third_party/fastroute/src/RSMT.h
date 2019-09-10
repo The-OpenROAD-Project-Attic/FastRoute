@@ -38,8 +38,8 @@ extern int **H_table;
 
 extern void copyStTree(int ind, Flute::Tree rsmt);
 extern void gen_brk_RSMT(Bool congestionDriven, Bool reRoute, Bool genTree, Bool newType, Bool noADJ);
-extern void fluteNormal(int netID, int d, FLUTE_DTYPE x[], FLUTE_DTYPE y[], int acc, float coeffV, Flute::Tree *t);
-extern void fluteCongest(int netID, int d, FLUTE_DTYPE x[], FLUTE_DTYPE y[], int acc, float coeffV, Flute::Tree *t);
+extern void fluteNormal(int netID, int d, Flute::DTYPE x[], Flute::DTYPE y[], int acc, float coeffV, Flute::Tree *t);
+extern void fluteCongest(int netID, int d, Flute::DTYPE x[], Flute::DTYPE y[], int acc, float coeffV, Flute::Tree *t);
 
 }  // namespace FastRoute
 #endif /* __RSMT_H__ */
