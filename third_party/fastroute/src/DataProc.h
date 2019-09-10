@@ -91,9 +91,9 @@ extern int *segOrder;      // the order of segments for routing
 
 extern Flute::Tree *trees;      // the tree topologies
 extern StTree *sttrees;  // the Steiner trees
-extern FLUTE_DTYPE **gxs;      // the copy of xs for nets, used for second FLUTE
-extern FLUTE_DTYPE **gys;      // the copy of xs for nets, used for second FLUTE
-extern FLUTE_DTYPE **gs;       // the copy of vertical sequence for nets, used for second FLUTE
+extern Flute::DTYPE **gxs;      // the copy of xs for nets, used for second FLUTE
+extern Flute::DTYPE **gys;      // the copy of xs for nets, used for second FLUTE
+extern Flute::DTYPE **gs;       // the copy of vertical sequence for nets, used for second FLUTE
 
 extern OrderNetPin *treeOrderPV;
 extern OrderTree *treeOrderCong;
@@ -139,6 +139,14 @@ extern Bool *pop_heap2;
 extern void init_usage();
 extern void readFile(char benchFile[]);
 extern void freeAllMemory();
+
+template <class T> T ADIFF(T x, T y) {
+        if (x > y) {
+            return (x - y);
+        } else {
+            return (y - x);
+        }
+}
 }  // namespace FastRoute
 
 #endif /* __DATAPROC_H__ */
