@@ -46,7 +46,7 @@ void help() {
         std::cout << "Set LEF files:                    set_lef_files \"path/to/file1.lef path/to/fileN.lef\"\n";
         std::cout << "Set DEF files:                    set_def_files \"path/to/file1.def path/to/fileN.def\"\n";
         std::cout << "Parse input LEF/DEF files:        parse_input_files\n";
-        std::cout << "Set output file name:             set_output_file\n";
+        std::cout << "Set output file name:             set_output_file \"outputName\"\n";
         std::cout << "User defined capacity adjustment: set_capacity_adjustment FLOAT\n";
         std::cout << "User defined min routing layer:   set_min_layer INTEGER\n";
         std::cout << "User defined max routing layer:   set_max_layer INTEGER\n";
