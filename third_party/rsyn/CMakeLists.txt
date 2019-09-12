@@ -57,6 +57,23 @@ set(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -Werror=return-type")
 set(Boost_USE_STATIC_LIBS ON)
 find_package(Boost COMPONENTS system filesystem program_options REQUIRED)
 
+ # Finds tcl
+include(FindTCL.cmake)
+
+# Loads swig and generates the tcl wrapper file
+find_package(SWIG REQUIRED)
+add_custom_command(OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/src/TclInterfaceWrap.cpp
+        COMMAND ${SWIG_EXECUTABLE} -tcl8 -c++ -o ${CMAKE_CURRENT_SOURCE_DIR}/src/TclInterfaceWrap.cpp ${CMAKE_CURRENT_SOURCE_DIR}/src/TclInterface.i
+        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+        COMMENT "Generating swig wrapper"
+)
+add_custom_target(tclInterfaceWrapper DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/src/TclInterfaceWrap.cpp)
+
+file(GLOB_RECURSE SRC_FILES ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp)
+set(SRC_FILES ${SRC_FILES} ${CMAKE_CURRENT_SOURCE_DIR}/src/TclInterfaceWrap.cpp)
+
+add_definitions(-DSTANDALONE_MODE)
+
 # OpenMP (work around)
 set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -fopenmp")
 
@@ -78,6 +95,8 @@ file(GLOB_RECURSE SRC_FILES
 ###########
 
 add_executable(rsyn ${SRC_FILES})
+
+add_dependencies(rsyn tclInterfaceWrapper)
 
 #######################
 # Include Directories #
@@ -114,5 +133,5 @@ target_link_libraries(rsyn
         )
 
 # Boost
-target_include_directories(rsyn PUBLIC ${Boost_INCLUDE_DIR})
-target_link_libraries(rsyn ${Boost_LIBRARIES})
+target_include_directories(rsyn PUBLIC ${Boost_INCLUDE_DIR} ${TCL_HEADER_DIR})
+target_link_libraries(rsyn ${Boost_LIBRARIES} ${TCL_LIB})
