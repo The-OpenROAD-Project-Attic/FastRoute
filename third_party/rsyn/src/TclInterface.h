@@ -37,6 +37,9 @@
 
 #include "session/Session.h"
 
+// Help cmd
+void help();
+
 // LEF/DEF interface
 void set_lef_files(const char * files);
 void set_def_files(const char * files);

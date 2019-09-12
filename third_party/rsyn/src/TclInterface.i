@@ -40,6 +40,8 @@
 #include "TclInterface.h"
 %}
 
+extern void help();
+
 extern void set_lef_files(const char * files);
 
 extern void set_def_files(const char * files);
