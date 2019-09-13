@@ -87,7 +87,7 @@ target_include_directories(rsyn PUBLIC
         "./include"
         "./third_party/lef/lef"
         "./third_party/def/def"
-        "./../flute"
+        "./../flute3"
         "./src"
         "./src/contests"
         )
