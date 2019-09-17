@@ -54,7 +54,7 @@ MAKE_OPT =
 PARALLEL = 1
 
 .PHONY: default
-default: release ispd18_unit_test
+default: release ispd18_unit_test ispd19_unit_test
 
 .PHONY: all
 all: clean default
@@ -112,6 +112,18 @@ ispd18_download:
 .PHONY: ispd18_clean
 ispd18_clean:
 	git clean -xdf $(SUPPORT_DIR)/ispd18
+	
+.PHONY: ispd19_unit_test
+ispd19_unit_test:
+	@bash $(SUPPORT_DIR)/tests/ispd19_unit_test.sh
+
+.PHONY: ispd19_download
+ispd19_download:
+	@bash $(SUPPORT_DIR)/ispd19_download.sh $(BENCHMARKS_DIR)
+
+.PHONY: ispd19_clean
+ispd19_clean:
+	git clean -xdf $(SUPPORT_DIR)/ispd19
 
 .PHONY: clean
 clean:
