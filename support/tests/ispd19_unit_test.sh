@@ -39,6 +39,10 @@
 
 cd "$(dirname "$0")"/../../ || exit
 
+echo
+echo "Start unit tests..."
+echo
+
 FRlefdef_bin=$1
 bin_path=${FRlefdef_bin:-./FRlefdef}
 test_name="ispd19_test7"
@@ -50,6 +54,9 @@ test_dir="$support_dir/ispd19/"
 output_file="${test_dir}/${test_name}/${test_name}.guide"
 gold_dir="${support_dir}/gold"
 gold_file="${gold_dir}/${test_name}.guide"
+gold_wl="${gold_dir}/${test_name}.wl"
+grep_pattern="Final routing length"
+log_file="unit_test.log"
 
 if [[ ! -f "${test_dir}/${test_name}/${test_name}.input.lef" ]] || [[ ! -f "${test_dir}/${test_name}/${test_name}.input.def" ]]; then
         echo "Downloading test files... from ${base_dir}"
@@ -69,26 +76,52 @@ fail()
         echo "Unit test failed, please check end of log file"
         echo
         echo
-        diff  "${output_file}" "${gold_file}" >> "$base_dir/unit_test.log"
+        diff  "${output_file}" "${gold_file}" >> "$base_dir/${log_file}"
         exit 1
 }
 
-"$bin_path" --no-gui --script "${support_dir}/rsyn/${test_name}.rsyn" > "$base_dir/unit_test.log"
+"$bin_path" --no-gui --script "${support_dir}/rsyn/${test_name}.rsyn" > "$base_dir/${log_file}"
 
 if [[ $? != 0 ]]; then
         echo "Runtime error"
         fail
 fi
 
+
+# Test 1: compare output guides
+echo
+echo "--Compare guides..."
+echo
+
 cmp "${output_file}" "${gold_file}"
 
 if [[ $? != 0 ]]; then
-        echo "Output missmatch"
+        echo "--ERROR: Compare guides: Output guides missmatch"
         fail
 fi
 
 echo
+echo "--Compare guides: Success!"
 echo
-echo "Passed unit test"
+
+#Test 3: check wire length
 echo
+echo "--Verify QoR: global routed wire lenght..."
+echo
+
+length_report=$(grep -i "${grep_pattern}" ${base_dir}/${log_file})
+gold_report=$(grep -i "${grep_pattern}" ${gold_wl})
+
+if [[ "$length_report" != "$gold_report" ]];
+then
+        echo "--ERROR: Verify QoR: wirelength missmatch"
+        fail
+fi
+
+echo
+echo "--Vefiry QoR: Success!"
+echo
+
+echo
+echo "Unit tests... Done!"
 echo

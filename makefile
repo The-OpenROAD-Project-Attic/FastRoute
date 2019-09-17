@@ -54,7 +54,7 @@ MAKE_OPT =
 PARALLEL = 1
 
 .PHONY: default
-default: release ispd18_unit_test ispd19_unit_test
+default: release ispd19_unit_test
 
 .PHONY: all
 all: clean default
