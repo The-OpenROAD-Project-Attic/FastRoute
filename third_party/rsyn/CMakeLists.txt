@@ -89,6 +89,7 @@ file(GLOB_RECURSE SRC_FILES
         ${PATH_RSYN}/../third_party/liberty/*.cc
         ${PATH_RSYN}/../third_party/liberty/*.cpp
         )
+set(SRC_FILES ${SRC_FILES} ${CMAKE_CURRENT_SOURCE_DIR}/src/TclInterfaceWrap.cpp)
 
 ###########
 # Targets #
