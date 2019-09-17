@@ -519,7 +519,7 @@ void FastRouteProcess::setTrackAdjustments() {
                         continue;
 
                 if (phLayer.getRelativeIndex() < (minRoutingLayer - 1) ||
-                    phLayer.getRelativeIndex() >= (maxRoutingLayer))
+                    phLayer.getRelativeIndex() >= (maxRoutingLayer) && maxRoutingLayer > 0)
                         continue;
                 
                 if (phLayer.getDirection() == Rsyn::HORIZONTAL) {
