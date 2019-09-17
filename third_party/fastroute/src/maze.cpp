@@ -32,6 +32,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
+#include <algorithm>
 #include "DataType.h"
 #include "flute.h"
 #include "DataProc.h"
@@ -301,7 +302,7 @@ void updateCongestionHistory(int round, int upType) {
                                                 h_edges[grid].last_usage = h_edges[grid].last_usage * 0.9;
                                         }
                                 }
-                                maxlimit = maxFlute(maxlimit, h_edges[grid].last_usage);
+                                maxlimit = std::max<int>(maxlimit, h_edges[grid].last_usage);
                         }
                 }
 
@@ -318,7 +319,7 @@ void updateCongestionHistory(int round, int upType) {
                                                 v_edges[grid].last_usage = v_edges[grid].last_usage * 0.9;
                                         }
                                 }
-                                maxlimit = maxFlute(maxlimit, v_edges[grid].last_usage);
+                                maxlimit = std::max<int>(maxlimit, v_edges[grid].last_usage);
                         }
                 }
         } else if (upType == 2) {
@@ -338,11 +339,11 @@ void updateCongestionHistory(int round, int upType) {
                                 } else {
                                         if (!stopDEC) {
                                                 h_edges[grid].congCNT--;
-                                                h_edges[grid].congCNT = maxFlute(0, h_edges[grid].congCNT);
+                                                h_edges[grid].congCNT = std::max<int>(0, h_edges[grid].congCNT);
                                                 h_edges[grid].last_usage = h_edges[grid].last_usage * 0.9;
                                         }
                                 }
-                                maxlimit = maxFlute(maxlimit, h_edges[grid].last_usage);
+                                maxlimit = std::max<int>(maxlimit, h_edges[grid].last_usage);
                         }
                 }
 
@@ -357,11 +358,11 @@ void updateCongestionHistory(int round, int upType) {
                                 } else {
                                         if (!stopDEC) {
                                                 v_edges[grid].congCNT--;
-                                                v_edges[grid].congCNT = maxFlute(0, v_edges[grid].congCNT);
+                                                v_edges[grid].congCNT = std::max<int>(0, v_edges[grid].congCNT);
                                                 v_edges[grid].last_usage = v_edges[grid].last_usage * 0.9;
                                         }
                                 }
-                                maxlimit = maxFlute(maxlimit, v_edges[grid].last_usage);
+                                maxlimit = std::max<int>(maxlimit, v_edges[grid].last_usage);
                         }
                 }
 
@@ -377,12 +378,12 @@ void updateCongestionHistory(int round, int upType) {
                                 } else {
                                         if (!stopDEC) {
                                                 h_edges[grid].congCNT--;
-                                                h_edges[grid].congCNT = maxFlute(0, h_edges[grid].congCNT);
+                                                h_edges[grid].congCNT = std::max<int>(0, h_edges[grid].congCNT);
                                                 h_edges[grid].last_usage += overflow;
-                                                h_edges[grid].last_usage = maxFlute(h_edges[grid].last_usage, 0);
+                                                h_edges[grid].last_usage = std::max<int>(h_edges[grid].last_usage, 0);
                                         }
                                 }
-                                maxlimit = maxFlute(maxlimit, h_edges[grid].last_usage);
+                                maxlimit = std::max<int>(maxlimit, h_edges[grid].last_usage);
                         }
                 }
 
@@ -398,10 +399,10 @@ void updateCongestionHistory(int round, int upType) {
                                         if (!stopDEC) {
                                                 v_edges[grid].congCNT--;
                                                 v_edges[grid].last_usage += overflow;
-                                                v_edges[grid].last_usage = maxFlute(v_edges[grid].last_usage, 0);
+                                                v_edges[grid].last_usage = std::max<int>(v_edges[grid].last_usage, 0);
                                         }
                                 }
-                                maxlimit = maxFlute(maxlimit, v_edges[grid].last_usage);
+                                maxlimit = std::max<int>(maxlimit, v_edges[grid].last_usage);
                         }
                 }
 
@@ -417,11 +418,11 @@ void updateCongestionHistory(int round, int upType) {
                                 } else {
                                         if (!stopDEC) {
                                                 h_edges[grid].congCNT--;
-                                                h_edges[grid].congCNT = maxFlute(0, h_edges[grid].congCNT);
+                                                h_edges[grid].congCNT = std::max<int>(0, h_edges[grid].congCNT);
                                                 h_edges[grid].last_usage = h_edges[grid].last_usage * 0.9;
                                         }
                                 }
-                                maxlimit = maxFlute(maxlimit, h_edges[grid].last_usage);
+                                maxlimit = std::max<int>(maxlimit, h_edges[grid].last_usage);
                         }
                 }
 
@@ -436,11 +437,11 @@ void updateCongestionHistory(int round, int upType) {
                                 } else {
                                         if (!stopDEC) {
                                                 v_edges[grid].congCNT--;
-                                                v_edges[grid].congCNT = maxFlute(0, v_edges[grid].congCNT);
+                                                v_edges[grid].congCNT = std::max<int>(0, v_edges[grid].congCNT);
                                                 v_edges[grid].last_usage = v_edges[grid].last_usage * 0.9;
                                         }
                                 }
-                                maxlimit = maxFlute(maxlimit, v_edges[grid].last_usage);
+                                maxlimit = std::max<int>(maxlimit, v_edges[grid].last_usage);
                         }
                 }
                 //	if (maxlimit < 20) {
@@ -946,7 +947,7 @@ void updateRouteType2(TreeNode *treenodes, int n1, int A1, int A2, int C1, int C
 void reInitTree(int netID) {
         int deg, numEdges, edgeID, d, j;
         TreeEdge *treeedge;
-        Tree rsmt;
+        Flute::Tree rsmt;
 
         // TODO: check this size
         int x[nets[netID]->numPins];
@@ -1125,11 +1126,11 @@ void mazeRouteMSMD(int iter, int expand, float costHeight, int ripup_threshold, 
                                                 xmax = n1x;
                                         }
 
-                                        enlarge = minFlute(origENG, (iter / 6 + 3) * treeedge->route.routelen);
-                                        regionX1 = maxFlute(0, xmin - enlarge);
-                                        regionX2 = minFlute(xGrid - 1, xmax + enlarge);
-                                        regionY1 = maxFlute(0, ymin - enlarge);
-                                        regionY2 = minFlute(yGrid - 1, ymax + enlarge);
+                                        enlarge = std::min(origENG, (iter / 6 + 3) * treeedge->route.routelen);
+                                        regionX1 = std::max(0, xmin - enlarge);
+                                        regionX2 = std::min(xGrid - 1, xmax + enlarge);
+                                        regionY1 = std::max(0, ymin - enlarge);
+                                        regionY2 = std::min(yGrid - 1, ymax + enlarge);
 
                                         // initialize d1[][] and d2[][] as BIG_INT
                                         for (i = regionY1; i <= regionY2; i++) {
@@ -1633,11 +1634,11 @@ void mazeRouteMSMD(int iter, int expand, float costHeight, int ripup_threshold, 
                                         for (i = 0; i < cnt_n1n2 - 1; i++) {
                                                 if (gridsX[i] == gridsX[i + 1])  // a vertical edge
                                                 {
-                                                        min_y = minFlute(gridsY[i], gridsY[i + 1]);
+                                                        min_y = std::min(gridsY[i], gridsY[i + 1]);
                                                         v_edges[min_y * xGrid + gridsX[i]].usage += 1;
                                                 } else  ///if(gridsY[i]==gridsY[i+1])// a horizontal edge
                                                 {
-                                                        min_x = minFlute(gridsX[i], gridsX[i + 1]);
+                                                        min_x = std::min(gridsX[i], gridsX[i + 1]);
                                                         h_edges[gridsY[i] * (xGrid - 1) + min_x].usage += 1;
                                                 }
                                         }
@@ -1693,7 +1694,7 @@ int getOverflow2Dmaze(int *maxOverflow, int *tUsage) {
                         total_cap += h_edges[grid].cap;
                         if (overflow > 0) {
                                 H_overflow += overflow;
-                                max_H_overflow = maxFlute(max_H_overflow, overflow);
+                                max_H_overflow = std::max(max_H_overflow, overflow);
                                 numedges++;
                         }
                 }
@@ -1707,13 +1708,13 @@ int getOverflow2Dmaze(int *maxOverflow, int *tUsage) {
                         total_cap += v_edges[grid].cap;
                         if (overflow > 0) {
                                 V_overflow += overflow;
-                                max_V_overflow = maxFlute(max_V_overflow, overflow);
+                                max_V_overflow = std::max(max_V_overflow, overflow);
                                 numedges++;
                         }
                 }
         }
 
-        max_overflow = maxFlute(max_H_overflow, max_V_overflow);
+        max_overflow = std::max(max_H_overflow, max_V_overflow);
         totalOverflow = H_overflow + V_overflow;
         *maxOverflow = max_overflow;
 
@@ -1757,7 +1758,7 @@ int getOverflow2D(int *maxOverflow) {
                         hCap += h_edges[grid].cap;
                         if (overflow > 0) {
                                 H_overflow += overflow;
-                                max_H_overflow = maxFlute(max_H_overflow, overflow);
+                                max_H_overflow = std::max(max_H_overflow, overflow);
                                 numedges++;
                         }
                 }
@@ -1772,13 +1773,13 @@ int getOverflow2D(int *maxOverflow) {
                         vCap += v_edges[grid].cap;
                         if (overflow > 0) {
                                 V_overflow += overflow;
-                                max_V_overflow = maxFlute(max_V_overflow, overflow);
+                                max_V_overflow = std::max(max_V_overflow, overflow);
                                 numedges++;
                         }
                 }
         }
 
-        max_overflow = maxFlute(max_H_overflow, max_V_overflow);
+        max_overflow = std::max(max_H_overflow, max_V_overflow);
         totalOverflow = H_overflow + V_overflow;
         *maxOverflow = max_overflow;
 
@@ -1824,7 +1825,7 @@ int getOverflow3D(void) {
 
                                 if (overflow > 0) {
                                         H_overflow += overflow;
-                                        max_H_overflow = maxFlute(max_H_overflow, overflow);
+                                        max_H_overflow = std::max(max_H_overflow, overflow);
                                 }
                         }
                 }
@@ -1837,13 +1838,13 @@ int getOverflow3D(void) {
 
                                 if (overflow > 0) {
                                         V_overflow += overflow;
-                                        max_V_overflow = maxFlute(max_V_overflow, overflow);
+                                        max_V_overflow = std::max(max_V_overflow, overflow);
                                 }
                         }
                 }
         }
 
-        max_overflow = maxFlute(max_H_overflow, max_V_overflow);
+        max_overflow = std::max(max_H_overflow, max_V_overflow);
         totalOverflow = H_overflow + V_overflow;
 
         printf("total Usage   : %d\n", total_usage);

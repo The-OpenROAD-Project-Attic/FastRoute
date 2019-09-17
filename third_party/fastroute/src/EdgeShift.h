@@ -33,8 +33,8 @@
 #define __EDGESHIFT_H__
 namespace FastRoute {
 
-extern int edgeShift(Tree *t, int net);
-extern int edgeShiftNew(Tree *t, int net);
+extern int edgeShift(Flute::Tree *t, int net);
+extern int edgeShiftNew(Flute::Tree *t, int net);
 
 }  // namespace FastRoute
 

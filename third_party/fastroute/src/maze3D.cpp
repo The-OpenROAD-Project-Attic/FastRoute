@@ -32,7 +32,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
-
+#include <algorithm>
 #include "DataType.h"
 #include "flute.h"
 #include "DataProc.h"
@@ -874,12 +874,12 @@ void mazeRouteMSMDOrder3D(int expand, int ripupTHlb, int ripupTHub) {
 
                                 // ripup the routing for the edge
                                 if (newRipup3DType3(netID, edgeID)) {
-                                        enlarge = minFlute(origEng, treeedge->route.routelen);
+                                        enlarge = std::min(origEng, treeedge->route.routelen);
 
-                                        regionX1 = maxFlute(0, xmin - enlarge);
-                                        regionX2 = minFlute(xGrid - 1, xmax + enlarge);
-                                        regionY1 = maxFlute(0, ymin - enlarge);
-                                        regionY2 = minFlute(yGrid - 1, ymax + enlarge);
+                                        regionX1 = std::max(0, xmin - enlarge);
+                                        regionX2 = std::min(xGrid - 1, xmax + enlarge);
+                                        regionY1 = std::max(0, ymin - enlarge);
+                                        regionY2 = std::min(yGrid - 1, ymax + enlarge);
 
                                         n1Shift = FALSE;
                                         n2Shift = FALSE;
@@ -1470,11 +1470,11 @@ void mazeRouteMSMDOrder3D(int expand, int ripupTHlb, int ripupTHub) {
                                                 if (gridsL[i] == gridsL[i + 1]) {
                                                         if (gridsX[i] == gridsX[i + 1])  // a vertical edge
                                                         {
-                                                                min_y = minFlute(gridsY[i], gridsY[i + 1]);
+                                                                min_y = std::min(gridsY[i], gridsY[i + 1]);
                                                                 v_edges3D[gridsL[i] * gridV + min_y * xGrid + gridsX[i]].usage += 1;
                                                         } else  ///if(gridsY[i]==gridsY[i+1])// a horizontal edge
                                                         {
-                                                                min_x = minFlute(gridsX[i], gridsX[i + 1]);
+                                                                min_x = std::min(gridsX[i], gridsX[i + 1]);
                                                                 h_edges3D[gridsL[i] * gridH + gridsY[i] * (xGrid - 1) + min_x].usage += 1;
                                                         }
                                                 }

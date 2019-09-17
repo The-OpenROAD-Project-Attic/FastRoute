@@ -4,3 +4,6 @@
 [submodule "third_party/rsyn/third_party/lef"]
 	path = third_party/rsyn/third_party/lef
 	url = https://github.com/The-OpenROAD-Project/lef
+[submodule "third_party/flute3"]
+	path = third_party/flute3
+	url = https://github.com/The-OpenROAD-Project/flute3.git

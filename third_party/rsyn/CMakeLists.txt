@@ -25,7 +25,6 @@ project(rsyn)
 add_subdirectory(db)
 add_subdirectory(third_party/lef)
 add_subdirectory(third_party/def)
-add_subdirectory(third_party/flute)
 
 if (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
         set(WINDOWS true)
@@ -88,7 +87,7 @@ target_include_directories(rsyn PUBLIC
         "./include"
         "./third_party/lef/lef"
         "./third_party/def/def"
-        "./third_party/flute"
+        "./../flute3"
         "./src"
         "./src/contests"
         )
