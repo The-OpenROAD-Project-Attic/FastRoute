@@ -103,7 +103,7 @@ dirs:
 
 .PHONY: ispd18_unit_test
 ispd18_unit_test:
-	@bash $(SUPPORT_DIR)/tests/ispd18_unit_test.sh $(BENCHMARKS_DIR)
+	@bash $(SUPPORT_DIR)/tests/ispd18_unit_test.sh
 
 .PHONY: ispd18_download
 ispd18_download:

@@ -39,8 +39,7 @@
 
 cd "$(dirname "$0")"/../../ || exit
 
-FRlefdef_bin=$1
-bin_path=${FRlefdef_bin:-./FRlefdef}
+bin_path=${1:-./FRlefdef}
 test_name="ispd18_test1"
 
 base_dir="$PWD"
