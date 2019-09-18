@@ -60,7 +60,7 @@ namespace Rsyn {
 bool FastRouteProcess::run(const Rsyn::Json &params) {
         Stepwatch watch("FastRoute...");
         outfile = session.getSessionVariableAsString("outfile", "out");
-        outfile = outfile + ".guide";
+        outfile = outfile;
         adjustment = session.getSessionVariableAsFloat("adjustment", 0.0);
         minRoutingLayer = session.getSessionVariableAsInteger("minRoutingLayer", 1);
         maxRoutingLayer = session.getSessionVariableAsInteger("maxRoutingLayer", -1);
