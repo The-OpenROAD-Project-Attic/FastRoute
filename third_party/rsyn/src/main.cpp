@@ -28,6 +28,7 @@
 #endif
 
 #include "util/StreamLogger.h"
+#include "tcl.h"
 
 // -----------------------------------------------------------------------------
 
@@ -135,8 +136,25 @@ void signalHandler(int signum) {
 }  // end function
 
 // -----------------------------------------------------------------------------
+extern "C" {
+        extern int Fastroute_Init(Tcl_Interp *interp);
+}
+int TclAppInit(Tcl_Interp *interp) {
+        Tcl_Init(interp);
+        Fastroute_Init(interp);
+        std::string command = "";
+
+        command = "";
+        command += "puts \"FastRoute4-lefdef\"";
+        Tcl_Eval(interp, command.c_str());
+
+        return TCL_OK;
+}
+
+// -----------------------------------------------------------------------------
 
 int main(int argc, char *argv[]) {
+        Rsyn::Session session;
         signal(SIGINT, signalHandler);
         signal(SIGTERM, signalHandler);
 
@@ -205,7 +223,8 @@ int main(int argc, char *argv[]) {
                                    "The script to run at startup.")(
                     "interactive", "Does not exit after running the script.")(
                     "gui", "The user interface to start.")(
-                    "no-gui", "The user interface to start.");
+                    "no-gui", "The user interface to start.")(
+                    "tcl-shell", "Init Rsyn with TCL shell.");
 #endif
 
                 variables_map vm;
@@ -220,7 +239,11 @@ int main(int argc, char *argv[]) {
 #ifdef ISPD18_BIN
                 runISPD18Flow(vm);
 #else
-                if (!vm.count("no-gui")) {
+                if (vm.count("tcl-shell")) {
+                        
+                        Tcl_Main(1, argv, TclAppInit);
+                }
+                if (vm.count("gui")) {
 // User interface mode...
 #ifndef RSYN_NO_GUI
                         Q_INIT_RESOURCE(images);
