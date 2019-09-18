@@ -59,17 +59,17 @@ namespace Rsyn {
 
 bool FastRouteProcess::run(const Rsyn::Json &params) {
         Stepwatch watch("FastRoute...");
-        std::vector<FastRoute::NET> result;
-        std::string outfile = params.value("outfile", "out.guide");
+        outfile = session.getSessionVariableAsString("outfile", "out");
+        outfile = outfile;
+        adjustment = session.getSessionVariableAsFloat("adjustment", 0.0);
+        minRoutingLayer = session.getSessionVariableAsInteger("minRoutingLayer", 1);
+        maxRoutingLayer = session.getSessionVariableAsInteger("maxRoutingLayer", -1);
+        unidirectionalRoute = session.getSessionVariableAsBool("unidirectionalRoute", false);
 
-        adjustment = params.value("adjustment", 0.0);
-        minRoutingLayer = params.value("minRoutingLayer", 1);
-        maxRoutingLayer = params.value("maxRoutingLayer", -1);
-        unidirectionalRoute = params.value("unidirectionalRoute", false);
         design = session.getDesign();
         module = design.getTopModule();
         phDesign = session.getPhysicalDesign();
-
+        
         std::cout << "\n----------------\n";
         std::cout << "Params: \n";
         std::cout << "**** Output file: " << outfile << "\n";
