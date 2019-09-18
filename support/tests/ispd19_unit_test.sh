@@ -54,6 +54,10 @@ test_dir="$support_dir/ispd19/"
 output_file="${test_dir}/${test_name}/${test_name}.guide"
 gold_dir="${support_dir}/gold"
 gold_file="${gold_dir}/${test_name}.guide"
+
+guides_validation="guides_validation.log"
+gold_guides="complete post process guides ..."
+
 gold_wl="${gold_dir}/${test_name}.wl"
 grep_pattern="Final routing length"
 log_file="unit_test.log"
@@ -102,6 +106,36 @@ fi
 
 echo
 echo "--Compare guides: Success!"
+echo
+
+#Test 2: check pins coverage
+echo
+echo "--Check pin coverage..."
+echo
+
+cd "${support_dir}"
+
+if [[ ! -f "${support_dir}/FlexRoute" ]];
+then
+        # TODO: change download link to avoid permission issues with binary
+        wget "https://vlsicad.ucsd.edu/~bangqixu/toDaeyeon/FlexRoute"
+fi
+
+cd "${base_dir}"
+./"support"/FlexRoute "${support_dir}/param/run_checker_ispd19_test7.param" > "${support_dir}/${guides_validation}"
+
+
+check_guides_report=$(grep -i "${gold_guides}" ${support_dir}/${guides_validation})
+
+if [[ "${check_guides_report}" != "${gold_guides}" ]];
+then
+        echo "--ERROR: guides are not valid"
+        echo "--Check ${guides_validation} at ${support_dir}"
+        fail
+fi
+
+echo
+echo "--Check pin coverage... Success!"
 echo
 
 #Test 3: check wire length
