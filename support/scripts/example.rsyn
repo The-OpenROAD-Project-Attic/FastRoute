@@ -11,7 +11,7 @@ open "generic" {
 
 run "rsyn.fastRoute" {};
 
-# outfile: string. indicate the name of the generated guides file. do not need ".guide" extension
+# outfile: string. indicate the name of the generated guides file
 # adjustment: float. indicate the percentage reduction of each edge
 # minRoutingLayer: integer. indicate the min routing layer available for FastRoute
 # maxRoutingLayer: integer. indicate the max routing layer available for FastRoute
