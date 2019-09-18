@@ -100,22 +100,10 @@ dirs:
 	@echo Create $(BUILD_DIR)
 	@mkdir -p $(BUILD_DIR)/debug
 	@mkdir -p $(BUILD_DIR)/release
-
-.PHONY: ispd18_unit_test
-ispd18_unit_test:
-	@bash $(SUPPORT_DIR)/tests/ispd18_unit_test.sh
-
-.PHONY: ispd18_download
-ispd18_download:
-	@bash $(SUPPORT_DIR)/ispd18_download.sh $(BENCHMARKS_DIR)
-
-.PHONY: ispd18_clean
-ispd18_clean:
-	git clean -xdf $(SUPPORT_DIR)/ispd18
 	
 .PHONY: ispd19_unit_test
 ispd19_unit_test:
-	@bash $(SUPPORT_DIR)/tests/ispd19_unit_test.sh
+	@bash $(SUPPORT_DIR)/tests/unit_test.sh
 
 .PHONY: ispd19_download
 ispd19_download:
