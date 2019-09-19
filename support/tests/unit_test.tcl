@@ -81,14 +81,14 @@ proc downloadBenchmark {testName} {
                 } else {
                         _puts stderr "Error in download benchmark"
                         _puts stderr "********************************************************************************"
-                        _err "Benchmakr could not be downloaded"
+                        _err "Benchmark could not be downloaded"
                 }
         }
 }
 
 proc checkGuidesFile {goldFile outFile} {
         _puts "--Compare guides..."
-        
+
         if {![file exists $goldFile]} {
                 _err "Gold file $goldFile not found!"
         }
@@ -139,7 +139,7 @@ proc checkWirelength {goldFile testName} {
 
         set grep_pattern "Final routing length"
         set length_report [catch {exec grep -i "${grep_pattern}" ${base_dir}/${log_file}} result]
-        
+
         set status [catch {exec grep -q $result $goldFile} rslt]
         if {$status == 0} {
                 _puts "--Verify QoR: Success!"
