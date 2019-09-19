@@ -50,6 +50,9 @@ test_name="ispd19_test7"
 base_dir="$PWD"
 support_dir="$base_dir/support"
 test_dir="$support_dir/ispd19/"
+scripts_dir="${support_dir}/scripts"
+
+run_FR_file="${scripts_dir}/run_FRlefdef.tcl"
 
 output_file="${test_dir}/${test_name}/${test_name}.guide"
 gold_dir="${support_dir}/gold"
@@ -60,7 +63,7 @@ gold_guides="complete post process guides ..."
 
 gold_wl="${gold_dir}/${test_name}.wl"
 grep_pattern="Final routing length"
-log_file="unit_test.log"
+log_file="${test_name}.log"
 
 if [[ ! -f "${test_dir}/${test_name}/${test_name}.input.lef" ]] || [[ ! -f "${test_dir}/${test_name}/${test_name}.input.def" ]]; then
         echo "Downloading test files... from ${base_dir}"
@@ -84,7 +87,8 @@ fail()
         exit 1
 }
 
-"$bin_path" --no-gui --script "${support_dir}/rsyn/${test_name}.rsyn" > "$base_dir/${log_file}"
+tclsh "${run_FR_file}" "${test_name}" "${test_dir}/${test_name}/${test_name}.input.lef" "${test_dir}/${test_name}/${test_name}.input.def" "${bin_path}"
+mv "${test_name}.guide" "${test_dir}/${test_name}"
 
 if [[ $? != 0 ]]; then
         echo "Runtime error"
@@ -122,7 +126,7 @@ then
 fi
 
 cd "${base_dir}"
-./"support"/FlexRoute "${support_dir}/param/run_checker_ispd19_test7.param" > "${support_dir}/${guides_validation}"
+./"support"/FlexRoute "${support_dir}/param/run_checker_${test_name}.param" > "${support_dir}/${guides_validation}"
 
 
 check_guides_report=$(grep -i "${gold_guides}" ${support_dir}/${guides_validation})
