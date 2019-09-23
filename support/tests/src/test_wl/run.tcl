@@ -1,3 +1,5 @@
+#!/usr/bin/env tclsh
+
 ################################################################################
 ## Authors: Vitor Bandeira, Eder Matheus Monteiro e Isadora Oliveira
 ##          (Advisor: Ricardo Reis)
@@ -34,11 +36,58 @@
 ## POSSIBILITY OF SUCH DAMAGE.
 ################################################################################
 
-set_lef_files "_LEF_"
-set_def_files "_DEF_"
-set_output_file "_GUIDE_"
+proc checkWirelength {goldFile outFile} {
+        _puts "--Verify QoR: global routed wire lenght..."
 
-parse_input_files
-run_fastroute
+        set base_dir [pwd]
+        set grep_pattern "Final routing length"
+        set length_report [catch {exec grep -i "${grep_pattern}" $outFile} result]
 
-exit
+        set status [catch {exec grep -q $result $goldFile} rslt]
+        if {$status == 0} {
+                _puts "--Verify QoR: Success!"
+        } else {
+                _puts stderr "Wirelengths are different"
+                _puts stderr "********************************************************************************"
+                _puts stderr $rslt
+                _puts stderr "********************************************************************************"
+                _err "Current routing have wirelength different from gold wl"
+        }
+}
+
+set curr_test "${tests_dir}/test_wl"
+
+set gold_wl "${curr_test}/golden.wl"
+
+set script_file "${curr_test}/routeDesign.tcl"
+set output_file "${curr_test}/${test_name}.guide"
+set output_log "${curr_test}/${test_name}.log"
+set bin_file "$base_dir/FRlefdef"
+
+downloadBenchmark $test_name $curr_test
+if {[file exists "${curr_test}/${test_name}.tgz"]} {
+        exec rm "${curr_test}/${test_name}.tgz"
+}
+
+runFastRoute $test_name $curr_test $bin_file $output_log
+
+checkWirelength $gold_wl $output_log
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

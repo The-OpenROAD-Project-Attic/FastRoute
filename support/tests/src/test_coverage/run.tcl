@@ -1,3 +1,5 @@
+#!/usr/bin/env tclsh
+
 ################################################################################
 ## Authors: Vitor Bandeira, Eder Matheus Monteiro e Isadora Oliveira
 ##          (Advisor: Ricardo Reis)
@@ -33,19 +35,68 @@
 ## ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 ## POSSIBILITY OF SUCH DAMAGE.
 ################################################################################
+proc checkPinsCoverage {goldFile testDir testName} {
+        _puts "--Check pin coverage..."
 
-set benchmark [lindex $argv 0]
-set lefFile [lindex $argv 1]
-set defFile [lindex $argv 2]
-set binary [lindex $argv 3]
+        set gr_checker_file "${testDir}/FlexRoute"
 
-puts In_$benchmark
+        set guides_validation "FlexRoute.log"
+        exec $gr_checker_file "${testDir}/run_checker_${testName}.param" > "${testDir}/${guides_validation}"
 
-variable curr_file [file normalize [info script]]
-variable curr_path [file dirname $curr_file]
+        set status [catch {exec grep -q $goldFile ${testDir}/${guides_validation}} result]
+        if {$status == 0} {
+                _puts "--Check pin coverage: Success!"
+        } else {
+                _puts stderr "Pins are not covered"
+                _puts stderr "********************************************************************************"
+                _puts stderr "$result"
+                _puts stderr "********************************************************************************"
+                _err "Generated guides are not valid"
+        }
+}
 
-exec cp $curr_path/routeDesign.tcl $benchmark.tcl
-exec sed -i s#_LEF_#$lefFile#g $benchmark.tcl
-exec sed -i s#_DEF_#$defFile#g $benchmark.tcl
-exec sed -i s#_GUIDE_#$benchmark.guide#g $benchmark.tcl
-exec $binary --tcl-shell < $benchmark.tcl > $benchmark.log
+set test_name "ispd19_test3"
+
+set base_dir [pwd]
+set support_dir "${base_dir}/support"
+set tests_dir "${support_dir}/tests/src"
+set curr_test "${tests_dir}/test_coverage"
+
+set gold_guides "$curr_test/golden.guide"
+
+set script_file "${curr_test}/routeDesign.tcl"
+set output_file "${curr_test}/${test_name}.guide"
+set output_log "${curr_test}/${test_name}.log"
+set gold_check_guides "complete post process guides ..."
+set bin_file "$base_dir/FRlefdef"
+
+downloadBenchmark $test_name $curr_test
+downloadChecker $curr_test
+if {[file exists "${curr_test}/${test_name}.tgz"]} {
+        exec rm "${curr_test}/${test_name}.tgz"
+}
+
+runFastRoute $test_name $curr_test $bin_file $output_log
+
+checkPinsCoverage $gold_check_guides $curr_test $test_name
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
