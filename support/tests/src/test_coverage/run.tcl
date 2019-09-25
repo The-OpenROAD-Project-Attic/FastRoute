@@ -38,12 +38,18 @@
 proc checkPinsCoverage {goldFile testDir testName} {
         _puts "--Check pin coverage..."
 
+        set base_dir [pwd]
+
         set gr_checker_file "${testDir}/FlexRoute"
 
         set guides_validation "FlexRoute.log"
-        exec $gr_checker_file "${testDir}/run_checker_${testName}.param" > "${testDir}/${guides_validation}"
 
+        cd $testDir
+ 
+        exec $gr_checker_file "${testDir}/run_checker_${testName}.param" > "${testDir}/${guides_validation}"
         set status [catch {exec grep -q $goldFile ${testDir}/${guides_validation}} result]
+        
+        cd $base_dir
         if {$status == 0} {
                 _puts "--Check pin coverage: Success!"
         } else {

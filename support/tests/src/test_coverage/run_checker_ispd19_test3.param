@@ -1,0 +1,8 @@
+lef:ispd19_test3/ispd19_test3.input.lef
+def:ispd19_test3/ispd19_test3.input.def
+guide:ispd19_test3.guide
+output:ispd19_test3.flex.out.def
+threads:8
+cpxthreads:1
+verbose:1
+timeout:36000
