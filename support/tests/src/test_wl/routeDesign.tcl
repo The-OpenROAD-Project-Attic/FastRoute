@@ -34,90 +34,16 @@
 ## POSSIBILITY OF SUCH DAMAGE.
 ################################################################################
 
-BUILD_DIR = build
+set_lef_files "_LEF_"
+set_def_files "_DEF_"
+set_output_file "_GUIDE_"
 
-ROOT = ${PWD}
+set_capacity_adjustment 0.0
+set_min_layer 1
+set_max_layer 9
+set_unidirectional_routing false
 
-BIN_DIR = .
-BIN_NAME = FRlefdef
-OUTPUT_FILE = third_party/rsyn/bin/rsyn
-# LIB_NAME =
+parse_input_files
+run_fastroute
 
-SUPPORT_DIR = support
-BENCHMARKS_DIR = $(SUPPORT_DIR)/ispd18
-
-CMAKE = cmake
-CMAKE_OPT =
-MAKE = make
-MAKE_OPT =
-
-PARALLEL = 1
-
-.PHONY: default
-default: release ispd19_unit_test
-
-.PHONY: all
-all: clean default
-
-.PHONY: release
-release: setup
-	@echo Change to $(BUILD_DIR)/$@
-	@echo Call $(CMAKE)
-	@cd $(BUILD_DIR)/$@ && $(CMAKE) $(CMAKE_OPT) -DCMAKE_BUILD_TYPE=$@ $(ROOT)
-	@echo Call $(MAKE)
-	@$(MAKE) -C $(BUILD_DIR)/$@ -j$(PARALLEL) --no-print-directory $(MK_OPT)
-	@echo Remove old binary
-	@rm -f $(BIN_NAME)
-	@echo Copy binary
-	@ln -f -s $(BUILD_DIR)/$@/$(OUTPUT_FILE) $(BIN_NAME)
-
-.PHONY: debug
-debug: setup
-	@echo Change to $(BUILD_DIR)/$@
-	@echo Call $(CMAKE)
-	@cd $(BUILD_DIR)/$@ && $(CMAKE) $(CMAKE_OPT) -DCMAKE_BUILD_TYPE=$@ $(ROOT)
-	@echo Call $(MAKE)
-	@$(MAKE) -C $(BUILD_DIR)/$@ -j$(PARALLEL) --no-print-directory $(MK_OPT)
-	@echo Remove old binary
-	@rm -f $(BIN_NAME)
-	@echo Copy binary
-	@ln -f -s $(BUILD_DIR)/$@/$(OUTPUT_FILE) $(BIN_NAME)
-
-.PHONY: setup
-setup: check_submodules dirs
-	@ln -f -s $(SUPPORT_DIR)/POST9.dat $(BIN_DIR)/
-	@ln -f -s $(SUPPORT_DIR)/POWV9.dat $(BIN_DIR)/
-
-.PHONY: check_submodules
-check_submodules:
-	@echo "Initialize submodules"
-	@git submodule init
-	@echo "Update submodules"
-	@git submodule update
-
-.PHONY: dirs
-dirs:
-	@echo Create $(BUILD_DIR)
-	@mkdir -p $(BUILD_DIR)/debug
-	@mkdir -p $(BUILD_DIR)/release
-	
-.PHONY: ispd19_unit_test
-ispd19_unit_test:
-	@bash $(SUPPORT_DIR)/tests/unit_test.sh
-
-.PHONY: ispd19_download
-ispd19_download:
-	@bash $(SUPPORT_DIR)/ispd19_download.sh $(BENCHMARKS_DIR)
-
-.PHONY: ispd19_clean
-ispd19_clean:
-	git clean -xdf $(SUPPORT_DIR)/ispd19
-
-.PHONY: clean
-clean:
-	rm -rf $(BUILD_DIR)
-
-.PHONY: clean_all
-clean_all: ispd18_clean
-	rm -rf $(BUILD_DIR)
-	rm -rf $(BIN_NAME)
+exit

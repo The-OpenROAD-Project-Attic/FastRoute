@@ -1,3 +1,5 @@
+#!/usr/bin/env tclsh
+
 ################################################################################
 ## Authors: Vitor Bandeira, Eder Matheus Monteiro e Isadora Oliveira
 ##          (Advisor: Ricardo Reis)
@@ -34,90 +36,64 @@
 ## POSSIBILITY OF SUCH DAMAGE.
 ################################################################################
 
-BUILD_DIR = build
+proc checkGuidesFile {goldFile outFile} {
+        _puts "--Compare guides..."
 
-ROOT = ${PWD}
+        if {![file exists $goldFile]} {
+                _err "Gold file $goldFile not found!"
+        }
+        if {![file exists $outFile]} {
+                _err "Out file $outFile not found!"
+        }
+        set status [catch {exec diff $goldFile $outFile} result]
+        if {$status == 0} {
+                _puts "--Compare guides: Success!"
+        } else {
+                _puts stderr "Files are different"
+                _puts stderr "********************************************************************************"
+                _puts stderr $result
+                _puts stderr "********************************************************************************"
+                _err "files are different: $goldFile and $outFile... "
+        }
+}
 
-BIN_DIR = .
-BIN_NAME = FRlefdef
-OUTPUT_FILE = third_party/rsyn/bin/rsyn
-# LIB_NAME =
+set test_name "ispd19_test3"
 
-SUPPORT_DIR = support
-BENCHMARKS_DIR = $(SUPPORT_DIR)/ispd18
+set base_dir [pwd]
+set support_dir "${base_dir}/support"
+set tests_dir "${support_dir}/tests/src"
+set curr_test "${tests_dir}/test_guides"
 
-CMAKE = cmake
-CMAKE_OPT =
-MAKE = make
-MAKE_OPT =
+set gold_guides "$curr_test/golden.guide"
 
-PARALLEL = 1
+set script_file "${curr_test}/routeDesign.tcl"
+set output_file "${curr_test}/${test_name}.guide"
+set output_log "${curr_test}/${test_name}.log"
 
-.PHONY: default
-default: release ispd19_unit_test
+downloadBenchmark $test_name $curr_test
+if {[file exists "${curr_test}/${test_name}.tgz"]} {
+        exec rm "${curr_test}/${test_name}.tgz"
+}
 
-.PHONY: all
-all: clean default
+runFastRoute $test_name $curr_test $bin_file $output_log
 
-.PHONY: release
-release: setup
-	@echo Change to $(BUILD_DIR)/$@
-	@echo Call $(CMAKE)
-	@cd $(BUILD_DIR)/$@ && $(CMAKE) $(CMAKE_OPT) -DCMAKE_BUILD_TYPE=$@ $(ROOT)
-	@echo Call $(MAKE)
-	@$(MAKE) -C $(BUILD_DIR)/$@ -j$(PARALLEL) --no-print-directory $(MK_OPT)
-	@echo Remove old binary
-	@rm -f $(BIN_NAME)
-	@echo Copy binary
-	@ln -f -s $(BUILD_DIR)/$@/$(OUTPUT_FILE) $(BIN_NAME)
+checkGuidesFile $gold_guides $output_file
 
-.PHONY: debug
-debug: setup
-	@echo Change to $(BUILD_DIR)/$@
-	@echo Call $(CMAKE)
-	@cd $(BUILD_DIR)/$@ && $(CMAKE) $(CMAKE_OPT) -DCMAKE_BUILD_TYPE=$@ $(ROOT)
-	@echo Call $(MAKE)
-	@$(MAKE) -C $(BUILD_DIR)/$@ -j$(PARALLEL) --no-print-directory $(MK_OPT)
-	@echo Remove old binary
-	@rm -f $(BIN_NAME)
-	@echo Copy binary
-	@ln -f -s $(BUILD_DIR)/$@/$(OUTPUT_FILE) $(BIN_NAME)
 
-.PHONY: setup
-setup: check_submodules dirs
-	@ln -f -s $(SUPPORT_DIR)/POST9.dat $(BIN_DIR)/
-	@ln -f -s $(SUPPORT_DIR)/POWV9.dat $(BIN_DIR)/
 
-.PHONY: check_submodules
-check_submodules:
-	@echo "Initialize submodules"
-	@git submodule init
-	@echo "Update submodules"
-	@git submodule update
 
-.PHONY: dirs
-dirs:
-	@echo Create $(BUILD_DIR)
-	@mkdir -p $(BUILD_DIR)/debug
-	@mkdir -p $(BUILD_DIR)/release
-	
-.PHONY: ispd19_unit_test
-ispd19_unit_test:
-	@bash $(SUPPORT_DIR)/tests/unit_test.sh
 
-.PHONY: ispd19_download
-ispd19_download:
-	@bash $(SUPPORT_DIR)/ispd19_download.sh $(BENCHMARKS_DIR)
 
-.PHONY: ispd19_clean
-ispd19_clean:
-	git clean -xdf $(SUPPORT_DIR)/ispd19
 
-.PHONY: clean
-clean:
-	rm -rf $(BUILD_DIR)
 
-.PHONY: clean_all
-clean_all: ispd18_clean
-	rm -rf $(BUILD_DIR)
-	rm -rf $(BIN_NAME)
+
+
+
+
+
+
+
+
+
+
+

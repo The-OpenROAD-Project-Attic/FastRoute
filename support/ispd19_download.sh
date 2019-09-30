@@ -1,6 +1,6 @@
 #!/bin/bash
 
-export support_dir="support/ispd18"
+export support_dir="support/ispd19"
 
 max_par=${1:-4}
 
@@ -11,10 +11,10 @@ cd "$support_dir" || exit
 par_download()
 {
         num=$1
-        fname="ispd18_test${num}"
+        fname="ispd19_test${num}"
         if [[ ! -f "${fname}/${fname}.input.lef" ]]; then
-                wget "http://www.ispd.cc/contests/18/${fname}.tgz"
-                mkdir -p "${fname}"
+                wget "http://www.ispd.cc/contests/19/benchmarks/${fname}.tgz"
+#                mkdir -p "${fname}"
                 tar zxvf "${fname}.tgz" -C "./$fname/"
         fi
 }

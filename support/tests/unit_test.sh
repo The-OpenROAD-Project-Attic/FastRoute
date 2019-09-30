@@ -39,21 +39,37 @@
 
 cd "$(dirname "$0")"/../../ || exit
 
-bin_path=${1:-./FRlefdef}
-test_name="ispd18_test1"
+echo
+echo "Start unit tests..."
+echo
+
+FRlefdef_bin=$1
+bin_path=${FRlefdef_bin:-./FRlefdef}
+test_name="ispd19_test7"
 
 base_dir="$PWD"
 support_dir="$base_dir/support"
-test_dir="$support_dir/ispd18/${test_name}"
+test_dir="$support_dir/ispd19/"
+scripts_dir="${support_dir}/scripts"
 
-output_file="${test_dir}/${test_name}.guide"
+run_FR_file="${scripts_dir}/run_FRlefdef.tcl"
+
+output_file="${test_dir}/${test_name}/${test_name}.guide"
 gold_dir="${support_dir}/gold"
 gold_file="${gold_dir}/${test_name}.guide"
 
-if [[ ! -f "${test_dir}/${test_name}.input.lef" ]] || [[ ! -f "${test_dir}/${test_name}.input.def" ]]; then
+guides_validation="guides_validation.log"
+gold_guides="complete post process guides ..."
+
+gold_wl="${gold_dir}/${test_name}.wl"
+grep_pattern="Final routing length"
+log_file="${test_name}.log"
+
+if [[ ! -f "${test_dir}/${test_name}/${test_name}.input.lef" ]] || [[ ! -f "${test_dir}/${test_name}/${test_name}.input.def" ]]; then
+        echo "Downloading test files... from ${base_dir}"
         mkdir -p "${test_dir}"
         cd "$test_dir" || exit
-        wget "http://www.ispd.cc/contests/18/${test_name}.tgz"
+        wget "http://www.ispd.cc/contests/19/benchmarks/${test_name}.tgz"
         tar zxvf "${test_name}.tgz"
         cd - || exit
 fi
@@ -67,26 +83,83 @@ fail()
         echo "Unit test failed, please check end of log file"
         echo
         echo
-        diff  "${output_file}" "${gold_file}" >> "$base_dir/unit_test.log"
+        diff  "${output_file}" "${gold_file}" >> "$base_dir/${log_file}"
         exit 1
 }
 
-"$bin_path" --no-gui --script "${support_dir}/rsyn/${test_name}.rsyn" > "$base_dir/unit_test.log"
+tclsh "${run_FR_file}" "${test_name}" "${test_dir}/${test_name}/${test_name}.input.lef" "${test_dir}/${test_name}/${test_name}.input.def" "${bin_path}"
+mv "${test_name}.guide" "${test_dir}/${test_name}"
 
 if [[ $? != 0 ]]; then
         echo "Runtime error"
         fail
 fi
 
+
+# Test 1: compare output guides
+echo
+echo "--Compare guides..."
+echo
+
 cmp "${output_file}" "${gold_file}"
 
 if [[ $? != 0 ]]; then
-        echo "Output missmatch"
+        echo "--ERROR: Compare guides: Output guides missmatch"
         fail
 fi
 
 echo
+echo "--Compare guides: Success!"
 echo
-echo "Passed unit test"
+
+#Test 2: check pins coverage
 echo
+echo "--Check pin coverage..."
+echo
+
+cd "${support_dir}"
+
+if [[ ! -f "${support_dir}/FlexRoute" ]];
+then
+        # TODO: change download link to avoid permission issues with binary
+        wget "https://vlsicad.ucsd.edu/~bangqixu/toDaeyeon/FlexRoute"
+fi
+
+cd "${base_dir}"
+./"support"/FlexRoute "${support_dir}/param/run_checker_${test_name}.param" > "${support_dir}/${guides_validation}"
+
+
+check_guides_report=$(grep -i "${gold_guides}" ${support_dir}/${guides_validation})
+
+if [[ "${check_guides_report}" != "${gold_guides}" ]];
+then
+        echo "--ERROR: guides are not valid"
+        echo "--Check ${guides_validation} at ${support_dir}"
+        fail
+fi
+
+echo
+echo "--Check pin coverage... Success!"
+echo
+
+#Test 3: check wire length
+echo
+echo "--Verify QoR: global routed wire lenght..."
+echo
+
+length_report=$(grep -i "${grep_pattern}" ${base_dir}/${log_file})
+gold_report=$(grep -i "${grep_pattern}" ${gold_wl})
+
+if [[ "$length_report" != "$gold_report" ]];
+then
+        echo "--ERROR: Verify QoR: wirelength missmatch"
+        fail
+fi
+
+echo
+echo "--Vefiry QoR: Success!"
+echo
+
+echo
+echo "Unit tests... Done!"
 echo
