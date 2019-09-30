@@ -38,7 +38,7 @@
 rename puts _puts
 
 proc _err {s {n 1}} {
-        _puts stderr "ERRO: $s"
+        _puts stderr "ERROR: $s"
         exit $n
 }
 
