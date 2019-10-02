@@ -46,6 +46,7 @@
 #include "core/RsynTypes.h"
 #include "util/Stepwatch.h"
 #include "phy/obj/decl/PhysicalPinLayer.h"
+#include "phy/obj/decl/PhysicalInstance.h"
 #include <cstring>
 #include <string>
 #include <iostream>
@@ -722,19 +723,13 @@ void FastRouteProcess::computeObstaclesAdjustments() {
                 Rsyn::PhysicalCell phCell = phDesign.getPhysicalCell(cell);
                 const Rsyn::PhysicalTransform &transform = phCell.getTransform(true);
                 DBUxy pos = phCell.getPosition();
-                Rsyn::PhysicalLayer upperBlockLayer;
-
+                
                 for (Rsyn::PhysicalObstacle phObs : phLibCell.allObstacles()) {
                         Rsyn::PhysicalLayer phLayer = phObs.getLayer();
-                        if (upperBlockLayer == nullptr) {
-                                upperBlockLayer = phLayer;
-                        } else if (phLayer.getIndex() > upperBlockLayer.getIndex()) {
-                                upperBlockLayer = phLayer;
+                        if (phLayer.getType() != Rsyn::ROUTING) {
+                                continue;
                         }
-                }
-
-                for (Rsyn::PhysicalObstacle phObs : phLibCell.allObstacles()) {
-                        Rsyn::PhysicalLayer phLayer = phObs.getLayer();
+                        
                         for (Bounds bds : phObs.allBounds()) {
                                 bds = transform.apply(bds);
                                 bds.translate(pos);
