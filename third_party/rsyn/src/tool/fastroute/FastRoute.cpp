@@ -66,6 +66,13 @@ bool FastRouteProcess::run(const Rsyn::Json &params) {
         minRoutingLayer = session.getSessionVariableAsInteger("minRoutingLayer", 1);
         maxRoutingLayer = session.getSessionVariableAsInteger("maxRoutingLayer", -1);
         unidirectionalRoute = session.getSessionVariableAsBool("unidirectionalRoute", false);
+        
+        regionsMinX.push_back(session.getSessionVariableAsInteger("regionMinX", -1));
+        regionsMinY.push_back(session.getSessionVariableAsInteger("regionMinY", -1));
+        regionsMaxX.push_back(session.getSessionVariableAsInteger("regionMaxX", -1));
+        regionsMaxY.push_back(session.getSessionVariableAsInteger("regionMaxY", -1));
+        regionsLayer.push_back(session.getSessionVariableAsInteger("regionLayer", -1));
+        regionsReductionPercentage.push_back(session.getSessionVariableAsFloat("regionReductionPercentage", -1));
 
         design = session.getDesign();
         module = design.getTopModule();
@@ -137,7 +144,17 @@ bool FastRouteProcess::run(const Rsyn::Json &params) {
         std::cout << "Computing user defined adjustments...\n";
         computeSimpleAdjustments();
         std::cout << "Computing user defined adjustments... Done!\n";
-
+        
+        for (int i = 0; i < regionsReductionPercentage.size(); i++) {
+                if (regionsLayer[i] < 0)
+                        break;
+                
+                std::cout << "Adjusting specific region in layer " << regionsLayer[i] << "...\n";
+                DBUxy lowerLeft = DBUxy(regionsMinX[i], regionsMinY[i]);
+                DBUxy upperRight = DBUxy(regionsMaxX[i], regionsMaxY[i]);
+                adjustRegion(lowerLeft, upperRight, regionsLayer[i], regionsReductionPercentage[i]);
+        }
+        
         fastRoute.initAuxVar();
 
         std::cout << "Running FastRoute...\n";
@@ -822,6 +839,99 @@ void FastRouteProcess::computeObstaclesAdjustments() {
                                                                                 x, y + 1, phLayer.getRelativeIndex() + 1, 0);
                                                 }
                                         }
+                                }
+                        }
+                }
+        }
+}
+
+void FastRouteProcess::adjustRegion(DBUxy lowerLeft, DBUxy upperRight, int layer, float reductionPercentage) {
+        Bounds firstTileBds;
+        Bounds lastTileBds;
+        std::pair<TILE, TILE> tilesToAdjust;
+        
+        Rsyn::PhysicalDie phDie = phDesign.getPhysicalDie();
+        Bounds dieBounds = phDie.getBounds();
+        
+        if ((dieBounds.getLower().x > lowerLeft.x && dieBounds.getLower().y > lowerLeft.y) ||
+            (dieBounds.getUpper().x < upperRight.x && dieBounds.getUpper().y < upperRight.y)) {
+                std::cout << "ERROR: informed region is outside die area!\n";
+                std::cout << "Die bounds: " << dieBounds << "\n";
+                std::cout << "Informed region: (" << lowerLeft << "; " << upperRight << ")\n";
+                std::exit(-1);
+        }
+        
+        Rsyn::PhysicalLayer phLayer = phDesign.getPhysicalLayerByIndex(Rsyn::ROUTING, layer);
+        bool horizontal = phLayer.getDirection() == Rsyn::HORIZONTAL ? 1 : 0;
+        Bounds regionToAdjust = Bounds(lowerLeft, upperRight);
+        
+        tilesToAdjust = getBlockedTiles(regionToAdjust, firstTileBds, lastTileBds);
+        TILE &firstTile = tilesToAdjust.first;
+        TILE &lastTile = tilesToAdjust.second;
+        
+        DBU trackSpace;
+        for (PhysicalTracks phTracks : phDesign.allPhysicalTracks(phLayer)) {
+                if (horizontal) {
+                        if (phTracks.getDirection() != (PhysicalTrackDirection)Rsyn::HORIZONTAL) {
+                                trackSpace = phTracks.getSpace();
+                                break;
+                        }
+                } else {
+                        if (phTracks.getDirection() != (PhysicalTrackDirection)Rsyn::VERTICAL) {
+                                trackSpace = phTracks.getSpace();
+                                break;
+                        }
+                }
+        }
+        
+        int firstTileReduce = computeTileReduce(regionToAdjust, firstTileBds, trackSpace, true, horizontal);
+
+        int lastTileReduce = computeTileReduce(regionToAdjust, lastTileBds, trackSpace, false, horizontal);
+        
+        if (horizontal) {                                          // If preferred direction is horizontal, only first and the last line will have specific adjustments
+                for (int x = firstTile.x; x <= lastTile.x; x++) {  // Setting capacities of edges completely inside the adjust region according the percentage of reduction
+                        for (int y = firstTile.y; y <= lastTile.y; y++) {
+                                int edgeCap = fastRoute.getEdgeCapacity(x, y, phLayer.getRelativeIndex() + 1, x + 1, y, phLayer.getRelativeIndex() + 1);
+                                
+                                if (y == firstTile.y) {
+                                        edgeCap -= firstTileReduce;
+                                        if (edgeCap < 0)
+                                                edgeCap = 0;
+                                        fastRoute.addAdjustment(x, y, phLayer.getRelativeIndex() + 1,
+                                                                x + 1, y, phLayer.getRelativeIndex() + 1, edgeCap);
+                                } else if (y == lastTile.y) {
+                                        edgeCap -= lastTileReduce;
+                                        if (edgeCap < 0)
+                                                edgeCap = 0;
+                                        fastRoute.addAdjustment(x, y, phLayer.getRelativeIndex() + 1,
+                                                                x + 1, y, phLayer.getRelativeIndex() + 1, edgeCap);
+                                } else {
+                                        edgeCap -= edgeCap*reductionPercentage;
+                                        fastRoute.addAdjustment(x, y, phLayer.getRelativeIndex() + 1,
+                                                                x + 1, y, phLayer.getRelativeIndex() + 1, 0);
+                                }
+                        }
+                }
+        } else {                                                   // If preferred direction is vertical, only first and last columns will have specific adjustments
+                for (int x = firstTile.x; x <= lastTile.x; x++) {  // Setting capacities of edges completely inside the adjust region according the percentage of reduction
+                        for (int y = firstTile.y; y <= lastTile.y; y++) {
+                                int edgeCap = fastRoute.getEdgeCapacity(x, y, phLayer.getRelativeIndex() + 1, x, y + 1, phLayer.getRelativeIndex() + 1);
+                                if (x == firstTile.x) {
+                                        edgeCap -= firstTileReduce;
+                                        if (edgeCap < 0)
+                                                edgeCap = 0;
+                                        fastRoute.addAdjustment(x, y, phLayer.getRelativeIndex() + 1,
+                                                                x, y + 1, phLayer.getRelativeIndex() + 1, edgeCap);
+                                } else if (x == lastTile.x) {
+                                        edgeCap -= lastTileReduce;
+                                        if (edgeCap < 0)
+                                                edgeCap = 0;
+                                        fastRoute.addAdjustment(x, y, phLayer.getRelativeIndex() + 1,
+                                                                x, y + 1, phLayer.getRelativeIndex() + 1, edgeCap);
+                                } else {
+                                        edgeCap -= edgeCap*reductionPercentage;
+                                        fastRoute.addAdjustment(x, y, phLayer.getRelativeIndex() + 1,
+                                                                x, y + 1, phLayer.getRelativeIndex() + 1, 0);
                                 }
                         }
                 }

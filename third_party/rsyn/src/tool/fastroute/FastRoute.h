@@ -76,6 +76,14 @@ class FastRouteProcess : public Process {
         int maxRoutingLayer;
         bool unidirectionalRoute;
         int fixLayer = 0;
+        
+        // Region adjustment variables
+        std::vector<int> regionsMinX;
+        std::vector<int> regionsMinY;
+        std::vector<int> regionsMaxX;
+        std::vector<int> regionsMaxY;
+        std::vector<int> regionsLayer;
+        std::vector<float> regionsReductionPercentage;
 
         GRID grid;
         std::vector<int> vCapacities;
@@ -95,6 +103,7 @@ class FastRouteProcess : public Process {
         void setTrackAdjustments();
         void computeSimpleAdjustments();
         void computeObstaclesAdjustments();
+        void adjustRegion(DBUxy lowerLeft, DBUxy upperRight, int layer, float reductionPercentage);
         void writeGuides(std::vector<FastRoute::NET> &, std::string);
 
         void writeEst(const std::vector<FastRoute::NET> &, std::string);
