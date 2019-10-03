@@ -97,6 +97,15 @@ void set_capacity_adjustment(float adjustment) {
         session.setSessionVariable("adjustment", adjustment);
 }
 
+void set_region_adjustment(int minX, int minY, int maxX, int maxY, int layer, float reductionPercentage) {
+        session.setSessionVariable("regionMinX", minX);
+        session.setSessionVariable("regionMinY", minY);
+        session.setSessionVariable("regionMaxX", maxX);
+        session.setSessionVariable("regionMaxY", maxY);
+        session.setSessionVariable("regionLayer", layer);
+        session.setSessionVariable("regionReductionPercentage", reductionPercentage);
+}
+
 void set_min_layer(int minLayer) {
         session.setSessionVariable("minRoutingLayer", minLayer);
 }

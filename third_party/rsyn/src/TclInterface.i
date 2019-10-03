@@ -52,6 +52,8 @@ extern void set_output_file(const char * file);
 
 extern void set_capacity_adjustment(float adjustment);
 
+extern void set_region_adjustment(int minX, int minY, int maxX, int maxY, int layer, float reductionPercentage);
+
 extern void set_min_layer(int minLayer);
 
 extern void set_max_layer(int maxLayer);
