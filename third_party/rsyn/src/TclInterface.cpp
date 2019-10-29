@@ -118,6 +118,10 @@ void set_unidirectional_routing(bool unidirRouting) {
         session.setSessionVariable("unidirectionalRoute", unidirRouting);
 }
 
+void set_tile_size(int size) {
+        session.setSessionVariable("tileSize", size);
+}
+
 void run_fastroute() {
         bool success = session.runProcess("rsyn.fastRoute");
 }

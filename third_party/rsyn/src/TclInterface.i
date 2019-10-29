@@ -60,6 +60,8 @@ extern void set_max_layer(int maxLayer);
 
 extern void set_unidirectional_routing(bool unidirRouting);
 
+extern void set_tile_size(int size);
+
 extern void run_fastroute();
 
 //extern void write_guides(const char * fileName);
