@@ -66,6 +66,7 @@ bool FastRouteProcess::run(const Rsyn::Json &params) {
         minRoutingLayer = session.getSessionVariableAsInteger("minRoutingLayer", 1);
         maxRoutingLayer = session.getSessionVariableAsInteger("maxRoutingLayer", -1);
         unidirectionalRoute = session.getSessionVariableAsBool("unidirectionalRoute", false);
+        pitchesInTile = session.getSessionVariableAsInteger("tileSize", 15);
         
         regionsMinX.push_back(session.getSessionVariableAsInteger("regionMinX", -1));
         regionsMinY.push_back(session.getSessionVariableAsInteger("regionMinY", -1));
@@ -85,6 +86,7 @@ bool FastRouteProcess::run(const Rsyn::Json &params) {
         std::cout << "**** Min routing layer: " << minRoutingLayer << "\n";
         std::cout << "**** Max routing layer: " << maxRoutingLayer << "\n";
         std::cout << "**** Unidirectional routing: " << unidirectionalRoute << "\n";
+        std::cout << "**** Tile size: " << pitchesInTile << "\n";
         std::cout << "\n----------------\n";
         
         if (minRoutingLayer >= maxRoutingLayer && (minRoutingLayer > 0 && maxRoutingLayer > 0)) {
@@ -400,6 +402,9 @@ void FastRouteProcess::initNets() {
                                                 continue;
                                         numOfLayers = pinGeo.allPinLayers().size();
                                         for (Rsyn::PhysicalPinLayer phPinLayer : pinGeo.allPinLayers()) {
+                                                if (phPinLayer.getLayer().getType() != Rsyn::ROUTING)
+                                                        continue;
+                                                
                                                 if (pinLayer < phPinLayer.getLayer().getRelativeIndex())
                                                         pinLayer = phPinLayer.getLayer().getRelativeIndex();
 
