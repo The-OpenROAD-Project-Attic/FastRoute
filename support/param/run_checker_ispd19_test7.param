@@ -1,8 +1,0 @@
-lef:./support/ispd19/ispd19_test7/ispd19_test7.input.lef
-def:./support/ispd19/ispd19_test7/ispd19_test7.input.def
-guide:./support/ispd19/ispd19_test7/ispd19_test7.guide
-output:./support/ispd19/ispd19_test7/ispd19_test7.flex.out.def
-threads:8
-cpxthreads:1
-verbose:1
-timeout:36000
