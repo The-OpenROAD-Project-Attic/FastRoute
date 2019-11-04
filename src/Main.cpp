@@ -81,16 +81,8 @@ int main(int argc, char** argv) {
             std::chrono::system_clock::now());
         std::cout << " > Current time: " << std::ctime(&date);
 
-        //parmsToIOPlacer = new Parameters(argc, argv);
         fastRouteKernel = new FastRouteKernel();
         Tcl_Main(argc, argv, TclAppInit);
-/*
-        if (parmsToIOPlacer->isInteractiveMode()) {
-                Tcl_Main(argc, argv, tclAppInit);
-        } else {
-                ioPlacerKernel->run();
-                ioPlacerKernel->writeDEF();
-        }
-*/
+
         return 0;
 }

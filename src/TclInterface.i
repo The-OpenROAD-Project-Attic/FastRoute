@@ -34,7 +34,7 @@
 // POSSIBILITY OF SUCH DAMAGE.
 ////////////////////////////////////////////////////////////////////////////////
 
-%module ioplacer
+%module fastroute
 %{
 #include "TclInterface.h"
 %}
