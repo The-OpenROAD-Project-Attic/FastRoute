@@ -89,7 +89,7 @@ public:
         bool getUnidirectionalRoute() const { return _unidirectionalRoute; }
         
         void setPitchesInTile(const bool pitchesInTile) { _pitchesInTile = pitchesInTile; }
-        bool getPitchesInTile() const { return _pitchesInTile; }
+        int getPitchesInTile() const { return _pitchesInTile; }
         
         void setInteractiveMode(bool enable) { _interactiveMode = enable; }
         bool isInteractiveMode() const { return _interactiveMode; }
