@@ -40,6 +40,7 @@
 #include <ctime>
 #include <tcl.h>
 
+#include "Parameters.h"
 #include "FastRouteKernel.h"
 
 extern "C" {
@@ -50,16 +51,11 @@ int TclAppInit(Tcl_Interp *interp) {
         
         Tcl_Init(interp);
         Fastroute_Init(interp);
-        
-//        std::string command = "";
-//
-//        command = "";
-//        command += "puts \"FastRoute4-lefdef\"";
-//        Tcl_Eval(interp, command.c_str());
 
         return TCL_OK;
 }
 
+Parameters* parmsToFastRoute = nullptr;
 FastRouteKernel* fastRouteKernel = nullptr;
 
 int main(int argc, char** argv) {
@@ -81,8 +77,14 @@ int main(int argc, char** argv) {
             std::chrono::system_clock::now());
         std::cout << " > Current time: " << std::ctime(&date);
 
-        fastRouteKernel = new FastRouteKernel();
-        Tcl_Main(argc, argv, TclAppInit);
+        parmsToFastRoute = new Parameters(argc, argv);
+        fastRouteKernel = new FastRouteKernel(*parmsToFastRoute);
+        
+        if (parmsToFastRoute->isInteractiveMode()) {
+                Tcl_Main(argc, argv, TclAppInit);
+        } else {
+                fastRouteKernel->printGrid();
+        }
 
         return 0;
 }
