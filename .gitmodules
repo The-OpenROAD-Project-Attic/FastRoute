@@ -7,3 +7,6 @@
 [submodule "third_party/flute3"]
 	path = third_party/flute3
 	url = https://github.com/The-OpenROAD-Project/flute3.git
+[submodule "third_party/OpenDB"]
+	path = third_party/OpenDB
+	url = https://github.com/The-OpenROAD-Project/OpenDB.git
