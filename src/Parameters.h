@@ -52,6 +52,7 @@ private:
         int _maxRoutingLayer = -1;
         bool _unidirectionalRoute = false;
         int _pitchesInTile = 15;
+        bool _interactiveMode = false;
         
         // Region adjustment variables
         std::vector<int> _regionsMinX;
@@ -60,8 +61,6 @@ private:
         std::vector<int> _regionsMaxY;
         std::vector<int> _regionsLayer;
         std::vector<float> _regionsReductionPercentage;
-        
-        bool _interactiveMode = false;
         
 public:
         Parameters() = default;

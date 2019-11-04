@@ -125,6 +125,8 @@ void Parameters::printAll() const {
         std::cout << _maxRoutingLayer << "\n";
         std::cout << std::setw(20) << std::left << "Unidirectional route: ";
         std::cout << _unidirectionalRoute << "\n";
+        std::cout << std::setw(20) << std::left << "Interactive mode: ";
+        std::cout << _interactiveMode << "\n";
 
         std::cout << "\n";
         // clang-format on
