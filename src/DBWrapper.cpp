@@ -2,6 +2,10 @@
 
 #include <iostream>
 #include <vector>
+#include <cmath>
+#include <cstring>
+#include <string>
+#include <utility>
 
 #include "db.h"
 #include "lefin.h"
@@ -9,7 +13,8 @@
 #include "defout.h"
 #include "dbShape.h"
 
-DBWrapper::DBWrapper() {
+DBWrapper::DBWrapper(Grid& grid, Parameters& parms) :
+                _grid(&grid), _parms(&parms) {
         _db = odb::dbDatabase::create();
 }
 
@@ -31,83 +36,71 @@ void DBWrapper::parseDEF(const std::string &filename) {
         _chip = defReader.createChip(searchLibs, filename.c_str());
 }
 
-/*
-void DBWrapper::initCore() {
-        ads::dbTech* tech = _db->getTech();
+void DBWrapper::initGrid() {
+        odb::dbTech* tech = _db->getTech();
         if (!tech) {
-                std::cout << "[ERROR] ads::dbTech not initialized! Exiting...\n";
+                std::cout << "[ERROR] obd::dbTech not initialized! Exiting...\n";
                 std::exit(1);
         }
-
+        
         int databaseUnit = tech->getLefUnits(); 
 
-        ads::dbBlock* block = _chip->getBlock();
+        odb::dbBlock* block = _chip->getBlock();
         if (!block) {
-                std::cout << "[ERROR] ads::dbBlock not found! Exiting...\n";
+                std::cout << "[ERROR] odb::dbBlock not found! Exiting...\n";
                 std::exit(1);
         }
-
-        ads::dbBox* coreBBox = block->getBBox();
-
-        Coordinate lowerBound(coreBBox->xMin(), coreBBox->yMin());
-        Coordinate upperBound(coreBBox->xMax(), coreBBox->yMax());
         
-        int horLayerIdx = _parms->getHorizontalMetalLayer();
-        int verLayerIdx = _parms->getVerticalMetalLayer();
-
-        ads::dbTechLayer* horLayer = tech->findRoutingLayer(horLayerIdx);
-        if (!horLayer) {
-                std::cout << "[ERROR] Layer" << horLayerIdx << " not found! Exiting...\n";
-                std::exit(1);
-        }
-
-        ads::dbTechLayer* verLayer = tech->findRoutingLayer(verLayerIdx);
-        if (!horLayer) {
-                std::cout << "[ERROR] Layer" << verLayerIdx << " not found! Exiting...\n";
-                std::exit(1);
-        }
-
-        ads::dbTrackGrid* horTrackGrid = block->findTrackGrid( horLayer );        
-        ads::dbTrackGrid* verTrackGrid = block->findTrackGrid( verLayer );
-        if (!horTrackGrid || !verTrackGrid) {
-                std::cout << "[ERROR] No track grid! Exiting...\n";
-                std::exit(1);
-        }
-
-        int minSpacingX = 0;
-        int minSpacingY = 0;
-        int initTrackX = 0;
-        int initTrackY = 0;
-        int minAreaX = 0;
-        int minAreaY = 0;
-        int minWidthX = 0;
-        int minWidthY = 0;
+        odb::dbBox* coreBBox = block->getBBox();
+        odb::dbTechLayer* selectedLayer = tech->findRoutingLayer(selectedMetal);
         
-        int numTracks = -1;
-        verTrackGrid->getGridPatternX(0, initTrackX, numTracks, minSpacingX);
-        horTrackGrid->getGridPatternY(0, initTrackY, numTracks, minSpacingY);
-
-        minAreaX =  verLayer->getArea();
-        minWidthX = verLayer->getWidth();
-        minAreaY =  horLayer->getArea();
-        minWidthY = horLayer->getWidth();
-
-        *_core = Core(lowerBound, upperBound, minSpacingX * 2, minSpacingY * 2,
-                      initTrackX, initTrackY, minAreaX, minAreaY,
-                      minWidthX, minWidthY, databaseUnit);
-
-        if(_verbose) {
-                std::cout << "lowerBound: " << lowerBound.getX() << " " << lowerBound.getY() << "\n";
-                std::cout << "upperBound: " << upperBound.getX() << " " << upperBound.getY() << "\n";
-                std::cout << "minSpacingX: " << minSpacingX << "\n";
-                std::cout << "minSpacingY: " << minSpacingY << "\n";
-                std::cout << "initTrackX: " << initTrackX << "\n";
-                std::cout << "initTrackY: " << initTrackY << "\n";
-                std::cout << "minAreaX: " << minAreaX << "\n";
-                std::cout << "minAreaY: " << minAreaY << "\n";
-                std::cout << "minWidthX: " << minWidthX << "\n";
-                std::cout << "minWidthY: " << minWidthY << "\n";
-                std::cout << "databaseUnit: " << databaseUnit << "\n";
+        if (!selectedLayer) {
+                std::cout << "[ERROR] Layer" << selectedMetal << " not found! Exiting...\n";
+                std::exit(1);
         }
+        
+        odb::dbTrackGrid* selectedTrack = block->findTrackGrid(selectedLayer);
+        
+        int trackStepX, trackStepY;
+        int initTrackX, numTracksX;
+        int initTrackY, numTracksY;
+        int trackSpacing;
+        
+        selectedTrack->getGridPatternX(0, initTrackX, numTracksX, trackStepY);
+        selectedTrack->getGridPatternY(0, initTrackY, numTracksY, trackStepX);
+        
+        if (selectedLayer->getDirection().getString() == "HORIZONTAL") {
+                trackSpacing = trackStepY;
+        } else if (selectedLayer->getDirection().getString() == "VERTICAL") {
+                trackSpacing = trackStepX;
+        } else {
+                std::cout << "[ERROR] Layer " << selectedMetal << " does not have valid direction! Exiting...\n";
+                std::exit(1);
+        }
+        
+        long lowerLeftX = coreBBox->xMin();
+        long lowerLeftY = coreBBox->yMin();
+        
+        long upperRightX = coreBBox->xMax() - lowerLeftX;
+        long upperRightY = coreBBox->yMax() - lowerLeftY;
+        
+        long tileWidth = _parms->getPitchesInTile() * trackSpacing;
+        long tileHeight = _parms->getPitchesInTile() * trackSpacing;
+        
+        int xGrids = std::floor((float)upperRightX / tileWidth);
+        int yGrids = std::floor((float)upperRightY / tileHeight);
+        
+        bool perfectRegularX = false;
+        bool perfectRegularY = false;
+        
+        int numLayers = tech->getRoutingLayerCount();
+        
+        if ((xGrids * tileWidth) == upperRightX)
+                perfectRegularX = true;
+        
+        if ((yGrids * tileHeight) == upperRightY)
+                perfectRegularY = true;
+        
+        *_grid = Grid(lowerLeftX, lowerLeftY, tileWidth, tileHeight, xGrids,
+                     yGrids, perfectRegularX, perfectRegularY, numLayers);
 }
-*/

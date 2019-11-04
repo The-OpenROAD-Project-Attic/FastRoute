@@ -40,6 +40,8 @@
 #define DBWRAPPER_h
 
 #include <string>
+#include "Grid.h"
+#include "Parameters.h"
 
 // Forward declaration protects IOPlacer code from any
 // header file from the DB. IOPlacer code keeps independent.
@@ -51,24 +53,20 @@ class dbTech;
 
 class DBWrapper {
 public:
-        DBWrapper();
+        DBWrapper() = default;
+        DBWrapper(Grid& grid, Parameters& parms);
 
         void parseLEF(const std::string &filename);
         void parseDEF(const std::string &filename);
         
-        //void populateIOPlacer();
-        //void commitIOPlacementToDB(std::vector<IOPin>& assignment);
-        //void writeDEF();
+        void initGrid();
 private:
-        //void initCore();
-        //void initNetlist();
-        //void initTracks();
+        int selectedMetal = 2;
 
         odb::dbDatabase *_db;
         odb::dbChip     *_chip;
-        //Netlist         *_netlist = nullptr;
-        //Core            *_core = nullptr;
-        //Parameters      *_parms = nullptr;
+        Grid            *_grid = nullptr;
+        Parameters      *_parms = nullptr;
         bool            _verbose = false;
 };
 
