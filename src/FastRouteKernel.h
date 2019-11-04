@@ -38,16 +38,35 @@
 #ifndef __FASTROUTEKERNEL_H_
 #define __FASTROUTEKERNEL_H_
 
+#include <iostream>
+#include <vector>
+#include <cmath>
+#include <cstring>
+#include <string>
+#include <utility>
+
 #include "DBWrapper.h"
+#include "Grid.h"
+#include "Parameters.h"
 
 class FastRouteKernel {
-	private:
-	DBWrapper _dbWrapper;
+protected:
+        Grid _grid;
 
-	public:
-	FastRouteKernel();
+private:
+	DBWrapper _dbWrapper;
+        Parameters* _parms;
+        
+        void initGrid();
+
+public:
+	FastRouteKernel(Parameters& parms);
+	FastRouteKernel() = default;
+        
 	void parseLef(const std::string& file) { _dbWrapper.parseLEF(file); }
         void parseDef(const std::string& file) { _dbWrapper.parseDEF(file); }
+        
+        void printGrid();
 };
 
 #endif /* __FASTROUTEKERNEL_H_ */

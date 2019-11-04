@@ -37,6 +37,30 @@
 
 #include "FastRouteKernel.h"
 
-FastRouteKernel::FastRouteKernel() {
-    
+FastRouteKernel::FastRouteKernel(Parameters& parms)
+    : _parms(&parms), _dbWrapper(_grid, parms) {
+}
+
+void FastRouteKernel::initGrid() {
+        if (!_parms->isInteractiveMode()) {
+                std::cout << "Parsing input files...\n";
+                _dbWrapper.parseLEF(_parms->getInputLefFile()); 
+                _dbWrapper.parseDEF(_parms->getInputDefFile());
+        }
+        
+        _dbWrapper.initGrid();
+}
+
+void FastRouteKernel::printGrid() {
+        initGrid();
+        std::cout << "**** Global Routing Grid ****\n";
+        std::cout << "******** Lower left: (" << _grid.getLowerLeftX() << ", " <<
+                    _grid.getLowerLeftY() << ") ********\n";
+        std::cout << "******** Tile size: " << _grid.getTileWidth() << " ********\n";
+        std::cout << "******** xGrids, yGrids: " << _grid.getXGrids() << ", " <<
+                    _grid.getYGrids() << " ********\n";
+        std::cout << "******** Perfect regular X/Y: " << _grid.isPerfectRegularX() << "/" <<
+                    _grid.isPerfectRegularY() << " ********\n";
+        std::cout << "******** Num layers: " << _grid.getNumLayers() << " ********\n";
+        
 }
