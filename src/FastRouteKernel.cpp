@@ -44,16 +44,26 @@ FastRouteKernel::FastRouteKernel(Parameters& parms)
 void FastRouteKernel::initGrid() {        
         _dbWrapper.initGrid();
         _dbWrapper.computeCapacities();
+        _dbWrapper.computeSpacingsAndMinWidth();
         
         fastRoute.setLowerLeft(_grid.getLowerLeftX(), _grid.getLowerLeftY());
         fastRoute.setTileSize(_grid.getTileWidth(), _grid.getTileHeight());
         fastRoute.setGridsAndLayers(_grid.getXGrids(), _grid.getYGrids(), _grid.getNumLayers());
+        fastRoute.setLayerOrientation(_grid.getMetal1Orientation());
 }
 
 void FastRouteKernel::setCapacities() {
         for (int l = 1; l < _grid.getNumLayers(); l++) {
                 fastRoute.addHCapacity(_grid.getHorizontalEdgesCapacities()[l-1], l);
                 fastRoute.addVCapacity(_grid.getVerticalEdgesCapacities()[l-1], l);
+        }
+}
+
+void FastRouteKernel::setSpacingsAndMinWidths() {
+        for (int l = 1; l < _grid.getNumLayers(); l++) {
+                fastRoute.addMinSpacing(_grid.getSpacings()[l-1], l);
+                fastRoute.addMinWidth(_grid.getMinWidths()[l-1], l);
+                fastRoute.addViaSpacing(1, l);
         }
 }
 
@@ -80,8 +90,14 @@ void FastRouteKernel::run() {
         std::cout << "Initializing grid...\n";
         initGrid();
         std::cout << "Initializing grid... Done!\n";
+        
         std::cout << "Setting capacities...\n";
         setCapacities();
         std::cout << "Setting capacities... Done!\n";
+        
+        std::cout << "Setting spacings and widths...\n";
+        setSpacingsAndMinWidths();
+        std::cout << "Setting spacings and widths... Done!\n";
+        
         printGrid();
 }

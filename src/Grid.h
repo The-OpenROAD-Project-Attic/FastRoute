@@ -51,6 +51,9 @@ private:
         bool _perfectRegularX;
         bool _perfectRegularY;
         int _numLayers;
+        bool _metal1Orientation;
+        std::vector<int> _spacings;
+        std::vector<int> _minWidths;
         std::vector<int> _horizontalEdgesCapacities;
         std::vector<int> _verticalEdgesCapacities;
         
@@ -61,14 +64,18 @@ public:
              const long tileWidth, const long tileHeight,
              const int xGrids, const int yGrids,
              const bool perfectRegularX, const bool perfectRegularY,
-             const int numLayers, const std::vector<int> horizontalCapacities,
+             const int numLayers, const bool metal1Orientation,
+             const std::vector<int> spacings, const std::vector<int> minWidths,
+             const std::vector<int> horizontalCapacities,
              const std::vector<int> verticalCapacities)
             : _lowerLeftX(lowerLeftX), _lowerLeftY(lowerLeftY),
               _tileWidth(tileWidth), _tileHeight(tileHeight),
               _xGrids(xGrids), _yGrids(yGrids),
               _perfectRegularX(perfectRegularX),
               _perfectRegularY(perfectRegularY),
-              _numLayers(numLayers), _horizontalEdgesCapacities(horizontalCapacities),
+              _numLayers(numLayers), _metal1Orientation(metal1Orientation),
+              _spacings(spacings), _minWidths(minWidths),
+              _horizontalEdgesCapacities(horizontalCapacities),
               _verticalEdgesCapacities(verticalCapacities) {}
         
         long getLowerLeftX() const { return _lowerLeftX; }
@@ -84,6 +91,14 @@ public:
         bool isPerfectRegularY() const { return _perfectRegularY; }
         
         int getNumLayers() const { return _numLayers; }
+        
+        bool getMetal1Orientation() const { return _metal1Orientation; }
+        
+        std::vector<int> getSpacings() const { return _spacings; }
+        std::vector<int> getMinWidths() const { return _minWidths; }
+        
+        void addSpacing(int value, int layer) { _spacings[layer] = value; }
+        void addMinWidth(int value, int layer) { _minWidths[layer] = value; }
         
         std::vector<int> getHorizontalEdgesCapacities() { return _horizontalEdgesCapacities; };
         std::vector<int> getVerticalEdgesCapacities() { return _verticalEdgesCapacities; };

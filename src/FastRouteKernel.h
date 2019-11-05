@@ -61,6 +61,7 @@ private:
         
         void initGrid();
         void setCapacities();
+        void setSpacingsAndMinWidths();
 
 public:
 	FastRouteKernel(Parameters& parms);
