@@ -41,18 +41,23 @@ FastRouteKernel::FastRouteKernel(Parameters& parms)
     : _parms(&parms), _dbWrapper(_grid, parms) {
 }
 
-void FastRouteKernel::initGrid() {
-        if (!_parms->isInteractiveMode()) {
-                std::cout << "Parsing input files...\n";
-                _dbWrapper.parseLEF(_parms->getInputLefFile()); 
-                _dbWrapper.parseDEF(_parms->getInputDefFile());
-        }
-        
+void FastRouteKernel::initGrid() {        
         _dbWrapper.initGrid();
+        _dbWrapper.computeCapacities();
+        
+        fastRoute.setLowerLeft(_grid.getLowerLeftX(), _grid.getLowerLeftY());
+        fastRoute.setTileSize(_grid.getTileWidth(), _grid.getTileHeight());
+        fastRoute.setGridsAndLayers(_grid.getXGrids(), _grid.getYGrids(), _grid.getNumLayers());
+}
+
+void FastRouteKernel::setCapacities() {
+        for (int l = 1; l < _grid.getNumLayers(); l++) {
+                fastRoute.addHCapacity(_grid.getHorizontalEdgesCapacities()[l-1], l);
+                fastRoute.addVCapacity(_grid.getVerticalEdgesCapacities()[l-1], l);
+        }
 }
 
 void FastRouteKernel::printGrid() {
-        initGrid();
         std::cout << "**** Global Routing Grid ****\n";
         std::cout << "******** Lower left: (" << _grid.getLowerLeftX() << ", " <<
                     _grid.getLowerLeftY() << ") ********\n";
@@ -62,5 +67,21 @@ void FastRouteKernel::printGrid() {
         std::cout << "******** Perfect regular X/Y: " << _grid.isPerfectRegularX() << "/" <<
                     _grid.isPerfectRegularY() << " ********\n";
         std::cout << "******** Num layers: " << _grid.getNumLayers() << " ********\n";
+}
+
+void FastRouteKernel::run() {
+        if (!_parms->isInteractiveMode()) {
+                std::cout << "Parsing input files...\n";
+                _dbWrapper.parseLEF(_parms->getInputLefFile()); 
+                _dbWrapper.parseDEF(_parms->getInputDefFile());
+                std::cout << "Parsing input files... Done!\n";
+        }
         
+        std::cout << "Initializing grid...\n";
+        initGrid();
+        std::cout << "Initializing grid... Done!\n";
+        std::cout << "Setting capacities...\n";
+        setCapacities();
+        std::cout << "Setting capacities... Done!\n";
+        printGrid();
 }

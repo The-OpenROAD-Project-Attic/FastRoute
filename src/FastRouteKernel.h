@@ -48,6 +48,7 @@
 #include "DBWrapper.h"
 #include "Grid.h"
 #include "Parameters.h"
+#include "../include/FastRoute.h"
 
 class FastRouteKernel {
 protected:
@@ -56,8 +57,10 @@ protected:
 private:
 	DBWrapper _dbWrapper;
         Parameters* _parms;
+        FastRoute::FT fastRoute;
         
         void initGrid();
+        void setCapacities();
 
 public:
 	FastRouteKernel(Parameters& parms);
@@ -67,6 +70,8 @@ public:
         void parseDef(const std::string& file) { _dbWrapper.parseDEF(file); }
         
         void printGrid();
+        
+        void run();
 };
 
 #endif /* __FASTROUTEKERNEL_H_ */
