@@ -38,6 +38,8 @@
 #ifndef __CORE_H_
 #define __CORE_H_
 
+#include <vector>
+
 class Grid {
 private:
         long _lowerLeftX;
@@ -49,6 +51,8 @@ private:
         bool _perfectRegularX;
         bool _perfectRegularY;
         int _numLayers;
+        std::vector<int> _horizontalEdgesCapacities;
+        std::vector<int> _verticalEdgesCapacities;
         
 public:
         Grid () = default;
@@ -57,13 +61,15 @@ public:
              const long tileWidth, const long tileHeight,
              const int xGrids, const int yGrids,
              const bool perfectRegularX, const bool perfectRegularY,
-             const int numLayers)
+             const int numLayers, const std::vector<int> horizontalCapacities,
+             const std::vector<int> verticalCapacities)
             : _lowerLeftX(lowerLeftX), _lowerLeftY(lowerLeftY),
               _tileWidth(tileWidth), _tileHeight(tileHeight),
               _xGrids(xGrids), _yGrids(yGrids),
               _perfectRegularX(perfectRegularX),
               _perfectRegularY(perfectRegularY),
-              _numLayers(numLayers) {}
+              _numLayers(numLayers), _horizontalEdgesCapacities(horizontalCapacities),
+              _verticalEdgesCapacities(verticalCapacities) {}
         
         long getLowerLeftX() const { return _lowerLeftX; }
         long getLowerLeftY() const { return _lowerLeftY; }
@@ -78,6 +84,12 @@ public:
         bool isPerfectRegularY() const { return _perfectRegularY; }
         
         int getNumLayers() const { return _numLayers; }
+        
+        std::vector<int> getHorizontalEdgesCapacities() { return _horizontalEdgesCapacities; };
+        std::vector<int> getVerticalEdgesCapacities() { return _verticalEdgesCapacities; };
+        
+        void addHorizontalCapacity(int value, int layer) { _horizontalEdgesCapacities[layer] = value; }
+        void addVerticalCapacity(int value, int layer) { _verticalEdgesCapacities[layer] = value; }
         
         typedef struct {
                 int _x;

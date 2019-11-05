@@ -42,8 +42,6 @@ void DBWrapper::initGrid() {
                 std::cout << "[ERROR] obd::dbTech not initialized! Exiting...\n";
                 std::exit(1);
         }
-        
-        int databaseUnit = tech->getLefUnits(); 
 
         odb::dbBlock* block = _chip->getBlock();
         if (!block) {
@@ -66,8 +64,8 @@ void DBWrapper::initGrid() {
         int initTrackY, numTracksY;
         int trackSpacing;
         
-        selectedTrack->getGridPatternX(0, initTrackX, numTracksX, trackStepY);
-        selectedTrack->getGridPatternY(0, initTrackY, numTracksY, trackStepX);
+        selectedTrack->getGridPatternX(0, initTrackX, numTracksX, trackStepX);
+        selectedTrack->getGridPatternY(0, initTrackY, numTracksY, trackStepY);
         
         if (selectedLayer->getDirection().getString() == "HORIZONTAL") {
                 trackSpacing = trackStepY;
@@ -101,6 +99,58 @@ void DBWrapper::initGrid() {
         if ((yGrids * tileHeight) == upperRightY)
                 perfectRegularY = true;
         
+        std::vector<int> horizontalCapacities(numLayers);
+        std::vector<int> verticalCapacities(numLayers);
+        
         *_grid = Grid(lowerLeftX, lowerLeftY, tileWidth, tileHeight, xGrids,
-                     yGrids, perfectRegularX, perfectRegularY, numLayers);
+                     yGrids, perfectRegularX, perfectRegularY, numLayers,
+                     horizontalCapacities, verticalCapacities);
+}
+
+void DBWrapper::computeCapacities() {
+        int trackSpacing;
+        int hCapacity, vCapacity;
+        int trackStepX, trackStepY;
+        
+        int initTrackX, numTracksX;
+        int initTrackY, numTracksY;
+        
+        odb::dbTech* tech = _db->getTech();
+        
+        if (!tech) {
+                std::cout << "[ERROR] obd::dbTech not initialized! Exiting...\n";
+                std::exit(1);
+        }
+        
+        odb::dbBlock* block = _chip->getBlock();
+        if (!block) {
+                std::cout << "[ERROR] odb::dbBlock not found! Exiting...\n";
+                std::exit(1);
+        }
+        
+        for (int l = 1; l <= tech->getRoutingLayerCount(); l++) {
+                odb::dbTechLayer* techLayer = tech->findRoutingLayer(l);
+                
+                odb::dbTrackGrid* track = block->findTrackGrid(techLayer);
+                
+                track->getGridPatternX(0, initTrackX, numTracksX, trackStepX);
+                track->getGridPatternY(0, initTrackY, numTracksY, trackStepY);
+                
+                if (techLayer->getDirection().getString() == "HORIZONTAL") {
+                        trackSpacing = trackStepY;
+                        hCapacity = std::floor((float)_grid->getTileWidth() / trackSpacing);
+                        
+                        _grid->addHorizontalCapacity(hCapacity, l-1);
+                        _grid->addVerticalCapacity(0, l-1);
+                } else if (techLayer->getDirection().getString() == "VERTICAL") {
+                        trackSpacing = trackStepX;
+                        vCapacity = std::floor((float)_grid->getTileWidth() / trackSpacing);
+                        
+                        _grid->addHorizontalCapacity(0, l-1);
+                        _grid->addVerticalCapacity(vCapacity, l-1);
+                } else {
+                        std::cout << "[ERROR] Layer " << l << " does not have valid direction! Exiting...\n";
+                        std::exit(1);
+                }
+        }
 }

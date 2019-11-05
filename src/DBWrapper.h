@@ -60,8 +60,9 @@ public:
         void parseDEF(const std::string &filename);
         
         void initGrid();
+        void computeCapacities();
 private:
-        int selectedMetal = 2;
+        int selectedMetal = 3;
 
         odb::dbDatabase *_db;
         odb::dbChip     *_chip;
