@@ -61,6 +61,7 @@ public:
         
         void initGrid();
         void computeCapacities();
+        void computeSpacingsAndMinWidth();
 private:
         int selectedMetal = 3;
 

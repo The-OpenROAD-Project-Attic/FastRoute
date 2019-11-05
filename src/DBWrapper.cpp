@@ -59,6 +59,11 @@ void DBWrapper::initGrid() {
         
         odb::dbTrackGrid* selectedTrack = block->findTrackGrid(selectedLayer);
         
+        if (!selectedTrack) {
+                std::cout << "[ERROR] Track for layer " << selectedMetal << " not found! Exiting...\n";
+                std::exit(1);
+        }
+        
         int trackStepX, trackStepY;
         int initTrackX, numTracksX;
         int initTrackY, numTracksY;
@@ -99,12 +104,25 @@ void DBWrapper::initGrid() {
         if ((yGrids * tileHeight) == upperRightY)
                 perfectRegularY = true;
         
-        std::vector<int> horizontalCapacities(numLayers);
-        std::vector<int> verticalCapacities(numLayers);
+        bool metal1Orientation = 0;
+        
+        odb::dbTechLayer* layer1 = tech->findRoutingLayer(1);
+        
+        if (layer1->getDirection().getString() == "HORIZONTAL") {
+                metal1Orientation = 0;
+        } else if (layer1->getDirection().getString() == "VERTICAL") {
+                metal1Orientation = 1;
+        } else {
+                std::cout << "[ERROR] Layer 1 does not have valid direction! Exiting...\n";
+                std::exit(1);
+        }
+        
+        std::vector<int> genericVector(numLayers);
         
         *_grid = Grid(lowerLeftX, lowerLeftY, tileWidth, tileHeight, xGrids,
                      yGrids, perfectRegularX, perfectRegularY, numLayers,
-                     horizontalCapacities, verticalCapacities);
+                     metal1Orientation, genericVector, genericVector,
+                     genericVector, genericVector);
 }
 
 void DBWrapper::computeCapacities() {
@@ -133,6 +151,11 @@ void DBWrapper::computeCapacities() {
                 
                 odb::dbTrackGrid* track = block->findTrackGrid(techLayer);
                 
+                if (!track) {
+                        std::cout << "[ERROR] Track for layer " << l << " not found! Exiting...\n";
+                        std::exit(1);
+                }
+                
                 track->getGridPatternX(0, initTrackX, numTracksX, trackStepX);
                 track->getGridPatternY(0, initTrackY, numTracksY, trackStepY);
                 
@@ -152,5 +175,53 @@ void DBWrapper::computeCapacities() {
                         std::cout << "[ERROR] Layer " << l << " does not have valid direction! Exiting...\n";
                         std::exit(1);
                 }
+        }
+}
+
+void DBWrapper::computeSpacingsAndMinWidth() {
+        int minSpacing = 0;
+        int minWidth;
+        int trackStepX, trackStepY;
+        int initTrackX, numTracksX;
+        int initTrackY, numTracksY;
+        
+        odb::dbTech* tech = _db->getTech();
+        
+        if (!tech) {
+                std::cout << "[ERROR] obd::dbTech not initialized! Exiting...\n";
+                std::exit(1);
+        }
+        
+        odb::dbBlock* block = _chip->getBlock();
+        if (!block) {
+                std::cout << "[ERROR] odb::dbBlock not found! Exiting...\n";
+                std::exit(1);
+        }
+        
+        for (int l = 1; l <= tech->getRoutingLayerCount(); l++) {
+                odb::dbTechLayer* techLayer = tech->findRoutingLayer(l);
+                
+                odb::dbTrackGrid* track = block->findTrackGrid(techLayer);
+                
+                if (!track) {
+                        std::cout << "[ERROR] Track for layer " << l << " not found! Exiting...\n";
+                        std::exit(1);
+                }
+                
+                track->getGridPatternX(0, initTrackX, numTracksX, trackStepX);
+                track->getGridPatternY(0, initTrackY, numTracksY, trackStepY);
+                
+                if (techLayer->getDirection().getString() == "HORIZONTAL") {
+                        minWidth = trackStepY;
+                } else if (techLayer->getDirection().getString() == "VERTICAL") {
+                        minWidth = trackStepX;
+                } else {
+                        std::cout << "[ERROR] Layer " << l << " does not have valid direction! Exiting...\n";
+                        std::exit(1);
+                }
+                
+                std::cout << "[DEBUG] Layer " << l << " has min width equal to " << minWidth << "\n";
+                _grid->addSpacing(minSpacing, l-1);
+                _grid->addMinWidth(minWidth, l-1);
         }
 }
