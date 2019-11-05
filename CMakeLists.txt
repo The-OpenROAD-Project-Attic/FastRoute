@@ -90,7 +90,7 @@ add_dependencies(${BIN_NAME} tclInterfaceWrapper)
 target_include_directories(${BIN_NAME} PUBLIC
         ${Boost_INCLUDE_DIR}
         ${CMAKE_CURRENT_SOURCE_DIR}/third_party
-        ${CMAKE_CURRENT_SOURCE_DIR}/third_party/fastroute
+        ${CMAKE_CURRENT_SOURCE_DIR}/third_party/fastroute/include
         ${CMAKE_CURRENT_SOURCE_DIR}/third_party/flute
         ${CMAKE_CURRENT_SOURCE_DIR}/third_party/OpenDB/include/opendb
         )
