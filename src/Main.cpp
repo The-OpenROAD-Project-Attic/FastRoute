@@ -64,7 +64,6 @@ int main(int argc, char** argv) {
         std::cout << " #                                    #\n";
         std::cout << " # Authors:                           #\n";
         std::cout << " #    Vitor Bandeira (UFRGS)          #\n";
-        std::cout << " #    Mateus Fogaca (UFRGS)           #\n";
         std::cout << " #    Eder Matheus Monteiro (UFRGS)   #\n";
         std::cout << " #    Isadora Oliveira (UFRGS)        #\n";
         std::cout << " #                                    #\n";
@@ -83,7 +82,7 @@ int main(int argc, char** argv) {
         if (parmsToFastRoute->isInteractiveMode()) {
                 Tcl_Main(argc, argv, TclAppInit);
         } else {
-                fastRouteKernel->printGrid();
+                fastRouteKernel->run();
         }
 
         return 0;
