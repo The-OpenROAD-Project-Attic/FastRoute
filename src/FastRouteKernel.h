@@ -45,23 +45,29 @@
 #include <string>
 #include <utility>
 
+#include "Coordinate.h"
+#include "Box.h"
 #include "DBWrapper.h"
 #include "Grid.h"
 #include "Parameters.h"
+#include "Netlist.h"
 #include "../include/FastRoute.h"
 
 class FastRouteKernel {
 protected:
+        Netlist _netlist;
         Grid _grid;
+        
 
 private:
 	DBWrapper _dbWrapper;
         Parameters* _parms;
-        FastRoute::FT fastRoute;
+        FastRoute::FT _fastRoute;
         
         void initGrid();
         void setCapacities();
         void setSpacingsAndMinWidths();
+        void initializeNets();
 
 public:
 	FastRouteKernel(Parameters& parms);
