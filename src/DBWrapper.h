@@ -40,6 +40,7 @@
 #define DBWRAPPER_h
 
 #include <string>
+#include "Netlist.h"
 #include "Grid.h"
 #include "Parameters.h"
 
@@ -54,7 +55,7 @@ class dbTech;
 class DBWrapper {
 public:
         DBWrapper() = default;
-        DBWrapper(Grid& grid, Parameters& parms);
+        DBWrapper(Netlist& netlist, Grid& grid, Parameters& parms);
 
         void parseLEF(const std::string &filename);
         void parseDEF(const std::string &filename);
@@ -62,11 +63,13 @@ public:
         void initGrid();
         void computeCapacities();
         void computeSpacingsAndMinWidth();
+        void initNetlist();
 private:
         int selectedMetal = 3;
 
         odb::dbDatabase *_db;
         odb::dbChip     *_chip;
+        Netlist         *_netlist = nullptr;
         Grid            *_grid = nullptr;
         Parameters      *_parms = nullptr;
         bool            _verbose = false;

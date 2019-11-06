@@ -6,15 +6,19 @@
 #include <cstring>
 #include <string>
 #include <utility>
+#include <map>
 
 #include "db.h"
 #include "lefin.h"
 #include "defin.h"
 #include "defout.h"
 #include "dbShape.h"
+#include "Coordinate.h"
+#include "Box.h"
+#include "Pin.h"
 
-DBWrapper::DBWrapper(Grid& grid, Parameters& parms) :
-                _grid(&grid), _parms(&parms) {
+DBWrapper::DBWrapper(Netlist& netlist, Grid& grid, Parameters& parms) :
+                _netlist(&netlist), _grid(&grid), _parms(&parms) {
         _db = odb::dbDatabase::create();
 }
 
@@ -220,8 +224,146 @@ void DBWrapper::computeSpacingsAndMinWidth() {
                         std::exit(1);
                 }
                 
-                std::cout << "[DEBUG] Layer " << l << " has min width equal to " << minWidth << "\n";
                 _grid->addSpacing(minSpacing, l-1);
                 _grid->addMinWidth(minWidth, l-1);
+        }
+}
+
+void DBWrapper::initNetlist() {
+        odb::dbBlock* block = _chip->getBlock();
+        if (!block) {
+                std::cout << "[ERROR] ads::dbBlock not found! Exiting...\n";
+                std::exit(1);
+        }
+        
+        odb::dbSet<odb::dbNet> nets = block->getNets();
+        
+        if (nets.size() == 0) {
+                std::cout << "[ERROR] Design without nets. Exiting...\n";
+                std::exit(1);
+        }
+        
+        odb::dbSet<odb::dbNet>::iterator nIter;
+        
+        for (nIter = nets.begin(); nIter != nets.end(); ++nIter) {
+                std::vector<Pin> netPins;
+                
+                odb::dbNet* currNet = *nIter;
+                if (currNet->getSigType().getString() == "POWER" ||
+                    currNet->getSigType().getString() == "GROUND") {
+                        continue;
+                }
+                std::string netName =currNet->getConstName();
+                
+                // Iterate through all instance pins
+                odb::dbSet<odb::dbITerm> iTerms = currNet->getITerms();
+                odb::dbSet<odb::dbITerm>::iterator iIter;
+                
+                for (iIter = iTerms.begin(); iIter != iTerms.end(); iIter++) {
+                        odb::dbITerm* currITerm = *iIter;
+                        int pX, pY;
+                        std::string pinName;
+                        std::vector<int> pinLayers;
+                        std::map<int, std::vector<Box>> pinBoxes;
+                        
+                        odb::dbMTerm* mTerm = currITerm->getMTerm();
+                        std::string instName = currITerm->getInst()->getConstName();
+                        pinName = mTerm->getConstName();
+                        pinName = instName + ":" + pinName;
+                        
+                        odb::dbSet<odb::dbMPin> mTermPins = mTerm->getMPins();
+                        odb::dbSet<odb::dbMPin>::iterator pinIter;
+                        
+                        odb::dbInst* inst = currITerm->getInst();
+                        inst->getOrigin(pX, pY);
+                        odb::adsPoint origin = odb::adsPoint(pX, pY);
+                        odb::dbTransform transform(inst->getOrient(), origin);
+                        
+                        for (pinIter = mTermPins.begin(); pinIter != mTermPins.end(); pinIter++) {
+                                Coordinate lowerBound;
+                                Coordinate upperBound;
+                                Box pinBox;
+                                int pinLayer;
+                                
+                                odb::dbMPin* currMTermPin = *pinIter;
+                                odb::dbSet<odb::dbBox> geometries = currMTermPin->getGeometry();
+                                odb::dbSet<odb::dbBox>::iterator geomIter;
+                                
+                                for (geomIter = geometries.begin(); geomIter != geometries.end(); geomIter++) {
+                                        odb::dbBox* box = *geomIter;
+                                        odb::adsRect rect;
+                                        box->getBox(rect);
+                                        transform.apply(rect);
+                                        
+                                        odb::dbTechLayer* techLayer = box->getTechLayer();
+                                        if (techLayer->getType().getString() != "ROUTING") {
+                                                continue;
+                                        }
+                                        
+                                        pinLayer = techLayer->getRoutingLevel();
+                                        lowerBound = Coordinate(rect.xMin(), 
+                                                                rect.yMin());
+                                        upperBound = Coordinate(rect.xMax(), 
+                                                                rect.yMax());
+                                        pinBox = Box(lowerBound, upperBound, pinLayer);
+                                        pinBoxes[pinLayer].push_back(pinBox);
+                                }
+                                
+                                for(std::map<int, std::vector<Box>>::iterator it = pinBoxes.begin();
+                                    it != pinBoxes.end(); ++it) {
+                                        pinLayers.push_back(it->first);
+                                }
+                                
+                                Pin pin = Pin(pinName, pinLayers, pinBoxes, netName);
+                                netPins.push_back(pin);
+                        }
+                }
+                
+                // Iterate through all I/O pins
+                odb::dbSet<odb::dbBTerm> bTerms = currNet->getBTerms();
+                odb::dbSet<odb::dbBTerm>::iterator bIter;
+                
+                for (bIter = bTerms.begin(); bIter != bTerms.end(); bIter++) {
+                        odb::dbBTerm* currBTerm = *bIter;
+                        std::string pinName;
+                        
+                        std::vector<int> pinLayers;
+                        std::map<int, std::vector<Box>> pinBoxes;
+                                                
+                        pinName = currBTerm->getConstName();
+                        odb::dbSet<odb::dbBPin> bTermPins = currBTerm->getBPins();
+                        odb::dbSet<odb::dbBPin>::iterator pinIter;
+                        
+                        for (pinIter = bTermPins.begin(); pinIter != bTermPins.end(); pinIter++) {
+                                Coordinate lowerBound;
+                                Coordinate upperBound;
+                                Box pinBox;
+                                int pinLayer;
+                                
+                                odb::dbBPin* currBTermPin = *pinIter;
+                                odb::dbBox* currBTermBox = currBTermPin->getBox();
+                                odb::dbTechLayer* techLayer = currBTermBox->getTechLayer();
+                                if (techLayer->getType().getString() != "ROUTING") {
+                                        continue;
+                                }
+                                
+                                pinLayer = techLayer->getRoutingLevel();
+                                lowerBound = Coordinate(currBTermBox->xMin(), 
+                                                        currBTermBox->yMin());
+                                upperBound = Coordinate(currBTermBox->xMax(), 
+                                                        currBTermBox->yMax());
+                                pinBox = Box(lowerBound, upperBound, pinLayer);
+                                pinBoxes[pinLayer].push_back(pinBox);
+                        }
+                        
+                        for(std::map<int, std::vector<Box>>::iterator it = pinBoxes.begin();
+                            it != pinBoxes.end(); ++it) {
+                                pinLayers.push_back(it->first);
+                        }
+                        
+                        Pin pin = Pin(pinName, pinLayers, pinBoxes, netName);
+                        netPins.push_back(pin);
+                }
+                _netlist->addNet(netName, netPins);
         }
 }
