@@ -39,6 +39,9 @@
 #define __CORE_H_
 
 #include <vector>
+#include <cmath>
+#include "Coordinate.h"
+#include "Box.h"
 
 class Grid {
 private:
@@ -105,6 +108,8 @@ public:
         
         void addHorizontalCapacity(int value, int layer) { _horizontalEdgesCapacities[layer] = value; }
         void addVerticalCapacity(int value, int layer) { _verticalEdgesCapacities[layer] = value; }
+        
+        Coordinate getPositionOnGrid(const Coordinate& position);
         
         typedef struct {
                 int _x;
