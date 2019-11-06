@@ -52,7 +52,6 @@
 class Pin {
 private:
         std::string _name;
-        Coordinate _position;
         std::vector<int> _layers;
         std::map<int, std::vector<Box>> _boxesPerLayer;
         std::string _netName;
@@ -61,15 +60,13 @@ private:
         
 public:
         Pin() = default;
-        Pin(const std::string& name, const Coordinate& position,
-            const std::vector<int> layers,
+        Pin(const std::string& name, const std::vector<int> layers,
             const std::map<int, std::vector<Box>>& boxesPerLayer,
             const std::string& netName)
-            : _name(name), _position(position), _layers(layers),
+            : _name(name), _layers(layers),
             _boxesPerLayer(boxesPerLayer), _netName(netName) { sortLayers(); }
         
         std::string getName() const { return _name; }
-        Coordinate getPosition() const { return _position; }
         std::vector<int> getLayers() const { return _layers; }
         int getNumLayers() const { return _layers.size(); }
         int getTopLayer() const { return _layers.back(); }
