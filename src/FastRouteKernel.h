@@ -63,11 +63,20 @@ private:
 	DBWrapper _dbWrapper;
         Parameters* _parms;
         FastRoute::FT _fastRoute;
-        
+        std::string outfile;
+        float adjustment = 0.0;
+        int minRoutingLayer = 0;
+        int maxRoutingLayer = -1;
+        bool unidirectionalRoute;
+        int fixLayer = 0;
+
+        std::vector<FastRoute::NET> _result;
+
         void initGrid();
         void setCapacities();
         void setSpacingsAndMinWidths();
         void initializeNets();
+        void computeGridAdjustments();
 
 public:
 	FastRouteKernel(Parameters& parms);

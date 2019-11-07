@@ -47,6 +47,8 @@ class Grid {
 private:
         long _lowerLeftX;
         long _lowerLeftY;
+        long _upperRightX;
+        long _upperRightY;
         long _tileWidth;
         long _tileHeight;
         int _xGrids;
@@ -64,6 +66,7 @@ public:
         Grid () = default;
         
         Grid(const long lowerLeftX, const long lowerLeftY,
+             const long upperRightX, const long upperRightY,
              const long tileWidth, const long tileHeight,
              const int xGrids, const int yGrids,
              const bool perfectRegularX, const bool perfectRegularY,
@@ -72,6 +75,7 @@ public:
              const std::vector<int> horizontalCapacities,
              const std::vector<int> verticalCapacities)
             : _lowerLeftX(lowerLeftX), _lowerLeftY(lowerLeftY),
+              _upperRightX(upperRightX), _upperRightY(upperRightY),
               _tileWidth(tileWidth), _tileHeight(tileHeight),
               _xGrids(xGrids), _yGrids(yGrids),
               _perfectRegularX(perfectRegularX),
@@ -81,8 +85,14 @@ public:
               _horizontalEdgesCapacities(horizontalCapacities),
               _verticalEdgesCapacities(verticalCapacities) {}
         
+        const static bool HORIZONTAL = 0;
+        const static bool VERTICAL = 1;
+        
         long getLowerLeftX() const { return _lowerLeftX; }
         long getLowerLeftY() const { return _lowerLeftY; }
+        
+        long getUpperRightX() const { return _upperRightX; }
+        long getUpperRightY() const { return _upperRightY; }
         
         long getTileWidth() const { return _tileWidth; }
         long getTileHeight() const { return _tileHeight; }

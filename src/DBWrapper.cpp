@@ -123,10 +123,10 @@ void DBWrapper::initGrid() {
         
         std::vector<int> genericVector(numLayers);
         
-        *_grid = Grid(lowerLeftX, lowerLeftY, tileWidth, tileHeight, xGrids,
-                     yGrids, perfectRegularX, perfectRegularY, numLayers,
-                     metal1Orientation, genericVector, genericVector,
-                     genericVector, genericVector);
+        *_grid = Grid(lowerLeftX, lowerLeftY, coreBBox->xMax(), coreBBox->yMax(),
+                     tileWidth, tileHeight, xGrids, yGrids, perfectRegularX,
+                     perfectRegularY, numLayers, metal1Orientation, 
+                     genericVector, genericVector, genericVector, genericVector);
 }
 
 void DBWrapper::computeCapacities() {

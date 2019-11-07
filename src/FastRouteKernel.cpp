@@ -128,6 +128,68 @@ void FastRouteKernel::initializeNets() {
         _fastRoute.initEdges();
 }
 
+void FastRouteKernel::computeGridAdjustments() {
+        Coordinate upperDieBounds = Coordinate(_grid.getUpperRightX(),
+                                               _grid.getUpperRightY());
+        DBU hSpace;
+        DBU vSpace;
+
+        int xGrids = _grid.getXGrids();
+        int yGrids = _grid.getYGrids();
+
+        Coordinate upperGridBounds = Coordinate(xGrids*_grid.getTileWidth(), yGrids*_grid.getTileHeight());
+        DBU xExtra = upperDieBounds.getX() - upperGridBounds.getX();
+        DBU yExtra = upperDieBounds.getY() - upperGridBounds.getY();
+
+        for (int layer = 1; layer <= _grid.getNumLayers(); layer++) {
+                hSpace = 0;
+                vSpace = 0;
+                
+                if (layer < minRoutingLayer || layer > maxRoutingLayer &&
+                    maxRoutingLayer > 0)
+                        continue;
+
+                int newVCapacity = 0;
+                int newHCapacity = 0;
+                
+                if (_grid.getMetal1Orientation() == Grid::HORIZONTAL && layer%2 == 1) {
+                        hSpace = _grid.getMinWidths()[layer-1];
+                        newHCapacity = std::floor((_grid.getTileHeight() + yExtra)/hSpace);
+                } else if (_grid.getMetal1Orientation() == Grid::HORIZONTAL && layer%2 == 0) {
+                        vSpace = _grid.getMinWidths()[layer-1];
+                        newVCapacity = std::floor((_grid.getTileWidth() + xExtra)/vSpace);
+                } else if (_grid.getMetal1Orientation() == Grid::VERTICAL && layer%2 == 0) {
+                        hSpace = _grid.getMinWidths()[layer-1];
+                        newHCapacity = std::floor((_grid.getTileHeight() + yExtra)/hSpace);
+                } else if (_grid.getMetal1Orientation() == Grid::VERTICAL && layer%2 == 1) {
+                        vSpace = _grid.getMinWidths()[layer-1];
+                        newVCapacity = std::floor((_grid.getTileWidth() + xExtra)/vSpace);
+                } else {
+                    std::cout << "[ERROR] Layer spacing not found. Exiting...\n";
+                    std::exit(0);
+                }
+                
+                int layerN = layer + 1;
+                int numAdjustments = 0;
+                for (int i = 1; i < yGrids; i++)
+                        numAdjustments++;
+                for (int i = 1; i < xGrids; i++)
+                        numAdjustments++;
+                _fastRoute.setNumAdjustments(numAdjustments);
+
+                if (!_grid.isPerfectRegularX()) {
+                        for (int i = 1; i < yGrids; i++) {
+                                _fastRoute.addAdjustment(xGrids - 1, i - 1, layerN, xGrids - 1, i, layerN, newVCapacity, false);
+                        }
+                }
+                if (!_grid.isPerfectRegularY()) {
+                        for (int i = 1; i < xGrids; i++) {
+                                _fastRoute.addAdjustment(i - 1, yGrids - 1, layerN, i, yGrids - 1, layerN, newHCapacity, false);
+                        }
+                }
+        }
+}
+
 void FastRouteKernel::printGrid() {
         std::cout << "**** Global Routing Grid ****\n";
         std::cout << "******** Lower left: (" << _grid.getLowerLeftX() << ", " <<
@@ -139,6 +201,7 @@ void FastRouteKernel::printGrid() {
                     _grid.isPerfectRegularY() << " ********\n";
         std::cout << "******** Num layers: " << _grid.getNumLayers() << " ********\n";
         std::cout << "******** Num nets: " << _netlist.getNetCount() << " ********\n";
+        std::cout << "******** Tile size: " << _parms->getPitchesInTile() << "\n";
 }
 
 void FastRouteKernel::run() {
@@ -165,5 +228,13 @@ void FastRouteKernel::run() {
         initializeNets();
         std::cout << "Initializing nets... Done!\n";
         
-        printGrid();
+//        std::cout << "Adjusting grid...\n";
+//        computeGridAdjustments();
+//        std::cout << "Adjusting grid... Done!\n";
+//        
+        _fastRoute.initAuxVar();
+
+        std::cout << "Running FastRoute...\n";
+        _fastRoute.run(_result);
+        std::cout << "Running FastRoute... Done!\n";
 }
