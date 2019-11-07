@@ -37,6 +37,17 @@
 
 #include "Netlist.h"
 
+Net Netlist::getNetByName(std::string name) {
+        Net choosenNet;
+        for (Net net : _nets) {
+                if (net.getName() == name) {
+                        choosenNet = net;
+                }
+        }
+        
+        return choosenNet;
+}
+
 void Netlist::addNet(const std::string& name, const std::vector<Pin>& pins) {
         Net net = Net(name, pins);
         _nets.push_back(net);

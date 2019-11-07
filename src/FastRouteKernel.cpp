@@ -53,14 +53,14 @@ void FastRouteKernel::initGrid() {
 }
 
 void FastRouteKernel::setCapacities() {
-        for (int l = 1; l < _grid.getNumLayers(); l++) {
+        for (int l = 1; l <= _grid.getNumLayers(); l++) {
                 _fastRoute.addHCapacity(_grid.getHorizontalEdgesCapacities()[l-1], l);
                 _fastRoute.addVCapacity(_grid.getVerticalEdgesCapacities()[l-1], l);
         }
 }
 
 void FastRouteKernel::setSpacingsAndMinWidths() {
-        for (int l = 1; l < _grid.getNumLayers(); l++) {
+        for (int l = 1; l <= _grid.getNumLayers(); l++) {
                 _fastRoute.addMinSpacing(_grid.getSpacings()[l-1], l);
                 _fastRoute.addMinWidth(_grid.getMinWidths()[l-1], l);
                 _fastRoute.addViaSpacing(1, l);
@@ -169,7 +169,6 @@ void FastRouteKernel::computeGridAdjustments() {
                     std::exit(0);
                 }
                 
-                int layerN = layer + 1;
                 int numAdjustments = 0;
                 for (int i = 1; i < yGrids; i++)
                         numAdjustments++;
@@ -179,12 +178,12 @@ void FastRouteKernel::computeGridAdjustments() {
 
                 if (!_grid.isPerfectRegularX()) {
                         for (int i = 1; i < yGrids; i++) {
-                                _fastRoute.addAdjustment(xGrids - 1, i - 1, layerN, xGrids - 1, i, layerN, newVCapacity, false);
+                                _fastRoute.addAdjustment(xGrids - 1, i - 1, layer, xGrids - 1, i, layer, newVCapacity, false);
                         }
                 }
                 if (!_grid.isPerfectRegularY()) {
                         for (int i = 1; i < xGrids; i++) {
-                                _fastRoute.addAdjustment(i - 1, yGrids - 1, layerN, i, yGrids - 1, layerN, newHCapacity, false);
+                                _fastRoute.addAdjustment(i - 1, yGrids - 1, layer, i, yGrids - 1, layer, newHCapacity, false);
                         }
                 }
         }
@@ -228,10 +227,10 @@ void FastRouteKernel::run() {
         initializeNets();
         std::cout << "Initializing nets... Done!\n";
         
-//        std::cout << "Adjusting grid...\n";
-//        computeGridAdjustments();
-//        std::cout << "Adjusting grid... Done!\n";
-//        
+        std::cout << "Adjusting grid...\n";
+        computeGridAdjustments();
+        std::cout << "Adjusting grid... Done!\n";
+        
         _fastRoute.initAuxVar();
 
         std::cout << "Running FastRoute...\n";
