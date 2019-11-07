@@ -64,6 +64,7 @@ public:
         void computeCapacities();
         void computeSpacingsAndMinWidth();
         void initNetlist();
+        void initObstacles();
 private:
         int selectedMetal = 3;
 

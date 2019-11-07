@@ -113,20 +113,21 @@ void DBWrapper::initGrid() {
         odb::dbTechLayer* layer1 = tech->findRoutingLayer(1);
         
         if (layer1->getDirection().getString() == "HORIZONTAL") {
-                metal1Orientation = 0;
+                metal1Orientation = Grid::HORIZONTAL;
         } else if (layer1->getDirection().getString() == "VERTICAL") {
-                metal1Orientation = 1;
+                metal1Orientation = Grid::VERTICAL;
         } else {
                 std::cout << "[ERROR] Layer 1 does not have valid direction! Exiting...\n";
                 std::exit(1);
         }
         
         std::vector<int> genericVector(numLayers);
+        std::map<int, std::vector<Box>> genericMap;
         
         *_grid = Grid(lowerLeftX, lowerLeftY, coreBBox->xMax(), coreBBox->yMax(),
                      tileWidth, tileHeight, xGrids, yGrids, perfectRegularX,
-                     perfectRegularY, numLayers, metal1Orientation, 
-                     genericVector, genericVector, genericVector, genericVector);
+                     perfectRegularY, numLayers, metal1Orientation, genericVector,
+                     genericVector, genericVector, genericVector, genericMap);
 }
 
 void DBWrapper::computeCapacities() {
@@ -237,6 +238,8 @@ void DBWrapper::initNetlist() {
         }
         
         odb::dbSet<odb::dbNet> nets = block->getNets();
+        
+        std::cout << "[DEBUG] Num nets: " << nets.size() << "\n";
         
         if (nets.size() == 0) {
                 std::cout << "[ERROR] Design without nets. Exiting...\n";
@@ -366,4 +369,74 @@ void DBWrapper::initNetlist() {
                 }
                 _netlist->addNet(netName, netPins);
         }
+}
+
+void DBWrapper::initObstacles() {
+        // Get routing obstructions
+        odb::dbTech* tech = _db->getTech();
+        if (!tech) {
+                std::cout << "[ERROR] obd::dbTech not initialized! Exiting...\n";
+                std::exit(1);
+        }
+
+        odb::dbBlock* block = _chip->getBlock();
+        if (!block) {
+                std::cout << "[ERROR] odb::dbBlock not found! Exiting...\n";
+                std::exit(1);
+        }
+        
+        odb::dbSet<odb::dbObstruction> obstructions = block->getObstructions();
+        std::cout << "[DEBUG] Num obstructions: " << obstructions.size() << "\n";
+        
+        odb::dbSet<odb::dbObstruction>::iterator obstructIter;
+        for (obstructIter = obstructions.begin(); obstructIter != obstructions.end(); obstructIter++) {
+                odb::dbObstruction* currObstruct = *obstructIter;
+                odb::dbBox* obstructBox = currObstruct->getBBox();
+                
+                int layer = obstructBox->getTechLayer()->getRoutingLevel();
+                
+                Coordinate lowerBound = Coordinate(obstructBox->xMin(), obstructBox->yMin());
+                Coordinate upperBound = Coordinate(obstructBox->xMax(), obstructBox->yMax());
+                Box obstacleBox = Box(lowerBound, upperBound, layer);
+                _grid->addObstacle(layer, obstacleBox);
+        }
+        
+        // Get instance obstructions
+        int instObs = 0;
+        odb::dbSet<odb::dbInst> insts;
+        insts = block->getInsts();
+        
+        odb::dbSet<odb::dbInst>::iterator instIter;
+        std::cout << "[DEBUG] Num insts: " << insts.size() << "\n";
+        
+        for (instIter = insts.begin(); instIter != insts.end(); instIter++) {
+                int pX, pY;
+                odb::dbInst* currInst = *instIter;
+                odb::dbMaster* master = currInst->getMaster();
+                
+                currInst->getOrigin(pX, pY);
+                odb::adsPoint origin = odb::adsPoint(pX, pY);
+                
+                odb::dbTransform transform(currInst->getOrient(), origin);
+                
+                odb::dbSet<odb::dbBox> obstructions = master->getObstructions();
+                odb::dbSet<odb::dbBox>::iterator boxIter;
+                
+                for (boxIter = obstructions.begin(); boxIter != obstructions.end(); boxIter++) {
+                        odb::dbBox* currBox = *boxIter;
+                        int layer = currBox->getTechLayer()->getRoutingLevel();
+                        
+                        odb::adsRect rect;
+                        currBox->getBox(rect);
+                        transform.apply(rect);
+
+                        Coordinate lowerBound = Coordinate(rect.xMin(), rect.yMin());
+                        Coordinate upperBound = Coordinate(rect.xMax(), rect.yMax());
+                        Box obstacleBox = Box(lowerBound, upperBound, layer);
+                        _grid->addObstacle(layer, obstacleBox);
+                }
+        }
+        
+        
+        std::cout << "[DEBUG] Num instance obstacles: " << instObs << "\n";
 }
