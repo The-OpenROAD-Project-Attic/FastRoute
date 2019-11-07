@@ -240,6 +240,97 @@ void FastRouteKernel::computeUserAdjustments() {
         }
 }
 
+void FastRouteKernel::computeObstaclesAdjustments() {
+        std::map<int, std::vector<Box>> obstacles = _grid.getAllObstacles();
+        
+        for (int layer = 1; layer <= _grid.getNumLayers(); layer++) {
+                std::vector<Box> layerObstacles = obstacles[layer];
+                std::pair<Grid::TILE, Grid::TILE> blockedTiles;
+                
+                bool direction;
+                
+                if (_grid.getMetal1Orientation() == Grid::HORIZONTAL) {
+                        if (layer % 2 == 1) {
+                                direction = Grid::HORIZONTAL;
+                        } else {
+                                direction = Grid::VERTICAL;
+                        }
+                } else {
+                        if (layer % 2 == 1) {
+                                direction = Grid::VERTICAL;
+                        } else {
+                                direction = Grid::HORIZONTAL;
+                        }
+                }
+                
+                std::cout << "----Processing " << layerObstacles.size() << 
+                             " obstacles in Metal" << layer << "\n";
+                
+                int trackSpace = _grid.getMinWidths()[layer-1];
+                
+                for (Box obs : layerObstacles) {
+                        Box firstTileBox;
+                        Box lastTileBox;
+                        
+                        blockedTiles = _grid.getBlockedTiles(obs, firstTileBox,
+                                                             lastTileBox);
+                        
+                        Grid::TILE &firstTile = blockedTiles.first;
+                        Grid::TILE &lastTile = blockedTiles.second;
+                        
+                        if (lastTile._x == _grid.getXGrids() - 1 || 
+                            lastTile._y == _grid.getYGrids())
+                                continue;
+                        
+                        int firstTileReduce = _grid.computeTileReduce(obs, firstTileBox, trackSpace, true, direction);
+
+                        int lastTileReduce = _grid.computeTileReduce(obs, lastTileBox, trackSpace, false, direction);
+                        
+                        if (direction == Grid::HORIZONTAL) {
+                                for (int x = firstTile._x; x <= lastTile._x; x++) {  // Setting capacities of completely blocked edges to zero
+                                        for (int y = firstTile._y; y <= lastTile._y; y++) {
+                                                if (y == firstTile._y) {
+                                                        int edgeCap = _fastRoute.getEdgeCapacity(x, y, layer, x + 1, y, layer);
+                                                        edgeCap -= firstTileReduce;
+                                                        if (edgeCap < 0)
+                                                                edgeCap = 0;
+                                                        _fastRoute.addAdjustment(x, y, layer, x + 1, y, layer, edgeCap);
+                                                } else if (y == lastTile._y) {
+                                                        int edgeCap = _fastRoute.getEdgeCapacity(x, y, layer, x + 1, y, layer);
+                                                        edgeCap -= lastTileReduce;
+                                                        if (edgeCap < 0)
+                                                                edgeCap = 0;
+                                                        _fastRoute.addAdjustment(x, y, layer, x + 1, y, layer, edgeCap);
+                                                } else {
+                                                        _fastRoute.addAdjustment(x, y, layer, x + 1, y, layer, 0);
+                                                }
+                                        }
+                                }
+                        } else {
+                                for (int x = firstTile._x; x <= lastTile._x; x++) {  // Setting capacities of completely blocked edges to zero
+                                        for (int y = firstTile._y; y <= lastTile._y; y++) {
+                                                if (x == firstTile._x) {
+                                                        int edgeCap = _fastRoute.getEdgeCapacity(x, y, layer, x, y + 1, layer);
+                                                        edgeCap -= firstTileReduce;
+                                                        if (edgeCap < 0)
+                                                                edgeCap = 0;
+                                                        _fastRoute.addAdjustment(x, y, layer, x, y + 1, layer, edgeCap);
+                                                } else if (x == lastTile._x) {
+                                                        int edgeCap = _fastRoute.getEdgeCapacity(x, y, layer, x, y + 1, layer);
+                                                        edgeCap -= lastTileReduce;
+                                                        if (edgeCap < 0)
+                                                                edgeCap = 0;
+                                                        _fastRoute.addAdjustment(x, y, layer, x, y + 1, layer, edgeCap);
+                                                } else {
+                                                        _fastRoute.addAdjustment(x, y, layer, x, y + 1, layer, 0);
+                                                }
+                                        }
+                                }
+                        }
+                }
+        }
+}
+
 void FastRouteKernel::printGrid() {
         std::cout << "**** Global Routing Grid ****\n";
         std::cout << "******** Lower left: (" << _grid.getLowerLeftX() << ", " <<
@@ -286,6 +377,10 @@ void FastRouteKernel::run() {
         std::cout << "Computing user defined adjustments...\n";
         computeUserAdjustments();
         std::cout << "Computing user defined adjustments... Done!\n";
+        
+        std::cout << "Computing obstacles adjustments...\n";
+        computeObstaclesAdjustments();
+        std::cout << "Computing obstacles adjustments... Done!\n";
         
         _fastRoute.initAuxVar();
 

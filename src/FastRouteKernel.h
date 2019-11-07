@@ -81,6 +81,7 @@ private:
         void initializeNets();
         void computeGridAdjustments();
         void computeUserAdjustments();
+        void computeObstaclesAdjustments();
 
 public:
 	FastRouteKernel(Parameters& parms);

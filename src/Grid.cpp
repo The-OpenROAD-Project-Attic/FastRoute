@@ -59,3 +59,71 @@ Coordinate Grid::getPositionOnGrid(const Coordinate& position) {
         
         return posOnGrid;
 }
+
+std::pair<Grid::TILE, Grid::TILE> Grid::getBlockedTiles(const Box& obstacle, Box& firstTileBds,
+                                              Box& lastTileBds) {
+        std::pair<TILE, TILE> tiles;
+        TILE firstTile;
+        TILE lastTile;
+
+        Coordinate lower = obstacle.getLowerBound();  // lower bound of obstacle
+        Coordinate upper = obstacle.getUpperBound();  // upper bound of obstacle
+
+        getPositionOnGrid(lower);  // translate lower bound of obstacle to the center of the tile where it is inside
+        getPositionOnGrid(upper);  // translate upper bound of obstacle to the center of the tile where it is inside
+
+        // Get x and y indices of first blocked tile
+        firstTile._x = (lower.getX() - (getTileWidth() / 2)) / getTileWidth();
+        firstTile._y = (lower.getY() - (getTileHeight() / 2)) / getTileHeight();
+
+        // Get x and y indices of last blocked tile
+        lastTile._x = (upper.getX() - (getTileWidth() / 2)) / getTileWidth();
+        lastTile._y = (upper.getY() - (getTileHeight() / 2)) / getTileHeight();
+
+        tiles = std::make_pair(firstTile, lastTile);
+
+        Coordinate llFirstTile = Coordinate(lower.getX() - (getTileWidth() / 2),
+                                            lower.getY() - (getTileHeight() / 2));
+        Coordinate urFirstTile = Coordinate(lower.getX() + (getTileWidth() / 2),
+                                            lower.getY() + (getTileHeight() / 2));
+
+        Coordinate llLastTile = Coordinate(upper.getX() - (getTileWidth() / 2),
+                                           upper.getY() - (getTileHeight() / 2));
+        Coordinate urLastTile = Coordinate(upper.getX() + (getTileWidth() / 2),
+                                           upper.getY() + (getTileHeight() / 2));
+
+        if ((_upperRightX - urLastTile.getX()) / getTileWidth() < 1) {
+                urLastTile.setX(_upperRightX);
+        }
+        if ((_upperRightY - urLastTile.getY())/getTileHeight() < 1) {
+                urLastTile.setY(_upperRightY);
+        }
+
+        firstTileBds = Box(llFirstTile, urFirstTile, -1);
+        lastTileBds = Box(llLastTile, urLastTile, -1);
+
+        return tiles;
+}
+
+int Grid::computeTileReduce(const Box &obs, const Box &tile, int trackSpace, bool first, bool direction) {
+        int reduce = -1;
+        if (direction == VERTICAL) {
+                if (first) {
+                        reduce = floor(abs(tile.getUpperBound().getX() - obs.getLowerBound().getX()) / trackSpace);
+                } else {
+                        reduce = floor(abs(obs.getUpperBound().getX() - tile.getLowerBound().getX()) / trackSpace);
+                }
+        } else {
+                if (first) {
+                        reduce = floor(abs(tile.getUpperBound().getY() - obs.getLowerBound().getY()) / trackSpace);
+                } else {
+                        reduce = floor(abs(obs.getUpperBound().getY() - tile.getLowerBound().getY()) / trackSpace);
+                }
+        }
+
+        if (reduce < 0) {
+                std::cout << "Error!!!\n";
+                std::exit(0);
+        }
+        return reduce;
+}

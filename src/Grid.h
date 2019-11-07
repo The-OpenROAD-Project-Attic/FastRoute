@@ -40,6 +40,8 @@
 
 #include <vector>
 #include <cmath>
+#include <map>
+#include <iostream>
 #include "Coordinate.h"
 #include "Box.h"
 
@@ -61,6 +63,7 @@ private:
         std::vector<int> _minWidths;
         std::vector<int> _horizontalEdgesCapacities;
         std::vector<int> _verticalEdgesCapacities;
+        std::map<int, std::vector<Box>> _obstacles;
         
 public:
         Grid () = default;
@@ -73,7 +76,8 @@ public:
              const int numLayers, const bool metal1Orientation,
              const std::vector<int> spacings, const std::vector<int> minWidths,
              const std::vector<int> horizontalCapacities,
-             const std::vector<int> verticalCapacities)
+             const std::vector<int> verticalCapacities,
+             const std::map<int, std::vector<Box>> obstacles)
             : _lowerLeftX(lowerLeftX), _lowerLeftY(lowerLeftY),
               _upperRightX(upperRightX), _upperRightY(upperRightY),
               _tileWidth(tileWidth), _tileHeight(tileHeight),
@@ -83,7 +87,13 @@ public:
               _numLayers(numLayers), _metal1Orientation(metal1Orientation),
               _spacings(spacings), _minWidths(minWidths),
               _horizontalEdgesCapacities(horizontalCapacities),
-              _verticalEdgesCapacities(verticalCapacities) {}
+              _verticalEdgesCapacities(verticalCapacities),
+              _obstacles(obstacles) {}
+        
+        typedef struct {
+                int _x;
+                int _y;
+        } TILE;
         
         const static bool HORIZONTAL = 0;
         const static bool VERTICAL = 1;
@@ -119,12 +129,15 @@ public:
         void addHorizontalCapacity(int value, int layer) { _horizontalEdgesCapacities[layer] = value; }
         void addVerticalCapacity(int value, int layer) { _verticalEdgesCapacities[layer] = value; }
         
+        std::map<int, std::vector<Box>> getAllObstacles() const { return _obstacles; }
+        void addObstacle(int layer, Box obstacle) { _obstacles[layer].push_back(obstacle); }
+        
         Coordinate getPositionOnGrid(const Coordinate& position);
         
-        typedef struct {
-                int _x;
-                int _y;
-        } TILE;
+        std::pair<TILE, TILE> getBlockedTiles(const Box& obstacle, Box& firstTileBds,
+                                              Box& lastTileBds);
+        
+        int computeTileReduce(const Box &obs, const Box &tile, int trackSpace, bool first, bool direction);
 };
 
 #endif /* __CORE_H_ */
