@@ -64,12 +64,15 @@ private:
         Parameters* _parms;
         FastRoute::FT _fastRoute;
         std::string outfile;
-        float adjustment = 0.0;
-        int minRoutingLayer = 0;
-        int maxRoutingLayer = -1;
-        bool unidirectionalRoute;
-        int fixLayer = 0;
+        float _adjustment;
+        int _minRoutingLayer;
+        int _maxRoutingLayer;
+        bool _unidirectionalRoute ;
+        int _fixLayer = 0;
+        bool _interactiveMode;
 
+        std::vector<int> _vCapacities;
+        std::vector<int> _hCapacities;
         std::vector<FastRoute::NET> _result;
 
         void initGrid();
@@ -77,6 +80,7 @@ private:
         void setSpacingsAndMinWidths();
         void initializeNets();
         void computeGridAdjustments();
+        void computeUserAdjustments();
 
 public:
 	FastRouteKernel(Parameters& parms);

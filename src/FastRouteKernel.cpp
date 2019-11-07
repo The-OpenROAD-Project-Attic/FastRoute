@@ -39,6 +39,11 @@
 
 FastRouteKernel::FastRouteKernel(Parameters& parms)
     : _parms(&parms), _dbWrapper(_netlist, _grid, parms) {
+        _adjustment = _parms->getAdjustment();
+        _minRoutingLayer = _parms->getMinRoutingLayer();
+        _maxRoutingLayer = _parms->getMaxRoutingLayer();
+        _unidirectionalRoute = _parms->getUnidirectionalRoute();
+        _interactiveMode = _parms->isInteractiveMode();
 }
 
 void FastRouteKernel::initGrid() {        
@@ -56,6 +61,9 @@ void FastRouteKernel::setCapacities() {
         for (int l = 1; l <= _grid.getNumLayers(); l++) {
                 _fastRoute.addHCapacity(_grid.getHorizontalEdgesCapacities()[l-1], l);
                 _fastRoute.addVCapacity(_grid.getVerticalEdgesCapacities()[l-1], l);
+                
+                _hCapacities.push_back(_grid.getHorizontalEdgesCapacities()[l-1]);
+                _vCapacities.push_back(_grid.getVerticalEdgesCapacities()[l-1]);
         }
 }
 
@@ -145,8 +153,8 @@ void FastRouteKernel::computeGridAdjustments() {
                 hSpace = 0;
                 vSpace = 0;
                 
-                if (layer < minRoutingLayer || layer > maxRoutingLayer &&
-                    maxRoutingLayer > 0)
+                if (layer < _minRoutingLayer || layer > _maxRoutingLayer &&
+                    _maxRoutingLayer > 0)
                         continue;
 
                 int newVCapacity = 0;
@@ -189,6 +197,49 @@ void FastRouteKernel::computeGridAdjustments() {
         }
 }
 
+void FastRouteKernel::computeUserAdjustments() {
+        if (_adjustment == 0.0)
+                return;
+
+        int xGrids = _grid.getXGrids();
+        int yGrids = _grid.getYGrids();
+        
+        int numAdjustments = 0;
+
+        for (int layer = 1; layer <= _grid.getNumLayers(); layer++) {
+                for (int y = 0; y < yGrids; y++) {
+                        for (int x = 0; x < xGrids; x++) {
+                                numAdjustments++;
+                        }
+                }
+        }
+
+        numAdjustments *= 2;
+        _fastRoute.setNumAdjustments(numAdjustments);
+
+        for (int layer = 1; layer <= _grid.getNumLayers(); layer++) {
+                if (_hCapacities[layer - 1] != 0) {
+                        for (int y = 1; y < yGrids; y++) {
+                                for (int x = 1; x < xGrids; x++) {
+                                        int edgeCap = _fastRoute.getEdgeCapacity(x - 1, y - 1, layer, x, y - 1, layer);
+                                        int newHCapacity = std::floor((float)edgeCap * (1 - _adjustment));
+                                        _fastRoute.addAdjustment(x - 1, y - 1, layer, x, y - 1, layer, newHCapacity);
+                                }
+                        }
+                }
+
+                if (_vCapacities[layer - 1] != 0) {
+                        for (int x = 1; x < xGrids; x++) {
+                                for (int y = 1; y < yGrids; y++) {
+                                        int edgeCap = _fastRoute.getEdgeCapacity(x - 1, y - 1, layer, x - 1, y, layer);
+                                        int newVCapacity = std::floor((float)edgeCap * (1 - _adjustment));
+                                        _fastRoute.addAdjustment(x - 1, y - 1, layer, x - 1, y, layer, newVCapacity);
+                                }
+                        }
+                }
+        }
+}
+
 void FastRouteKernel::printGrid() {
         std::cout << "**** Global Routing Grid ****\n";
         std::cout << "******** Lower left: (" << _grid.getLowerLeftX() << ", " <<
@@ -204,7 +255,8 @@ void FastRouteKernel::printGrid() {
 }
 
 void FastRouteKernel::run() {
-        if (!_parms->isInteractiveMode()) {
+        _parms->printAll();
+        if (!_interactiveMode) {
                 std::cout << "Parsing input files...\n";
                 _dbWrapper.parseLEF(_parms->getInputLefFile()); 
                 _dbWrapper.parseDEF(_parms->getInputDefFile());
@@ -230,6 +282,10 @@ void FastRouteKernel::run() {
         std::cout << "Adjusting grid...\n";
         computeGridAdjustments();
         std::cout << "Adjusting grid... Done!\n";
+        
+        std::cout << "Computing user defined adjustments...\n";
+        computeUserAdjustments();
+        std::cout << "Computing user defined adjustments... Done!\n";
         
         _fastRoute.initAuxVar();
 
