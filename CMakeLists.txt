@@ -105,4 +105,5 @@ target_link_libraries(${BIN_NAME}
         tm
         zlib
         zutil
+        rt
         )
