@@ -44,6 +44,8 @@
 #include <cstring>
 #include <string>
 #include <utility>
+#include <fstream>
+#include <istream>
 
 #include "Coordinate.h"
 #include "Box.h"
@@ -51,19 +53,20 @@
 #include "Grid.h"
 #include "Parameters.h"
 #include "Netlist.h"
+#include "RoutingLayer.h"
 #include "../include/FastRoute.h"
 
 class FastRouteKernel {
 protected:
         Netlist _netlist;
         Grid _grid;
-        
+        std::vector<RoutingLayer> _routingLayers;
 
 private:
 	DBWrapper _dbWrapper;
         Parameters* _parms;
         FastRoute::FT _fastRoute;
-        std::string outfile;
+        std::string _outfile;
         float _adjustment;
         int _minRoutingLayer;
         int _maxRoutingLayer;
@@ -74,14 +77,22 @@ private:
         std::vector<int> _vCapacities;
         std::vector<int> _hCapacities;
         std::vector<FastRoute::NET> _result;
+        std::map<std::string, int> _netsDegree;
 
         void initGrid();
+        void initRoutingLayers();
         void setCapacities();
         void setSpacingsAndMinWidths();
         void initializeNets();
         void computeGridAdjustments();
         void computeUserAdjustments();
         void computeObstaclesAdjustments();
+        void writeGuides();
+        
+        RoutingLayer getRoutingLayerByIndex(int index);
+        void addRemainingGuides(std::vector<FastRoute::NET> &globalRoute);
+        void mergeBox(std::vector<Box>& guideBox);
+        Box globalRoutingToBox(const FastRoute::ROUTE &route);
 
 public:
 	FastRouteKernel(Parameters& parms);

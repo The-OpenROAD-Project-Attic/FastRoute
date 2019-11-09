@@ -35,6 +35,15 @@
 // POSSIBILITY OF SUCH DAMAGE.
 ////////////////////////////////////////////////////////////////////////////////
 
+#include <iostream>
+#include <vector>
+#include <cmath>
+#include <cstring>
+#include <string>
+#include <utility>
+#include <fstream>
+#include <istream>
+
 #include "FastRouteKernel.h"
 
 FastRouteKernel::FastRouteKernel(Parameters& parms)
@@ -44,17 +53,82 @@ FastRouteKernel::FastRouteKernel(Parameters& parms)
         _maxRoutingLayer = _parms->getMaxRoutingLayer();
         _unidirectionalRoute = _parms->getUnidirectionalRoute();
         _interactiveMode = _parms->isInteractiveMode();
+        _outfile = _parms->getOutputFile();
+}
+
+void FastRouteKernel::run() {
+        _parms->printAll();
+        if (!_interactiveMode) {
+                std::cout << "Parsing input files...\n";
+                _dbWrapper.parseLEF(_parms->getInputLefFile()); 
+                _dbWrapper.parseDEF(_parms->getInputDefFile());
+                std::cout << "Parsing input files... Done!\n";
+        }
+        
+        if (_unidirectionalRoute) {
+                _minRoutingLayer = 2;
+                _fixLayer = 1;
+        }
+        
+        std::cout << "Initializing grid...\n";
+        initGrid();
+        std::cout << "Initializing grid... Done!\n";
+        
+        std::cout << "Initializing routing layers...\n";
+        initRoutingLayers();
+        std::cout << "Initializing routing layers... Done!\n";
+            
+        std::cout << "Setting capacities...\n";
+        setCapacities();
+        std::cout << "Setting capacities... Done!\n";
+        
+        std::cout << "Setting spacings and widths...\n";
+        setSpacingsAndMinWidths();
+        std::cout << "Setting spacings and widths... Done!\n";
+        
+        std::cout << "Initializing nets...\n";
+        initializeNets();
+        std::cout << "Initializing nets... Done!\n";
+        
+        std::cout << "Adjusting grid...\n";
+        computeGridAdjustments();
+        std::cout << "Adjusting grid... Done!\n";
+
+        std::cout << "Computing obstacles adjustments...\n";
+        computeObstaclesAdjustments();
+        std::cout << "Computing obstacles adjustments... Done!\n";
+                
+        std::cout << "Computing user defined adjustments...\n";
+        computeUserAdjustments();
+        std::cout << "Computing user defined adjustments... Done!\n";
+
+        _fastRoute.initAuxVar();
+
+        std::cout << "Running FastRoute...\n";
+        _fastRoute.run(_result);
+        std::cout << "Running FastRoute... Done!\n";
+        
+        std::cout << "Writing guides...\n";
+        writeGuides();
+        std::cout << "Writing guides... Done!\n";
 }
 
 void FastRouteKernel::initGrid() {        
         _dbWrapper.initGrid();
         _dbWrapper.computeCapacities();
         _dbWrapper.computeSpacingsAndMinWidth();
+        _dbWrapper.initObstacles();
         
         _fastRoute.setLowerLeft(_grid.getLowerLeftX(), _grid.getLowerLeftY());
         _fastRoute.setTileSize(_grid.getTileWidth(), _grid.getTileHeight());
         _fastRoute.setGridsAndLayers(_grid.getXGrids(), _grid.getYGrids(), _grid.getNumLayers());
-        _fastRoute.setLayerOrientation(_grid.getMetal1Orientation());
+}
+
+void FastRouteKernel::initRoutingLayers() {
+        _dbWrapper.initRoutingLayers(_routingLayers);
+        
+        RoutingLayer routingLayer = getRoutingLayerByIndex(1);
+        _fastRoute.setLayerOrientation(routingLayer.getPreferredDirection());
 }
 
 void FastRouteKernel::setCapacities() {
@@ -85,6 +159,8 @@ void FastRouteKernel::initializeNets() {
                 if (net.getNumPins() == 1) {
                         continue;
                 }
+                
+                _netsDegree[net.getName()] = net.getNumPins();
                 
                 std::vector<FastRoute::PIN> pins;
                 for (Pin pin : net.getPins()) {
@@ -152,6 +228,7 @@ void FastRouteKernel::computeGridAdjustments() {
         for (int layer = 1; layer <= _grid.getNumLayers(); layer++) {
                 hSpace = 0;
                 vSpace = 0;
+                RoutingLayer routingLayer = getRoutingLayerByIndex(layer);
                 
                 if (layer < _minRoutingLayer || layer > _maxRoutingLayer &&
                     _maxRoutingLayer > 0)
@@ -160,16 +237,10 @@ void FastRouteKernel::computeGridAdjustments() {
                 int newVCapacity = 0;
                 int newHCapacity = 0;
                 
-                if (_grid.getMetal1Orientation() == Grid::HORIZONTAL && layer%2 == 1) {
+                if (routingLayer.getPreferredDirection() == RoutingLayer::HORIZONTAL) {
                         hSpace = _grid.getMinWidths()[layer-1];
                         newHCapacity = std::floor((_grid.getTileHeight() + yExtra)/hSpace);
-                } else if (_grid.getMetal1Orientation() == Grid::HORIZONTAL && layer%2 == 0) {
-                        vSpace = _grid.getMinWidths()[layer-1];
-                        newVCapacity = std::floor((_grid.getTileWidth() + xExtra)/vSpace);
-                } else if (_grid.getMetal1Orientation() == Grid::VERTICAL && layer%2 == 0) {
-                        hSpace = _grid.getMinWidths()[layer-1];
-                        newHCapacity = std::floor((_grid.getTileHeight() + yExtra)/hSpace);
-                } else if (_grid.getMetal1Orientation() == Grid::VERTICAL && layer%2 == 1) {
+                } else if (routingLayer.getPreferredDirection() == RoutingLayer::VERTICAL) {
                         vSpace = _grid.getMinWidths()[layer-1];
                         newVCapacity = std::floor((_grid.getTileWidth() + xExtra)/vSpace);
                 } else {
@@ -245,30 +316,21 @@ void FastRouteKernel::computeObstaclesAdjustments() {
         
         for (int layer = 1; layer <= _grid.getNumLayers(); layer++) {
                 std::vector<Box> layerObstacles = obstacles[layer];
+                if (layerObstacles.size() == 0)
+                    continue;
+                
+                RoutingLayer routingLayer = getRoutingLayerByIndex(layer);
+                
                 std::pair<Grid::TILE, Grid::TILE> blockedTiles;
                 
-                bool direction;
-                
-                if (_grid.getMetal1Orientation() == Grid::HORIZONTAL) {
-                        if (layer % 2 == 1) {
-                                direction = Grid::HORIZONTAL;
-                        } else {
-                                direction = Grid::VERTICAL;
-                        }
-                } else {
-                        if (layer % 2 == 1) {
-                                direction = Grid::VERTICAL;
-                        } else {
-                                direction = Grid::HORIZONTAL;
-                        }
-                }
+                bool direction = routingLayer.getPreferredDirection();
                 
                 std::cout << "----Processing " << layerObstacles.size() << 
                              " obstacles in Metal" << layer << "\n";
                 
                 int trackSpace = _grid.getMinWidths()[layer-1];
                 
-                for (Box obs : layerObstacles) {
+                for (Box& obs : layerObstacles) {
                         Box firstTileBox;
                         Box lastTileBox;
                         
@@ -286,7 +348,7 @@ void FastRouteKernel::computeObstaclesAdjustments() {
 
                         int lastTileReduce = _grid.computeTileReduce(obs, lastTileBox, trackSpace, false, direction);
                         
-                        if (direction == Grid::HORIZONTAL) {
+                        if (direction == RoutingLayer::HORIZONTAL) {
                                 for (int x = firstTile._x; x <= lastTile._x; x++) {  // Setting capacities of completely blocked edges to zero
                                         for (int y = firstTile._y; y <= lastTile._y; y++) {
                                                 if (y == firstTile._y) {
@@ -331,6 +393,105 @@ void FastRouteKernel::computeObstaclesAdjustments() {
         }
 }
 
+void FastRouteKernel::writeGuides() {
+        std::ofstream guideFile;
+        guideFile.open(_outfile);
+        if (!guideFile.is_open()) {
+                std::cout << "Error in writeFile!" << std::endl;
+                guideFile.close();
+                std::exit(0);
+        }
+        RoutingLayer phLayerF;
+        addRemainingGuides(_result);
+        
+        std::cout << "Num routed nets: " << _result.size() << "\n";
+        int finalLayer;
+        for (FastRoute::NET netRoute : _result) {
+                if (netRoute.name != "clk")
+                        continue;
+                guideFile << netRoute.name << "\n";
+                guideFile << "(\n";
+                std::vector<Box> guideBox;
+                finalLayer = -1;
+                for (FastRoute::ROUTE route : netRoute.route) {
+                       if (route.initLayer != finalLayer && finalLayer != -1) {
+                                mergeBox(guideBox);
+                                for (Box guide : guideBox){
+                                        guideFile << guide.getLowerBound().getX() << " "
+                                                  << guide.getLowerBound().getY() << " "
+                                                  << guide.getUpperBound().getX() << " "
+                                                  << guide.getUpperBound().getY() << " "
+                                                  << phLayerF.getName() << "\n";
+                                }
+                                guideBox.clear();
+                                finalLayer = route.initLayer;
+                        }
+                        if (route.initLayer == route.finalLayer) {
+                                if (route.initLayer < _minRoutingLayer && 
+                                    route.initX != route.finalX && route.initY != route.finalX) {
+                                        std::cout << "[ERROR] Routing with guides in blocked metal\n"
+                                                "---- Net: " << netRoute.name << "\n";
+                                        std::exit(1);
+                                }
+                                Box box;
+                                box = globalRoutingToBox(route);
+                                guideBox.push_back(box);
+                                if (route.finalLayer < _minRoutingLayer && !_unidirectionalRoute) {
+                                        phLayerF = getRoutingLayerByIndex((route.finalLayer + (_minRoutingLayer - route.finalLayer)));
+                                } else {
+                                        phLayerF = getRoutingLayerByIndex(route.finalLayer);
+                                }
+                                finalLayer = route.finalLayer;
+                        } else {
+                                if (abs(route.finalLayer - route.initLayer) > 1) {
+                                        std::cout << "ERROR: connection between"
+                                                     "non-adjacent layers";
+                                        std::exit(0);
+                                } else {
+                                        RoutingLayer phLayerI;
+                                        if (route.initLayer < _minRoutingLayer && !_unidirectionalRoute) {
+                                                phLayerI = getRoutingLayerByIndex((route.initLayer + (_minRoutingLayer - route.initLayer)));
+                                        } else {
+                                                phLayerI = getRoutingLayerByIndex(route.initLayer);
+                                        }
+                                        if (route.finalLayer < _minRoutingLayer && !_unidirectionalRoute) {
+                                                phLayerF = getRoutingLayerByIndex((route.finalLayer + (_minRoutingLayer - route.finalLayer)));
+                                        } else {
+                                                phLayerF = getRoutingLayerByIndex(route.finalLayer);
+                                        }
+                                        finalLayer = route.finalLayer;
+                                        Box box;
+                                        box = globalRoutingToBox(route);
+                                        guideBox.push_back(box);
+                                        mergeBox(guideBox);
+                                        for (Box guide : guideBox){
+                                                 guideFile << guide.getLowerBound().getX() << " "
+                                                           << guide.getLowerBound().getY() << " "
+                                                           << guide.getUpperBound().getX() << " "
+                                                           << guide.getUpperBound().getY() << " "
+                                                           << phLayerI.getName() << "\n";
+                                        }
+                                        guideBox.clear();
+
+                                        box = globalRoutingToBox(route);
+                                        guideBox.push_back(box);
+                                }
+                        }
+                }
+                mergeBox(guideBox);
+                for (Box guide : guideBox){
+                         guideFile << guide.getLowerBound().getX() << " "
+                                   << guide.getLowerBound().getY() << " "
+                                   << guide.getUpperBound().getX() << " "
+                                   << guide.getUpperBound().getY() << " "
+                                   << phLayerF.getName() << "\n";
+                }
+                guideFile << ")\n";
+        }
+
+        guideFile.close();
+}
+
 void FastRouteKernel::printGrid() {
         std::cout << "**** Global Routing Grid ****\n";
         std::cout << "******** Lower left: (" << _grid.getLowerLeftX() << ", " <<
@@ -345,46 +506,164 @@ void FastRouteKernel::printGrid() {
         std::cout << "******** Tile size: " << _parms->getPitchesInTile() << "\n";
 }
 
-void FastRouteKernel::run() {
-        _parms->printAll();
-        if (!_interactiveMode) {
-                std::cout << "Parsing input files...\n";
-                _dbWrapper.parseLEF(_parms->getInputLefFile()); 
-                _dbWrapper.parseDEF(_parms->getInputDefFile());
-                std::cout << "Parsing input files... Done!\n";
+RoutingLayer FastRouteKernel::getRoutingLayerByIndex(int index) {
+        RoutingLayer selectedRoutingLayer;
+        
+        for (RoutingLayer routingLayer : _routingLayers) {
+                if (routingLayer.getIndex() == index) {
+                        selectedRoutingLayer = routingLayer;
+                        break;
+                }
         }
         
-        std::cout << "Initializing grid...\n";
-        initGrid();
-        std::cout << "Initializing grid... Done!\n";
-        
-        std::cout << "Setting capacities...\n";
-        setCapacities();
-        std::cout << "Setting capacities... Done!\n";
-        
-        std::cout << "Setting spacings and widths...\n";
-        setSpacingsAndMinWidths();
-        std::cout << "Setting spacings and widths... Done!\n";
-        
-        std::cout << "Initializing nets...\n";
-        initializeNets();
-        std::cout << "Initializing nets... Done!\n";
-        
-        std::cout << "Adjusting grid...\n";
-        computeGridAdjustments();
-        std::cout << "Adjusting grid... Done!\n";
-        
-        std::cout << "Computing user defined adjustments...\n";
-        computeUserAdjustments();
-        std::cout << "Computing user defined adjustments... Done!\n";
-        
-        std::cout << "Computing obstacles adjustments...\n";
-        computeObstaclesAdjustments();
-        std::cout << "Computing obstacles adjustments... Done!\n";
-        
-        _fastRoute.initAuxVar();
+        return selectedRoutingLayer;
+}
 
-        std::cout << "Running FastRoute...\n";
-        _fastRoute.run(_result);
-        std::cout << "Running FastRoute... Done!\n";
+void FastRouteKernel::addRemainingGuides(std::vector<FastRoute::NET> &globalRoute) {
+        std::map<std::string, std::vector<FastRoute::PIN>> allNets;
+        allNets = _fastRoute.getNets();
+        int localNetsId = allNets.size();
+
+        for (FastRoute::NET &netRoute : globalRoute) {
+                std::vector<FastRoute::PIN> &pins = allNets[netRoute.name];
+
+                if (_netsDegree[netRoute.name] < 2) {
+                        continue;
+                }
+                if (netRoute.route.size() == 0) {
+                        int lastLayer = -1;
+                        for (int p = 0; p < pins.size(); p++){
+                                if (p > 0){
+                                        if (pins[p].x != pins[p-1].x ||
+                                                pins[p].y != pins[p-1].y){
+                                                std::cout << "ERROR: Net " << netRoute.name << " not properly covered.";
+                                                exit(-1);
+                                        }
+                                }
+                                if (pins[p].layer > lastLayer)
+                                        lastLayer = pins[p].layer;
+                        }
+
+                        for (int l = _minRoutingLayer - _fixLayer; l <= lastLayer - 1; l++) {
+                                FastRoute::ROUTE route;
+                                route.initLayer = l;
+                                route.initX = pins[0].x;
+                                route.initY = pins[0].y;
+                                route.finalLayer = l + 1;
+                                route.finalX = pins[0].x;
+                                route.finalY = pins[0].y;
+                                netRoute.route.push_back(route);
+                        }
+                } else {
+                        for (FastRoute::PIN pin : pins) {
+                                if (pin.layer > 1) {
+                                        for (int l = _minRoutingLayer - _fixLayer; l <= pin.layer - 1; l++) {
+                                                FastRoute::ROUTE route;
+                                                route.initLayer = l;
+                                                route.initX = pin.x;
+                                                route.initY = pin.y;
+                                                route.finalLayer = l + 1;
+                                                route.finalX = pin.x;
+                                                route.finalY = pin.y;
+                                                netRoute.route.push_back(route);
+                                        }
+                                }
+                        }
+                }
+                allNets.erase(netRoute.name);
+        }
+
+        if (allNets.size() > 0) {
+                for (std::map<std::string, std::vector<FastRoute::PIN>>::iterator
+                         it = allNets.begin();
+                     it != allNets.end(); ++it) {
+                        std::vector<FastRoute::PIN> &pins = it->second;
+
+                        FastRoute::NET localNet;
+                        localNet.id = localNetsId;
+                        localNetsId++;
+                        localNet.name = it->first;
+                        for (FastRoute::PIN pin : pins) {
+                                FastRoute::ROUTE route;
+                                route.initLayer = pin.layer;
+                                route.initX = pin.x;
+                                route.initY = pin.y;
+                                route.finalLayer = pin.layer;
+                                route.finalX = pin.x;
+                                route.finalY = pin.y;
+                                localNet.route.push_back(route);
+                        }
+                        globalRoute.push_back(localNet);
+                }
+        }
+}
+
+void FastRouteKernel::mergeBox(std::vector<Box>& guideBox) {
+        std::vector<Box> finalBox;
+        if (guideBox.size() < 1) {
+                std::cout << "Error: guides vector is empty!!!\n";
+                std::exit(0);
+        }
+        finalBox.push_back(guideBox[0]);
+        for (int i=1; i < guideBox.size(); i++){
+                Box box = guideBox[i];
+                Box & lastBox = finalBox.back();
+                if (lastBox.overlap(box)) {
+                        DBU lowerX = std::min(lastBox.getLowerBound().getX(),
+                                              box.getLowerBound().getX());
+                        DBU lowerY = std::min(lastBox.getLowerBound().getY(),
+                                              box.getLowerBound().getY());
+                        DBU upperX = std::max(lastBox.getUpperBound().getX(),
+                                              box.getUpperBound().getX());
+                        DBU upperY = std::max(lastBox.getUpperBound().getY(),
+                                              box.getUpperBound().getY());
+                        lastBox = Box(lowerX, lowerY, upperX, upperY, -1);
+                } else
+                        finalBox.push_back(box);
+        } 
+        guideBox.clear();
+        guideBox = finalBox;
+}
+
+Box FastRouteKernel::globalRoutingToBox(const FastRoute::ROUTE &route) {
+        Box dieBounds = Box(_grid.getLowerLeftX(), _grid.getLowerLeftY(),
+                            _grid.getUpperRightX(), _grid.getUpperRightY(),
+                            -1);
+        long initX, initY;
+        long finalX, finalY;
+
+        if (route.initX < route.finalX) {
+                initX = route.initX;
+                finalX = route.finalX;
+        } else {
+                initX = route.finalX;
+                finalX = route.initX;
+        }
+
+        if (route.initY < route.finalY) {
+                initY = route.initY;
+                finalY = route.finalY;
+        } else {
+                initY = route.finalY;
+                finalY = route.initY;
+        }
+
+        DBU llX = initX - (_grid.getTileWidth() / 2);
+        DBU llY = initY - (_grid.getTileHeight() / 2);
+
+        DBU urX = finalX + (_grid.getTileWidth() / 2);
+        DBU urY = finalY + (_grid.getTileHeight() / 2);
+
+        if ((dieBounds.getUpperBound().getX() - urX) / _grid.getTileWidth() < 1) {
+                urX = dieBounds.getUpperBound().getX();
+        }
+        if ((dieBounds.getUpperBound().getY() - urY) / _grid.getTileHeight() < 1) {
+                urY = dieBounds.getUpperBound().getY();
+        }
+
+        Coordinate lowerLeft = Coordinate(llX, llY);
+        Coordinate upperRight = Coordinate(urX, urY);
+
+        Box routeBds = Box(lowerLeft, upperRight, -1);
+        return routeBds;
 }

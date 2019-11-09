@@ -38,6 +38,8 @@
 #ifndef __BOX_H_
 #define __BOX_H_
 
+#include <algorithm>
+#include <limits>
 #include "Coordinate.h"
 
 class Box {
@@ -53,6 +55,12 @@ public:
         Box(const Coordinate& lowerBound, const Coordinate& upperBound,
             const int layer)
             : _lowerBound(lowerBound), _upperBound(upperBound), _layer(layer) {}
+        
+        Box(const DBU lowerX, const DBU lowerY, const DBU upperX, const DBU upperY,
+            const int layer)
+            : _lowerBound(Coordinate(lowerX, lowerY)),
+              _upperBound(Coordinate(upperX, upperY)),
+              _layer(layer) {}
 
         Coordinate getLowerBound() const { return _lowerBound; }
         Coordinate getUpperBound() const { return _upperBound; }
@@ -60,6 +68,8 @@ public:
 
         DBU getHalfPerimeter();
         Coordinate getMiddle();
+        
+        bool overlap(Box box);
 };
 
 #endif /* __BOX_H_ */

@@ -266,8 +266,6 @@ void DBWrapper::initNetlist() {
         
         odb::dbSet<odb::dbNet> nets = block->getNets();
         
-        std::cout << "[DEBUG] Num nets: " << nets.size() << "\n";
-        
         if (nets.size() == 0) {
                 std::cout << "[ERROR] Design without nets. Exiting...\n";
                 std::exit(1);

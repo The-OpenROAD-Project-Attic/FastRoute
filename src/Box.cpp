@@ -57,3 +57,12 @@ DBU Box::getHalfPerimeter() {
 
         return (x + y);
 }
+
+bool Box::overlap(Box box) {
+        const DBU dx = std::max(_lowerBound.getX(), box.getLowerBound().getX()) -
+                       std::min(_upperBound.getX(), box.getUpperBound().getX());
+        const DBU dy = std::max(_lowerBound.getY(), box.getLowerBound().getY()) -
+                       std::min(_upperBound.getY(), box.getUpperBound().getY());
+
+        return (dx < 0 && dy < 0);
+}
