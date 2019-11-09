@@ -35,8 +35,8 @@
 // POSSIBILITY OF SUCH DAMAGE.
 ////////////////////////////////////////////////////////////////////////////////
 
-#ifndef __CORE_H_
-#define __CORE_H_
+#ifndef __GRID_H_
+#define __GRID_H_
 
 #include <vector>
 #include <cmath>
@@ -44,6 +44,7 @@
 #include <iostream>
 #include "Coordinate.h"
 #include "Box.h"
+#include "RoutingLayer.h"
 
 class Grid {
 private:
@@ -58,7 +59,6 @@ private:
         bool _perfectRegularX;
         bool _perfectRegularY;
         int _numLayers;
-        bool _metal1Orientation;
         std::vector<int> _spacings;
         std::vector<int> _minWidths;
         std::vector<int> _horizontalEdgesCapacities;
@@ -73,8 +73,8 @@ public:
              const long tileWidth, const long tileHeight,
              const int xGrids, const int yGrids,
              const bool perfectRegularX, const bool perfectRegularY,
-             const int numLayers, const bool metal1Orientation,
-             const std::vector<int> spacings, const std::vector<int> minWidths,
+             const int numLayers, const std::vector<int> spacings,
+             const std::vector<int> minWidths,
              const std::vector<int> horizontalCapacities,
              const std::vector<int> verticalCapacities,
              const std::map<int, std::vector<Box>> obstacles)
@@ -84,8 +84,7 @@ public:
               _xGrids(xGrids), _yGrids(yGrids),
               _perfectRegularX(perfectRegularX),
               _perfectRegularY(perfectRegularY),
-              _numLayers(numLayers), _metal1Orientation(metal1Orientation),
-              _spacings(spacings), _minWidths(minWidths),
+              _numLayers(numLayers), _spacings(spacings), _minWidths(minWidths),
               _horizontalEdgesCapacities(horizontalCapacities),
               _verticalEdgesCapacities(verticalCapacities),
               _obstacles(obstacles) {}
@@ -94,9 +93,6 @@ public:
                 int _x;
                 int _y;
         } TILE;
-        
-        const static bool HORIZONTAL = 0;
-        const static bool VERTICAL = 1;
         
         long getLowerLeftX() const { return _lowerLeftX; }
         long getLowerLeftY() const { return _lowerLeftY; }
@@ -114,8 +110,6 @@ public:
         bool isPerfectRegularY() const { return _perfectRegularY; }
         
         int getNumLayers() const { return _numLayers; }
-        
-        bool getMetal1Orientation() const { return _metal1Orientation; }
         
         std::vector<int> getSpacings() const { return _spacings; }
         std::vector<int> getMinWidths() const { return _minWidths; }
@@ -140,4 +134,4 @@ public:
         int computeTileReduce(const Box &obs, const Box &tile, int trackSpace, bool first, bool direction);
 };
 
-#endif /* __CORE_H_ */
+#endif /* __GRID_H_ */

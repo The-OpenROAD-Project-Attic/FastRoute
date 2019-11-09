@@ -107,7 +107,7 @@ std::pair<Grid::TILE, Grid::TILE> Grid::getBlockedTiles(const Box& obstacle, Box
 
 int Grid::computeTileReduce(const Box &obs, const Box &tile, int trackSpace, bool first, bool direction) {
         int reduce = -1;
-        if (direction == VERTICAL) {
+        if (direction == RoutingLayer::VERTICAL) {
                 if (first) {
                         reduce = floor(abs(tile.getUpperBound().getX() - obs.getLowerBound().getX()) / trackSpace);
                 } else {

@@ -113,9 +113,9 @@ void DBWrapper::initGrid() {
         odb::dbTechLayer* layer1 = tech->findRoutingLayer(1);
         
         if (layer1->getDirection().getString() == "HORIZONTAL") {
-                metal1Orientation = Grid::HORIZONTAL;
+                metal1Orientation = RoutingLayer::HORIZONTAL;
         } else if (layer1->getDirection().getString() == "VERTICAL") {
-                metal1Orientation = Grid::VERTICAL;
+                metal1Orientation = RoutingLayer::VERTICAL;
         } else {
                 std::cout << "[ERROR] Layer 1 does not have valid direction! Exiting...\n";
                 std::exit(1);
@@ -126,8 +126,35 @@ void DBWrapper::initGrid() {
         
         *_grid = Grid(lowerLeftX, lowerLeftY, coreBBox->xMax(), coreBBox->yMax(),
                      tileWidth, tileHeight, xGrids, yGrids, perfectRegularX,
-                     perfectRegularY, numLayers, metal1Orientation, genericVector,
-                     genericVector, genericVector, genericVector, genericMap);
+                     perfectRegularY, numLayers, genericVector, genericVector,
+                     genericVector, genericVector, genericMap);
+}
+
+void DBWrapper::initRoutingLayers(std::vector<RoutingLayer>& routingLayers) {
+        odb::dbTech* tech = _db->getTech();
+        
+        if (!tech) {
+                std::cout << "[ERROR] obd::dbTech not initialized! Exiting...\n";
+                std::exit(1);
+        }
+        
+        for (int l = 1; l <= tech->getRoutingLayerCount(); l++) {
+                odb::dbTechLayer* techLayer = tech->findRoutingLayer(l);
+                int index = l;
+                std::string name = techLayer->getConstName();
+                bool preferredDirection;
+                if (techLayer->getDirection().getString() == "HORIZONTAL") {
+                        preferredDirection = RoutingLayer::HORIZONTAL;
+                } else if (techLayer->getDirection().getString() == "VERTICAL") {
+                        preferredDirection = RoutingLayer::VERTICAL;
+                } else {
+                        std::cout << "[ERROR] Layer 1 does not have valid direction! Exiting...\n";
+                        std::exit(1);
+                }
+                
+                RoutingLayer routingLayer = RoutingLayer(index, name, preferredDirection);
+                routingLayers.push_back(routingLayer);
+        }
 }
 
 void DBWrapper::computeCapacities() {
@@ -386,7 +413,6 @@ void DBWrapper::initObstacles() {
         }
         
         odb::dbSet<odb::dbObstruction> obstructions = block->getObstructions();
-        std::cout << "[DEBUG] Num obstructions: " << obstructions.size() << "\n";
         
         odb::dbSet<odb::dbObstruction>::iterator obstructIter;
         for (obstructIter = obstructions.begin(); obstructIter != obstructions.end(); obstructIter++) {
@@ -407,7 +433,6 @@ void DBWrapper::initObstacles() {
         insts = block->getInsts();
         
         odb::dbSet<odb::dbInst>::iterator instIter;
-        std::cout << "[DEBUG] Num insts: " << insts.size() << "\n";
         
         for (instIter = insts.begin(); instIter != insts.end(); instIter++) {
                 int pX, pY;
@@ -436,7 +461,4 @@ void DBWrapper::initObstacles() {
                         _grid->addObstacle(layer, obstacleBox);
                 }
         }
-        
-        
-        std::cout << "[DEBUG] Num instance obstacles: " << instObs << "\n";
 }

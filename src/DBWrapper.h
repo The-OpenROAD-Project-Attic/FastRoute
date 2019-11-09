@@ -43,6 +43,7 @@
 #include "Netlist.h"
 #include "Grid.h"
 #include "Parameters.h"
+#include "RoutingLayer.h"
 
 // Forward declaration protects IOPlacer code from any
 // header file from the DB. IOPlacer code keeps independent.
@@ -61,6 +62,7 @@ public:
         void parseDEF(const std::string &filename);
         
         void initGrid();
+        void initRoutingLayers(std::vector<RoutingLayer>& routingLayers);
         void computeCapacities();
         void computeSpacingsAndMinWidth();
         void initNetlist();
