@@ -157,6 +157,65 @@ void DBWrapper::initRoutingLayers(std::vector<RoutingLayer>& routingLayers) {
         }
 }
 
+void DBWrapper::initRoutingTracks(std::vector<RoutingTracks>& allRoutingTracks) {
+        odb::dbTech* tech = _db->getTech();
+        if (!tech) {
+                std::cout << "[ERROR] obd::dbTech not initialized! Exiting...\n";
+                std::exit(1);
+        }
+
+        odb::dbBlock* block = _chip->getBlock();
+        if (!block) {
+                std::cout << "[ERROR] odb::dbBlock not found! Exiting...\n";
+                std::exit(1);
+        }
+        
+        for (int layer = 1; layer <= tech->getRoutingLayerCount(); layer++) {
+                odb::dbTechLayer* techayer = tech->findRoutingLayer(layer);
+        
+                if (!techayer) {
+                        std::cout << "[ERROR] Layer" << selectedMetal << " not found! Exiting...\n";
+                        std::exit(1);
+                }
+
+                odb::dbTrackGrid* selectedTrack = block->findTrackGrid(techayer);
+
+                if (!selectedTrack) {
+                        std::cout << "[ERROR] Track for layer " << selectedMetal << " not found! Exiting...\n";
+                        std::exit(1);
+                }
+                
+                int trackStepX, trackStepY;
+                int initTrackX, numTracksX;
+                int initTrackY, numTracksY;
+                int spacing, location, numTracks;
+                bool orientation;
+
+                selectedTrack->getGridPatternX(0, initTrackX, numTracksX, trackStepX);
+                selectedTrack->getGridPatternY(0, initTrackY, numTracksY, trackStepY);
+
+                if (techayer->getDirection().getString() == "HORIZONTAL") {
+                        spacing = trackStepY;
+                        location = initTrackY;
+                        numTracks = numTracksY;
+                        orientation = RoutingLayer::HORIZONTAL;
+                } else if (techayer->getDirection().getString() == "VERTICAL") {
+                        spacing = trackStepX;
+                        location = initTrackX;
+                        numTracks = numTracksX;
+                        orientation = RoutingLayer::VERTICAL;
+                } else {
+                        std::cout << "[ERROR] Layer " << selectedMetal << " does not have valid direction! Exiting...\n";
+                        std::exit(1);
+                }
+                
+                RoutingTracks routingTracks = RoutingTracks(layer, spacing,
+                                                           location, numTracks,
+                                                           orientation);
+                allRoutingTracks.push_back(routingTracks);
+        }
+}
+
 void DBWrapper::computeCapacities() {
         int trackSpacing;
         int hCapacity, vCapacity;

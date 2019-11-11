@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////
-// Authors: Vitor Bandeira, Mateus Fogaça, Eder Matheus Monteiro e Isadora
+// Authors: Vitor Bandeira, Eder Matheus Monteiro e Isadora
 // Oliveira
 //          (Advisor: Ricardo Reis)
 //
@@ -35,49 +35,41 @@
 // POSSIBILITY OF SUCH DAMAGE.
 ////////////////////////////////////////////////////////////////////////////////
 
-
-#ifndef DBWRAPPER_h
-#define DBWRAPPER_h
+#ifndef __ROUTINGTRACKS_H_
+#define __ROUTINGTRACKS_H_
 
 #include <string>
-#include "Netlist.h"
-#include "Grid.h"
-#include "Parameters.h"
-#include "RoutingLayer.h"
-#include "RoutingTracks.h"
+#include <vector>
+#include <functional>
+#include <limits>
+#include <iostream>
 
-// Forward declaration protects IOPlacer code from any
-// header file from the DB. IOPlacer code keeps independent.
-namespace odb{
-class dbDatabase;
-class dbChip;
-class dbTech;
-}
+#include "Coordinate.h"
+#include "Box.h"
+#include "Pin.h"
 
-class DBWrapper {
-public:
-        DBWrapper() = default;
-        DBWrapper(Netlist& netlist, Grid& grid, Parameters& parms);
-
-        void parseLEF(const std::string &filename);
-        void parseDEF(const std::string &filename);
-        
-        void initGrid();
-        void initRoutingLayers(std::vector<RoutingLayer>& routingLayers);
-        void initRoutingTracks(std::vector<RoutingTracks>& allRoutingTracks);
-        void computeCapacities();
-        void computeSpacingsAndMinWidth();
-        void initNetlist();
-        void initObstacles();
+class RoutingTracks {
 private:
-        int selectedMetal = 3;
-
-        odb::dbDatabase *_db;
-        odb::dbChip     *_chip;
-        Netlist         *_netlist = nullptr;
-        Grid            *_grid = nullptr;
-        Parameters      *_parms = nullptr;
-        bool            _verbose = false;
+        int _layerIndex;
+        DBU _space;
+        DBU _location;
+        int _numTracks;
+        bool _orientation;
+        
+public:
+        RoutingTracks() = default;
+        RoutingTracks(const int layerIndex, const DBU space,
+                      const DBU location, const int numTracks,
+                      const bool orientation)
+            : _layerIndex(layerIndex), _space(space),
+              _location(location), _numTracks(numTracks),
+              _orientation(orientation) {}
+        
+        int getLayerIndex() const { return _layerIndex; }
+        DBU getSpace() const { return _space; }
+        DBU getLocation() const { return _location; }
+        int getNumTracks() const { return _numTracks; }
+        bool getOrientation() const { return _orientation; }
 };
 
-#endif
+#endif /* __ROUTINGTRACKS_H_ */
