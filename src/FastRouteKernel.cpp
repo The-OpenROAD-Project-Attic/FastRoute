@@ -77,6 +77,10 @@ void FastRouteKernel::run() {
         std::cout << "Initializing routing layers...\n";
         initRoutingLayers();
         std::cout << "Initializing routing layers... Done!\n";
+        
+        std::cout << "Initializing routing tracks...\n";
+        initRoutingTracks();
+        std::cout << "Initializing routing tracks... Done!\n";
             
         std::cout << "Setting capacities...\n";
         setCapacities();
@@ -93,6 +97,10 @@ void FastRouteKernel::run() {
         std::cout << "Adjusting grid...\n";
         computeGridAdjustments();
         std::cout << "Adjusting grid... Done!\n";
+        
+        std::cout << "Computing track adjustments...\n";
+        computeTrackAdjustments();
+        std::cout << "Computing track adjustments... Done!\n";
 
         std::cout << "Computing obstacles adjustments...\n";
         computeObstaclesAdjustments();
@@ -103,7 +111,7 @@ void FastRouteKernel::run() {
         std::cout << "Computing user defined adjustments... Done!\n";
 
         _fastRoute.initAuxVar();
-
+        
         std::cout << "Running FastRoute...\n";
         _fastRoute.run(_result);
         std::cout << "Running FastRoute... Done!\n";
@@ -129,6 +137,10 @@ void FastRouteKernel::initRoutingLayers() {
         
         RoutingLayer routingLayer = getRoutingLayerByIndex(1);
         _fastRoute.setLayerOrientation(routingLayer.getPreferredDirection());
+}
+
+void FastRouteKernel::initRoutingTracks() {
+        _dbWrapper.initRoutingTracks(_allRoutingTracks);
 }
 
 void FastRouteKernel::setCapacities() {
@@ -263,6 +275,148 @@ void FastRouteKernel::computeGridAdjustments() {
                 if (!_grid.isPerfectRegularY()) {
                         for (int i = 1; i < xGrids; i++) {
                                 _fastRoute.addAdjustment(i - 1, yGrids - 1, layer, i, yGrids - 1, layer, newHCapacity, false);
+                        }
+                }
+        }
+}
+
+void FastRouteKernel::computeTrackAdjustments() {
+        Coordinate upperDieBounds = Coordinate(_grid.getUpperRightX(),
+                                               _grid.getUpperRightY());
+        for (RoutingLayer layer : _routingLayers) {
+                DBU trackLocation;
+                int numInitAdjustments = 0;
+                int numFinalAdjustments = 0;
+                DBU trackSpace;
+                int numTracks = 0;
+                
+                if (layer.getIndex() < _minRoutingLayer ||
+                    layer.getIndex() > _maxRoutingLayer && _maxRoutingLayer > 0)
+                        continue;
+                
+                if (layer.getPreferredDirection() == RoutingLayer::HORIZONTAL) {
+                        RoutingTracks routingTracks = getRoutingTracksByIndex(layer.getIndex());
+                        trackLocation = routingTracks.getLocation();
+                        trackSpace = routingTracks.getSpace();
+                        numTracks = routingTracks.getNumTracks();
+                        
+                        if (numTracks > 0) {
+                                DBU finalTrackLocation = trackLocation + (trackSpace * (numTracks-1));
+                                DBU remainingFinalSpace = upperDieBounds.getY() - finalTrackLocation;
+                                DBU extraSpace = upperDieBounds.getY() - (_grid.getTileHeight() * _grid.getYGrids());
+                                if (_grid.isPerfectRegularY()) {
+                                        numFinalAdjustments = std::ceil((float)remainingFinalSpace/_grid.getTileHeight());
+                                } else {
+                                        if (remainingFinalSpace != 0){
+                                                DBU finalSpace = remainingFinalSpace - extraSpace;
+                                                if (finalSpace <= 0)
+                                                        numFinalAdjustments = 1;
+                                                else
+                                                        numFinalAdjustments = std::ceil((float)finalSpace/_grid.getTileHeight());
+                                        }
+                                        else
+                                                numFinalAdjustments = 0;
+                                }
+                                
+                                numFinalAdjustments *= _grid.getXGrids();
+                                numInitAdjustments = std::ceil((float)trackLocation/_grid.getTileHeight());
+                                numInitAdjustments *= _grid.getXGrids();
+                                _fastRoute.setNumAdjustments(numInitAdjustments + numFinalAdjustments);
+                                
+                                int y = 0;
+                                while (trackLocation >= _grid.getTileHeight()){
+                                        for (int x = 1; x < _grid.getXGrids(); x++){
+                                                _fastRoute.addAdjustment(x - 1, y, layer.getIndex(), x, y, layer.getIndex(), 0);
+                                        }
+                                        y++;
+                                        trackLocation -= _grid.getTileHeight();
+                                }
+                                if (trackLocation > 0){
+                                        DBU remainingTile = _grid.getTileHeight() - trackLocation;
+                                        int newCapacity = std::floor((float)remainingTile/trackSpace);
+                                        for (int x = 1; x < _grid.getXGrids(); x++){
+                                                _fastRoute.addAdjustment(x - 1, y, layer.getIndex(), x, y, layer.getIndex(), newCapacity);
+                                        }
+                                }
+                                
+                                y = _grid.getYGrids() - 1;
+                                while (remainingFinalSpace >= _grid.getTileHeight() + extraSpace){
+                                        for (int x = 1; x < _grid.getXGrids(); x++){
+                                                _fastRoute.addAdjustment(x - 1, y, layer.getIndex(), x, y, layer.getIndex(), 0);
+                                        }
+                                        y--;
+                                        remainingFinalSpace -= (_grid.getTileHeight() + extraSpace);
+                                        extraSpace = 0;
+                                }
+                                if (remainingFinalSpace > 0){
+                                        DBU remainingTile = (_grid.getTileHeight() + extraSpace) - remainingFinalSpace;
+                                        int newCapacity = std::floor((float)remainingTile/trackSpace);
+                                        for (int x = 1; x < _grid.getXGrids(); x++){
+                                                _fastRoute.addAdjustment(x - 1, y, layer.getIndex(), x, y, layer.getIndex(), newCapacity);
+                                        }
+                                }
+                        }
+                } else {
+                        RoutingTracks routingTracks = getRoutingTracksByIndex(layer.getIndex());
+                        trackLocation = routingTracks.getLocation();
+                        trackSpace = routingTracks.getSpace();
+                        numTracks = routingTracks.getNumTracks();
+                        
+                        if (numTracks > 0) {
+                                DBU finalTrackLocation = trackLocation + (trackSpace * (numTracks-1));
+                                DBU remainingFinalSpace = upperDieBounds.getX() - finalTrackLocation;
+                                DBU extraSpace = upperDieBounds.getX() - (_grid.getTileWidth() * _grid.getXGrids());
+                                if (_grid.isPerfectRegularX()) {
+                                        numFinalAdjustments = std::ceil((float)remainingFinalSpace/_grid.getTileWidth());
+                                } else {
+                                        if (remainingFinalSpace != 0){
+                                                DBU finalSpace = remainingFinalSpace - extraSpace;
+                                                if (finalSpace <= 0)
+                                                        numFinalAdjustments = 1;
+                                                else
+                                                        numFinalAdjustments = std::ceil((float)finalSpace/_grid.getTileWidth());
+                                        }
+                                        else
+                                                numFinalAdjustments = 0;
+                                }
+                                
+                                numFinalAdjustments *= _grid.getYGrids();
+                                numInitAdjustments = std::ceil((float)trackLocation/_grid.getTileWidth());
+                                numInitAdjustments *= _grid.getYGrids();
+                                _fastRoute.setNumAdjustments(numInitAdjustments + numFinalAdjustments);
+                                
+                                int x = 0;
+                                while (trackLocation >= _grid.getTileWidth()){
+                                        for (int y = 1; y < _grid.getYGrids(); y++){
+                                                _fastRoute.addAdjustment(x, y - 1, layer.getIndex(), x, y, layer.getIndex(), 0);
+                                        }
+                                        x++;
+                                        trackLocation -= _grid.getTileWidth();
+                                }
+                                if (trackLocation > 0){
+                                        DBU remainingTile = _grid.getTileWidth() - trackLocation;
+                                        int newCapacity = std::floor((float)remainingTile/trackSpace);
+                                        for (int y = 1; y < _grid.getYGrids(); y++) {
+                                                _fastRoute.addAdjustment(x, y - 1, layer.getIndex(), x, y, layer.getIndex(), newCapacity);
+                                        }
+                                }
+                                
+                                x = _grid.getXGrids() - 1;
+                                while (remainingFinalSpace >= _grid.getTileWidth() + extraSpace){
+                                        for (int y = 1; y < _grid.getYGrids(); y++){
+                                                _fastRoute.addAdjustment(x, y - 1, layer.getIndex(), x, y, layer.getIndex(), 0);
+                                        }
+                                        x--;
+                                        remainingFinalSpace -= (_grid.getTileWidth() + extraSpace);
+                                        extraSpace = 0;
+                                }
+                                if (remainingFinalSpace > 0){
+                                        DBU remainingTile = (_grid.getTileWidth() + extraSpace) - remainingFinalSpace;
+                                        int newCapacity = std::floor((float)remainingTile/trackSpace);
+                                        for (int y = 1; y < _grid.getYGrids(); y++){
+                                                _fastRoute.addAdjustment(x, y - 1, layer.getIndex(), x, y, layer.getIndex(), newCapacity);
+                                        }
+                                }
                         }
                 }
         }
@@ -517,6 +671,18 @@ RoutingLayer FastRouteKernel::getRoutingLayerByIndex(int index) {
         }
         
         return selectedRoutingLayer;
+}
+
+RoutingTracks FastRouteKernel::getRoutingTracksByIndex(int layer) {
+        RoutingTracks selectedRoutingTracks;
+        
+        for (RoutingTracks routingTracks: _allRoutingTracks) {
+                if (routingTracks.getLayerIndex() == layer) {
+                        selectedRoutingTracks = routingTracks;
+                }
+        }
+        
+        return selectedRoutingTracks;
 }
 
 void FastRouteKernel::addRemainingGuides(std::vector<FastRoute::NET> &globalRoute) {

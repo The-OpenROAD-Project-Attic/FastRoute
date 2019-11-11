@@ -54,6 +54,7 @@
 #include "Parameters.h"
 #include "Netlist.h"
 #include "RoutingLayer.h"
+#include "RoutingTracks.h"
 #include "../include/FastRoute.h"
 
 class FastRouteKernel {
@@ -61,6 +62,7 @@ protected:
         Netlist _netlist;
         Grid _grid;
         std::vector<RoutingLayer> _routingLayers;
+        std::vector<RoutingTracks> _allRoutingTracks;
 
 private:
 	DBWrapper _dbWrapper;
@@ -81,15 +83,18 @@ private:
 
         void initGrid();
         void initRoutingLayers();
+        void initRoutingTracks();
         void setCapacities();
         void setSpacingsAndMinWidths();
         void initializeNets();
         void computeGridAdjustments();
+        void computeTrackAdjustments();
         void computeUserAdjustments();
         void computeObstaclesAdjustments();
         void writeGuides();
         
         RoutingLayer getRoutingLayerByIndex(int index);
+        RoutingTracks getRoutingTracksByIndex(int layer);
         void addRemainingGuides(std::vector<FastRoute::NET> &globalRoute);
         void mergeBox(std::vector<Box>& guideBox);
         Box globalRoutingToBox(const FastRoute::ROUTE &route);
