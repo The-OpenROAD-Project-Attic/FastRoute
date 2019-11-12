@@ -48,15 +48,17 @@
 
 FastRouteKernel::FastRouteKernel(Parameters& parms)
     : _parms(&parms), _dbWrapper(_netlist, _grid, parms) {
+        _interactiveMode = _parms->isInteractiveMode();
+        if (_interactiveMode)
+                return;
         _adjustment = _parms->getAdjustment();
         _minRoutingLayer = _parms->getMinRoutingLayer();
         _maxRoutingLayer = _parms->getMaxRoutingLayer();
         _unidirectionalRoute = _parms->getUnidirectionalRoute();
-        _interactiveMode = _parms->isInteractiveMode();
         _outfile = _parms->getOutputFile();
 }
 
-void FastRouteKernel::run() {
+int FastRouteKernel::run() {
         _parms->printAll();
         if (!_interactiveMode) {
                 std::cout << "Parsing input files...\n";
@@ -119,6 +121,8 @@ void FastRouteKernel::run() {
         std::cout << "Writing guides...\n";
         writeGuides();
         std::cout << "Writing guides... Done!\n";
+        
+        return 0;
 }
 
 void FastRouteKernel::initGrid() {        
@@ -561,8 +565,6 @@ void FastRouteKernel::writeGuides() {
         std::cout << "Num routed nets: " << _result.size() << "\n";
         int finalLayer;
         for (FastRoute::NET netRoute : _result) {
-                if (netRoute.name != "clk")
-                        continue;
                 guideFile << netRoute.name << "\n";
                 guideFile << "(\n";
                 std::vector<Box> guideBox;

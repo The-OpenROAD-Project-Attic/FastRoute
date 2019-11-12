@@ -41,12 +41,47 @@
 
 extern FastRouteKernel* fastRouteKernel;
 
-void import_lef(const char* file){
+void help() {
+        std::cout << "Import LEF files:                 import_lef \"path/to/file1.lef path/to/fileN.lef\"\n";
+        std::cout << "Import DEF files:                 import_def \"path/to/file1.def path/to/fileN.def\"\n";
+        std::cout << "Set output file name:             set_output_file \"outputName\"\n";
+        std::cout << "User defined capacity adjustment: set_capacity_adjustment FLOAT\n";
+        std::cout << "User defined min routing layer:   set_min_layer INTEGER\n";
+        std::cout << "User defined max routing layer:   set_max_layer INTEGER\n";
+        std::cout << "Enable unidirection route:        set_unidirectional_routing BOOL\n";
+        std::cout << "Run FastRoute4-lefdef flow:       run_fastroute\n";
+}
+
+void import_lef(const char* file) {
         std::cout << " > Importing LEF file \"" << file << "\"\n";
         fastRouteKernel->parseLef(file);
 }
 
-void import_def(const char* file){
+void import_def(const char* file) {
         std::cout << " > Importing DEF file \"" << file << "\"\n";
         fastRouteKernel->parseDef(file);
+}
+
+void set_output_file(const char * file) {
+        fastRouteKernel->setOutputFile(file);
+}
+
+void set_capacity_adjustment(float adjustment) {
+        fastRouteKernel->setAdjustment(adjustment);
+}
+
+void set_min_layer(int minLayer) {
+        fastRouteKernel->setMinRoutingLayer(minLayer);
+}
+
+void set_max_layer(int maxLayer) {
+        fastRouteKernel->setMaxRoutingLayer(maxLayer);
+}
+
+void set_unidirectional_routing(bool unidirRouting) {
+        fastRouteKernel->setUnidirectionalRoute(unidirRouting);
+}
+
+void run_fastroute() {
+        fastRouteKernel->run();
 }

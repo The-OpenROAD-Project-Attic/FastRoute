@@ -68,11 +68,11 @@ private:
 	DBWrapper _dbWrapper;
         Parameters* _parms;
         FastRoute::FT _fastRoute;
-        std::string _outfile;
-        float _adjustment;
-        int _minRoutingLayer;
-        int _maxRoutingLayer;
-        bool _unidirectionalRoute ;
+        std::string _outfile = "output.guide";
+        float _adjustment = 0;
+        int _minRoutingLayer = 1;
+        int _maxRoutingLayer = -1;
+        bool _unidirectionalRoute = false;
         int _fixLayer = 0;
         bool _interactiveMode;
 
@@ -106,9 +106,15 @@ public:
 	void parseLef(const std::string& file) { _dbWrapper.parseLEF(file); }
         void parseDef(const std::string& file) { _dbWrapper.parseDEF(file); }
         
+        void setAdjustment(const float adjustment) { _adjustment = adjustment; }
+        void setMinRoutingLayer(const int minLayer) { _minRoutingLayer = minLayer; }
+        void setMaxRoutingLayer(const int maxLayer) { _maxRoutingLayer = maxLayer; }
+        void setUnidirectionalRoute(const bool unidirRoute) { _unidirectionalRoute = unidirRoute; }
+        void setOutputFile(const std::string& outfile) { _outfile = outfile; }
+        
         void printGrid();
         
-        void run();
+        int run();
 };
 
 #endif /* __FASTROUTEKERNEL_H_ */

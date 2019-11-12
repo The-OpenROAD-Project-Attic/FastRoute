@@ -38,9 +38,22 @@
 #ifndef _TCL_INTERFACE_
 #define _TCL_INTERFACE_
 
-// LEF/DEF interface
+// Help cmd
+void help();
+
+// LEF/DEF/Guides interface
 void import_lef(const char* file);
 void import_def(const char* file);
+void set_output_file(const char * file);
+
+// Parms interface
+void set_capacity_adjustment(float adjustment);
+void set_min_layer(int minLayer);
+void set_max_layer(int maxLayer);
+void set_unidirectional_routing(bool unidirRouting);
+
+// Run
+void run_fastroute();
 
 #endif
 

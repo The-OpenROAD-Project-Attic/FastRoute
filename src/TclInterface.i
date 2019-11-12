@@ -39,5 +39,20 @@
 #include "TclInterface.h"
 %}
 
-void import_lef(const char* file);
-void import_def(const char* file);
+extern void help();
+
+extern void import_lef(const char* file);
+
+extern void import_def(const char* file);
+
+extern void set_output_file(const char * file);
+
+extern void set_capacity_adjustment(float adjustment);
+
+extern void set_min_layer(int minLayer);
+
+extern void set_max_layer(int maxLayer);
+
+extern void set_unidirectional_routing(bool unidirRouting);
+
+extern void run_fastroute();
