@@ -1,4 +1,4 @@
-cp /fastroute/support/*.dat /fastroute/
+cp /fastroute/etc/*.dat /fastroute/
 cd fastroute/
-ln -s /fastroute/build/third_party/rsyn/bin/rsyn ./FRlefdef
-tclsh support/tests/run_all.tcl
+ln -s /fastroute/build/FRlefdef ./FRlefdef
+tclsh tests/run_all.tcl
