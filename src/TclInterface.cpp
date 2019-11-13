@@ -82,6 +82,18 @@ void set_unidirectional_routing(bool unidirRouting) {
         fastRouteKernel->setUnidirectionalRoute(unidirRouting);
 }
 
+void start_fastroute() {
+        fastRouteKernel->startFastRoute();
+}
+
 void run_fastroute() {
+        fastRouteKernel->runFastRoute();
+}
+
+void run() {
         fastRouteKernel->run();
+}
+
+void write_guides() {
+        fastRouteKernel->writeGuides();
 }

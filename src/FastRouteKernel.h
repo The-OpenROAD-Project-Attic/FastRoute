@@ -69,11 +69,11 @@ private:
         Parameters* _parms;
         FastRoute::FT _fastRoute;
         std::string _outfile = "output.guide";
-        float _adjustment = 0;
+        float _adjustment = 0.0;
         int _minRoutingLayer = 1;
         int _maxRoutingLayer = -1;
         bool _unidirectionalRoute = false;
-        int _fixLayer = 0;
+        int _fixLayer;
         bool _interactiveMode;
 
         std::vector<int> _vCapacities;
@@ -91,7 +91,6 @@ private:
         void computeTrackAdjustments();
         void computeUserAdjustments();
         void computeObstaclesAdjustments();
-        void writeGuides();
         
         RoutingLayer getRoutingLayerByIndex(int index);
         RoutingTracks getRoutingTracksByIndex(int layer);
@@ -114,7 +113,12 @@ public:
         
         void printGrid();
         
+        void writeGuides();
+        void startFastRoute();
+        void runFastRoute();
         int run();
+        
+        void resetFastRoute();
 };
 
 #endif /* __FASTROUTEKERNEL_H_ */

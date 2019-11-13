@@ -55,4 +55,10 @@ extern void set_max_layer(int maxLayer);
 
 extern void set_unidirectional_routing(bool unidirRouting);
 
+extern void start_fastroute();
+
 extern void run_fastroute();
+
+extern void run();
+
+extern void write_guides();

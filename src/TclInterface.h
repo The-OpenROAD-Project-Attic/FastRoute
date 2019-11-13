@@ -53,7 +53,10 @@ void set_max_layer(int maxLayer);
 void set_unidirectional_routing(bool unidirRouting);
 
 // Run
+void start_fastroute();
 void run_fastroute();
+void run();
+void write_guides();
 
 #endif
 
