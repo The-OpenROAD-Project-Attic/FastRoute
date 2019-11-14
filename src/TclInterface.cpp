@@ -70,6 +70,11 @@ void set_capacity_adjustment(float adjustment) {
         fastRouteKernel->setAdjustment(adjustment);
 }
 
+void set_region_adjustment(int minX, int minY, int maxX, int maxY, int layer, float reductionPercentage) {
+        fastRouteKernel->addRegionAdjustment(minX, minY, maxX, maxY,
+                                             layer, reductionPercentage);
+}
+
 void set_min_layer(int minLayer) {
         fastRouteKernel->setMinRoutingLayer(minLayer);
 }
