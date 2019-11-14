@@ -38,12 +38,11 @@ BUILD_DIR = build
 
 ROOT = ${PWD}
 
+ETC_DIR = etc/
 BIN_DIR = .
 BIN_NAME = FRlefdef
+BIN_NAME_DEBUG = FRlefdef_debug
 OUTPUT_FILE = build/release
-# LIB_NAME =
-
-SUPPORT_DIR = support
 
 CMAKE = cmake
 CMAKE_OPT =
@@ -78,21 +77,14 @@ debug: setup
 	@echo Call $(MAKE)
 	@$(MAKE) -C $(BUILD_DIR)/$@ -j$(PARALLEL) --no-print-directory $(MK_OPT)
 	@echo Remove old binary
-	@rm -f $(BIN_NAME)
+	@rm -f $(BIN_NAME_DEBUG)
 	@echo Copy binary
-	@ln -f -s $(BUILD_DIR)/$@/$(OUTPUT_FILE) $(BIN_NAME)
+	@ln -f -s $(BUILD_DIR)/debug/$(BIN_NAME) $(BIN_NAME_DEBUG)
 
 .PHONY: setup
-setup: check_submodules dirs
-	@ln -f -s $(SUPPORT_DIR)/POST9.dat $(BIN_DIR)/
-	@ln -f -s $(SUPPORT_DIR)/POWV9.dat $(BIN_DIR)/
-
-.PHONY: check_submodules
-check_submodules:
-	@echo "Initialize submodules"
-	@git submodule init
-	@echo "Update submodules"
-	@git submodule update
+setup: dirs
+	@ln -f -s $(ETC_DIR)/POST9.dat $(BIN_DIR)/
+	@ln -f -s $(ETC_DIR)/POWV9.dat $(BIN_DIR)/
 
 .PHONY: dirs
 dirs:
