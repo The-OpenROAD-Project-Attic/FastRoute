@@ -76,9 +76,9 @@ void DBWrapper::initGrid() {
         selectedTrack->getGridPatternX(0, initTrackX, numTracksX, trackStepX);
         selectedTrack->getGridPatternY(0, initTrackY, numTracksY, trackStepY);
         
-        if (selectedLayer->getDirection().getString() == "HORIZONTAL") {
+        if (selectedLayer->getDirection().getValue() == odb::dbTechLayerDir::HORIZONTAL) {
                 trackSpacing = trackStepY;
-        } else if (selectedLayer->getDirection().getString() == "VERTICAL") {
+        } else if (selectedLayer->getDirection().getValue() == odb::dbTechLayerDir::VERTICAL) {
                 trackSpacing = trackStepX;
         } else {
                 std::cout << "[ERROR] Layer " << selectedMetal << " does not have valid direction! Exiting...\n";
@@ -112,9 +112,9 @@ void DBWrapper::initGrid() {
         
         odb::dbTechLayer* layer1 = tech->findRoutingLayer(1);
         
-        if (layer1->getDirection().getString() == "HORIZONTAL") {
+        if (layer1->getDirection().getValue() == odb::dbTechLayerDir::HORIZONTAL) {
                 metal1Orientation = RoutingLayer::HORIZONTAL;
-        } else if (layer1->getDirection().getString() == "VERTICAL") {
+        } else if (layer1->getDirection().getValue() == odb::dbTechLayerDir::VERTICAL) {
                 metal1Orientation = RoutingLayer::VERTICAL;
         } else {
                 std::cout << "[ERROR] Layer 1 does not have valid direction! Exiting...\n";
@@ -143,9 +143,9 @@ void DBWrapper::initRoutingLayers(std::vector<RoutingLayer>& routingLayers) {
                 int index = l;
                 std::string name = techLayer->getConstName();
                 bool preferredDirection;
-                if (techLayer->getDirection().getString() == "HORIZONTAL") {
+                if (techLayer->getDirection().getValue() == odb::dbTechLayerDir::HORIZONTAL) {
                         preferredDirection = RoutingLayer::HORIZONTAL;
-                } else if (techLayer->getDirection().getString() == "VERTICAL") {
+                } else if (techLayer->getDirection().getValue() == odb::dbTechLayerDir::VERTICAL) {
                         preferredDirection = RoutingLayer::VERTICAL;
                 } else {
                         std::cout << "[ERROR] Layer 1 does not have valid direction! Exiting...\n";
@@ -194,12 +194,12 @@ void DBWrapper::initRoutingTracks(std::vector<RoutingTracks>& allRoutingTracks) 
                 selectedTrack->getGridPatternX(0, initTrackX, numTracksX, trackStepX);
                 selectedTrack->getGridPatternY(0, initTrackY, numTracksY, trackStepY);
 
-                if (techayer->getDirection().getString() == "HORIZONTAL") {
+                if (techayer->getDirection().getValue() == odb::dbTechLayerDir::HORIZONTAL) {
                         spacing = trackStepY;
                         location = initTrackY;
                         numTracks = numTracksY;
                         orientation = RoutingLayer::HORIZONTAL;
-                } else if (techayer->getDirection().getString() == "VERTICAL") {
+                } else if (techayer->getDirection().getValue() == odb::dbTechLayerDir::VERTICAL) {
                         spacing = trackStepX;
                         location = initTrackX;
                         numTracks = numTracksX;
@@ -250,13 +250,13 @@ void DBWrapper::computeCapacities() {
                 track->getGridPatternX(0, initTrackX, numTracksX, trackStepX);
                 track->getGridPatternY(0, initTrackY, numTracksY, trackStepY);
                 
-                if (techLayer->getDirection().getString() == "HORIZONTAL") {
+                if (techLayer->getDirection().getValue() == odb::dbTechLayerDir::HORIZONTAL) {
                         trackSpacing = trackStepY;
                         hCapacity = std::floor((float)_grid->getTileWidth() / trackSpacing);
                         
                         _grid->addHorizontalCapacity(hCapacity, l-1);
                         _grid->addVerticalCapacity(0, l-1);
-                } else if (techLayer->getDirection().getString() == "VERTICAL") {
+                } else if (techLayer->getDirection().getValue() == odb::dbTechLayerDir::VERTICAL) {
                         trackSpacing = trackStepX;
                         vCapacity = std::floor((float)_grid->getTileWidth() / trackSpacing);
                         
@@ -302,9 +302,9 @@ void DBWrapper::computeSpacingsAndMinWidth() {
                 track->getGridPatternX(0, initTrackX, numTracksX, trackStepX);
                 track->getGridPatternY(0, initTrackY, numTracksY, trackStepY);
                 
-                if (techLayer->getDirection().getString() == "HORIZONTAL") {
+                if (techLayer->getDirection().getValue() == odb::dbTechLayerDir::HORIZONTAL) {
                         minWidth = trackStepY;
-                } else if (techLayer->getDirection().getString() == "VERTICAL") {
+                } else if (techLayer->getDirection().getValue() == odb::dbTechLayerDir::VERTICAL) {
                         minWidth = trackStepX;
                 } else {
                         std::cout << "[ERROR] Layer " << l << " does not have valid direction! Exiting...\n";
@@ -336,8 +336,8 @@ void DBWrapper::initNetlist() {
                 std::vector<Pin> netPins;
                 
                 odb::dbNet* currNet = *nIter;
-                if (currNet->getSigType().getString() == "POWER" ||
-                    currNet->getSigType().getString() == "GROUND") {
+                if (currNet->getSigType().getValue() == odb::dbSigType::POWER ||
+                    currNet->getSigType().getValue() == odb::dbSigType::GROUND) {
                         continue;
                 }
                 std::string netName =currNet->getConstName();
@@ -383,7 +383,7 @@ void DBWrapper::initNetlist() {
                                         transform.apply(rect);
                                         
                                         odb::dbTechLayer* techLayer = box->getTechLayer();
-                                        if (techLayer->getType().getString() != "ROUTING") {
+                                        if (techLayer->getType().getValue() != odb::dbTechLayerType::ROUTING) {
                                                 continue;
                                         }
                                         
@@ -430,7 +430,7 @@ void DBWrapper::initNetlist() {
                                 odb::dbBPin* currBTermPin = *pinIter;
                                 odb::dbBox* currBTermBox = currBTermPin->getBox();
                                 odb::dbTechLayer* techLayer = currBTermBox->getTechLayer();
-                                if (techLayer->getType().getString() != "ROUTING") {
+                                if (techLayer->getType().getValue() != odb::dbTechLayerType::ROUTING) {
                                         continue;
                                 }
                                 
