@@ -75,6 +75,14 @@ private:
         bool _unidirectionalRoute = false;
         int _fixLayer;
         bool _interactiveMode;
+        
+        // Region adjustment variables
+        std::vector<int> regionsMinX;
+        std::vector<int> regionsMinY;
+        std::vector<int> regionsMaxX;
+        std::vector<int> regionsMaxY;
+        std::vector<int> regionsLayer;
+        std::vector<float> regionsReductionPercentage;
 
         std::vector<int> _vCapacities;
         std::vector<int> _hCapacities;
@@ -90,6 +98,7 @@ private:
         void computeGridAdjustments();
         void computeTrackAdjustments();
         void computeUserAdjustments();
+        void computeRegionAdjustments(Coordinate lowerBound, Coordinate upperBound, int layer, float reductionPercentage);
         void computeObstaclesAdjustments();
         
         RoutingLayer getRoutingLayerByIndex(int index);
@@ -110,6 +119,16 @@ public:
         void setMaxRoutingLayer(const int maxLayer) { _maxRoutingLayer = maxLayer; }
         void setUnidirectionalRoute(const bool unidirRoute) { _unidirectionalRoute = unidirRoute; }
         void setOutputFile(const std::string& outfile) { _outfile = outfile; }
+        
+        void addRegionAdjustment(int minX, int minY, int maxX, int maxY,
+                                 int layer, float reductionPercentage) {
+                regionsMinX.push_back(minX);
+                regionsMinY.push_back(minY);
+                regionsMaxX.push_back(maxX);
+                regionsMaxY.push_back(maxY);
+                regionsLayer.push_back(layer);
+                regionsReductionPercentage.push_back(reductionPercentage);
+        }
         
         void printGrid();
         

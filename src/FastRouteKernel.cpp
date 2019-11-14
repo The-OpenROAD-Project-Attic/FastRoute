@@ -111,6 +111,16 @@ int FastRouteKernel::run() {
         std::cout << "Computing user defined adjustments...\n";
         computeUserAdjustments();
         std::cout << "Computing user defined adjustments... Done!\n";
+        
+        for (int i = 0; i < regionsReductionPercentage.size(); i++) {
+                if (regionsLayer[i] < 1)
+                        break;
+                
+                std::cout << "Adjusting specific region in layer " << regionsLayer[i] << "...\n";
+                Coordinate lowerLeft = Coordinate(regionsMinX[i], regionsMinY[i]);
+                Coordinate upperRight = Coordinate(regionsMaxX[i], regionsMaxY[i]);
+                computeRegionAdjustments(lowerLeft, upperRight, regionsLayer[i], regionsReductionPercentage[i]);
+        }
 
         _fastRoute.initAuxVar();
         
@@ -511,6 +521,83 @@ void FastRouteKernel::computeUserAdjustments() {
                                         int edgeCap = _fastRoute.getEdgeCapacity(x - 1, y - 1, layer, x - 1, y, layer);
                                         int newVCapacity = std::floor((float)edgeCap * (1 - _adjustment));
                                         _fastRoute.addAdjustment(x - 1, y - 1, layer, x - 1, y, layer, newVCapacity);
+                                }
+                        }
+                }
+        }
+}
+
+void FastRouteKernel::computeRegionAdjustments(Coordinate lowerBound, Coordinate upperBound,
+                                               int layer, float reductionPercentage) {
+        Box firstTileBox;
+        Box lastTileBox;
+        std::pair<Grid::TILE, Grid::TILE> tilesToAdjust;
+        
+        Box dieBox = Box(_grid.getLowerLeftX(), _grid.getLowerLeftY(),
+                         _grid.getUpperRightX(), _grid.getUpperRightY(), -1);
+        
+        if ((dieBox.getLowerBound().getX() > lowerBound.getX() && dieBox.getLowerBound().getY() > lowerBound.getY()) ||
+            (dieBox.getUpperBound().getX() < upperBound.getX() && dieBox.getUpperBound().getY() < upperBound.getY())) {
+                std::cout << "ERROR: informed region is outside die area!\n";
+                std::cout << "Informed region: (" << lowerBound.getX() << ", " << lowerBound.getY() << "); ("
+                          << upperBound.getX() << ", " << upperBound.getY() << ")\n";
+                std::exit(-1);
+        }
+        
+        RoutingLayer routingLayer = getRoutingLayerByIndex(layer);
+        bool direction = routingLayer.getPreferredDirection();
+        Box regionToAdjust = Box(lowerBound, upperBound, -1);
+        
+        tilesToAdjust = _grid.getBlockedTiles(regionToAdjust, firstTileBox, lastTileBox);
+        Grid::TILE &firstTile = tilesToAdjust.first;
+        Grid::TILE &lastTile = tilesToAdjust.second;
+        
+        RoutingTracks routingTracks = getRoutingTracksByIndex(layer);
+        DBU trackSpace = routingTracks.getSpace();
+        
+        int firstTileReduce = _grid.computeTileReduce(regionToAdjust, firstTileBox, trackSpace, true, direction);
+
+        int lastTileReduce = _grid.computeTileReduce(regionToAdjust, lastTileBox, trackSpace, false, direction);
+        
+        if (direction == RoutingLayer::HORIZONTAL) {                                          // If preferred direction is horizontal, only first and the last line will have specific adjustments
+                for (int x = firstTile._x; x <= lastTile._x; x++) {  // Setting capacities of edges completely inside the adjust region according the percentage of reduction
+                        for (int y = firstTile._y; y <= lastTile._y; y++) {
+                                int edgeCap = _fastRoute.getEdgeCapacity(x, y, layer, x + 1, y, layer);
+                                
+                                if (y == firstTile._y) {
+                                        edgeCap -= firstTileReduce;
+                                        if (edgeCap < 0)
+                                                edgeCap = 0;
+                                        _fastRoute.addAdjustment(x, y, layer, x + 1, y, layer, edgeCap);
+                                } else if (y == lastTile._y) {
+                                        edgeCap -= lastTileReduce;
+                                        if (edgeCap < 0)
+                                                edgeCap = 0;
+                                        _fastRoute.addAdjustment(x, y, layer, x + 1, y, layer, edgeCap);
+                                } else {
+                                        edgeCap -= edgeCap*reductionPercentage;
+                                        _fastRoute.addAdjustment(x, y, layer, x + 1, y, layer, 0);
+                                }
+                        }
+                }
+        } else {                                                   // If preferred direction is vertical, only first and last columns will have specific adjustments
+                for (int x = firstTile._x; x <= lastTile._x; x++) {  // Setting capacities of edges completely inside the adjust region according the percentage of reduction
+                        for (int y = firstTile._y; y <= lastTile._y; y++) {
+                                int edgeCap = _fastRoute.getEdgeCapacity(x, y, layer, x, y + 1, layer);
+                                
+                                if (x == firstTile._x) {
+                                        edgeCap -= firstTileReduce;
+                                        if (edgeCap < 0)
+                                                edgeCap = 0;
+                                        _fastRoute.addAdjustment(x, y, layer, x, y + 1, layer, edgeCap);
+                                } else if (x == lastTile._x) {
+                                        edgeCap -= lastTileReduce;
+                                        if (edgeCap < 0)
+                                                edgeCap = 0;
+                                        _fastRoute.addAdjustment(x, y, layer, x, y + 1, layer, edgeCap);
+                                } else {
+                                        edgeCap -= edgeCap*reductionPercentage;
+                                        _fastRoute.addAdjustment(x, y, layer, x, y + 1, layer, 0);
                                 }
                         }
                 }
