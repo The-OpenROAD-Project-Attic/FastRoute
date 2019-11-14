@@ -43,6 +43,6 @@ set_min_layer 1
 set_max_layer 9
 set_unidirectional_routing false
 
-run_fastroute
+run
 
 exit
