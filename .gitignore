@@ -10,3 +10,4 @@ support/ispd18/*
 support/ispd19/*
 .gdb_history
 src/TclInterfaceWrap.cpp
+nbproject/
