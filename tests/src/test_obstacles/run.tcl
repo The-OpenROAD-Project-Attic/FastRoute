@@ -36,8 +36,8 @@
 ## POSSIBILITY OF SUCH DAMAGE.
 ################################################################################
 
-proc checkGuidesFile {goldFile outFile} {
-        _puts "--Compare guides..."
+proc checkObstacles {goldFile outFile} {
+        _puts "--Verify obstacles..."
 
         if {![file exists $goldFile]} {
                 _err "Gold file $goldFile not found!"
@@ -45,15 +45,19 @@ proc checkGuidesFile {goldFile outFile} {
         if {![file exists $outFile]} {
                 _err "Out file $outFile not found!"
         }
-        set status [catch {exec diff $goldFile $outFile} result]
+        
+        set grep_pattern "----Processing"
+        set obstacles_report [catch {exec grep -i -e "${grep_pattern}" $outFile} result]
+        
+        set status [catch {exec grep -q -e $result $goldFile} rslt]
         if {$status == 0} {
-                _puts "--Compare guides: Success!"
+                _puts "--Verify obstacles: Success!"
         } else {
-                _puts stderr "Files are different"
+                _puts stderr "Obstacles count are different"
                 _puts stderr "********************************************************************************"
-                _puts stderr $result
+                _puts stderr $rslt
                 _puts stderr "********************************************************************************"
-                _err "files are different: $goldFile and $outFile... "
+                _err "Current obstacles are different from gold obstacles"
         }
 }
 
@@ -65,17 +69,15 @@ set src_dir "${tests_dir}/src"
 set inputs_dir "${tests_dir}/input"
 set bin_file "$base_dir/FRlefdef"
 
-set curr_test "${src_dir}/test_guides"
+set curr_test "${src_dir}/test_obstacles"
 
-set gold_guides "${curr_test}/golden.guide"
+set gold_obstacles_logs "${curr_test}/golden.obs"
 
-set script_file "${curr_test}/routeDesign.tcl"
-set output_file "${curr_test}/${test_name}.guide"
-set output_log "${curr_test}/${test_name}.log"
+set output_file "${curr_test}/${test_name}.log"
 
-runFastRoute $test_name $curr_test $inputs_dir $bin_file $output_log
+runFastRoute $test_name $curr_test $inputs_dir $bin_file $output_file
 
-checkGuidesFile $gold_guides $output_file
+checkObstacles $gold_obstacles_logs $output_file
 
 
 

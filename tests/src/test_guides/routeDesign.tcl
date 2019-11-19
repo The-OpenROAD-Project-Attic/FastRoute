@@ -34,8 +34,8 @@
 ## POSSIBILITY OF SUCH DAMAGE.
 ################################################################################
 
-import_lef "_LEF_"
-import_def "_DEF_"
+fr_import_lef "_LEF_"
+fr_import_def "_DEF_"
 set_output_file "_GUIDE_"
 
 set_capacity_adjustment 0.0
