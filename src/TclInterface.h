@@ -42,8 +42,8 @@
 void help();
 
 // LEF/DEF/Guides interface
-void import_lef(const char* file);
-void import_def(const char* file);
+void fr_import_lef(const char* file);
+void fr_import_def(const char* file);
 void set_output_file(const char * file);
 
 // Parms interface

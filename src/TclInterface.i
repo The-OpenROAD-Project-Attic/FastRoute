@@ -41,9 +41,9 @@
 
 extern void help();
 
-extern void import_lef(const char* file);
+extern void fr_import_lef(const char* file);
 
-extern void import_def(const char* file);
+extern void fr_import_def(const char* file);
 
 extern void set_output_file(const char * file);
 
