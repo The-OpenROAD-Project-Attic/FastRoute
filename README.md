@@ -3,22 +3,19 @@ FastRoute4-lefdef
 
 **FastRoute4-lefdef** is an open-source global router.
 
-The algorithm base is from FastRoute4.1, and the underlying infrastructure comes from [Rsyn](https://github.com/RsynTeam/rsyn-x/)
-
+The algorithm base is from FastRoute4.1, and the database comes from [OpenDB](https://github.com/The-OpenROAD-Project/OpenDB)
 
 
 The FastRoute4.1 version was received from <yuexu@iastate.edu> on June 15, 2019, with the BSD-3 open source license as given in the FastRoute [website](http://home.eng.iastate.edu/~cnchu/FastRoute.html#License).
-
-[Rsyn](https://github.com/RsynTeam/rsyn-x/) version is based on commit `1087c918e4fa14db84fc3b4c91210db96b07bb4c` and released under Apache License, Version 2.0 as given in its [repository](https://github.com/RsynTeam/rsyn-x/blob/master/README.md).
-
-Any third party code such as Rsyn will clearly specify its license in each file and in this README. We ask contributors to seriously consider using the BSD-3 Licence.
 
 ## Getting Started
 ### Pre-Requisite
 
 - GCC compiler
 - boost library
-- cmake3.1
+- CMake3.1
+- TCL
+- Swig
 
 ### How to Compile
 
@@ -31,46 +28,51 @@ NOTE: use `PARALLEL=nthreads` instead of `-j nthreads`
 
 ### Basic Usage
 
-Your command line to run FastRoute4-lefdef should look like this:
+##### Arguments
+
+To properly run FastRoute4-lefdef there are a few mandatory arguments that must be defined:
+
+- **l** : Input LEF file (e.g.: -l input.lef)
+- **d** : Input DEF file (e.g.: -d input.def)
+- **o** : Output Guides file, the name of the output file, where the routing guides will be saved (e.g.: -o output.guide)
+
+There are optional flags that can be used:
+
+- **a**: Global capacity adjustment (e.g.: -a 0.3)
+- **n**: Minimum routing layer (e.g.: -n 2)
+- **m** Maximum routing layer (e.g.: -m 9)
+- **u** Unidirectional route (e.g.: -u true)
+
+Command line example:
 
 ````
-./FRlefdef --no-gui --script /path/to/script.rsyn
+./FRlefdef -l input.lef -d input.def -o output.guide -a 0.3 -n 2 -m 9 -u false
 ````
 
-You can find a script example in `third_party/rsyn/support/fastroute/example.rsyn`
+##### TCL commands
 
-#### Script details
+FastRoute4-lefdef also have support for TCL commands. These commands can be used through script or through a TCL shell.
+Currently, the tool have extra options in TCL commands/shell in comparison with command line options.
 
-The basic format of a script to run FastRoute is shown below:
+##### Load and write files
+- **fr_import_lef** "path/to/file1.lef path/to/fileN.lef"
+- **fr_import_def** "path/to/file1.def path/to/fileN.def"
+- **set_output_file** "path/to/output.guide"
 
-````
-open "generic" {
-	"lefFiles" : "example.lef",
-	"defFiles" : "example.def"
-};
-run "rsyn.fastRoute" {"outfile" : "example.guide", "adjustment" : 0.X, "minRoutingLayer" : Y, "maxRoutingLayer" : Z, "unidirectionalRoute" : bool};
-````
-
-FastRoute has five main parameters. These are:
-- outfile: name of the file with the generated guides
-- adjustment: percentage reduction in capacity of each edge in the global routing grid
-- minRoutingLayer: minimum (i.e., lowest) routing layer available for FastRoute to use
-- maxRoutingLayer: maximum (i.e., highest) routing layer available for FastRoute to use
-- unidirectionalRoute: indicate if unidirectional routing is activated
+##### Modify global and region capacities, minimum and maximum routing layer and set unidirectional route
+- **set_capacity_adjustment** FLOAT
+- **set_region_adjustment** INTEGER INTEGER INTEGER INTEGER INTEGER FLOAT
+- **set_min_layer** INTEGER
+- **set_max_layer** INTEGER
+- **set_unidirectional_routing** BOOL
 
 NOTE: if you set unidirectionalRoute as "true", the minimum routing layer will be assigned as "2" automatically
 
-If you need more than one LEF/DEF file, you can script for this case as:
-
-````
-open "generic" {
-	"lefFiles" : ["example1.lef", "example2.lef", ..., "exampleN.lef"],
-	"defFiles" : ["example1.def", "example2.def", ..., "exampleN.def"]
-};
-run "rsyn.fastRoute" {"outfile" : "example.guide", "adjustment" : 0.X, "minRoutingLayer" : Y, "maxRoutingLayer" : Z, "unidirectionalRoute" : B};
-````
-
-You can use either the absolute path or the relative path (relative to the script file) for LEF/DEF files.
+##### Flow commands
+- **start_fastroute:** Initialize FastRoute4-lefdef structures
+- **run_fastroute:** Run only FastRoute4.1 algorithm, without write guides
+- **write_guides:** Write guides file. Should be called only after **run_fastroute**
+- **run:** Run entire flow
 
 ## Fixes and modifications on FastRoute4 original code
 

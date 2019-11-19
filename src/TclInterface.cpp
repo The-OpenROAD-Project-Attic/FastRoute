@@ -42,9 +42,9 @@
 extern FastRouteKernel* fastRouteKernel;
 
 void help() {
-        std::cout << "Import LEF files:                        import_lef \"path/to/file1.lef path/to/fileN.lef\"\n";
-        std::cout << "Import DEF files:                        import_def \"path/to/file1.def path/to/fileN.def\"\n";
-        std::cout << "Set output file name:                    set_output_file \"outputName\"\n";
+        std::cout << "Import LEF file:                         fr_import_lef \"path/to/file1.lef path/to/fileN.lef\"\n";
+        std::cout << "Import DEF file:                         fr_import_def \"path/to/file1.def path/to/fileN.def\"\n";
+        std::cout << "Set output file name:                    set_output_file \"path/to/output.guide\"\n";
         std::cout << "User defined global capacity adjustment: set_capacity_adjustment FLOAT\n";
         std::cout << "User defined region capacity adjustment: set_region_adjustment INTEGER INTEGER INTEGER INTEGER INTEGER FLOAT\n";
         std::cout << "User defined min routing layer:          set_min_layer INTEGER\n";
