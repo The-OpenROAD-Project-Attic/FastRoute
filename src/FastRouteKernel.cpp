@@ -108,9 +108,13 @@ int FastRouteKernel::run() {
         computeObstaclesAdjustments();
         std::cout << "Computing obstacles adjustments... Done!\n";
                 
-        std::cout << "Computing user defined adjustments...\n";
-        computeUserAdjustments();
-        std::cout << "Computing user defined adjustments... Done!\n";
+        std::cout << "Computing user defined global adjustments...\n";
+        computeUserGlobalAdjustments();
+        std::cout << "Computing user defined global adjustments... Done!\n";
+        
+        std::cout << "Computing user defined layers adjustments...\n";
+        computeUserLayerAdjustments();
+        std::cout << "Computing user defined layers adjustments... Done!\n";
         
         for (int i = 0; i < regionsReductionPercentage.size(); i++) {
                 if (regionsLayer[i] < 1)
@@ -171,7 +175,7 @@ void FastRouteKernel::startFastRoute() {
         std::cout << "Computing obstacles adjustments... Done!\n";
                 
         std::cout << "Computing user defined adjustments...\n";
-        computeUserAdjustments();
+        computeUserGlobalAdjustments();
         std::cout << "Computing user defined adjustments... Done!\n";
 
         _fastRoute.initAuxVar();
@@ -484,7 +488,7 @@ void FastRouteKernel::computeTrackAdjustments() {
         }
 }
 
-void FastRouteKernel::computeUserAdjustments() {
+void FastRouteKernel::computeUserGlobalAdjustments() {
         if (_adjustment == 0.0)
                 return;
 
@@ -520,6 +524,48 @@ void FastRouteKernel::computeUserAdjustments() {
                                 for (int y = 1; y < yGrids; y++) {
                                         int edgeCap = _fastRoute.getEdgeCapacity(x - 1, y - 1, layer, x - 1, y, layer);
                                         int newVCapacity = std::floor((float)edgeCap * (1 - _adjustment));
+                                        _fastRoute.addAdjustment(x - 1, y - 1, layer, x - 1, y, layer, newVCapacity);
+                                }
+                        }
+                }
+        }
+}
+
+void FastRouteKernel::computeUserLayerAdjustments() {
+        int xGrids = _grid.getXGrids();
+        int yGrids = _grid.getYGrids();
+        
+        int numAdjustments = 0;
+
+        for (int layer = 0; layer < _layersToAdjust.size(); layer++) {
+                for (int y = 0; y < yGrids; y++) {
+                        for (int x = 0; x < xGrids; x++) {
+                                numAdjustments++;
+                        }
+                }
+        }
+
+        numAdjustments *= 2;
+        _fastRoute.setNumAdjustments(numAdjustments);
+
+        for (int idx = 0; idx < _layersToAdjust.size(); idx++) {
+                int layer = _layersToAdjust[idx];
+                float adjustment = _layersReductionPercentage[idx];
+                if (_hCapacities[layer - 1] != 0) {
+                        for (int y = 1; y < yGrids; y++) {
+                                for (int x = 1; x < xGrids; x++) {
+                                        int edgeCap = _fastRoute.getEdgeCapacity(x - 1, y - 1, layer, x, y - 1, layer);
+                                        int newHCapacity = std::floor((float)edgeCap * (1 - adjustment));
+                                        _fastRoute.addAdjustment(x - 1, y - 1, layer, x, y - 1, layer, newHCapacity);
+                                }
+                        }
+                }
+
+                if (_vCapacities[layer - 1] != 0) {
+                        for (int x = 1; x < xGrids; x++) {
+                                for (int y = 1; y < yGrids; y++) {
+                                        int edgeCap = _fastRoute.getEdgeCapacity(x - 1, y - 1, layer, x - 1, y, layer);
+                                        int newVCapacity = std::floor((float)edgeCap * (1 - adjustment));
                                         _fastRoute.addAdjustment(x - 1, y - 1, layer, x - 1, y, layer, newVCapacity);
                                 }
                         }

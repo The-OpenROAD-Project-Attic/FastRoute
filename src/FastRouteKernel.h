@@ -76,6 +76,10 @@ private:
         int _fixLayer;
         bool _interactiveMode;
         
+        // Layer adjustment variavles
+        std::vector<int> _layersToAdjust;
+        std::vector<float> _layersReductionPercentage;
+        
         // Region adjustment variables
         std::vector<int> regionsMinX;
         std::vector<int> regionsMinY;
@@ -97,7 +101,8 @@ private:
         void initializeNets();
         void computeGridAdjustments();
         void computeTrackAdjustments();
-        void computeUserAdjustments();
+        void computeUserGlobalAdjustments();
+        void computeUserLayerAdjustments();
         void computeRegionAdjustments(Coordinate lowerBound, Coordinate upperBound, int layer, float reductionPercentage);
         void computeObstaclesAdjustments();
         
@@ -119,6 +124,11 @@ public:
         void setMaxRoutingLayer(const int maxLayer) { _maxRoutingLayer = maxLayer; }
         void setUnidirectionalRoute(const bool unidirRoute) { _unidirectionalRoute = unidirRoute; }
         void setOutputFile(const std::string& outfile) { _outfile = outfile; }
+        
+        void addLayerAdjustment(int layer, float reductionPercentage) {
+                _layersToAdjust.push_back(layer);
+                _layersReductionPercentage.push_back(reductionPercentage);
+        }
         
         void addRegionAdjustment(int minX, int minY, int maxX, int maxY,
                                  int layer, float reductionPercentage) {

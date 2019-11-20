@@ -95,6 +95,7 @@ dirs:
 .PHONY: clean
 clean:
 	rm -rf $(BUILD_DIR)
+	rm $(ROOT)/src/TclInterfaceWrap.cpp
 
 .PHONY: clean_all
 clean_all:
