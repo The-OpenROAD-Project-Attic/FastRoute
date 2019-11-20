@@ -69,9 +69,9 @@ std::pair<Grid::TILE, Grid::TILE> Grid::getBlockedTiles(const Box& obstacle, Box
         Coordinate lower = obstacle.getLowerBound();  // lower bound of obstacle
         Coordinate upper = obstacle.getUpperBound();  // upper bound of obstacle
 
-        getPositionOnGrid(lower);  // translate lower bound of obstacle to the center of the tile where it is inside
-        getPositionOnGrid(upper);  // translate upper bound of obstacle to the center of the tile where it is inside
-
+        lower = getPositionOnGrid(lower);  // translate lower bound of obstacle to the center of the tile where it is inside
+        upper = getPositionOnGrid(upper);  // translate upper bound of obstacle to the center of the tile where it is inside
+        
         // Get x and y indices of first blocked tile
         firstTile._x = (lower.getX() - (getTileWidth() / 2)) / getTileWidth();
         firstTile._y = (lower.getY() - (getTileHeight() / 2)) / getTileHeight();
