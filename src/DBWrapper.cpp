@@ -401,7 +401,8 @@ void DBWrapper::initNetlist() {
                                         pinLayers.push_back(it->first);
                                 }
                                 
-                                Pin pin = Pin(pinName, pinLayers, pinBoxes, netName);
+                                Coordinate pinPos = Coordinate(pX, pY);
+                                Pin pin = Pin(pinName, pinPos, pinLayers, pinBoxes, netName, false);
                                 netPins.push_back(pin);
                         }
                 }
@@ -411,8 +412,11 @@ void DBWrapper::initNetlist() {
                 odb::dbSet<odb::dbBTerm>::iterator bIter;
                 
                 for (bIter = bTerms.begin(); bIter != bTerms.end(); bIter++) {
+                        int posX, posY;
                         odb::dbBTerm* currBTerm = *bIter;
                         std::string pinName;
+                        
+                        currBTerm->getFirstPinLocation(posX, posY);
                         
                         std::vector<int> pinLayers;
                         std::map<int, std::vector<Box>> pinBoxes;
@@ -448,7 +452,8 @@ void DBWrapper::initNetlist() {
                                 pinLayers.push_back(it->first);
                         }
                         
-                        Pin pin = Pin(pinName, pinLayers, pinBoxes, netName);
+                        Coordinate pinPos = Coordinate(posX, posY);
+                        Pin pin = Pin(pinName, pinPos, pinLayers, pinBoxes, netName, true);
                         netPins.push_back(pin);
                 }
                 _netlist->addNet(netName, netPins);
@@ -485,7 +490,6 @@ void DBWrapper::initObstacles() {
         }
         
         // Get instance obstructions
-        int instObs = 0;
         odb::dbSet<odb::dbInst> insts;
         insts = block->getInsts();
         

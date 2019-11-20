@@ -71,3 +71,16 @@ int Netlist::getMaxNetDegree() {
         
         return maxDegree;
 }
+
+std::vector<Pin> Netlist::getAllPorts() {
+        std::vector<Pin> ports; 
+        for (Net net : _nets) {
+                for (Pin pin : net.getPins()) {
+                        if (pin.isPort()) {
+                                ports.push_back(pin);
+                        }
+                }
+        }
+        
+        return ports;
+}

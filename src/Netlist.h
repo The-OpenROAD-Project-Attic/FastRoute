@@ -66,6 +66,8 @@ public:
         void addNet(const std::string& name, const std::vector<Pin>& pins);
         
         int getMaxNetDegree();
+        
+        std::vector<Pin> getAllPorts();
 };
 
 #endif /* __NETLIST_H_ */

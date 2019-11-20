@@ -93,6 +93,7 @@ private:
         std::vector<FastRoute::NET> _result;
         std::map<std::string, int> _netsDegree;
 
+        // main functions
         void initGrid();
         void initRoutingLayers();
         void initRoutingTracks();
@@ -106,11 +107,15 @@ private:
         void computeRegionAdjustments(Coordinate lowerBound, Coordinate upperBound, int layer, float reductionPercentage);
         void computeObstaclesAdjustments();
         
+        // aux functions
         RoutingLayer getRoutingLayerByIndex(int index);
         RoutingTracks getRoutingTracksByIndex(int layer);
         void addRemainingGuides(std::vector<FastRoute::NET> &globalRoute);
         void mergeBox(std::vector<Box>& guideBox);
         Box globalRoutingToBox(const FastRoute::ROUTE &route);
+        
+        // check functions
+        void checkPinPlacement();
 
 public:
 	FastRouteKernel(Parameters& parms);
@@ -142,12 +147,11 @@ public:
         
         void printGrid();
         
+        // flow functions
         void writeGuides();
         void startFastRoute();
         void runFastRoute();
         int run();
-        
-        void resetFastRoute();
 };
 
 #endif /* __FASTROUTEKERNEL_H_ */

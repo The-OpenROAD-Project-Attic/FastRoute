@@ -72,6 +72,10 @@ int FastRouteKernel::run() {
                 _fixLayer = 1;
         }
         
+        std::cout << "Checking pin placement...\n";
+        checkPinPlacement();
+        std::cout << "Checking pin placement... Done!\n";
+        
         std::cout << "Initializing grid...\n";
         initGrid();
         std::cout << "Initializing grid... Done!\n";
@@ -323,7 +327,7 @@ void FastRouteKernel::computeGridAdjustments() {
                         newVCapacity = std::floor((_grid.getTileWidth() + xExtra)/vSpace);
                 } else {
                     std::cout << "[ERROR] Layer spacing not found. Exiting...\n";
-                    std::exit(0);
+                    std::exit(1);
                 }
                 
                 int numAdjustments = 0;
@@ -784,7 +788,7 @@ void FastRouteKernel::writeGuides() {
                                 if (abs(route.finalLayer - route.initLayer) > 1) {
                                         std::cout << "ERROR: connection between"
                                                      "non-adjacent layers";
-                                        std::exit(0);
+                                        std::exit(1);
                                 } else {
                                         RoutingLayer phLayerI;
                                         if (route.initLayer < _minRoutingLayer && !_unidirectionalRoute) {
@@ -953,7 +957,7 @@ void FastRouteKernel::mergeBox(std::vector<Box>& guideBox) {
         std::vector<Box> finalBox;
         if (guideBox.size() < 1) {
                 std::cout << "Error: guides vector is empty!!!\n";
-                std::exit(0);
+                std::exit(1);
         }
         finalBox.push_back(guideBox[0]);
         for (int i=1; i < guideBox.size(); i++){
@@ -1017,4 +1021,32 @@ Box FastRouteKernel::globalRoutingToBox(const FastRoute::ROUTE &route) {
 
         Box routeBds = Box(lowerLeft, upperRight, -1);
         return routeBds;
+}
+
+void FastRouteKernel::checkPinPlacement() {
+        bool invalid = false;
+        std::map<int, std::vector<Coordinate>> mapLayerToPositions;
+        
+        for (Pin port : _netlist.getAllPorts()) {
+                DBU layer = port.getLayers()[0]; // port have only one layer
+                
+                if (mapLayerToPositions[layer].size() == 0) {
+                        mapLayerToPositions[layer].push_back(port.getPosition());
+                        continue;
+                }
+                
+                for (Coordinate pos : mapLayerToPositions[layer]) {
+                        if (pos == port.getPosition()) {
+                                std::cout << "ERROR: at least 2 pins in position ("
+                                          << pos.getX() << ", " << pos.getY()
+                                          << "), layer " << layer+1 << "\n";
+                                invalid = true;
+                        }
+                }
+                mapLayerToPositions[layer].push_back(port.getPosition());
+        }
+        
+        if (invalid) {
+                std::exit(-1);
+        }
 }
