@@ -61,6 +61,7 @@ Currently, the tool have extra options in TCL commands/shell in comparison with 
 
 ##### Modify global and region capacities, minimum and maximum routing layer and set unidirectional route
 - **set_capacity_adjustment** adjustment_percent (FLOAT)
+- **set_layer_adjustment** layer (INTEGER) adjusment_percentage (FLOAT)
 - **set_region_adjustment** lower_x (INTEGER) lower_y (INTEGER) upper_x (INTEGER) upper_y (INTEGER) layer (INTEGER) adjusment_percentage (FLOAT)
 - **set_min_layer** layer_index (INTEGER)
 - **set_max_layer** layer_index (INTEGER)
@@ -68,6 +69,7 @@ Currently, the tool have extra options in TCL commands/shell in comparison with 
 
 NOTE 1: if you set unidirectionalRoute as "true", the minimum routing layer will be assigned as "2" automatically
 NOTE 2: the first routing layer of the design have index equal to 1
+NOTE 3: ***set_layer_adjustment*** and ***set+region_adjustment*** can be called multiple times, creating a list of adjustments
 
 ##### Flow commands
 - **start_fastroute:** Initialize FastRoute4-lefdef structures
