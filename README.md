@@ -60,18 +60,19 @@ Currently, the tool have extra options in TCL commands/shell in comparison with 
 - **set_output_file** "path/to/output.guide"
 
 ##### Modify global and region capacities, minimum and maximum routing layer and set unidirectional route
-- **set_capacity_adjustment** FLOAT
-- **set_region_adjustment** INTEGER INTEGER INTEGER INTEGER INTEGER FLOAT
-- **set_min_layer** INTEGER
-- **set_max_layer** INTEGER
+- **set_capacity_adjustment** adjustment_percent (FLOAT)
+- **set_region_adjustment** lower_x (INTEGER) lower_y (INTEGER) upper_x (INTEGER) upper_y (INTEGER) layer (INTEGER) adjusment_percentage (FLOAT)
+- **set_min_layer** layer_index (INTEGER)
+- **set_max_layer** layer_index (INTEGER)
 - **set_unidirectional_routing** BOOL
 
-NOTE: if you set unidirectionalRoute as "true", the minimum routing layer will be assigned as "2" automatically
+NOTE 1: if you set unidirectionalRoute as "true", the minimum routing layer will be assigned as "2" automatically
+NOTE 2: the first routing layer of the design have index equal to 1
 
 ##### Flow commands
 - **start_fastroute:** Initialize FastRoute4-lefdef structures
 - **run_fastroute:** Run only FastRoute4.1 algorithm, without write guides
-- **write_guides:** Write guides file. Should be called only after **run_fastroute**
+- **write_guides:** Write guides file. Should be called only after ***run_fastroute***
 - **run:** Run entire flow
 
 ## Fixes and modifications on FastRoute4 original code
