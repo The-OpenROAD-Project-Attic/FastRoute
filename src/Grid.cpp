@@ -38,6 +38,8 @@
 
 #include "Grid.h"
 
+namespace FastRoute {
+
 Coordinate Grid::getPositionOnGrid(const Coordinate& position) {
         DBU x = position.getX();
         DBU y = position.getY();
@@ -126,4 +128,6 @@ int Grid::computeTileReduce(const Box &obs, const Box &tile, int trackSpace, boo
                 std::exit(0);
         }
         return reduce;
+}
+
 }

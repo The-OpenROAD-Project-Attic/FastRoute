@@ -46,6 +46,8 @@
 
 #include "FastRouteKernel.h"
 
+namespace FastRoute {
+
 FastRouteKernel::FastRouteKernel(Parameters& parms)
     : _parms(&parms), _dbWrapper(_netlist, _grid, parms) {
         _interactiveMode = _parms->isInteractiveMode();
@@ -1049,4 +1051,6 @@ void FastRouteKernel::checkPinPlacement() {
         if (invalid) {
                 std::exit(-1);
         }
+}
+
 }

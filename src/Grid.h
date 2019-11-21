@@ -46,6 +46,8 @@
 #include "Box.h"
 #include "RoutingLayer.h"
 
+namespace FastRoute {
+
 class Grid {
 private:
         long _lowerLeftX;
@@ -133,5 +135,7 @@ public:
         
         int computeTileReduce(const Box &obs, const Box &tile, int trackSpace, bool first, bool direction);
 };
+
+}
 
 #endif /* __GRID_H_ */

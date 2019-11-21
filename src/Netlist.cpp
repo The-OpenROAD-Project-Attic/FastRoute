@@ -37,6 +37,8 @@
 
 #include "Netlist.h"
 
+namespace FastRoute {
+
 Net Netlist::getNetByName(std::string name) {
         Net choosenNet;
         for (Net net : _nets) {
@@ -83,4 +85,6 @@ std::vector<Pin> Netlist::getAllPorts() {
         }
         
         return ports;
+}
+
 }

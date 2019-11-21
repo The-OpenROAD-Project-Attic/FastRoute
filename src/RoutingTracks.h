@@ -48,6 +48,8 @@
 #include "Box.h"
 #include "Pin.h"
 
+namespace FastRoute {
+
 class RoutingTracks {
 private:
         int _layerIndex;
@@ -71,5 +73,7 @@ public:
         int getNumTracks() const { return _numTracks; }
         bool getOrientation() const { return _orientation; }
 };
+
+}
 
 #endif /* __ROUTINGTRACKS_H_ */

@@ -49,6 +49,8 @@
 #include "Pin.h"
 #include "Net.h"
 
+namespace FastRoute {
+
 class Netlist {
 private:
         std::vector<Net> _nets;
@@ -69,5 +71,7 @@ public:
         
         std::vector<Pin> getAllPorts();
 };
+
+}
 
 #endif /* __NETLIST_H_ */

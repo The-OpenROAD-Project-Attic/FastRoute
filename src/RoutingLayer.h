@@ -48,6 +48,8 @@
 #include "Box.h"
 #include "Pin.h"
 
+namespace FastRoute {
+
 class RoutingLayer {
 private:
         int _index;
@@ -68,5 +70,7 @@ public:
         std::string getName() const { return _name; }
         bool getPreferredDirection() const { return _preferredDirection; }
 };
+
+}
 
 #endif /* __ROUTINGLAYER_H_ */

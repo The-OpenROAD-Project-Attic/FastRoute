@@ -46,13 +46,15 @@
 #include "RoutingLayer.h"
 #include "RoutingTracks.h"
 
-// Forward declaration protects IOPlacer code from any
-// header file from the DB. IOPlacer code keeps independent.
+// Forward declaration protects FastRoute code from any
+// header file from the DB. FastRoute code keeps independent.
 namespace odb{
 class dbDatabase;
 class dbChip;
 class dbTech;
 }
+
+namespace FastRoute {
 
 class DBWrapper {
 public:
@@ -79,5 +81,7 @@ private:
         Parameters      *_parms = nullptr;
         bool            _verbose = false;
 };
+
+}
 
 #endif

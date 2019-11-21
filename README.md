@@ -69,7 +69,7 @@ Currently, the tool have extra options in TCL commands/shell in comparison with 
 
 NOTE 1: if you set unidirectionalRoute as "true", the minimum routing layer will be assigned as "2" automatically
 NOTE 2: the first routing layer of the design have index equal to 1
-NOTE 3: ***set_layer_adjustment*** and ***set+region_adjustment*** can be called multiple times, creating a list of adjustments
+NOTE 3: ***set_layer_adjustment*** and ***set_region_adjustment*** can be called multiple times, creating a list of adjustments
 
 ##### Flow commands
 - **start_fastroute:** Initialize FastRoute4-lefdef structures

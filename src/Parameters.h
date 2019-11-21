@@ -41,6 +41,8 @@
 #include <string>
 #include <vector>
 
+namespace FastRoute {
+
 class Parameters {
 private:
         std::string _inputLefFile;
@@ -96,5 +98,7 @@ public:
         
         void printAll() const;
 };
+
+}
 
 #endif /* __PARAMETERS_H_ */

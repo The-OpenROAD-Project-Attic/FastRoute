@@ -37,6 +37,8 @@
 
 #include "Box.h"
 
+namespace FastRoute {
+
 Coordinate Box::getMiddle() {
         DBU lowerX = _lowerBound.getX();
         DBU lowerY = _lowerBound.getY();
@@ -65,4 +67,6 @@ bool Box::overlap(Box box) {
                        std::min(_upperBound.getY(), box.getUpperBound().getY());
 
         return (dx < 0 && dy < 0);
+}
+
 }

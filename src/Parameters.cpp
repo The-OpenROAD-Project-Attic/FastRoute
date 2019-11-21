@@ -41,6 +41,8 @@
 #include <iomanip>
 #include <boost/program_options.hpp>
 
+namespace FastRoute {
+
 Parameters::Parameters(int argc, char** argv) {
         namespace po = boost::program_options;
         po::options_description dscp("Usage");
@@ -130,4 +132,6 @@ void Parameters::printAll() const {
 
         std::cout << "\n";
         // clang-format on
+}
+
 }

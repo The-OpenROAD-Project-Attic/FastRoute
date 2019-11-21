@@ -48,6 +48,8 @@
 #include "Box.h"
 #include "Pin.h"
 
+namespace FastRoute {
+
 class Net {
 private:
         std::string _name;
@@ -62,5 +64,7 @@ public:
         std::vector<Pin> getPins() const { return _pins; }
         int getNumPins() const { return _pins.size(); }
 };
+
+}
 
 #endif /* __NET_H_ */

@@ -57,6 +57,8 @@
 #include "RoutingTracks.h"
 #include "../include/FastRoute.h"
 
+namespace FastRoute {
+
 class FastRouteKernel {
 protected:
         Netlist _netlist;
@@ -67,7 +69,7 @@ protected:
 private:
 	DBWrapper _dbWrapper;
         Parameters* _parms;
-        FastRoute::FT _fastRoute;
+        FT _fastRoute;
         std::string _outfile = "output.guide";
         float _adjustment = 0.0;
         int _minRoutingLayer = 1;
@@ -153,5 +155,7 @@ public:
         void runFastRoute();
         int run();
 };
+
+}
 
 #endif /* __FASTROUTEKERNEL_H_ */

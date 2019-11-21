@@ -49,6 +49,8 @@
 #include "Coordinate.h"
 #include "Box.h"
 
+namespace FastRoute {
+
 class Pin {
 private:
         std::string _name;
@@ -79,5 +81,7 @@ public:
         std::string getNetName() const { return _netName; }
         bool isPort() const { return _isPort; }
 };
+
+}
 
 #endif /* __PIN_H_ */

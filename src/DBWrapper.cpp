@@ -17,6 +17,8 @@
 #include "Box.h"
 #include "Pin.h"
 
+namespace FastRoute {
+
 DBWrapper::DBWrapper(Netlist& netlist, Grid& grid, Parameters& parms) :
                 _netlist(&netlist), _grid(&grid), _parms(&parms) {
         _db = odb::dbDatabase::create();
@@ -522,4 +524,6 @@ void DBWrapper::initObstacles() {
                         _grid->addObstacle(layer, obstacleBox);
                 }
         }
+}
+
 }

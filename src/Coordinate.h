@@ -37,6 +37,8 @@
 #ifndef __COORDINATE_H_
 #define __COORDINATE_H_
 
+namespace FastRoute {
+
 typedef long long int DBU;
 
 class Coordinate {
@@ -60,5 +62,7 @@ public:
         DBU getY() const { return _y; }
         DBU dst(Coordinate);
 };
+
+}
 
 #endif /* __COORDINATE_H_ */

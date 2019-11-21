@@ -42,6 +42,8 @@
 #include <limits>
 #include "Coordinate.h"
 
+namespace FastRoute {
+
 class Box {
 private:
         Coordinate _lowerBound;
@@ -71,5 +73,7 @@ public:
         
         bool overlap(Box box);
 };
+
+}
 
 #endif /* __BOX_H_ */

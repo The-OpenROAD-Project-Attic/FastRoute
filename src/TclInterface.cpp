@@ -39,6 +39,8 @@
 #include "TclInterface.h"
 #include "FastRouteKernel.h"
 
+using namespace FastRoute;
+
 extern FastRouteKernel* fastRouteKernel;
 
 void help() {
