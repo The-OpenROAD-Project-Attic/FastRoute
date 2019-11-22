@@ -54,12 +54,19 @@ Command line example:
 FastRoute4-lefdef also have support for TCL commands. These commands can be used through script or through a TCL shell.
 Currently, the tool have extra options in TCL commands/shell in comparison with command line options.
 
+To run FastRoute4-lefdef in interactive mode (TCL shell and TCL script), run the following command line:
+
+````
+./FRlefdef -c 1
+````
+
 ##### Load and write files
 - **fr_import_lef** "path/to/file1.lef path/to/fileN.lef"
 - **fr_import_def** "path/to/file1.def path/to/fileN.def"
 - **set_output_file** "path/to/output.guide"
 
-##### Modify global and region capacities, minimum and maximum routing layer and set unidirectional route
+##### Modify tile size, global and region capacities, minimum and maximum routing layer and set unidirectional route
+- **set_pitches_in_tile** num_tracks_per_tile (INTEGER)
 - **set_capacity_adjustment** adjustment_percent (FLOAT)
 - **set_layer_adjustment** layer (INTEGER) adjusment_percentage (FLOAT)
 - **set_region_adjustment** lower_x (INTEGER) lower_y (INTEGER) upper_x (INTEGER) upper_y (INTEGER) layer (INTEGER) adjusment_percentage (FLOAT)
@@ -67,9 +74,9 @@ Currently, the tool have extra options in TCL commands/shell in comparison with 
 - **set_max_layer** layer_index (INTEGER)
 - **set_unidirectional_routing** BOOL
 
-NOTE 1: if you set unidirectionalRoute as "true", the minimum routing layer will be assigned as "2" automatically
-NOTE 2: the first routing layer of the design have index equal to 1
-NOTE 3: ***set_layer_adjustment*** and ***set_region_adjustment*** can be called multiple times, creating a list of adjustments
+###### NOTE 1: if you set unidirectionalRoute as "true", the minimum routing layer will be assigned as "2" automatically
+###### NOTE 2: the first routing layer of the design have index equal to 1
+###### NOTE 3: ***set_layer_adjustment*** and ***set_region_adjustment*** can be called multiple times, creating a list of adjustments
 
 ##### Flow commands
 - **start_fastroute:** Initialize FastRoute4-lefdef structures

@@ -47,6 +47,8 @@ extern void fr_import_def(const char* file);
 
 extern void set_output_file(const char * file);
 
+extern void set_pitches_in_tile(int numPitches);
+
 extern void set_capacity_adjustment(float adjustment);
 
 extern void set_layer_adjustment(int layer, float reductionPercentage);

@@ -90,7 +90,7 @@ public:
         void setUnidirectionalRoute(const bool unidirRoute) { _unidirectionalRoute = unidirRoute; }
         bool getUnidirectionalRoute() const { return _unidirectionalRoute; }
         
-        void setPitchesInTile(const bool pitchesInTile) { _pitchesInTile = pitchesInTile; }
+        void setPitchesInTile(const int pitchesInTile) { _pitchesInTile = pitchesInTile; }
         int getPitchesInTile() const { return _pitchesInTile; }
         
         void setInteractiveMode(bool enable) { _interactiveMode = enable; }

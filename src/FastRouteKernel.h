@@ -77,6 +77,7 @@ private:
         bool _unidirectionalRoute = false;
         int _fixLayer;
         bool _interactiveMode;
+        int _pitchesInTile = 15;
         
         // Layer adjustment variavles
         std::vector<int> _layersToAdjust;

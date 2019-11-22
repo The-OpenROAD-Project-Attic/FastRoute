@@ -38,10 +38,12 @@
 #include <iostream>
 #include "TclInterface.h"
 #include "FastRouteKernel.h"
+#include "Parameters.h"
 
 using namespace FastRoute;
 
 extern FastRouteKernel* fastRouteKernel;
+extern FastRoute::Parameters* parmsToFastRoute;
 
 void help() {
         std::cout << "Import LEF file:                         fr_import_lef \"path/to/file1.lef path/to/fileN.lef\"\n";
@@ -70,6 +72,10 @@ void fr_import_def(const char* file) {
 
 void set_output_file(const char * file) {
         fastRouteKernel->setOutputFile(file);
+}
+
+void set_pitches_in_tile(int numPitches) {
+        parmsToFastRoute->setPitchesInTile(numPitches);
 }
 
 void set_capacity_adjustment(float adjustment) {

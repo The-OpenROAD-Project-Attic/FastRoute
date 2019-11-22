@@ -17,6 +17,7 @@ exit
 # fr_import_def:                string input. set the def file that will be loaded
 # set_output_file:              string input. indicate the name of the generated guides file. do not need ".guide" extension
 
+# set_pitches_in_tile:          integer input. indicate the number of routing tracks per tile
 # set_capacity_adjustment:      float input. indicate the percentage reduction of each edge. optional
 # set_layer_adjustment:         integer, float inputs. indicate the percentage reduction of each edge in a specified layer
 # set_region_adjustment:        int, int, int, int, int, float. indicate the percentage reduction of each edge in a specified region

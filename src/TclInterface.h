@@ -47,6 +47,7 @@ void fr_import_def(const char* file);
 void set_output_file(const char * file);
 
 // Parms interface
+void set_pitches_in_tile(int numPitches);
 void set_capacity_adjustment(float adjustment);
 void set_layer_adjustment(int layer, float reductionPercentage);
 void set_region_adjustment(int minX, int minY, int maxX, int maxY, int layer, float reductionPercentage);
