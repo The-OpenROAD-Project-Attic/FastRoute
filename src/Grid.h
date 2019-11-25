@@ -61,6 +61,7 @@ private:
         bool _perfectRegularX;
         bool _perfectRegularY;
         int _numLayers;
+        int _pitchesInTile = 15;
         std::vector<int> _spacings;
         std::vector<int> _minWidths;
         std::vector<int> _horizontalEdgesCapacities;
@@ -112,6 +113,9 @@ public:
         bool isPerfectRegularY() const { return _perfectRegularY; }
         
         int getNumLayers() const { return _numLayers; }
+        
+        void setPitchesInTile(const int pitchesInTile) { _pitchesInTile = pitchesInTile; }
+        int getPitchesInTile() const { return _pitchesInTile; }
         
         std::vector<int> getSpacings() const { return _spacings; }
         std::vector<int> getMinWidths() const { return _minWidths; }

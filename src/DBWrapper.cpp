@@ -19,8 +19,8 @@
 
 namespace FastRoute {
 
-DBWrapper::DBWrapper(Netlist& netlist, Grid& grid, Parameters& parms) :
-                _netlist(&netlist), _grid(&grid), _parms(&parms) {
+DBWrapper::DBWrapper(Netlist& netlist, Grid& grid) :
+                _netlist(&netlist), _grid(&grid) {
         _db = odb::dbDatabase::create();
 }
 
@@ -93,8 +93,8 @@ void DBWrapper::initGrid() {
         long upperRightX = coreBBox->xMax() - lowerLeftX;
         long upperRightY = coreBBox->yMax() - lowerLeftY;
         
-        long tileWidth = _parms->getPitchesInTile() * trackSpacing;
-        long tileHeight = _parms->getPitchesInTile() * trackSpacing;
+        long tileWidth = _grid->getPitchesInTile() * trackSpacing;
+        long tileHeight = _grid->getPitchesInTile() * trackSpacing;
         
         int xGrids = std::floor((float)upperRightX / tileWidth);
         int yGrids = std::floor((float)upperRightY / tileHeight);

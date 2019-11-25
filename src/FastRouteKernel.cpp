@@ -49,7 +49,7 @@
 namespace FastRoute {
 
 FastRouteKernel::FastRouteKernel(Parameters& parms)
-    : _parms(&parms), _dbWrapper(_netlist, _grid, parms) {
+    : _parms(&parms), _dbWrapper(_netlist, _grid) {
         _interactiveMode = _parms->isInteractiveMode();
         if (_interactiveMode)
                 return;
@@ -848,7 +848,7 @@ void FastRouteKernel::printGrid() {
                     _grid.isPerfectRegularY() << " ********\n";
         std::cout << "******** Num layers: " << _grid.getNumLayers() << " ********\n";
         std::cout << "******** Num nets: " << _netlist.getNetCount() << " ********\n";
-        std::cout << "******** Tile size: " << _parms->getPitchesInTile() << "\n";
+        std::cout << "******** Tile size: " << _grid.getPitchesInTile() << "\n";
 }
 
 RoutingLayer FastRouteKernel::getRoutingLayerByIndex(int index) {

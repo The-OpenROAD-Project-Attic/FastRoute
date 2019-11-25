@@ -53,7 +53,6 @@ private:
         int _minRoutingLayer = 1;
         int _maxRoutingLayer = -1;
         bool _unidirectionalRoute = false;
-        int _pitchesInTile = 15;
         bool _interactiveMode = false;
         
         // Region adjustment variables
@@ -90,8 +89,6 @@ public:
         void setUnidirectionalRoute(const bool unidirRoute) { _unidirectionalRoute = unidirRoute; }
         bool getUnidirectionalRoute() const { return _unidirectionalRoute; }
         
-        void setPitchesInTile(const int pitchesInTile) { _pitchesInTile = pitchesInTile; }
-        int getPitchesInTile() const { return _pitchesInTile; }
         
         void setInteractiveMode(bool enable) { _interactiveMode = enable; }
         bool isInteractiveMode() const { return _interactiveMode; }

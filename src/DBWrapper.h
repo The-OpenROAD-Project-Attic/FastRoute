@@ -59,7 +59,7 @@ namespace FastRoute {
 class DBWrapper {
 public:
         DBWrapper() = default;
-        DBWrapper(Netlist& netlist, Grid& grid, Parameters& parms);
+        DBWrapper(Netlist& netlist, Grid& grid);
 
         void parseLEF(const std::string &filename);
         void parseDEF(const std::string &filename);
@@ -78,7 +78,6 @@ private:
         odb::dbChip     *_chip;
         Netlist         *_netlist = nullptr;
         Grid            *_grid = nullptr;
-        Parameters      *_parms = nullptr;
         bool            _verbose = false;
 };
 

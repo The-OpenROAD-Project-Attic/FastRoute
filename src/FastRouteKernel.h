@@ -77,7 +77,6 @@ private:
         bool _unidirectionalRoute = false;
         int _fixLayer;
         bool _interactiveMode;
-        int _pitchesInTile = 15;
         
         // Layer adjustment variavles
         std::vector<int> _layersToAdjust;
@@ -132,6 +131,7 @@ public:
         void setMaxRoutingLayer(const int maxLayer) { _maxRoutingLayer = maxLayer; }
         void setUnidirectionalRoute(const bool unidirRoute) { _unidirectionalRoute = unidirRoute; }
         void setOutputFile(const std::string& outfile) { _outfile = outfile; }
+        void setPitchesInTile(const int pitchesInTile) { _grid.setPitchesInTile(pitchesInTile); }
         
         void addLayerAdjustment(int layer, float reductionPercentage) {
                 _layersToAdjust.push_back(layer);
