@@ -74,10 +74,6 @@ int FastRouteKernel::run() {
                 _fixLayer = 1;
         }
         
-        std::cout << "Checking pin placement...\n";
-        checkPinPlacement();
-        std::cout << "Checking pin placement... Done!\n";
-        
         std::cout << "Initializing grid...\n";
         initGrid();
         std::cout << "Initializing grid... Done!\n";
@@ -235,6 +231,11 @@ void FastRouteKernel::setSpacingsAndMinWidths() {
 
 void FastRouteKernel::initializeNets() {
         _dbWrapper.initNetlist();
+        
+        std::cout << "----Checking pin placement...\n";
+        checkPinPlacement();
+        std::cout << "----Checking pin placement... Done!\n";
+        
         int idx = 0;
         _fastRoute.setNumberNets(_netlist.getNetCount());
         _fastRoute.setMaxNetDegree(_netlist.getMaxNetDegree());
@@ -1030,6 +1031,11 @@ void FastRouteKernel::checkPinPlacement() {
         std::map<int, std::vector<Coordinate>> mapLayerToPositions;
         
         for (Pin port : _netlist.getAllPorts()) {
+                if (port.getNumLayers() == 0) {
+                        std::cout << "ERROR: pin " << port.getName() << " does "
+                            "not have layer assignment\n";
+                        exit(1);
+                }
                 DBU layer = port.getLayers()[0]; // port have only one layer
                 
                 if (mapLayerToPositions[layer].size() == 0) {
