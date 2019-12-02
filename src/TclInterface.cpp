@@ -39,9 +39,9 @@
 #include "TclInterface.h"
 #include "FastRouteKernel.h"
 
-using namespace FastRoute;
+namespace FastRoute {
 
-extern FastRouteKernel* fastRouteKernel;
+FastRouteKernel* fastRouteKernel = new FastRouteKernel();
 
 void help() {
         std::cout << "Import LEF file:                         fr_import_lef \"path/to/file1.lef path/to/fileN.lef\"\n";
@@ -115,4 +115,6 @@ void run() {
 
 void write_guides() {
         fastRouteKernel->writeGuides();
+}
+
 }

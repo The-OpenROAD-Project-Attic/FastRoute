@@ -39,6 +39,8 @@
 #include "TclInterface.h"
 %}
 
+namespace FastRoute {
+
 extern void help();
 
 extern void fr_import_lef(const char* file);
@@ -68,3 +70,5 @@ extern void run_fastroute();
 extern void run();
 
 extern void write_guides();
+
+}

@@ -38,6 +38,8 @@
 #ifndef _TCL_INTERFACE_
 #define _TCL_INTERFACE_
 
+namespace FastRoute {
+
 // Help cmd
 void help();
 
@@ -61,5 +63,6 @@ void run_fastroute();
 void run();
 void write_guides();
 
+}
 #endif
 
