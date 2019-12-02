@@ -67,7 +67,7 @@ protected:
         std::vector<RoutingTracks> _allRoutingTracks;
 
 private:
-	DBWrapper _dbWrapper;
+        DBWrapper _dbWrapper;
         Parameters* _parms;
         FT _fastRoute;
         std::string _outfile = "output.guide";
@@ -77,6 +77,7 @@ private:
         bool _unidirectionalRoute = false;
         int _fixLayer;
         bool _interactiveMode;
+        unsigned _dbId;
         
         // Layer adjustment variavles
         std::vector<int> _layersToAdjust;
@@ -120,8 +121,7 @@ private:
         void checkPinPlacement();
 
 public:
-	FastRouteKernel(Parameters& parms);
-	FastRouteKernel() = default;
+	FastRouteKernel();
         
 	void parseLef(const std::string& file) { _dbWrapper.parseLEF(file); }
         void parseDef(const std::string& file) { _dbWrapper.parseDEF(file); }
@@ -132,6 +132,8 @@ public:
         void setUnidirectionalRoute(const bool unidirRoute) { _unidirectionalRoute = unidirRoute; }
         void setOutputFile(const std::string& outfile) { _outfile = outfile; }
         void setPitchesInTile(const int pitchesInTile) { _grid.setPitchesInTile(pitchesInTile); }
+        void setDbId(unsigned idx) { _dbId = idx; }
+        unsigned getDbId() { return _dbId; }
         
         void addLayerAdjustment(int layer, float reductionPercentage) {
                 _layersToAdjust.push_back(layer);

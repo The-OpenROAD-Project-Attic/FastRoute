@@ -46,6 +46,12 @@
 #include "RoutingLayer.h"
 #include "RoutingTracks.h"
 
+#include "db.h"
+#include "lefin.h"
+#include "defin.h"
+#include "defout.h"
+#include "dbShape.h"
+
 // Forward declaration protects FastRoute code from any
 // header file from the DB. FastRoute code keeps independent.
 namespace odb{
@@ -57,9 +63,12 @@ class dbTech;
 namespace FastRoute {
 
 class DBWrapper {
-public:
+public:        
         DBWrapper() = default;
-        DBWrapper(Netlist& netlist, Grid& grid);
+        DBWrapper(Netlist& netlist, Grid& grid) 
+                  : _netlist(&netlist),
+                  _grid(&grid) {
+        }
 
         void parseLEF(const std::string &filename);
         void parseDEF(const std::string &filename);
@@ -71,9 +80,10 @@ public:
         void computeSpacingsAndMinWidth();
         void initNetlist();
         void initObstacles();
+        
+        void setDB(unsigned idx) { _db = odb::dbDatabase::getDatabase(idx); }
 private:
         int selectedMetal = 3;
-
         odb::dbDatabase *_db;
         odb::dbChip     *_chip;
         Netlist         *_netlist = nullptr;

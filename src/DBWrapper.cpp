@@ -8,21 +8,11 @@
 #include <utility>
 #include <map>
 
-#include "db.h"
-#include "lefin.h"
-#include "defin.h"
-#include "defout.h"
-#include "dbShape.h"
 #include "Coordinate.h"
 #include "Box.h"
 #include "Pin.h"
 
 namespace FastRoute {
-
-DBWrapper::DBWrapper(Netlist& netlist, Grid& grid) :
-                _netlist(&netlist), _grid(&grid) {
-        _db = odb::dbDatabase::create();
-}
 
 void DBWrapper::parseLEF(const std::string &filename) {
         odb::lefin lefReader(_db, false);
@@ -43,6 +33,9 @@ void DBWrapper::parseDEF(const std::string &filename) {
 }
 
 void DBWrapper::initGrid() {
+        // WORKAROUND: Initializing _chip here while we don't have a "populateFastRoute" function"
+        _chip = _db->getChip();
+    
         odb::dbTech* tech = _db->getTech();
         if (!tech) {
                 std::cout << "[ERROR] obd::dbTech not initialized! Exiting...\n";

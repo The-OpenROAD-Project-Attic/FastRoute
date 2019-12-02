@@ -55,8 +55,7 @@ int TclAppInit(Tcl_Interp *interp) {
         return TCL_OK;
 }
 
-FastRoute::Parameters* parmsToFastRoute = nullptr;
-FastRoute::FastRouteKernel* fastRouteKernel = nullptr;
+extern FastRoute::FastRouteKernel* fastRouteKernel;
 
 int main(int argc, char** argv) {
         std::cout << " ######################################\n";
@@ -75,14 +74,11 @@ int main(int argc, char** argv) {
         std::time_t date = std::chrono::system_clock::to_time_t(
             std::chrono::system_clock::now());
         std::cout << " > Current time: " << std::ctime(&date);
-
-        parmsToFastRoute = new FastRoute::Parameters(argc, argv);
-        fastRouteKernel = new FastRoute::FastRouteKernel(*parmsToFastRoute);
         
-        if (parmsToFastRoute->isInteractiveMode()) {
+        if (FastRoute::fastRouteKernel->isInteractiveMode()) {
                 Tcl_Main(argc, argv, TclAppInit);
         } else {
-                fastRouteKernel->run();
+                FastRoute::fastRouteKernel->run();
         }
 
         return 0;
