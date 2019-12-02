@@ -36,10 +36,12 @@
 
 cmake_minimum_required(VERSION 3.1)
 
+set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
+
 project(FastRoute4-lefdef)
-set(BIN_NAME "FRlefdef")
-message(STATUS "FastRoute4.1 Lef/Def version")
-message(STATUS ${CMAKE_CURRENT_SOURCE_DIR})
+set(LIB_NAME "FR4lefdef")
 
 # Print info on build
 if( CMAKE_BUILD_TYPE MATCHES "[Dd][Ee][Bb][Uu][Gg]" )
@@ -57,45 +59,55 @@ if( CMAKE_BUILD_TYPE MATCHES "[Rr][Ee][Ll][Ee][Aa][Ss][Ee]" )
         message( "INFO: RELEASE BUILD" )
 endif()
 
-set(BUILD_TCL OFF CACHE BOOL "Build TCL SWIG module" FORCE)
-
 add_subdirectory(third_party/fastroute)
-add_subdirectory(third_party/OpenDB)
-add_subdirectory(third_party/flute3)
 
 set(CMAKE_CXX_STANDARD 11)
 set(Boost_USE_STATIC_LIBS ON)
 
-find_package(Boost COMPONENTS system filesystem program_options REQUIRED)
+find_package(Boost REQUIRED)
 
 # Finds tcl
 include(FindTCL.cmake)
 
 # Loads swig and generates the tcl wrapper file
 find_package(SWIG REQUIRED)
-add_custom_command(OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/src/TclInterfaceWrap.cpp
-        COMMAND ${SWIG_EXECUTABLE} -tcl8 -c++ -o ${CMAKE_CURRENT_SOURCE_DIR}/src/TclInterfaceWrap.cpp ${CMAKE_CURRENT_SOURCE_DIR}/src/TclInterface.i
-        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-        COMMENT "Generating swig wrapper"
+
+set(FASTROUTE_WRAP ${FASTROUTE_HOME}/src/TclInterfaceWrap.cpp)
+set(FASTROUTE_TCL_INIT ${CMAKE_CURRENT_BINARY_DIR}/FastrouteTclInitVar.cc)
+
+add_custom_command(OUTPUT ${FASTROUTE_WRAP}
+        COMMAND ${SWIG_EXECUTABLE} -namespace -prefix FastRoute -tcl8 -c++ -o ${FASTROUTE_WRAP} ${FASTROUTE_HOME}/src/TclInterface.i
+        WORKING_DIRECTORY ${FASTROUTE_HOME}/src
 )
-add_custom_target(tclInterfaceWrapper DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/src/TclInterfaceWrap.cpp)
+
+add_custom_command(OUTPUT ${FASTROUTE_TCL_INIT}
+        COMMAND ${OPENSTA_HOME}/etc/TclEncode.tcl ${FASTROUTE_TCL_INIT} fastroute_tcl_inits ${FASTROUTE_HOME}/src/fastroute.tcl
+        WORKING_DIRECTORY ${FASTROUTE_HOME}/src
+        DEPENDS ${FASTROUTE_HOME}/src/fastroute.tcl ${OPENSTA_HOME}/etc/TclEncode.tcl
+)
 
 file(GLOB_RECURSE SRC_FILES ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp)
-set(SRC_FILES ${SRC_FILES} ${CMAKE_CURRENT_SOURCE_DIR}/src/TclInterfaceWrap.cpp)
 
-add_executable(${BIN_NAME} ${SRC_FILES})
+list(REMOVE_ITEM SRC_FILES ${CMAKE_CURRENT_SOURCE_DIR}/src/Main.cpp)
+list(REMOVE_ITEM SRC_FILES ${CMAKE_CURRENT_SOURCE_DIR}/src/Parameters.h)
+list(REMOVE_ITEM SRC_FILES ${CMAKE_CURRENT_SOURCE_DIR}/src/Parameters.cpp)
 
-add_dependencies(${BIN_NAME} tclInterfaceWrapper)
+add_library(${LIB_NAME} 
+        ${SRC_FILES}
+        ${FASTROUTE_WRAP}
+        ${FASTROUTE_TCL_INIT})
 
-target_include_directories(${BIN_NAME} PUBLIC
+target_include_directories(${LIB_NAME} PUBLIC
         ${Boost_INCLUDE_DIR}
+        ${CMAKE_CURRENT_SOURCE_DIR}/include
         ${CMAKE_CURRENT_SOURCE_DIR}/third_party
         ${CMAKE_CURRENT_SOURCE_DIR}/third_party/fastroute/include
-        ${CMAKE_CURRENT_SOURCE_DIR}/third_party/flute
-        ${CMAKE_CURRENT_SOURCE_DIR}/third_party/OpenDB/include/opendb
+        ${OPENDB_HOME}/include/
+        ${OPENROAD_HOME}/include
+        ${OPENSTA_HOME}/app
         )
 
-target_link_libraries(${BIN_NAME}
+target_link_libraries(${LIB_NAME}
         ${Boost_LIBRARIES}
         opendb
         lefin
