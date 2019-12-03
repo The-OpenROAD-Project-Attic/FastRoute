@@ -15,4 +15,5 @@ proc run_global_routing { args } {
 
     FastRoute::start_fastroute
     FastRoute::run_fastroute
+    FastRoute::write_guides
 }
