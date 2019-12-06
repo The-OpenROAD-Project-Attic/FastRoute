@@ -63,9 +63,6 @@ add_subdirectory(third_party/OpenDB)
 add_subdirectory(third_party/flute3)
 
 set(CMAKE_CXX_STANDARD 11)
-set(Boost_USE_STATIC_LIBS ON)
-
-find_package(Boost COMPONENTS system filesystem program_options REQUIRED)
 
 # Finds tcl
 include(FindTCL.cmake)
@@ -87,7 +84,6 @@ add_executable(${BIN_NAME} ${SRC_FILES})
 add_dependencies(${BIN_NAME} tclInterfaceWrapper)
 
 target_include_directories(${BIN_NAME} PUBLIC
-        ${Boost_INCLUDE_DIR}
         ${CMAKE_CURRENT_SOURCE_DIR}/third_party
         ${CMAKE_CURRENT_SOURCE_DIR}/third_party/fastroute/include
         ${CMAKE_CURRENT_SOURCE_DIR}/third_party/flute
@@ -95,7 +91,6 @@ target_include_directories(${BIN_NAME} PUBLIC
         )
 
 target_link_libraries(${BIN_NAME}
-        ${Boost_LIBRARIES}
         opendb
         lefin
         defin

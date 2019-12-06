@@ -37,8 +37,6 @@
 cmake_minimum_required (VERSION 3.1)
 project (FastRoute4.1)
 
-message("-- Will generate lib")
-
 set(LIB_NAME "FastRoute4.1")
 
 set(CMAKE_CXX_STANDARD 11)

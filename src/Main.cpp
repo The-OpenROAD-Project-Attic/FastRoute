@@ -40,14 +40,13 @@
 #include <ctime>
 #include <tcl.h>
 
-#include "Parameters.h"
 #include "FastRouteKernel.h"
 
 extern "C" {
         extern int Fastroute_Init(Tcl_Interp *interp);
 }
 int TclAppInit(Tcl_Interp *interp) {
-        std::cout << " > Running FastRoute4-lefdef in interactive mode.\n";
+        std::cout << " > Running FastRoute in interactive mode.\n";
         
         Tcl_Init(interp);
         Fastroute_Init(interp);
@@ -55,7 +54,7 @@ int TclAppInit(Tcl_Interp *interp) {
         return TCL_OK;
 }
 
-FastRoute::Parameters* parmsToFastRoute = nullptr;
+//FastRoute::Parameters* parmsToFastRoute = nullptr;
 FastRoute::FastRouteKernel* fastRouteKernel = nullptr;
 
 int main(int argc, char** argv) {
@@ -72,18 +71,10 @@ int main(int argc, char** argv) {
         std::cout << " ######################################\n";
         std::cout << "\n";
 
-        std::time_t date = std::chrono::system_clock::to_time_t(
-            std::chrono::system_clock::now());
-        std::cout << " > Current time: " << std::ctime(&date);
-
-        parmsToFastRoute = new FastRoute::Parameters(argc, argv);
-        fastRouteKernel = new FastRoute::FastRouteKernel(*parmsToFastRoute);
+//        parmsToFastRoute = new FastRoute::Parameters(argc, argv);
+        fastRouteKernel = new FastRoute::FastRouteKernel();
         
-        if (parmsToFastRoute->isInteractiveMode()) {
-                Tcl_Main(argc, argv, TclAppInit);
-        } else {
-                fastRouteKernel->run();
-        }
+        Tcl_Main(argc, argv, TclAppInit);
 
         return 0;
 }

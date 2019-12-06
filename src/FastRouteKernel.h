@@ -51,7 +51,6 @@
 #include "Box.h"
 #include "DBWrapper.h"
 #include "Grid.h"
-#include "Parameters.h"
 #include "Netlist.h"
 #include "RoutingLayer.h"
 #include "RoutingTracks.h"
@@ -68,7 +67,6 @@ protected:
 
 private:
 	DBWrapper _dbWrapper;
-        Parameters* _parms;
         FT _fastRoute;
         std::string _outfile = "output.guide";
         float _adjustment = 0.0;
@@ -77,6 +75,7 @@ private:
         bool _unidirectionalRoute = false;
         int _fixLayer;
         bool _interactiveMode;
+        bool _clockNetRouting;
         
         // Layer adjustment variavles
         std::vector<int> _layersToAdjust;
@@ -120,8 +119,7 @@ private:
         void checkPinPlacement();
 
 public:
-	FastRouteKernel(Parameters& parms);
-	FastRouteKernel() = default;
+	FastRouteKernel();
         
 	void parseLef(const std::string& file) { _dbWrapper.parseLEF(file); }
         void parseDef(const std::string& file) { _dbWrapper.parseDEF(file); }
@@ -130,6 +128,7 @@ public:
         void setMinRoutingLayer(const int minLayer) { _minRoutingLayer = minLayer; }
         void setMaxRoutingLayer(const int maxLayer) { _maxRoutingLayer = maxLayer; }
         void setUnidirectionalRoute(const bool unidirRoute) { _unidirectionalRoute = unidirRoute; }
+        void setClockNetRouting(const bool clockNetRouting) { _clockNetRouting = clockNetRouting; }
         void setOutputFile(const std::string& outfile) { _outfile = outfile; }
         void setPitchesInTile(const int pitchesInTile) { _grid.setPitchesInTile(pitchesInTile); }
         

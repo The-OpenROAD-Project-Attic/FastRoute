@@ -48,27 +48,12 @@
 
 namespace FastRoute {
 
-FastRouteKernel::FastRouteKernel(Parameters& parms)
-    : _parms(&parms), _dbWrapper(_netlist, _grid) {
-        _interactiveMode = _parms->isInteractiveMode();
-        if (_interactiveMode)
-                return;
-        _adjustment = _parms->getAdjustment();
-        _minRoutingLayer = _parms->getMinRoutingLayer();
-        _maxRoutingLayer = _parms->getMaxRoutingLayer();
-        _unidirectionalRoute = _parms->getUnidirectionalRoute();
-        _outfile = _parms->getOutputFile();
+FastRouteKernel::FastRouteKernel() {
+        _dbWrapper = DBWrapper(_netlist, _grid) ;
+        _interactiveMode = true;
 }
 
-int FastRouteKernel::run() {
-        _parms->printAll();
-        if (!_interactiveMode) {
-                std::cout << "Parsing input files...\n";
-                _dbWrapper.parseLEF(_parms->getInputLefFile()); 
-                _dbWrapper.parseDEF(_parms->getInputDefFile());
-                std::cout << "Parsing input files... Done!\n";
-        }
-        
+int FastRouteKernel::run() {        
         if (_unidirectionalRoute) {
                 _minRoutingLayer = 2;
                 _fixLayer = 1;
