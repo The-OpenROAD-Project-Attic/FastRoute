@@ -75,9 +75,10 @@ private:
         bool _unidirectionalRoute = false;
         int _fixLayer;
         bool _interactiveMode;
+        bool _clockNetRouting;
         unsigned _dbId;
         
-        // Layer adjustment variavles
+        // Layer adjustment variables
         std::vector<int> _layersToAdjust;
         std::vector<float> _layersReductionPercentage;
         
@@ -128,6 +129,7 @@ public:
         void setMinRoutingLayer(const int minLayer) { _minRoutingLayer = minLayer; }
         void setMaxRoutingLayer(const int maxLayer) { _maxRoutingLayer = maxLayer; }
         void setUnidirectionalRoute(const bool unidirRoute) { _unidirectionalRoute = unidirRoute; }
+        void setClockNetRouting(const bool clockNetRouting) { _clockNetRouting = clockNetRouting; }
         void setOutputFile(const std::string& outfile) { _outfile = outfile; }
         void setPitchesInTile(const int pitchesInTile) { _grid.setPitchesInTile(pitchesInTile); }
         void setDbId(unsigned idx) { _dbId = idx; }

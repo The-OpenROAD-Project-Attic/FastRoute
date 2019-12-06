@@ -232,6 +232,10 @@ void FastRouteKernel::initializeNets() {
                         continue;
                 }
                 
+                if (_clockNetRouting && net.getSignalType() != "CLOCK") {
+                        continue;
+                }
+                
                 _netsDegree[net.getName()] = net.getNumPins();
                 
                 std::vector<FastRoute::PIN> pins;

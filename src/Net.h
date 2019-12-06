@@ -53,14 +53,17 @@ namespace FastRoute {
 class Net {
 private:
         std::string _name;
+        std::string _signalType;
         std::vector<Pin> _pins;
         
 public:
         Net() = default;
-        Net(const std::string name, const std::vector<Pin> pins)
-            : _name(name), _pins(pins) {}
+        Net(const std::string name, const std::string signalType,
+            const std::vector<Pin> pins)
+            : _name(name), _signalType(signalType), _pins(pins) {}
         
         std::string getName() const { return _name; }
+        std::string getSignalType() const { return _signalType; }
         std::vector<Pin> getPins() const { return _pins; }
         int getNumPins() const { return _pins.size(); }
 };

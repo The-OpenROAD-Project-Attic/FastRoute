@@ -336,6 +336,7 @@ void DBWrapper::initNetlist() {
                         continue;
                 }
                 std::string netName =currNet->getConstName();
+                std::string signalType = currNet->getSigType().getString();
                 
                 // Iterate through all instance pins
                 odb::dbSet<odb::dbITerm> iTerms = currNet->getITerms();
@@ -451,7 +452,7 @@ void DBWrapper::initNetlist() {
                         Pin pin = Pin(pinName, pinPos, pinLayers, pinBoxes, netName, true);
                         netPins.push_back(pin);
                 }
-                _netlist->addNet(netName, netPins);
+                _netlist->addNet(netName, signalType, netPins);
         }
 }
 
