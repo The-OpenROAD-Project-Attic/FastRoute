@@ -40,8 +40,8 @@ set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-project(FastRoute4-lefdef)
-set(LIB_NAME "FR4lefdef")
+project(FastRoute)
+set(LIB_NAME "FastRoute")
 
 # Print info on build
 if( CMAKE_BUILD_TYPE MATCHES "[Dd][Ee][Bb][Uu][Gg]" )
@@ -112,7 +112,7 @@ target_link_libraries(${LIB_NAME}
         opendb
         lefin
         defin
-        FastRoute
+        FastRoute4.1
         flute
         tm
         zlib
