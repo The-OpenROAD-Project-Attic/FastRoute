@@ -64,8 +64,6 @@ add_subdirectory(third_party/fastroute)
 set(CMAKE_CXX_STANDARD 11)
 set(Boost_USE_STATIC_LIBS ON)
 
-find_package(Boost REQUIRED)
-
 # Finds tcl
 include(FindTCL.cmake)
 
@@ -98,7 +96,6 @@ add_library(${LIB_NAME}
         ${FASTROUTE_TCL_INIT})
 
 target_include_directories(${LIB_NAME} PUBLIC
-        ${Boost_INCLUDE_DIR}
         ${CMAKE_CURRENT_SOURCE_DIR}/include
         ${CMAKE_CURRENT_SOURCE_DIR}/third_party
         ${CMAKE_CURRENT_SOURCE_DIR}/third_party/fastroute/include
@@ -108,7 +105,6 @@ target_include_directories(${LIB_NAME} PUBLIC
         )
 
 target_link_libraries(${LIB_NAME}
-        ${Boost_LIBRARIES}
         opendb
         lefin
         defin

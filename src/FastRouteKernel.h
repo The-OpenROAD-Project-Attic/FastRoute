@@ -51,7 +51,6 @@
 #include "Box.h"
 #include "DBWrapper.h"
 #include "Grid.h"
-#include "Parameters.h"
 #include "Netlist.h"
 #include "RoutingLayer.h"
 #include "RoutingTracks.h"
@@ -68,7 +67,6 @@ protected:
 
 private:
         DBWrapper _dbWrapper;
-        Parameters* _parms;
         FT _fastRoute;
         std::string _outfile = "output.guide";
         float _adjustment = 0.0;
