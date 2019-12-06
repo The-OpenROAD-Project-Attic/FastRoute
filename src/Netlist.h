@@ -65,7 +65,7 @@ public:
         Net getNetByName(std::string name);
         
         
-        void addNet(const std::string& name, const std::vector<Pin>& pins);
+        void addNet(const std::string& name, const std::string& signalType, const std::vector<Pin>& pins);
         
         int getMaxNetDegree();
         

@@ -77,7 +77,7 @@ private:
         bool _interactiveMode;
         bool _clockNetRouting;
         
-        // Layer adjustment variavles
+        // Layer adjustment variables
         std::vector<int> _layersToAdjust;
         std::vector<float> _layersReductionPercentage;
         
