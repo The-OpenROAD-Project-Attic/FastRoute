@@ -36,9 +36,8 @@
 
 cmake_minimum_required(VERSION 3.1)
 
-project(FastRoute4-lefdef)
-set(BIN_NAME "FRlefdef")
-message(STATUS "FastRoute4.1 Lef/Def version")
+project(FastRoute)
+set(BIN_NAME "FastRoute")
 message(STATUS ${CMAKE_CURRENT_SOURCE_DIR})
 
 # Print info on build
@@ -100,7 +99,7 @@ target_link_libraries(${BIN_NAME}
         opendb
         lefin
         defin
-        FastRoute
+        FastRoute4.1
         flute
         tm
         zlib
