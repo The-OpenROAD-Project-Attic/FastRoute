@@ -1,7 +1,7 @@
-FastRoute4-lefdef
+FastRoute
 ======================
 
-**FastRoute4-lefdef** is an open-source global router.
+**FastRoute** is an open-source global router.
 
 The algorithm base is from FastRoute4.1, and the database comes from [OpenDB](https://github.com/The-OpenROAD-Project/OpenDB)
 
@@ -20,8 +20,8 @@ The FastRoute4.1 version was received from <yuexu@iastate.edu> on June 15, 2019,
 ### How to Compile
 
 ````
-git clone --recursive https://github.com/The-OpenROAD-Project/FastRoute4-lefdef
-cd FastRoute4-lefdef/
+git clone --recursive https://github.com/The-OpenROAD-Project/FastRoute
+cd FastRoute/
 make PARALLEL=nthreads
 ````
 NOTE: use `PARALLEL=nthreads` instead of `-j nthreads`
@@ -30,7 +30,7 @@ NOTE: use `PARALLEL=nthreads` instead of `-j nthreads`
 
 ##### Arguments
 
-To properly run FastRoute4-lefdef there are a few mandatory arguments that must be defined:
+To properly run FastRoute there are a few mandatory arguments that must be defined:
 
 - **l** : Input LEF file (e.g.: -l input.lef)
 - **d** : Input DEF file (e.g.: -d input.def)
@@ -46,18 +46,18 @@ There are optional flags that can be used:
 Command line example:
 
 ````
-./FRlefdef -l input.lef -d input.def -o output.guide -a 0.3 -n 2 -m 9 -u false
+./FastRoute -l input.lef -d input.def -o output.guide -a 0.3 -n 2 -m 9 -u false
 ````
 
 ##### TCL commands
 
-FastRoute4-lefdef also have support for TCL commands. These commands can be used through script or through a TCL shell.
+FastRoute also have support for TCL commands. These commands can be used through script or through a TCL shell.
 Currently, the tool have extra options in TCL commands/shell in comparison with command line options.
 
-To run FastRoute4-lefdef in interactive mode (TCL shell and TCL script), run the following command line:
+To run FastRoute in interactive mode (TCL shell and TCL script), run the following command line:
 
 ````
-./FRlefdef -c 1
+./FastRoute -c 1
 ````
 
 ##### Load and write files
@@ -79,7 +79,7 @@ To run FastRoute4-lefdef in interactive mode (TCL shell and TCL script), run the
 ###### NOTE 3: ***set_layer_adjustment*** and ***set_region_adjustment*** can be called multiple times, creating a list of adjustments
 
 ##### Flow commands
-- **start_fastroute:** Initialize FastRoute4-lefdef structures
+- **start_fastroute:** Initialize FastRoute structures
 - **run_fastroute:** Run only FastRoute4.1 algorithm, without write guides
 - **write_guides:** Write guides file. Should be called only after ***run_fastroute***
 - **run:** Run entire flow
@@ -136,9 +136,9 @@ To run FastRoute4-lefdef in interactive mode (TCL shell and TCL script), run the
 
 Implemented API to access FastRoute4 as a static library
 - Declarations of the functions are in the following path: 	\
-        `FastRoute4-lefdef/third_party/fastroute/include/FastRoute.h`
+        `FastRoute/third_party/fastroute/include/FastRoute.h`
 - Implementation of the functions are in the following path: \
-        `FastRoute4-lefdef/third_party/fastroute/src/FastRoute.cpp`
+        `FastRoute/third_party/fastroute/src/FastRoute.cpp`
 
 The following functions were implemented:
 
