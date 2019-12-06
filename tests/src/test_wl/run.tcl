@@ -69,7 +69,7 @@ set gold_wl "${curr_test}/golden.wl"
 set script_file "${curr_test}/routeDesign.tcl"
 set output_file "${curr_test}/${test_name}.guide"
 set output_log "${curr_test}/${test_name}.log"
-set bin_file "$base_dir/FRlefdef"
+set bin_file "$base_dir/FastRoute"
 
 runFastRoute $test_name $curr_test $inputs_dir $bin_file $output_log
 
