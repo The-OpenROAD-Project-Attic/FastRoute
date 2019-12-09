@@ -70,7 +70,7 @@ include(FindTCL.cmake)
 # Loads swig and generates the tcl wrapper file
 find_package(SWIG REQUIRED)
 
-set(FASTROUTE_WRAP ${FASTROUTE_HOME}/src/TclInterfaceWrap.cpp)
+set(FASTROUTE_WRAP ${CMAKE_CURRENT_BINARY_DIR}/TclInterfaceWrap.cpp)
 set(FASTROUTE_TCL_INIT ${CMAKE_CURRENT_BINARY_DIR}/FastrouteTclInitVar.cc)
 
 add_custom_command(OUTPUT ${FASTROUTE_WRAP}
@@ -102,6 +102,7 @@ target_include_directories(${LIB_NAME} PUBLIC
         ${OPENDB_HOME}/include/
         ${OPENROAD_HOME}/include
         ${OPENSTA_HOME}/app
+        ${FASTROUTE_HOME}/src
         )
 
 target_link_libraries(${LIB_NAME}
