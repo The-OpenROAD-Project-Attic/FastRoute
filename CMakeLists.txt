@@ -69,15 +69,15 @@ include(FindTCL.cmake)
 
 # Loads swig and generates the tcl wrapper file
 find_package(SWIG REQUIRED)
-add_custom_command(OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/src/TclInterfaceWrap.cpp
-        COMMAND ${SWIG_EXECUTABLE} -tcl8 -c++ -o ${CMAKE_CURRENT_SOURCE_DIR}/src/TclInterfaceWrap.cpp ${CMAKE_CURRENT_SOURCE_DIR}/src/TclInterface.i
+add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/TclInterfaceWrap.cpp
+        COMMAND ${SWIG_EXECUTABLE} -tcl8 -c++ -o ${CMAKE_CURRENT_BINARY_DIR}/TclInterfaceWrap.cpp ${CMAKE_CURRENT_SOURCE_DIR}/src/TclInterface.i
         WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
         COMMENT "Generating swig wrapper"
 )
-add_custom_target(tclInterfaceWrapper DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/src/TclInterfaceWrap.cpp)
+add_custom_target(tclInterfaceWrapper DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/TclInterfaceWrap.cpp)
 
 file(GLOB_RECURSE SRC_FILES ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp)
-set(SRC_FILES ${SRC_FILES} ${CMAKE_CURRENT_SOURCE_DIR}/src/TclInterfaceWrap.cpp)
+set(SRC_FILES ${SRC_FILES} ${CMAKE_CURRENT_BINARY_DIR}/TclInterfaceWrap.cpp)
 
 add_executable(${BIN_NAME} ${SRC_FILES})
 
@@ -88,6 +88,7 @@ target_include_directories(${BIN_NAME} PUBLIC
         ${CMAKE_CURRENT_SOURCE_DIR}/third_party/fastroute/include
         ${CMAKE_CURRENT_SOURCE_DIR}/third_party/flute
         ${CMAKE_CURRENT_SOURCE_DIR}/third_party/OpenDB/include/opendb
+        ${CMAKE_CURRENT_SOURCE_DIR}/src
         )
 
 target_link_libraries(${BIN_NAME}
