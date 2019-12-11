@@ -97,7 +97,6 @@ add_library(${LIB_NAME}
 
 target_include_directories(${LIB_NAME} PUBLIC
         ${CMAKE_CURRENT_SOURCE_DIR}/include
-        ${CMAKE_CURRENT_SOURCE_DIR}/third_party
         ${CMAKE_CURRENT_SOURCE_DIR}/third_party/fastroute/include
         ${OPENDB_HOME}/include/
         ${OPENROAD_HOME}/include
@@ -106,13 +105,4 @@ target_include_directories(${LIB_NAME} PUBLIC
         )
 
 target_link_libraries(${LIB_NAME}
-        opendb
-        lefin
-        defin
-        FastRoute4.1
-        flute
-        tm
-        zlib
-        zutil
-        rt
-        )
+        FastRoute4.1)
