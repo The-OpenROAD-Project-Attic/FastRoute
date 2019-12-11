@@ -43,10 +43,6 @@ namespace FastRoute {
 
 extern void help();
 
-extern void fr_import_lef(const char* file);
-
-extern void fr_import_def(const char* file);
-
 extern void set_output_file(const char * file);
 
 extern void set_pitches_in_tile(int numPitches);

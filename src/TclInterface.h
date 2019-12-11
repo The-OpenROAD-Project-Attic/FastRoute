@@ -43,9 +43,7 @@ namespace FastRoute {
 // Help cmd
 void help();
 
-// LEF/DEF/Guides interface
-void fr_import_lef(const char* file);
-void fr_import_def(const char* file);
+// Guides interface
 void set_output_file(const char * file);
 
 // Parms interface

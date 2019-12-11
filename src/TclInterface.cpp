@@ -44,8 +44,6 @@ namespace FastRoute {
 FastRouteKernel* fastRouteKernel = new FastRouteKernel();
 
 void help() {
-        std::cout << "Import LEF file:                         fr_import_lef \"path/to/file1.lef path/to/fileN.lef\"\n";
-        std::cout << "Import DEF file:                         fr_import_def \"path/to/file1.def path/to/fileN.def\"\n";
         std::cout << "Set output file name:                    set_output_file \"path/to/output.guide\"\n";
         std::cout << "User defined global capacity adjustment: set_capacity_adjustment FLOAT\n";
         std::cout << "User defined region capacity adjustment: set_region_adjustment INTEGER INTEGER INTEGER INTEGER INTEGER FLOAT\n";
@@ -56,16 +54,6 @@ void help() {
         std::cout << "Run FastRoute4-lefdef:                   run_fastroute\n";
         std::cout << "Write output guides:                     write_guides\n";
         std::cout << "Run FastRoute4-lefdef entire flow:       run\n";
-}
-
-void fr_import_lef(const char* file) {
-        std::cout << " > Importing LEF file \"" << file << "\"\n";
-        fastRouteKernel->parseLef(file);
-}
-
-void fr_import_def(const char* file) {
-        std::cout << " > Importing DEF file \"" << file << "\"\n";
-        fastRouteKernel->parseDef(file);
 }
 
 void set_output_file(const char * file) {
