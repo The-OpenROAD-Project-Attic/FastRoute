@@ -122,9 +122,6 @@ private:
 public:
 	FastRouteKernel();
         
-	void parseLef(const std::string& file) { _dbWrapper.parseLEF(file); }
-        void parseDef(const std::string& file) { _dbWrapper.parseDEF(file); }
-        
         void setAdjustment(const float adjustment) { _adjustment = adjustment; }
         void setMinRoutingLayer(const int minLayer) { _minRoutingLayer = minLayer; }
         void setMaxRoutingLayer(const int maxLayer) { _maxRoutingLayer = maxLayer; }
