@@ -39,7 +39,7 @@
 #include "MakeFastRoute.h"
 #include "openroad/OpenRoad.hh"
 #include "FastRouteKernel.h"
-#include "db.h"
+#include "opendb/db.h"
 
 namespace sta {
 // Tcl files encoded into strings.
@@ -64,7 +64,6 @@ void *makeFastRoute()
 void deleteFastRoute(void *fastroute)
 {
         delete FastRoute::fastRouteKernel;
-        delete fastroute;
 }
 
 void initFastRoute(OpenRoad *openroad)

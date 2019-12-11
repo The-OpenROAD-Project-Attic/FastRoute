@@ -14,24 +14,6 @@
 
 namespace FastRoute {
 
-void DBWrapper::parseLEF(const std::string &filename) {
-        odb::lefin lefReader(_db, false);
-        lefReader.createTechAndLib("testlib", filename.c_str());
-}
-
-void DBWrapper::parseDEF(const std::string &filename) {
-        odb::defin defReader(_db);
-
-        std::vector<odb::dbLib *> searchLibs;
-        odb::dbSet<odb::dbLib> libs = _db->getLibs();
-        odb::dbSet<odb::dbLib>::iterator itr;
-        for(itr = libs.begin(); itr != libs.end(); ++itr) {
-                searchLibs.push_back(*itr);
-        }
-        
-        _chip = defReader.createChip(searchLibs, filename.c_str());
-}
-
 void DBWrapper::initGrid() {
         // WORKAROUND: Initializing _chip here while we don't have a "populateFastRoute" function"
         _chip = _db->getChip();

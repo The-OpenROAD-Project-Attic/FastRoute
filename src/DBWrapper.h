@@ -45,11 +45,11 @@
 #include "RoutingLayer.h"
 #include "RoutingTracks.h"
 
-#include "db.h"
-#include "lefin.h"
-#include "defin.h"
-#include "defout.h"
-#include "dbShape.h"
+#include "opendb/db.h"
+#include "opendb/lefin.h"
+#include "opendb/defin.h"
+#include "opendb/defout.h"
+#include "opendb/dbShape.h"
 
 // Forward declaration protects FastRoute code from any
 // header file from the DB. FastRoute code keeps independent.
@@ -68,9 +68,6 @@ public:
                   : _netlist(&netlist),
                   _grid(&grid) {
         }
-
-        void parseLEF(const std::string &filename);
-        void parseDEF(const std::string &filename);
         
         void initGrid();
         void initRoutingLayers(std::vector<RoutingLayer>& routingLayers);
