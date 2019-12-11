@@ -50,8 +50,8 @@ Net Netlist::getNetByName(std::string name) {
         return choosenNet;
 }
 
-void Netlist::addNet(const std::string& name, const std::vector<Pin>& pins) {
-        Net net = Net(name, pins);
+void Netlist::addNet(const std::string& name, const std::string& signalType, const std::vector<Pin>& pins) {
+        Net net = Net(name, signalType, pins);
         _nets.push_back(net);
         _netCount++;
 }

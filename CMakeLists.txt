@@ -36,9 +36,8 @@
 
 cmake_minimum_required(VERSION 3.1)
 
-project(FastRoute4-lefdef)
-set(BIN_NAME "FRlefdef")
-message(STATUS "FastRoute4.1 Lef/Def version")
+project(FastRoute)
+set(BIN_NAME "FastRoute")
 message(STATUS ${CMAKE_CURRENT_SOURCE_DIR})
 
 # Print info on build
@@ -64,43 +63,39 @@ add_subdirectory(third_party/OpenDB)
 add_subdirectory(third_party/flute3)
 
 set(CMAKE_CXX_STANDARD 11)
-set(Boost_USE_STATIC_LIBS ON)
-
-find_package(Boost COMPONENTS system filesystem program_options REQUIRED)
 
 # Finds tcl
 include(FindTCL.cmake)
 
 # Loads swig and generates the tcl wrapper file
 find_package(SWIG REQUIRED)
-add_custom_command(OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/src/TclInterfaceWrap.cpp
-        COMMAND ${SWIG_EXECUTABLE} -tcl8 -c++ -o ${CMAKE_CURRENT_SOURCE_DIR}/src/TclInterfaceWrap.cpp ${CMAKE_CURRENT_SOURCE_DIR}/src/TclInterface.i
+add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/TclInterfaceWrap.cpp
+        COMMAND ${SWIG_EXECUTABLE} -tcl8 -c++ -o ${CMAKE_CURRENT_BINARY_DIR}/TclInterfaceWrap.cpp ${CMAKE_CURRENT_SOURCE_DIR}/src/TclInterface.i
         WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
         COMMENT "Generating swig wrapper"
 )
-add_custom_target(tclInterfaceWrapper DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/src/TclInterfaceWrap.cpp)
+add_custom_target(tclInterfaceWrapper DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/TclInterfaceWrap.cpp)
 
 file(GLOB_RECURSE SRC_FILES ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp)
-set(SRC_FILES ${SRC_FILES} ${CMAKE_CURRENT_SOURCE_DIR}/src/TclInterfaceWrap.cpp)
+set(SRC_FILES ${SRC_FILES} ${CMAKE_CURRENT_BINARY_DIR}/TclInterfaceWrap.cpp)
 
 add_executable(${BIN_NAME} ${SRC_FILES})
 
 add_dependencies(${BIN_NAME} tclInterfaceWrapper)
 
 target_include_directories(${BIN_NAME} PUBLIC
-        ${Boost_INCLUDE_DIR}
         ${CMAKE_CURRENT_SOURCE_DIR}/third_party
         ${CMAKE_CURRENT_SOURCE_DIR}/third_party/fastroute/include
         ${CMAKE_CURRENT_SOURCE_DIR}/third_party/flute
-        ${CMAKE_CURRENT_SOURCE_DIR}/third_party/OpenDB/include/opendb
+        ${CMAKE_CURRENT_SOURCE_DIR}/third_party/OpenDB/include
+        ${CMAKE_CURRENT_SOURCE_DIR}/src
         )
 
 target_link_libraries(${BIN_NAME}
-        ${Boost_LIBRARIES}
         opendb
         lefin
         defin
-        FastRoute
+        FastRoute4.1
         flute
         tm
         zlib

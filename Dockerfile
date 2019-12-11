@@ -26,16 +26,16 @@ RUN wget https://cmake.org/files/v3.9/cmake-3.9.0-Linux-x86_64.sh && \
 
 RUN yum install -y zlib-devel libpng-devel epel-release qt5-qtbase-devel
 
-COPY . /FastRoute4-lefdef
-RUN mkdir /FastRoute4-lefdef/build
-WORKDIR /FastRoute4-lefdef/build
-RUN cmake -DCMAKE_BUILD_TYPE=Release -DBOOST_ROOT=/opt/rh/rh-mongodb32/root/usr ..  && \
+COPY . /FastRoute
+RUN mkdir /FastRoute/build
+WORKDIR /FastRoute/build
+RUN cmake -DCMAKE_BUILD_TYPE=Release && \
     make
 
 # runtime environment
 FROM centos:centos6 AS runner
 RUN yum update -y && yum install -y tcl-devel libgomp
-COPY --from=builder /FastRoute4-lefdef/build/third_party/rsyn/bin/rsyn /build/FRlefdef
+COPY --from=builder /FastRoute/build/third_party/rsyn/bin/rsyn /build/FastRoute
 RUN useradd -ms /bin/bash openroad
 USER openroad
 WORKDIR /home/openroad

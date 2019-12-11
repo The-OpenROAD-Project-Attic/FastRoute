@@ -8,11 +8,6 @@
 #include <utility>
 #include <map>
 
-#include "db.h"
-#include "lefin.h"
-#include "defin.h"
-#include "defout.h"
-#include "dbShape.h"
 #include "Coordinate.h"
 #include "Box.h"
 #include "Pin.h"
@@ -339,10 +334,12 @@ void DBWrapper::initNetlist() {
                 
                 odb::dbNet* currNet = *nIter;
                 if (currNet->getSigType().getValue() == odb::dbSigType::POWER ||
-                    currNet->getSigType().getValue() == odb::dbSigType::GROUND) {
+                    currNet->getSigType().getValue() == odb::dbSigType::GROUND ||
+                    currNet->getSWires().size() > 0) {
                         continue;
                 }
-                std::string netName =currNet->getConstName();
+                std::string netName = currNet->getConstName();
+                std::string signalType = currNet->getSigType().getString();
                 
                 // Iterate through all instance pins
                 odb::dbSet<odb::dbITerm> iTerms = currNet->getITerms();
@@ -458,7 +455,7 @@ void DBWrapper::initNetlist() {
                         Pin pin = Pin(pinName, pinPos, pinLayers, pinBoxes, netName, true);
                         netPins.push_back(pin);
                 }
-                _netlist->addNet(netName, netPins);
+                _netlist->addNet(netName, signalType, netPins);
         }
 }
 

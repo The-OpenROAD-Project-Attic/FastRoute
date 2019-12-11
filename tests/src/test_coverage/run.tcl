@@ -76,7 +76,7 @@ set script_file "${curr_test}/routeDesign.tcl"
 set output_file "${curr_test}/${test_name}.guide"
 set output_log "${curr_test}/${test_name}.log"
 set gold_check_guides "complete post process guides ..."
-set bin_file "$base_dir/FRlefdef"
+set bin_file "$base_dir/FastRoute"
 
 downloadChecker $curr_test
 if {[file exists "${curr_test}/${test_name}.tgz"]} {

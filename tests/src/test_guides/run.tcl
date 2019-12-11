@@ -63,7 +63,7 @@ set base_dir [pwd]
 set tests_dir "${base_dir}/tests"
 set src_dir "${tests_dir}/src"
 set inputs_dir "${tests_dir}/input"
-set bin_file "$base_dir/FRlefdef"
+set bin_file "$base_dir/FastRoute"
 
 set curr_test "${src_dir}/test_guides"
 

@@ -38,7 +38,6 @@
 #ifndef __PIN_H_
 #define __PIN_H_
 
-#include <bits/stdc++.h>
 #include <string>
 #include <vector>
 #include <functional>

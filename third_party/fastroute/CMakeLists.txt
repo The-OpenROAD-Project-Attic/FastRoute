@@ -34,12 +34,10 @@
 ## POSSIBILITY OF SUCH DAMAGE.
 ################################################################################
 
-cmake_minimum_required (VERSION 2.8)
-project (FastRoute)
+cmake_minimum_required (VERSION 3.1)
+project (FastRoute4.1)
 
-message("-- Will generate lib")
-
-set(LIB_NAME "FastRoute")
+set(LIB_NAME "FastRoute4.1")
 
 set(CMAKE_CXX_STANDARD 11)
 
@@ -53,7 +51,7 @@ add_LIBRARY(${LIB_NAME} STATIC ${SRC_FILES})
 
 target_include_directories(${LIB_NAME} PUBLIC
                            ${CMAKE_CURRENT_SOURCE_DIR}/include
-                           ${CMAKE_CURRENT_SOURCE_DIR}/../flute)
+                           ${CMAKE_CURRENT_SOURCE_DIR}/../flute3)
 
-target_link_libraries(FastRoute
+target_link_libraries(FastRoute4.1
                     flute)

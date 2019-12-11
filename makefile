@@ -40,8 +40,8 @@ ROOT = ${PWD}
 
 ETC_DIR = etc/
 BIN_DIR = .
-BIN_NAME = FRlefdef
-BIN_NAME_DEBUG = FRlefdef_debug
+BIN_NAME = FastRoute
+BIN_NAME_DEBUG = FastRoute_debug
 OUTPUT_FILE = build/release
 
 CMAKE = cmake
