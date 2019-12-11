@@ -45,6 +45,12 @@
 #include "RoutingLayer.h"
 #include "RoutingTracks.h"
 
+#include "opendb/db.h"
+#include "opendb/lefin.h"
+#include "opendb/defin.h"
+#include "opendb/defout.h"
+#include "opendb/dbShape.h"
+
 // Forward declaration protects FastRoute code from any
 // header file from the DB. FastRoute code keeps independent.
 namespace odb{

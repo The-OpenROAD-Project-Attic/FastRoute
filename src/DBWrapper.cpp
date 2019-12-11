@@ -8,11 +8,6 @@
 #include <utility>
 #include <map>
 
-#include "db.h"
-#include "lefin.h"
-#include "defin.h"
-#include "defout.h"
-#include "dbShape.h"
 #include "Coordinate.h"
 #include "Box.h"
 #include "Pin.h"

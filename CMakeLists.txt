@@ -87,7 +87,7 @@ target_include_directories(${BIN_NAME} PUBLIC
         ${CMAKE_CURRENT_SOURCE_DIR}/third_party
         ${CMAKE_CURRENT_SOURCE_DIR}/third_party/fastroute/include
         ${CMAKE_CURRENT_SOURCE_DIR}/third_party/flute
-        ${CMAKE_CURRENT_SOURCE_DIR}/third_party/OpenDB/include/opendb
+        ${CMAKE_CURRENT_SOURCE_DIR}/third_party/OpenDB/include
         ${CMAKE_CURRENT_SOURCE_DIR}/src
         )
 
