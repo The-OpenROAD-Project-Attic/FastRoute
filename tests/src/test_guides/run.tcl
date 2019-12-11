@@ -60,10 +60,10 @@ proc checkGuidesFile {goldFile outFile} {
 set test_name "input"
 
 set base_dir [pwd]
-set tests_dir "${base_dir}/tests"
+set tests_dir "${base_dir}/src/FastRoute/tests"
 set src_dir "${tests_dir}/src"
 set inputs_dir "${tests_dir}/input"
-set bin_file "$base_dir/FRlefdef"
+set bin_file "$base_dir/build/src/openroad"
 
 set curr_test "${src_dir}/test_guides"
 

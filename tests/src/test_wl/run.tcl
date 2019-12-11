@@ -58,7 +58,7 @@ proc checkWirelength {goldFile outFile} {
 set test_name "input"
 
 set base_dir [pwd]
-set tests_dir "${base_dir}/tests"
+set tests_dir "${base_dir}/src/FastRoute/tests"
 set src_dir "${tests_dir}/src"
 set inputs_dir "${tests_dir}/input"
 
@@ -69,7 +69,7 @@ set gold_wl "${curr_test}/golden.wl"
 set script_file "${curr_test}/routeDesign.tcl"
 set output_file "${curr_test}/${test_name}.guide"
 set output_log "${curr_test}/${test_name}.log"
-set bin_file "$base_dir/FRlefdef"
+set bin_file "$base_dir/build/src/openroad"
 
 runFastRoute $test_name $curr_test $inputs_dir $bin_file $output_log
 

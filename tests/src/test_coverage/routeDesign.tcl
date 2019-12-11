@@ -34,15 +34,9 @@
 ## POSSIBILITY OF SUCH DAMAGE.
 ################################################################################
 
-fr_import_lef "_LEF_"
-fr_import_def "_DEF_"
-set_output_file "_GUIDE_"
+read_lef "_LEF_"
+read_def "_DEF_"
 
-set_capacity_adjustment 0.0
-set_min_layer 1
-set_max_layer 9
-set_unidirectional_routing false
-
-run
+run_global_routing -output_file "_GUIDE_"
 
 exit

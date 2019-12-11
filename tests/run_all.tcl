@@ -92,13 +92,14 @@ proc runFastRoute {testName testDir inputDir binFile outLog} {
         exec sed -i s#_LEF_#$lefFile#g $testDir/$testName.tcl
         exec sed -i s#_DEF_#$defFile#g $testDir/$testName.tcl
         exec sed -i s#_GUIDE_#$testDir/$testName.guide#g $testDir/$testName.tcl
-        catch {exec $binFile -c 1 < $testDir/$testName.tcl > $outLog}
+        catch {exec $binFile < $testDir/$testName.tcl > $outLog}
 }
 
 # proc Main {} {
 
 set base_dir [pwd]
-set tests_dir "${base_dir}/tests"
+_puts $base_dir
+set tests_dir "${base_dir}/src/FastRoute/tests"
 set src_dir "${tests_dir}/src"
 set inputs_dir "${tests_dir}/input"
 
