@@ -34,14 +34,14 @@
 # // POSSIBILITY OF SUCH DAMAGE.
 # ////////////////////////////////////////////////////////////////////////////////
 
-sta::define_cmd_args "run_global_routing" {[-output_file out_file] \
+sta::define_cmd_args "fastroute" {[-output_file out_file] \
                                            [-capacity_adjustment cap_adjust] \
                                            [-min_routing_layer min_layer] \
                                            [-max_routing_layer max_layer] \
 }
 
-proc run_global_routing { args } {
-  sta::parse_key_args "run_global_routing" args \
+proc fastroute { args } {
+  sta::parse_key_args "fastroute" args \
     keys {-output_file -capacity_adjustment -min_routing_layer -max_routing_layer} flags {}
 
   if { [info exists keys(-output_file)] } {
