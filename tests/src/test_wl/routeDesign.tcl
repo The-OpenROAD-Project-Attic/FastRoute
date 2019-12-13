@@ -37,6 +37,6 @@
 read_lef "_LEF_"
 read_def "_DEF_"
 
-run_global_routing -output_file "_GUIDE_"
+fastrouteg -output_file "_GUIDE_"
 
 exit
