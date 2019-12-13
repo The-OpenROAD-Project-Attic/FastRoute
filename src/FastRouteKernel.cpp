@@ -177,9 +177,9 @@ void FastRouteKernel::runFastRoute() {
 }
 
 void FastRouteKernel::initGrid() {        
-        _dbWrapper.initGrid();
-        _dbWrapper.computeCapacities();
-        _dbWrapper.computeSpacingsAndMinWidth();
+        _dbWrapper.initGrid(_maxRoutingLayer);
+        _dbWrapper.computeCapacities(_maxRoutingLayer);
+        _dbWrapper.computeSpacingsAndMinWidth(_maxRoutingLayer);
         _dbWrapper.initObstacles();
         
         _fastRoute.setLowerLeft(_grid.getLowerLeftX(), _grid.getLowerLeftY());
@@ -188,14 +188,14 @@ void FastRouteKernel::initGrid() {
 }
 
 void FastRouteKernel::initRoutingLayers() {
-        _dbWrapper.initRoutingLayers(_routingLayers);
+        _dbWrapper.initRoutingLayers(_routingLayers, _maxRoutingLayer);
         
         RoutingLayer routingLayer = getRoutingLayerByIndex(1);
         _fastRoute.setLayerOrientation(routingLayer.getPreferredDirection());
 }
 
 void FastRouteKernel::initRoutingTracks() {
-        _dbWrapper.initRoutingTracks(_allRoutingTracks);
+        _dbWrapper.initRoutingTracks(_allRoutingTracks, _maxRoutingLayer);
 }
 
 void FastRouteKernel::setCapacities() {

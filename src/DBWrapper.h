@@ -69,11 +69,11 @@ public:
                   _grid(&grid) {
         }
         
-        void initGrid();
-        void initRoutingLayers(std::vector<RoutingLayer>& routingLayers);
-        void initRoutingTracks(std::vector<RoutingTracks>& allRoutingTracks);
-        void computeCapacities();
-        void computeSpacingsAndMinWidth();
+        void initGrid(int maxLayer);
+        void initRoutingLayers(std::vector<RoutingLayer>& routingLayers,int maxLayer);
+        void initRoutingTracks(std::vector<RoutingTracks>& allRoutingTracks, int maxLayer);
+        void computeCapacities(int maxLayer);
+        void computeSpacingsAndMinWidth(int maxLayer);
         void initNetlist();
         void initObstacles();
         

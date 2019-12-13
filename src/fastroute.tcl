@@ -72,7 +72,7 @@ proc fastroute { args } {
     set max_layer $keys(-max_routing_layer)
     FastRoute::set_max_layer $max_layer
   } else {
-    puts "WARNING: Default minimum layer: -1 (last layer)"
+    puts "WARNING: Default maximum layer: -1 (last layer)"
     FastRoute::set_max_layer -1
   }
 

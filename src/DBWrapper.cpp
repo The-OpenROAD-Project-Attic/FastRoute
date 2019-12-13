@@ -14,7 +14,7 @@
 
 namespace FastRoute {
 
-void DBWrapper::initGrid() {
+void DBWrapper::initGrid(int maxLayer) {
         // WORKAROUND: Initializing _chip here while we don't have a "populateFastRoute" function"
         _chip = _db->getChip();
     
@@ -78,6 +78,9 @@ void DBWrapper::initGrid() {
         bool perfectRegularY = false;
         
         int numLayers = tech->getRoutingLayerCount();
+        if (maxLayer > -1) {
+                numLayers = maxLayer;
+        }
         
         if ((xGrids * tileWidth) == upperRightX)
                 perfectRegularX = true;
@@ -107,7 +110,7 @@ void DBWrapper::initGrid() {
                      genericVector, genericVector, genericMap);
 }
 
-void DBWrapper::initRoutingLayers(std::vector<RoutingLayer>& routingLayers) {
+void DBWrapper::initRoutingLayers(std::vector<RoutingLayer>& routingLayers, int maxLayer) {
         odb::dbTech* tech = _db->getTech();
         
         if (!tech) {
@@ -116,6 +119,9 @@ void DBWrapper::initRoutingLayers(std::vector<RoutingLayer>& routingLayers) {
         }
         
         for (int l = 1; l <= tech->getRoutingLayerCount(); l++) {
+                if (l > maxLayer && maxLayer > -1) {
+                        break;
+                }
                 odb::dbTechLayer* techLayer = tech->findRoutingLayer(l);
                 int index = l;
                 std::string name = techLayer->getConstName();
@@ -134,7 +140,7 @@ void DBWrapper::initRoutingLayers(std::vector<RoutingLayer>& routingLayers) {
         }
 }
 
-void DBWrapper::initRoutingTracks(std::vector<RoutingTracks>& allRoutingTracks) {
+void DBWrapper::initRoutingTracks(std::vector<RoutingTracks>& allRoutingTracks, int maxLayer) {
         odb::dbTech* tech = _db->getTech();
         if (!tech) {
                 std::cout << "[ERROR] obd::dbTech not initialized! Exiting...\n";
@@ -148,6 +154,10 @@ void DBWrapper::initRoutingTracks(std::vector<RoutingTracks>& allRoutingTracks) 
         }
         
         for (int layer = 1; layer <= tech->getRoutingLayerCount(); layer++) {
+                if (layer > maxLayer && maxLayer > -1) {
+                        break;
+                }
+            
                 odb::dbTechLayer* techayer = tech->findRoutingLayer(layer);
         
                 if (!techayer) {
@@ -193,7 +203,7 @@ void DBWrapper::initRoutingTracks(std::vector<RoutingTracks>& allRoutingTracks) 
         }
 }
 
-void DBWrapper::computeCapacities() {
+void DBWrapper::computeCapacities(int maxLayer) {
         int trackSpacing;
         int hCapacity, vCapacity;
         int trackStepX, trackStepY;
@@ -215,6 +225,10 @@ void DBWrapper::computeCapacities() {
         }
         
         for (int l = 1; l <= tech->getRoutingLayerCount(); l++) {
+                if (l > maxLayer && maxLayer > -1) {
+                        break;
+                }
+                
                 odb::dbTechLayer* techLayer = tech->findRoutingLayer(l);
                 
                 odb::dbTrackGrid* track = block->findTrackGrid(techLayer);
@@ -246,7 +260,7 @@ void DBWrapper::computeCapacities() {
         }
 }
 
-void DBWrapper::computeSpacingsAndMinWidth() {
+void DBWrapper::computeSpacingsAndMinWidth(int maxLayer) {
         int minSpacing = 0;
         int minWidth;
         int trackStepX, trackStepY;
@@ -267,6 +281,10 @@ void DBWrapper::computeSpacingsAndMinWidth() {
         }
         
         for (int l = 1; l <= tech->getRoutingLayerCount(); l++) {
+                if (l > maxLayer && maxLayer > -1) {
+                        break;
+                }
+            
                 odb::dbTechLayer* techLayer = tech->findRoutingLayer(l);
                 
                 odb::dbTrackGrid* track = block->findTrackGrid(techLayer);
