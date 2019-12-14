@@ -893,7 +893,7 @@ void FastRouteKernel::addRemainingGuides(std::vector<FastRoute::NET> &globalRout
                                         lastLayer = pins[p].layer;
                         }
 
-                        for (int l = _minRoutingLayer - _fixLayer; l <= lastLayer - 1; l++) {
+                        for (int l = _minRoutingLayer - _fixLayer; l <= lastLayer; l++) {
                                 FastRoute::ROUTE route;
                                 route.initLayer = l;
                                 route.initX = pins[0].x;
