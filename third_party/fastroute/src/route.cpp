@@ -34,11 +34,14 @@
 #include <time.h>
 #include <math.h>
 #include <algorithm>
+#include <queue>
 #include "DataType.h"
 #include "flute.h"
 #include "DataProc.h"
 #include "route.h"
 #include "RipUp.h"
+
+#define HCOST 5000
 
 namespace FastRoute {
 
@@ -53,7 +56,6 @@ float costHVHtest[YRANGE];  // Vertical first Z
 float costVtest[XRANGE];    // Vertical segment cost
 float costTBtest[XRANGE];   // Top and bottom boundary cost
 
-#define HCOST 5000;
 
 // estimate the routing by assigning 1 for H and V segments, 0.5 to both possible L for L segments
 void estimateOneSeg(Segment *seg) {
@@ -511,7 +513,6 @@ void newrouteZ_edge(int netID, int edgeID) {
                                         if (tmp > 0) {
                                                 costV[i - x1] += tmp;
                                                 costVtest[i - x1] += HCOST;
-                                                ;
                                         } else {
                                                 costVtest[i - x1] += tmp;
                                         }
@@ -1302,8 +1303,7 @@ void spiralRouteAll() {
         Bool redundant;
         TreeEdge *treeedges, *treeedge;
         TreeNode *treenodes;
-        int quehead, quetail;
-        int edgeQueue[5000];
+        std::queue<int> edgeQueue;
 
         for (netID = 0; netID < numValidNets; netID++) {
                 treeedges = sttrees[netID].edges;
@@ -1383,7 +1383,7 @@ void spiralRouteAll() {
                 treeedges = sttrees[netID].edges;
                 treenodes = sttrees[netID].nodes;
                 deg = sttrees[netID].deg;
-                quehead = quetail = 0;
+                /* edgeQueue.clear(); */
 
                 for (nodeID = 0; nodeID < deg; nodeID++) {
                         treenodes[nodeID].assigned = TRUE;
@@ -1391,15 +1391,15 @@ void spiralRouteAll() {
                                 edgeID = treenodes[nodeID].eID[k];
 
                                 if (treeedges[edgeID].assigned == FALSE) {
-                                        edgeQueue[quetail] = edgeID;
+                                        edgeQueue.push(edgeID);
                                         treeedges[edgeID].assigned = TRUE;
-                                        quetail++;
                                 }
                         }
                 }
 
-                while (quehead != quetail) {
-                        edgeID = edgeQueue[quehead];
+                while (!edgeQueue.empty()) {
+                        edgeID = edgeQueue.front();
+                        edgeQueue.pop();
                         treeedge = &(treeedges[edgeID]);
                         if (treenodes[treeedge->n1a].assigned) {
                                 spiralRoute(netID, edgeID);
@@ -1408,9 +1408,8 @@ void spiralRouteAll() {
                                         for (k = 0; k < treenodes[treeedge->n2a].conCNT; k++) {
                                                 edgeID = treenodes[treeedge->n2a].eID[k];
                                                 if (!treeedges[edgeID].assigned) {
-                                                        edgeQueue[quetail] = edgeID;
+                                                        edgeQueue.push(edgeID);
                                                         treeedges[edgeID].assigned = TRUE;
-                                                        quetail++;
                                                 }
                                         }
                                         treenodes[treeedge->n2a].assigned = TRUE;
@@ -1422,15 +1421,13 @@ void spiralRouteAll() {
                                         for (k = 0; k < treenodes[treeedge->n1a].conCNT; k++) {
                                                 edgeID = treenodes[treeedge->n1a].eID[k];
                                                 if (!treeedges[edgeID].assigned) {
-                                                        edgeQueue[quetail] = edgeID;
+                                                        edgeQueue.push(edgeID);
                                                         treeedges[edgeID].assigned = TRUE;
-                                                        quetail++;
                                                 }
                                         }
                                         treenodes[treeedge->n1a].assigned = TRUE;
                                 }
                         }
-                        quehead++;
                 }
         }
 
