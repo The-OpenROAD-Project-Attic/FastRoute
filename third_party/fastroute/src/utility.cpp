@@ -32,9 +32,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <algorithm>
+#include <queue>
 #include "DataType.h"
 #include "flute.h"
 #include "DataProc.h"
+
 
 namespace FastRoute {
 
@@ -735,8 +737,7 @@ void newLayerAssignmentV4() {
         int n1, n2, connectionCNT, deg;
 
         int n1a, n2a;
-        int quehead, quetail;
-        int edgeQueue[5000];
+        std::queue<int> edgeQueue;
 
         TreeEdge *treeedges, *treeedge;
         TreeNode *treenodes;
@@ -761,21 +762,20 @@ void newLayerAssignmentV4() {
                 treeedges = sttrees[netID].edges;
                 treenodes = sttrees[netID].nodes;
                 deg = sttrees[netID].deg;
-                quehead = quetail = 0;
 
                 for (nodeID = 0; nodeID < deg; nodeID++) {
                         for (k = 0; k < treenodes[nodeID].conCNT; k++) {
                                 edgeID = treenodes[nodeID].eID[k];
                                 if (!treeedges[edgeID].assigned) {
-                                        edgeQueue[quetail] = edgeID;
+                                        edgeQueue.push(edgeID);
                                         treeedges[edgeID].assigned = TRUE;
-                                        quetail++;
                                 }
                         }
                 }
 
-                while (quehead != quetail) {
-                        edgeID = edgeQueue[quehead];
+                while (!edgeQueue.empty()) {
+                        edgeID = edgeQueue.front();
+                        edgeQueue.pop();
                         treeedge = &(treeedges[edgeID]);
                         if (treenodes[treeedge->n1a].assigned) {
                                 assignEdge(netID, edgeID, 1);
@@ -784,9 +784,8 @@ void newLayerAssignmentV4() {
                                         for (k = 0; k < treenodes[treeedge->n2a].conCNT; k++) {
                                                 edgeID = treenodes[treeedge->n2a].eID[k];
                                                 if (!treeedges[edgeID].assigned) {
-                                                        edgeQueue[quetail] = edgeID;
+                                                        edgeQueue.push(edgeID);
                                                         treeedges[edgeID].assigned = TRUE;
-                                                        quetail++;
                                                 }
                                         }
                                         treenodes[treeedge->n2a].assigned = TRUE;
@@ -798,15 +797,13 @@ void newLayerAssignmentV4() {
                                         for (k = 0; k < treenodes[treeedge->n1a].conCNT; k++) {
                                                 edgeID = treenodes[treeedge->n1a].eID[k];
                                                 if (!treeedges[edgeID].assigned) {
-                                                        edgeQueue[quetail] = edgeID;
+                                                        edgeQueue.push(edgeID);
                                                         treeedges[edgeID].assigned = TRUE;
-                                                        quetail++;
                                                 }
                                         }
                                         treenodes[treeedge->n1a].assigned = TRUE;
                                 }
                         }
-                        quehead++;
                 }
 
                 deg = sttrees[netID].deg;
