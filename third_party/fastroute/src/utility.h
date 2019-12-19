@@ -64,6 +64,9 @@ extern void iniBDE();
 extern void copyBR(void);
 extern void copyRS(void);
 extern void freeRR(void);
+extern Tree fluteToTree(Flute::Tree fluteTree);
+extern Flute::Tree treeToFlute(Tree tree);
+extern Tree pdToTree(PD::Tree pdTree);
 
 }  // namespace FastRoute
 

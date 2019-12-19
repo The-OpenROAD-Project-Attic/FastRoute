@@ -36,6 +36,7 @@
 #include "DataType.h"
 #include "flute.h"
 #include "DataProc.h"
+#include "pdrev.h"
 
 
 namespace FastRoute {
@@ -1656,4 +1657,44 @@ void freeRR(void) {
         }
 }
 
+Tree fluteToTree(Flute::Tree fluteTree){
+        Tree tree;
+        tree.deg = fluteTree.deg;
+        tree.totalDeg = 2*fluteTree.deg -2;
+        tree.length = (DTYPE) fluteTree.length;
+        tree.branch = (Branch *)malloc(tree.totalDeg * sizeof(Branch));
+        for (int i=0; i < tree.totalDeg; i++){
+                tree.branch[i].x = (DTYPE) fluteTree.branch[i].x;
+                tree.branch[i].y = (DTYPE) fluteTree.branch[i].y;
+                tree.branch[i].n = fluteTree.branch[i].n;
+        }
+        return tree;
+}
+
+Flute::Tree treeToFlute(Tree tree){
+        Flute::Tree fluteTree;
+        fluteTree.deg = tree.deg;
+        fluteTree.length = (Flute::DTYPE) fluteTree.length;
+        fluteTree.branch = (Flute::Branch *)malloc(tree.totalDeg * sizeof(Flute::Branch));
+        for (int i=0; i < tree.totalDeg; i++){
+                fluteTree.branch[i].x = (Flute::DTYPE) tree.branch[i].x;
+                fluteTree.branch[i].y = (Flute::DTYPE) tree.branch[i].y;
+                fluteTree.branch[i].n = tree.branch[i].n;
+        }
+        return fluteTree;
+}
+
+Tree pdToTree(PD::Tree pdTree){
+        Tree tree;
+        tree.deg = pdTree.deg;
+        tree.totalDeg = 2*pdTree.deg -2;
+        tree.length = (DTYPE) pdTree.length;
+        tree.branch = (Branch *)malloc(tree.totalDeg * sizeof(Branch));
+        for (int i=0; i < tree.totalDeg; i++){
+                tree.branch[i].x = (DTYPE) pdTree.branch[i].x;
+                tree.branch[i].y = (DTYPE) pdTree.branch[i].y;
+                tree.branch[i].n = pdTree.branch[i].n;
+        }
+        return tree;
+}
 }  // namespace FastRoute

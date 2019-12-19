@@ -44,7 +44,7 @@ namespace FastRoute {
 #define HORIZONTAL 1
 #define VERTICAL 0
 
-int edgeShift(Flute::Tree *t, int net) {
+int edgeShift(Tree *t, int net) {
         int i, j, k, l, m, deg, root, x, y, n, n1, n2, n3;
         int maxX, minX, maxY, minY, maxX1, minX1, maxY1, minY1, maxX2, minX2, maxY2, minY2, bigX, smallX, bigY, smallY, grid, grid1, grid2;
         int pairCnt;
@@ -396,7 +396,7 @@ int edgeShift(Flute::Tree *t, int net) {
 }
 
 // exchange Steiner nodes at the same position, then call edgeShift()
-int edgeShiftNew(Flute::Tree *t, int net) {
+int edgeShiftNew(Tree *t, int net) {
         int i, j, n;
         int deg, pairCnt, cur_pairN1, cur_pairN2;
         int N1nbrH, N1nbrV, N2nbrH, N2nbrV, iter;

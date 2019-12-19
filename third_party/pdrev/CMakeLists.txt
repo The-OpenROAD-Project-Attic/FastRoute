@@ -34,23 +34,34 @@
 ## POSSIBILITY OF SUCH DAMAGE.
 ################################################################################
 
-cmake_minimum_required (VERSION 3.1)
-project (FastRoute4.1)
+cmake_minimum_required (VERSION 2.8)
+project (PDRev)
 
-set(LIB_NAME "FastRoute4.1")
+message("-- Will generate lib")
+
+set(LIB_NAME "pdrev")
 
 set(CMAKE_CXX_STANDARD 11)
 
-file(GLOB_RECURSE SRC_FILES ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp)
+file(GLOB_RECURSE SRC_FILES ${CMAKE_CURRENT_SOURCE_DIR}/*.cpp)
 
+set(EXECUTABLE_OUTPUT_PATH ${CMAKE_BINARY_DIR})
+set(LIBRARY_OUTPUT_PATH ${CMAKE_BINARY_DIR})
+#set(CMAKE_CXX_FLAGS "-O3 -fopenmp")
+#set(Boost_USE_STATIC_LIBS ON)
+find_package(OpenMP)
+
+#find_package(Boost COMPONENTS system filesystem program_options REQUIRED)
 add_definitions(-DLIBRARY_MODE)
 add_LIBRARY(${LIB_NAME} STATIC ${SRC_FILES})
+if(OpenMP_CXX_FOUND)
+    target_link_libraries(${LIB_NAME} PUBLIC OpenMP::OpenMP_CXX)
+endif()
 
-target_include_directories(${LIB_NAME} PUBLIC
-                           ${CMAKE_CURRENT_SOURCE_DIR}/include
-                           ${OPENROAD_HOME}/src/flute3)
-                           ${CMAKE_CURRENT_SOURCE_DIR}/../pdrev
+#target_include_directories(${LIB_NAME} PUBLIC
+#        ${Boost_INCLUDE_DIR}
+#        )
 
-target_link_libraries(FastRoute4.1
-                    pdrev
-                    flute)
+#target_link_libraries(${LIB_NAME}
+#        ${Boost_LIBRARIES}
+#        )

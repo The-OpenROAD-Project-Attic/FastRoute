@@ -42,6 +42,7 @@
 #include <algorithm>
 #include "DataType.h"
 #include "flute.h"
+#include "pdrev.h"
 #include "DataProc.h"
 #include "FastRoute.h"
 #include "utility.h"
@@ -349,11 +350,11 @@ void FT::initAuxVar() {
 
         seglistCnt = (int *)malloc(numValidNets * sizeof(int));
         seglist = (Segment *)malloc(segcount * sizeof(Segment));
-        trees = (Flute::Tree *)malloc(numValidNets * sizeof(Flute::Tree));
+        trees = (Tree *)malloc(numValidNets * sizeof(Tree));
         sttrees = (StTree *)malloc(numValidNets * sizeof(StTree));
-        gxs = (Flute::DTYPE **)malloc(numValidNets * sizeof(Flute::DTYPE *));
-        gys = (Flute::DTYPE **)malloc(numValidNets * sizeof(Flute::DTYPE *));
-        gs = (Flute::DTYPE **)malloc(numValidNets * sizeof(Flute::DTYPE *));
+        gxs = (DTYPE **)malloc(numValidNets * sizeof(DTYPE *));
+        gys = (DTYPE **)malloc(numValidNets * sizeof(DTYPE *));
+        gs = (DTYPE **)malloc(numValidNets * sizeof(DTYPE *));
 
         gridHV = XRANGE * YRANGE;
         gridH = (xGrid - 1) * yGrid;
@@ -836,6 +837,14 @@ int FT::run(std::vector<NET> &result) {
          * this function call for now.> */
         /* freeAllMemory(); */
         return (1);
+}
+
+void FT::usePdRev(){
+        pdRev = true;
+}
+
+void FT::setAlpha(float a){
+        alpha = a;
 }
 
 }  // namespace FastRoute

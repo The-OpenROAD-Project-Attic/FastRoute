@@ -42,6 +42,20 @@
 namespace FastRoute {
 typedef char Bool;
 
+typedef int DTYPE;
+
+typedef struct {
+        DTYPE x,y;
+        int n;
+} Branch;
+
+typedef struct {
+        int deg;
+        int totalDeg;
+        DTYPE length;
+        Branch *branch;
+} Tree;
+
 typedef struct
 {
         Bool xFirst;  // route x-direction first (only for L route)

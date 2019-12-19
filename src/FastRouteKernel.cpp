@@ -64,6 +64,9 @@ int FastRouteKernel::run() {
                 _maxRoutingLayer = _dbWrapper.computeMaxRoutingLayer();
                 std::cout << "Computing max routing layer... Done!\n";
         }
+
+        if (_clockNetRouting)
+                _fastRoute.usePdRev();
         
         std::cout << "Initializing grid...\n";
         initGrid();
@@ -142,6 +145,9 @@ void FastRouteKernel::startFastRoute() {
                 _maxRoutingLayer = _dbWrapper.computeMaxRoutingLayer();
                 std::cout << "Computing max routing layer... Done!\n";
         }
+        
+        if (_clockNetRouting)
+                _fastRoute.usePdRev();
         
         std::cout << "Params:\n";
         std::cout << "---- Min routing layer: " << _minRoutingLayer << "\n";

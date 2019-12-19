@@ -35,6 +35,7 @@
 #include <algorithm>
 #include "DataType.h"
 #include "flute.h"
+#include "pdrev.h"
 #include "DataProc.h"
 #include "route.h"
 #include "RipUp.h"
@@ -947,7 +948,7 @@ void updateRouteType2(TreeNode *treenodes, int n1, int A1, int A2, int C1, int C
 void reInitTree(int netID) {
         int deg, numEdges, edgeID, d, j;
         TreeEdge *treeedge;
-        Flute::Tree rsmt;
+        Tree rsmt;
 
         // TODO: check this size
         int x[nets[netID]->numPins];

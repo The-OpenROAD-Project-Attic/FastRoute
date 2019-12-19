@@ -53,6 +53,7 @@ if( CMAKE_BUILD_TYPE MATCHES "[Dd][Ee][Bb][Uu][Gg]" )
 endif()
 
 add_subdirectory(third_party/fastroute)
+add_subdirectory(third_party/pdrev)
 
 set(CMAKE_CXX_STANDARD 11)
 set(Boost_USE_STATIC_LIBS ON)
@@ -92,6 +93,7 @@ add_library(${LIB_NAME}
 target_include_directories(${LIB_NAME} PUBLIC
         ${CMAKE_CURRENT_SOURCE_DIR}/include
         ${CMAKE_CURRENT_SOURCE_DIR}/third_party/fastroute/include
+<<<<<<< HEAD
         ${OPENDB_HOME}/include/
         ${OPENROAD_HOME}/include
         ${OPENSTA_HOME}/app
@@ -102,3 +104,23 @@ target_include_directories(${LIB_NAME} PUBLIC
 
 target_link_libraries(${LIB_NAME}
         FastRoute4.1)
+=======
+        ${CMAKE_CURRENT_SOURCE_DIR}/third_party/flute
+        ${CMAKE_CURRENT_SOURCE_DIR}/third_party/OpenDB/include
+        ${CMAKE_CURRENT_SOURCE_DIR}/src
+        ${CMAKE_CURRENT_SOURCE_DIR}/third_party/pdrev
+        )
+
+target_link_libraries(${BIN_NAME}
+        opendb
+        lefin
+        defin
+        FastRoute4.1
+        flute
+        tm
+        zlib
+        zutil
+        rt
+        pdrev
+        )
+>>>>>>> 912151c... Fr + PD
