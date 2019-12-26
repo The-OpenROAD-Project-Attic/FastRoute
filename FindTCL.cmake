@@ -1,9 +1,5 @@
-################################################################################
-## Copyright (c) 2019, Parallax Software, Inc.
-#
-# Stolen by: Vitor Bandeira, Mateus Fogaça, Eder Matheus Monteiro e Isadora
-# Oliveira
-#          (Advisor: Ricardo Reis)
+# OpenSTA, Static Timing Analyzer
+# Copyright (c) 2019, Parallax Software, Inc.
 # 
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,8 +14,6 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-
-################################################################
 #
 # Locate TCL library.
 #
