@@ -76,6 +76,7 @@ public:
         void computeSpacingsAndMinWidth(int maxLayer);
         void initNetlist();
         void initObstacles();
+        int computeMaxRoutingLayer();
         
         void setDB(unsigned idx) { _db = odb::dbDatabase::getDatabase(idx); }
 private:

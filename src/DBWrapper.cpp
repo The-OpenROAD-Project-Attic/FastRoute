@@ -521,4 +521,37 @@ void DBWrapper::initObstacles() {
         }
 }
 
+int DBWrapper::computeMaxRoutingLayer() {
+        _chip = _db->getChip();
+        
+        int maxRoutingLayer = -1;
+
+        odb::dbTech* tech = _db->getTech();
+        if (!tech) {
+                std::cout << "[ERROR] obd::dbTech not initialized! Exiting...\n";
+                std::exit(1);
+        }
+
+        odb::dbBlock* block = _chip->getBlock();
+        if (!block) {
+                std::cout << "[ERROR] odb::dbBlock not found! Exiting...\n";
+                std::exit(1);
+        }
+        
+        for (int layer = 1; layer <= tech->getRoutingLayerCount(); layer++) {          
+                odb::dbTechLayer* techayer = tech->findRoutingLayer(layer);
+                if (!techayer) {
+                        std::cout << "[ERROR] Layer" << selectedMetal << " not found! Exiting...\n";
+                        std::exit(1);
+                }
+                odb::dbTrackGrid* selectedTrack = block->findTrackGrid(techayer);
+                if (!selectedTrack) {
+                    break;
+                }
+                maxRoutingLayer = layer;
+        }
+        
+        return maxRoutingLayer;
+}
+
 }

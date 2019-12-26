@@ -57,7 +57,6 @@ proc fastroute { args } {
     set cap_adjust $keys(-capacity_adjustment)
     FastRoute::set_capacity_adjustment $cap_adjust
   } else {
-    puts "WARNING: Default capacity adjustment: 0.0 (no adjustment)"
     FastRoute::set_capacity_adjustment 0.0
   }
 
@@ -65,7 +64,6 @@ proc fastroute { args } {
     set min_layer $keys(-min_routing_layer)
     FastRoute::set_min_layer $min_layer
   } else {
-    puts "WARNING: Default minimum layer: 1"
     FastRoute::set_min_layer 1
   }
 
@@ -73,7 +71,6 @@ proc fastroute { args } {
     set max_layer $keys(-max_routing_layer)
     FastRoute::set_max_layer $max_layer
   } else {
-    puts "WARNING: Default maximum layer: -1 (last layer)"
     FastRoute::set_max_layer -1
   }
 

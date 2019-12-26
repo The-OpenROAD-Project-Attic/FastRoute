@@ -58,6 +58,12 @@ int FastRouteKernel::run() {
                 _minRoutingLayer = 2;
                 _fixLayer = 1;
         }
+
+        if (_maxRoutingLayer == -1) {
+                std::cout << "Computing max routing layer...\n";
+                _maxRoutingLayer = _dbWrapper.computeMaxRoutingLayer();
+                std::cout << "Computing max routing layer... Done!\n";
+        }
         
         std::cout << "Initializing grid...\n";
         initGrid();
@@ -126,6 +132,23 @@ int FastRouteKernel::run() {
 
 void FastRouteKernel::startFastRoute() {
         _dbWrapper.setDB(_dbId);
+        if (_unidirectionalRoute) {
+                _minRoutingLayer = 2;
+                _fixLayer = 1;
+        }
+
+        if (_maxRoutingLayer == -1) {
+                std::cout << "Computing max routing layer...\n";
+                _maxRoutingLayer = _dbWrapper.computeMaxRoutingLayer();
+                std::cout << "Computing max routing layer... Done!\n";
+        }
+        
+        std::cout << "Params:\n";
+        std::cout << "---- Min routing layer: " << _minRoutingLayer << "\n";
+        std::cout << "---- Max routing layer: " << _maxRoutingLayer << "\n";
+        std::cout << "---- Global adjustment: " << _adjustment << "\n";
+        std::cout << "---- Unidirectional routing: " << _unidirectionalRoute << "\n";
+        std::cout << "---- Clock net routing: " << _clockNetRouting << "\n";
         
         std::cout << "Initializing grid...\n";
         initGrid();
@@ -200,11 +223,19 @@ void FastRouteKernel::initRoutingTracks() {
 
 void FastRouteKernel::setCapacities() {
         for (int l = 1; l <= _grid.getNumLayers(); l++) {
-                _fastRoute.addHCapacity(_grid.getHorizontalEdgesCapacities()[l-1], l);
-                _fastRoute.addVCapacity(_grid.getVerticalEdgesCapacities()[l-1], l);
-                
-                _hCapacities.push_back(_grid.getHorizontalEdgesCapacities()[l-1]);
-                _vCapacities.push_back(_grid.getVerticalEdgesCapacities()[l-1]);
+                if (l < _minRoutingLayer || l > _maxRoutingLayer) {
+                        _fastRoute.addHCapacity(0, l);
+                        _fastRoute.addVCapacity(0, l);
+
+                        _hCapacities.push_back(0);
+                        _vCapacities.push_back(0);
+                } else {
+                        _fastRoute.addHCapacity(_grid.getHorizontalEdgesCapacities()[l-1], l);
+                        _fastRoute.addVCapacity(_grid.getVerticalEdgesCapacities()[l-1], l);
+
+                        _hCapacities.push_back(_grid.getHorizontalEdgesCapacities()[l-1]);
+                        _vCapacities.push_back(_grid.getVerticalEdgesCapacities()[l-1]);
+                }
         }
 }
 
