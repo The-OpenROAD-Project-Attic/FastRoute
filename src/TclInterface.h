@@ -55,6 +55,7 @@ void set_min_layer(int minLayer);
 void set_max_layer(int maxLayer);
 void set_unidirectional_routing(bool unidirRouting);
 void set_clock_net_routing(bool clockNetRouting);
+void set_alpha(float alpha);
 
 // Run
 void start_fastroute();

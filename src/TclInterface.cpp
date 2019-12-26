@@ -93,6 +93,10 @@ void set_clock_net_routing(bool clockNetRouting) {
         fastRouteKernel->setClockNetRouting(clockNetRouting);
 }
 
+void set_alpha(float alpha) {
+        fastRouteKernel->setAlpha(alpha);
+}
+
 void start_fastroute() {
         fastRouteKernel->startFastRoute();
 }

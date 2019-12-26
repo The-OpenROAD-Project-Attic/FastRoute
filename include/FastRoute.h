@@ -89,6 +89,7 @@ class FT {
         std::map<std::string, std::vector<PIN>> getNets();
         void setMaxNetDegree(int);
         void usePdRev();
+        void setAlpha(float a);
 };
 }  // namespace FastRoute
 #endif /* __FASTROUTE_API__ */

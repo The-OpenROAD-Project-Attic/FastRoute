@@ -77,6 +77,7 @@ private:
         bool _interactiveMode;
         bool _clockNetRouting;
         unsigned _dbId;
+        float _alpha = 0.4;
         
         // Layer adjustment variables
         std::vector<int> _layersToAdjust;
@@ -127,6 +128,7 @@ public:
         void setMaxRoutingLayer(const int maxLayer) { _maxRoutingLayer = maxLayer; }
         void setUnidirectionalRoute(const bool unidirRoute) { _unidirectionalRoute = unidirRoute; }
         void setClockNetRouting(const bool clockNetRouting) { _clockNetRouting = clockNetRouting; }
+        void setAlpha(const float alpha) { _alpha = alpha; }
         void setOutputFile(const std::string& outfile) { _outfile = outfile; }
         void setPitchesInTile(const int pitchesInTile) { _grid.setPitchesInTile(pitchesInTile); }
         void setDbId(unsigned idx) { _dbId = idx; }

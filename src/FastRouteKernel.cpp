@@ -67,6 +67,7 @@ int FastRouteKernel::run() {
 
         if (_clockNetRouting)
                 _fastRoute.usePdRev();
+                _fastRoute.setAlpha(_alpha);
         
         std::cout << "Initializing grid...\n";
         initGrid();
