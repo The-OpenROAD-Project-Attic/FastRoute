@@ -96,14 +96,14 @@ proc runFastRoute {testName testDir inputDir binFile outLog} {
 }
 
 # proc Main {} {
-
+_puts "------------------------------------------------------"
 set base_dir [pwd]
 _puts $base_dir
 set tests_dir "${base_dir}/src/FastRoute/tests"
 set src_dir "${tests_dir}/src"
 set inputs_dir "${tests_dir}/input"
 
-_puts "Start unit tests..."
+_puts "Start FastRoute unit tests..."
 
 proc unit_tests {{dir}} {
         set subdirs [glob -dir $dir *]
