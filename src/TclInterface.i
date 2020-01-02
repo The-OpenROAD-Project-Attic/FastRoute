@@ -59,7 +59,11 @@ extern void set_max_layer(int maxLayer);
 
 extern void set_unidirectional_routing(bool unidirRouting);
 
+extern void set_pdrev(bool pdRev);
+
 extern void set_clock_net_routing(bool clockNetRouting);
+
+extern void set_alpha(float alpha);
 
 extern void start_fastroute();
 

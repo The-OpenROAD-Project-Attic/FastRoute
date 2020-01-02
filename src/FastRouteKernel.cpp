@@ -65,9 +65,10 @@ int FastRouteKernel::run() {
                 std::cout << "Computing max routing layer... Done!\n";
         }
 
-        if (_clockNetRouting)
+        if (_clockNetRouting && _pdRev){
                 _fastRoute.usePdRev();
                 _fastRoute.setAlpha(_alpha);
+        }
         
         std::cout << "Initializing grid...\n";
         initGrid();

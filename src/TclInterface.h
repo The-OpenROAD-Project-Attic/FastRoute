@@ -54,6 +54,7 @@ void add_region_adjustment(int minX, int minY, int maxX, int maxY, int layer, fl
 void set_min_layer(int minLayer);
 void set_max_layer(int maxLayer);
 void set_unidirectional_routing(bool unidirRouting);
+void set_pdrev(bool pdRev);
 void set_clock_net_routing(bool clockNetRouting);
 void set_alpha(float alpha);
 
