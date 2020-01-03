@@ -43,7 +43,7 @@ sta::define_cmd_args "fastroute" {[-output_file out_file] \
 
 proc fastroute { args } {
   sta::parse_key_args "fastroute" args \
-    keys {-output_file -capacity_adjustment -min_routing_layer -max_routing_layer -unidirectional_route} flags {}
+    keys {-output_file -capacity_adjustment -min_routing_layer -max_routing_layer} flags {-unidirectional_route}
 
   if { [info exists keys(-output_file)] } {
     set out_file $keys(-output_file)
@@ -74,9 +74,8 @@ proc fastroute { args } {
     FastRoute::set_max_layer -1
   }
 
-  if { [info exists keys(-unidirectional_route)] } {
-    set unidir_route $keys(-unidirectional_route)
-    FastRoute::set_unidirectional_routing $unidir_route
+  if { [info exists flags(-unidirectional_route)] } {
+    FastRoute::set_unidirectional_routing true
   } else {
     FastRoute::set_unidirectional_routing false
   }
