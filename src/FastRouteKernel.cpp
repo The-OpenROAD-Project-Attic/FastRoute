@@ -189,6 +189,20 @@ void FastRouteKernel::startFastRoute() {
         std::cout << "Computing user defined adjustments...\n";
         computeUserGlobalAdjustments();
         std::cout << "Computing user defined adjustments... Done!\n";
+        
+        std::cout << "Computing user defined layers adjustments...\n";
+        computeUserLayerAdjustments();
+        std::cout << "Computing user defined layers adjustments... Done!\n";
+        
+        for (int i = 0; i < regionsReductionPercentage.size(); i++) {
+                if (regionsLayer[i] < 1)
+                        break;
+                
+                std::cout << "Adjusting specific region in layer " << regionsLayer[i] << "...\n";
+                Coordinate lowerLeft = Coordinate(regionsMinX[i], regionsMinY[i]);
+                Coordinate upperRight = Coordinate(regionsMaxX[i], regionsMaxY[i]);
+                computeRegionAdjustments(lowerLeft, upperRight, regionsLayer[i], regionsReductionPercentage[i]);
+        }
 
         _fastRoute.initAuxVar();
 }
