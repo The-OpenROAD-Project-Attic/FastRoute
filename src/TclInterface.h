@@ -49,8 +49,8 @@ void set_output_file(const char * file);
 // Parms interface
 void set_pitches_in_tile(int numPitches);
 void set_capacity_adjustment(float adjustment);
-void set_layer_adjustment(int layer, float reductionPercentage);
-void set_region_adjustment(int minX, int minY, int maxX, int maxY, int layer, float reductionPercentage);
+void add_layer_adjustment(int layer, float reductionPercentage);
+void add_region_adjustment(int minX, int minY, int maxX, int maxY, int layer, float reductionPercentage);
 void set_min_layer(int minLayer);
 void set_max_layer(int maxLayer);
 void set_unidirectional_routing(bool unidirRouting);

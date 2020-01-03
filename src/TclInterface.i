@@ -49,9 +49,9 @@ extern void set_pitches_in_tile(int numPitches);
 
 extern void set_capacity_adjustment(float adjustment);
 
-extern void set_layer_adjustment(int layer, float reductionPercentage);
+extern void add_layer_adjustment(int layer, float reductionPercentage);
 
-extern void set_region_adjustment(int minX, int minY, int maxX, int maxY, int layer, float reductionPercentage);
+extern void add_region_adjustment(int minX, int minY, int maxX, int maxY, int layer, float reductionPercentage);
 
 extern void set_min_layer(int minLayer);
 

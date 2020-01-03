@@ -68,11 +68,11 @@ void set_capacity_adjustment(float adjustment) {
         fastRouteKernel->setAdjustment(adjustment);
 }
 
-extern void set_layer_adjustment(int layer, float reductionPercentage) {
+extern void add_layer_adjustment(int layer, float reductionPercentage) {
         fastRouteKernel->addLayerAdjustment(layer, reductionPercentage);
 }
 
-void set_region_adjustment(int minX, int minY, int maxX, int maxY, int layer, float reductionPercentage) {
+void add_region_adjustment(int minX, int minY, int maxX, int maxY, int layer, float reductionPercentage) {
         fastRouteKernel->addRegionAdjustment(minX, minY, maxX, maxY,
                                              layer, reductionPercentage);
 }
