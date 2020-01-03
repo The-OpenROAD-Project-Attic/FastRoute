@@ -44,10 +44,13 @@ sta::define_cmd_args "fastroute" {[-output_file out_file] \
 }
 
 proc fr_add_layer_adjustment { layer reductionPercentage } {
+  puts "Adjust layer $layer in [expr $reductionPercentage * 100]%"
   FastRoute::add_layer_adjustment $layer $reductionPercentage
 }
 
 proc fr_add_region_adjustment { minX minY maxX maxY layer reductionPercentage } {
+  puts "Adjust region ($minX, $minY); ($maxX, $maxY) in layer $layer \
+        in [expr $reductionPercentage * 100]%"
   FastRoute::add_region_adjustment $minX $minY $maxX $maxY $layer $reductionPercentage
 }
 
