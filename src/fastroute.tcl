@@ -38,12 +38,23 @@ sta::define_cmd_args "fastroute" {[-output_file out_file] \
                                            [-capacity_adjustment cap_adjust] \
                                            [-min_routing_layer min_layer] \
                                            [-max_routing_layer max_layer] \
-                                           [-unidirectional_route unidir_route] \
+                                           [-unidirectional_route] \
+                                           [-pitches_in_tile pitches] \
+                                           [-clock_net_routing] \
+}
+
+proc fr_add_layer_adjustment { layer reductionPercentage } {
+  FastRoute::add_layer_adjustment $layer $reductionPercentage
+}
+
+proc fr_add_region_adjustment { minX minY maxX maxY layer reductionPercentage } {
+  FastRoute::add_region_adjustment $minX $minY $maxX $maxY $layer $reductionPercentage
 }
 
 proc fastroute { args } {
   sta::parse_key_args "fastroute" args \
-    keys {-output_file -capacity_adjustment -min_routing_layer -max_routing_layer} flags {-unidirectional_route}
+    keys {-output_file -capacity_adjustment -min_routing_layer -max_routing_layer -pitches_in_tile} \
+    flags {-unidirectional_route -clock_net_routing}
 
   if { [info exists keys(-output_file)] } {
     set out_file $keys(-output_file)
@@ -74,10 +85,21 @@ proc fastroute { args } {
     FastRoute::set_max_layer -1
   }
 
+  if { [info exists keys(-pitches_in_tile)] } {
+    set pitches $keys(-pitches_in_tile)
+    FastRoute::set_pitches_in_tile $pitches
+  }
+
   if { [info exists flags(-unidirectional_route)] } {
     FastRoute::set_unidirectional_routing true
   } else {
     FastRoute::set_unidirectional_routing false
+  }
+
+  if { [info exists flags(-clock_net_routing)] } {
+    FastRoute::set_clock_net_routing true
+  } else {
+    FastRoute::set_clock_net_routing false
   }
 
   FastRoute::start_fastroute
