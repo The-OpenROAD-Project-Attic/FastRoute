@@ -95,6 +95,8 @@ target_include_directories(${LIB_NAME} PUBLIC
         ${OPENROAD_HOME}/include
         ${OPENSTA_HOME}/app
         ${FASTROUTE_HOME}/src
+	SYSTEM
+	${TCL_INCLUDE_PATH}
         )
 
 target_link_libraries(${LIB_NAME}
