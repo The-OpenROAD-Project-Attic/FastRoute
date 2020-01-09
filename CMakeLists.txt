@@ -69,6 +69,7 @@ set(FASTROUTE_TCL_INIT ${CMAKE_CURRENT_BINARY_DIR}/FastrouteTclInitVar.cc)
 add_custom_command(OUTPUT ${FASTROUTE_WRAP}
         COMMAND ${SWIG_EXECUTABLE} -namespace -prefix FastRoute -tcl8 -c++ -o ${FASTROUTE_WRAP} ${FASTROUTE_HOME}/src/TclInterface.i
         WORKING_DIRECTORY ${FASTROUTE_HOME}/src
+        DEPENDS ${FASTROUTE_HOME}/src/TclInterface.i ${FASTROUTE_HOME}/src/TclInterface.h
 )
 
 add_custom_command(OUTPUT ${FASTROUTE_TCL_INIT}
