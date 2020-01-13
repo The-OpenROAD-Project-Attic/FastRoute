@@ -37,6 +37,6 @@
 read_lef "_LEF_"
 read_def "_DEF_"
 
-fastroute -output_file "_GUIDE_"
+fastroute
 
 exit

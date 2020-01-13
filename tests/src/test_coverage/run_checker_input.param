@@ -1,6 +1,6 @@
 lef:../../input/input.lef
 def:../../input/input.def
-guide:input.guide
+guide:out.guide
 output:output.flex.out.def
 threads:8
 cpxthreads:1
