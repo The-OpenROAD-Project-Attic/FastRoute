@@ -54,6 +54,11 @@ proc fr_add_region_adjustment { minX minY maxX maxY layer reductionPercentage } 
   FastRoute::add_region_adjustment $minX $minY $maxX $maxY $layer $reductionPercentage
 }
 
+proc fr_set_alpha_for_net { net_name alpha } {
+  puts "Alpha $alpha for net $net_name"
+  FastRoute::set_alpha_for_net $net_name $alpha
+}
+
 proc fastroute { args } {
   sta::parse_key_args "fastroute" args \
     keys {-output_file -capacity_adjustment -min_routing_layer -max_routing_layer -pitches_in_tile} \
