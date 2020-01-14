@@ -93,7 +93,7 @@ add_library(${LIB_NAME}
 target_include_directories(${LIB_NAME} PUBLIC
         ${CMAKE_CURRENT_SOURCE_DIR}/include
         ${CMAKE_CURRENT_SOURCE_DIR}/third_party/fastroute/include
-<<<<<<< HEAD
+        ${CMAKE_CURRENT_SOURCE_DIR}/third_party/pdrev
         ${OPENDB_HOME}/include/
         ${OPENROAD_HOME}/include
         ${OPENSTA_HOME}/app
@@ -103,24 +103,5 @@ target_include_directories(${LIB_NAME} PUBLIC
         )
 
 target_link_libraries(${LIB_NAME}
-        FastRoute4.1)
-=======
-        ${CMAKE_CURRENT_SOURCE_DIR}/third_party/flute
-        ${CMAKE_CURRENT_SOURCE_DIR}/third_party/OpenDB/include
-        ${CMAKE_CURRENT_SOURCE_DIR}/src
-        ${CMAKE_CURRENT_SOURCE_DIR}/third_party/pdrev
-        )
-
-target_link_libraries(${BIN_NAME}
-        opendb
-        lefin
-        defin
         FastRoute4.1
-        flute
-        tm
-        zlib
-        zutil
-        rt
-        pdrev
-        )
->>>>>>> 912151c... Fr + PD
+        pdrev)

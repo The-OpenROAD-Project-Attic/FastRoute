@@ -48,8 +48,8 @@ add_LIBRARY(${LIB_NAME} STATIC ${SRC_FILES})
 
 target_include_directories(${LIB_NAME} PUBLIC
                            ${CMAKE_CURRENT_SOURCE_DIR}/include
-                           ${OPENROAD_HOME}/src/flute3)
-                           ${CMAKE_CURRENT_SOURCE_DIR}/../pdrev
+                           ${OPENROAD_HOME}/src/flute3
+                           ${CMAKE_CURRENT_SOURCE_DIR}/../pdrev)
 
 target_link_libraries(FastRoute4.1
                     pdrev
