@@ -65,5 +65,6 @@ if grep -q -e "$obs_report" golden.wl;
 then
 	exit $GREEN
 else
+        echo "     - [ERROR] Test failed. Check $testdir/src/test_wl/test.log and Check $testdir/src/test_wl/golden.wl"
 	exit $RED
 fi

@@ -65,5 +65,6 @@ if [ $status -eq 0 ]
 then
 	exit $GREEN
 else
+        echo "     - [ERROR] Test failed. Check $testdir/src/test_guides/test.log and Check $testdir/src/test_guides/golden.guide"
 	exit $RED
 fi

@@ -64,5 +64,6 @@ if grep -q "complete post process guides ..." test.log;
 then
 	exit $GREEN
 else
+        echo "     - [ERROR] Test failed. Check $testdir/src/test_coverage/test.log"
 	exit $RED
 fi
