@@ -101,8 +101,10 @@ proc fastroute { args } {
 
   if { [info exists flags(-clock_net_routing)] } {
     FastRoute::set_clock_net_routing true
+    FastRoute::set_pdrev true
   } else {
     FastRoute::set_clock_net_routing false
+    FastRoute::set_pdrev false
   }
 
   FastRoute::start_fastroute

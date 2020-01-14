@@ -101,6 +101,10 @@ void set_alpha(float alpha) {
         fastRouteKernel->setAlpha(alpha);
 }
 
+void set_alpha_for_net(char * netName, float alpha) {
+    fastRouteKernel->addAlphaForNet(netName, alpha);
+}
+
 void start_fastroute() {
         fastRouteKernel->startFastRoute();
 }

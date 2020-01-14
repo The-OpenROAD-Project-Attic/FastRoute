@@ -79,6 +79,7 @@ typedef struct
         short *pinY;    // array of Y coordinates of pins
         short *pinL;    // array of L coordinates of pins
         short minwidth;
+        float alpha; // alpha for pdrev when routing clock nets
 } Net;  // A Net is a set of connected MazePoints
 
 typedef struct

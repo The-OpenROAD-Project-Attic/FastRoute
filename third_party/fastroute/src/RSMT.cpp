@@ -824,7 +824,7 @@ void gen_brk_RSMT(Bool congestionDriven, Bool reRoute, Bool genTree, Bool newTyp
                         PD::PdRev pd;
                         std::vector<unsigned> vecX(x, x + d);
                         std::vector<unsigned> vecY(y, y + d);
-                        pd.setAlphaPDII(alpha);
+                        pd.setAlphaPDII(nets[i]->alpha);
                         pd.addNet(d, vecX, vecY);
                         pd.runPDII();
                         PD::Tree pdTree = pd.translateTree(0);

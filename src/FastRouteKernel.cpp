@@ -148,8 +148,10 @@ void FastRouteKernel::startFastRoute() {
                 std::cout << "Computing max routing layer... Done!\n";
         }
         
-        if (_clockNetRouting)
+        if (_clockNetRouting && _pdRev) {
                 _fastRoute.usePdRev();
+                _fastRoute.setAlpha(_alpha);
+        }
         
         std::cout << "Params:\n";
         std::cout << "---- Min routing layer: " << _minRoutingLayer << "\n";
@@ -334,7 +336,7 @@ void FastRouteKernel::initializeNets() {
                         count ++;
                 }
                 
-                _fastRoute.addNet(netName, idx, pins.size(), 1, grPins);
+                _fastRoute.addNet(netName, idx, pins.size(), 1, grPins, _alpha);
                 idx++;
         }
 

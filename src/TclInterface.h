@@ -57,6 +57,7 @@ void set_unidirectional_routing(bool unidirRouting);
 void set_pdrev(bool pdRev);
 void set_clock_net_routing(bool clockNetRouting);
 void set_alpha(float alpha);
+void set_alpha_for_net(char * netName, float alpha);
 
 // Run
 void start_fastroute();

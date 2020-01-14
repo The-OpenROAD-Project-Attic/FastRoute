@@ -112,7 +112,7 @@ void FT::setLayerOrientation(int x) {
         printf("layerOrientation = %d\n", layerOrientation);
 }
 
-void FT::addNet(char *name, int netIdx, int nPins, int minWidth, PIN pins[]) {
+void FT::addNet(char *name, int netIdx, int nPins, int minWidth, PIN pins[], float alpha) {
         int TD;
         int i, j, k;
         int pinX, pinY, pinL, netID, numPins, minwidth;
@@ -179,6 +179,7 @@ void FT::addNet(char *name, int netIdx, int nPins, int minWidth, PIN pins[]) {
                 nets[newnetID]->pinX = (short *)malloc(pinInd * sizeof(short));
                 nets[newnetID]->pinY = (short *)malloc(pinInd * sizeof(short));
                 nets[newnetID]->pinL = (short *)malloc(pinInd * sizeof(short));
+                nets[newnetID]->alpha = alpha;
 
                 for (j = 0; j < pinInd; j++) {
                         nets[newnetID]->pinX[j] = pinXarray[j];

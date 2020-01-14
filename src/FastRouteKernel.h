@@ -77,8 +77,6 @@ private:
         bool _interactiveMode;
         bool _clockNetRouting;
         unsigned _dbId;
-        bool _pdRev;
-        float _alpha = 0.4;
         
         // Layer adjustment variables
         std::vector<int> _layersToAdjust;
@@ -97,6 +95,11 @@ private:
         std::vector<FastRoute::NET> _result;
         std::map<std::string, int> _netsDegree;
 
+        // Clock net routing variables
+        bool _pdRev;
+        float _alpha = 0.4;
+        std::map<std::string, float> _netsAlpha;
+        
         // main functions
         void initGrid();
         void initRoutingLayers();
@@ -149,6 +152,11 @@ public:
                 regionsMaxY.push_back(maxY);
                 regionsLayer.push_back(layer);
                 regionsReductionPercentage.push_back(reductionPercentage);
+        }
+        
+        void addAlphaForNet(char * netName, float alpha) {
+                std::string name(netName);
+                _netsAlpha[name] = alpha;
         }
         
         void printGrid();
