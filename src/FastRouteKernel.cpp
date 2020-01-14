@@ -283,6 +283,8 @@ void FastRouteKernel::initializeNets() {
         _fastRoute.setMaxNetDegree(_netlist.getMaxNetDegree());
         
         for (Net net : _netlist.getNets()) {
+                float netAlpha = _alpha;
+
                 if (net.getNumPins() == 1) {
                         continue;
                 }
@@ -336,7 +338,11 @@ void FastRouteKernel::initializeNets() {
                         count ++;
                 }
                 
-                _fastRoute.addNet(netName, idx, pins.size(), 1, grPins, _alpha);
+                if (_netsAlpha.find(net.getName()) != _netsAlpha.end()) {
+                        netAlpha = _netsAlpha[net.getName()];
+                }
+                
+                _fastRoute.addNet(netName, idx, pins.size(), 1, grPins, netAlpha);
                 idx++;
         }
 
