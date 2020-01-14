@@ -77,6 +77,7 @@ private:
         bool _interactiveMode;
         bool _clockNetRouting;
         unsigned _dbId;
+        const int _selectedMetal = 3;
         
         // Layer adjustment variables
         std::vector<int> _layersToAdjust;

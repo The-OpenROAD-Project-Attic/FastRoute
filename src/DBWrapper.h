@@ -79,6 +79,7 @@ public:
         int computeMaxRoutingLayer();
         
         void setDB(unsigned idx) { _db = odb::dbDatabase::getDatabase(idx); }
+        void setSelectedMetal (int metal) { selectedMetal = metal; }
 private:
         int selectedMetal = 3;
         odb::dbDatabase *_db;

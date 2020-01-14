@@ -65,6 +65,10 @@ int FastRouteKernel::run() {
                 std::cout << "Computing max routing layer... Done!\n";
         }
         
+        if (_maxRoutingLayer < _selectedMetal) {
+                _dbWrapper->setSelectedMetal(_maxRoutingLayer);
+        }
+        
         std::cout << "Initializing grid...\n";
         initGrid();
         std::cout << "Initializing grid... Done!\n";
@@ -141,6 +145,10 @@ void FastRouteKernel::startFastRoute() {
                 std::cout << "Computing max routing layer...\n";
                 _maxRoutingLayer = _dbWrapper.computeMaxRoutingLayer();
                 std::cout << "Computing max routing layer... Done!\n";
+        }
+        
+        if (_maxRoutingLayer < _selectedMetal) {
+                _dbWrapper->setSelectedMetal(_maxRoutingLayer);
         }
         
         std::cout << "Params:\n";

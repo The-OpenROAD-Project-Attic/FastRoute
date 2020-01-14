@@ -34,7 +34,7 @@ void DBWrapper::initGrid(int maxLayer) {
         odb::dbTechLayer* selectedLayer = tech->findRoutingLayer(selectedMetal);
         
         if (!selectedLayer) {
-                std::cout << "[ERROR] Layer" << selectedMetal << " not found! Exiting...\n";
+                std::cout << "[ERROR] Layer " << selectedMetal << " not found! Exiting...\n";
                 std::exit(1);
         }
         
