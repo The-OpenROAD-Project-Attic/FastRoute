@@ -64,6 +64,11 @@ int FastRouteKernel::run() {
                 _maxRoutingLayer = _dbWrapper.computeMaxRoutingLayer();
                 std::cout << "Computing max routing layer... Done!\n";
         }
+
+        if (_clockNetRouting && _pdRev){
+                _fastRoute.usePdRev();
+                _fastRoute.setAlpha(_alpha);
+        }
         
         if (_maxRoutingLayer < _selectedMetal) {
                 _dbWrapper.setSelectedMetal(_maxRoutingLayer);
@@ -149,6 +154,11 @@ void FastRouteKernel::startFastRoute() {
         
         if (_maxRoutingLayer < _selectedMetal) {
                 _dbWrapper.setSelectedMetal(_maxRoutingLayer);
+        }
+
+        if (_clockNetRouting && _pdRev) {
+                _fastRoute.usePdRev();
+                _fastRoute.setAlpha(_alpha);
         }
         
         std::cout << "Params:\n";
@@ -281,6 +291,8 @@ void FastRouteKernel::initializeNets() {
         _fastRoute.setMaxNetDegree(_netlist.getMaxNetDegree());
         
         for (Net net : _netlist.getNets()) {
+                float netAlpha = _alpha;
+
                 if (net.getNumPins() == 1) {
                         continue;
                 }
@@ -334,7 +346,11 @@ void FastRouteKernel::initializeNets() {
                         count ++;
                 }
                 
-                _fastRoute.addNet(netName, idx, pins.size(), 1, grPins);
+                if (_netsAlpha.find(net.getName()) != _netsAlpha.end()) {
+                        netAlpha = _netsAlpha[net.getName()];
+                }
+                
+                _fastRoute.addNet(netName, idx, pins.size(), 1, grPins, netAlpha);
                 idx++;
         }
 

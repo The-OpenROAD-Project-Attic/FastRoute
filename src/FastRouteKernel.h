@@ -96,6 +96,11 @@ private:
         std::vector<FastRoute::NET> _result;
         std::map<std::string, int> _netsDegree;
 
+        // Clock net routing variables
+        bool _pdRev;
+        float _alpha = 0.4;
+        std::map<std::string, float> _netsAlpha;
+        
         // main functions
         void initGrid();
         void initRoutingLayers();
@@ -128,6 +133,8 @@ public:
         void setMaxRoutingLayer(const int maxLayer) { _maxRoutingLayer = maxLayer; }
         void setUnidirectionalRoute(const bool unidirRoute) { _unidirectionalRoute = unidirRoute; }
         void setClockNetRouting(const bool clockNetRouting) { _clockNetRouting = clockNetRouting; }
+        void setPDRev(const bool pdRev) { _pdRev = pdRev; }
+        void setAlpha(const float alpha) { _alpha = alpha; }
         void setOutputFile(const std::string& outfile) { _outfile = outfile; }
         void setPitchesInTile(const int pitchesInTile) { _grid.setPitchesInTile(pitchesInTile); }
         void setDbId(unsigned idx) { _dbId = idx; }
@@ -146,6 +153,11 @@ public:
                 regionsMaxY.push_back(maxY);
                 regionsLayer.push_back(layer);
                 regionsReductionPercentage.push_back(reductionPercentage);
+        }
+        
+        void addAlphaForNet(char * netName, float alpha) {
+                std::string name(netName);
+                _netsAlpha[name] = alpha;
         }
         
         void printGrid();

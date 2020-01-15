@@ -55,6 +55,8 @@ Edge *h_edges, *v_edges;
 float d1[YRANGE][XRANGE];
 float d2[YRANGE][XRANGE];
 int layerOrientation;
+bool pdRev;
+float alpha;
 
 Bool HV[YRANGE][XRANGE];
 Bool hyperV[YRANGE][XRANGE];
@@ -81,11 +83,11 @@ Segment* seglist;
 int* seglistIndex;  // the index for the segments for each net
 int* seglistCnt;    // the number of segements for each net
 int* segOrder;      // the order of segments for routing
-Flute::Tree* trees;        // the tree topologies
+Tree* trees;        // the tree topologies
 StTree* sttrees;    // the Steiner trees
-Flute::DTYPE** gxs;        // the copy of xs for nets, used for second FLUTE
-Flute::DTYPE** gys;        // the copy of xs for nets, used for second FLUTE
-Flute::DTYPE** gs;         // the copy of vertical sequence for nets, used for second FLUTE
+DTYPE** gxs;        // the copy of xs for nets, used for second FLUTE
+DTYPE** gys;        // the copy of xs for nets, used for second FLUTE
+DTYPE** gs;         // the copy of vertical sequence for nets, used for second FLUTE
 Edge3D* h_edges3D;
 Edge3D* v_edges3D;
 

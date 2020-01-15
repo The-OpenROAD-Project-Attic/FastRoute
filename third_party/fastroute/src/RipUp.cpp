@@ -33,6 +33,7 @@
 #include <stdlib.h>
 #include <algorithm>
 #include "DataType.h"
+#include "pdrev.h"
 #include "flute.h"
 #include "DataProc.h"
 #include "RipUp.h"

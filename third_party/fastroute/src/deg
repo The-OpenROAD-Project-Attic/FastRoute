@@ -1,0 +1,159 @@
+dl.cpp:                el->next->prev = el->prev;
+dl.cpp:        dl->count--;
+dl.cpp:        if (first_list->count <= 0) {
+dl.cpp:        } else if (second_list->count > 0) {
+dl.cpp:                first_list->last->next = second_list->first;
+dl.cpp:                second_list->first->prev = first_list->last;
+dl.cpp:                first_list->last = second_list->last;
+dl.cpp:                first_list->count += second_list->count;
+dl.cpp:        /* first_list.last->next = 0; */
+dl.cpp:        second_list.first->prev = 0;
+dl.h:                                (element)->next->prev = _el;                        \
+dl.h:                                (dl)->last->next = _el;                     \
+dl.h:                                (dl)->first->prev = _el;                    \
+EdgeShift.cpp:        deg = t->deg;
+EdgeShift.cpp:                if (t->branch[i].n == i) {
+EdgeShift.cpp:                n = t->branch[i].n;
+EdgeShift.cpp:                        n = t->branch[i].n;
+EdgeShift.cpp:                        n = t->branch[i].n;
+EdgeShift.cpp:                        if (t->branch[i].x == t->branch[n].x) {
+EdgeShift.cpp:                                if (t->branch[i].y < t->branch[n].y) {
+EdgeShift.cpp:                                } else if (t->branch[i].y > t->branch[n].y) {
+EdgeShift.cpp:                        } else if (t->branch[i].y == t->branch[n].y) {
+EdgeShift.cpp:                                if (t->branch[i].x < t->branch[n].x) {
+EdgeShift.cpp:                                } else if (t->branch[i].x > t->branch[n].x) {
+EdgeShift.cpp:                        if (t->branch[n1].y == t->branch[n2].y)  // a horizontal edge
+EdgeShift.cpp:                                maxY1 = minY1 = t->branch[n1].y;
+EdgeShift.cpp:                                        y = t->branch[nbr[n1][j]].y;
+EdgeShift.cpp:                                maxY2 = minY2 = t->branch[n2].y;
+EdgeShift.cpp:                                        y = t->branch[nbr[n2][j]].y;
+EdgeShift.cpp:                                                for (k = t->branch[n1].x; k < t->branch[n2].x; k++) {
+EdgeShift.cpp:                                                                if (t->branch[n1].x < t->branch[n3].x) {
+EdgeShift.cpp:                                                                        smallX = t->branch[n1].x;
+EdgeShift.cpp:                                                                        bigX = t->branch[n3].x;
+EdgeShift.cpp:                                                                        smallX = t->branch[n3].x;
+EdgeShift.cpp:                                                                        bigX = t->branch[n1].x;
+EdgeShift.cpp:                                                                if (j < t->branch[n3].y) {
+EdgeShift.cpp:                                                                        bigY = t->branch[n3].y;
+EdgeShift.cpp:                                                                        smallY = t->branch[n3].y;
+EdgeShift.cpp:                                                                if (t->branch[n2].x < t->branch[n3].x) {
+EdgeShift.cpp:                                                                        smallX = t->branch[n2].x;
+EdgeShift.cpp:                                                                        bigX = t->branch[n3].x;
+EdgeShift.cpp:                                                                        smallX = t->branch[n3].x;
+EdgeShift.cpp:                                                                        bigX = t->branch[n2].x;
+EdgeShift.cpp:                                                                if (j < t->branch[n3].y) {
+EdgeShift.cpp:                                                                        bigY = t->branch[n3].y;
+EdgeShift.cpp:                                                                        smallY = t->branch[n3].y;
+EdgeShift.cpp:                                        Pos = t->branch[n1].y;
+EdgeShift.cpp:                                        if (Pos != t->branch[n1].y)  // find a better position than current
+EdgeShift.cpp:                                                benefit = costH[t->branch[n1].y] - bestCost;
+EdgeShift.cpp:                                maxX1 = minX1 = t->branch[n1].x;
+EdgeShift.cpp:                                        x = t->branch[nbr[n1][j]].x;
+EdgeShift.cpp:                                maxX2 = minX2 = t->branch[n2].x;
+EdgeShift.cpp:                                        x = t->branch[nbr[n2][j]].x;
+EdgeShift.cpp:                                                for (k = t->branch[n1].y; k < t->branch[n2].y; k++) {
+EdgeShift.cpp:                                                                if (j < t->branch[n3].x) {
+EdgeShift.cpp:                                                                        bigX = t->branch[n3].x;
+EdgeShift.cpp:                                                                        smallX = t->branch[n3].x;
+EdgeShift.cpp:                                                                if (t->branch[n1].y < t->branch[n3].y) {
+EdgeShift.cpp:                                                                        smallY = t->branch[n1].y;
+EdgeShift.cpp:                                                                        bigY = t->branch[n3].y;
+EdgeShift.cpp:                                                                        smallY = t->branch[n3].y;
+EdgeShift.cpp:                                                                        bigY = t->branch[n1].y;
+EdgeShift.cpp:                                                                if (j < t->branch[n3].x) {
+EdgeShift.cpp:                                                                        bigX = t->branch[n3].x;
+EdgeShift.cpp:                                                                        smallX = t->branch[n3].x;
+EdgeShift.cpp:                                                                if (t->branch[n2].y < t->branch[n3].y) {
+EdgeShift.cpp:                                                                        smallY = t->branch[n2].y;
+EdgeShift.cpp:                                                                        bigY = t->branch[n3].y;
+EdgeShift.cpp:                                                                        smallY = t->branch[n3].y;
+EdgeShift.cpp:                                                                        bigY = t->branch[n2].y;
+EdgeShift.cpp:                                        Pos = t->branch[n1].x;
+EdgeShift.cpp:                                        if (Pos != t->branch[n1].x)  // find a better position than current
+EdgeShift.cpp:                                                benefit = costV[t->branch[n1].x] - bestCost;
+EdgeShift.cpp:                        if (t->branch[n1].y == t->branch[n2].y)  // horizontal edge
+EdgeShift.cpp:                                t->branch[n1].y = bestPos;
+EdgeShift.cpp:                                t->branch[n2].y = bestPos;
+EdgeShift.cpp:                                t->branch[n1].x = bestPos;
+EdgeShift.cpp:                                t->branch[n2].x = bestPos;
+EdgeShift.cpp:        deg = t->deg;
+EdgeShift.cpp:                        n = t->branch[i].n;
+EdgeShift.cpp:                        if (n != i && n != t->branch[n].n && t->branch[i].x == t->branch[n].x && t->branch[i].y == t->branch[n].y) {
+EdgeShift.cpp:                                        n = t->branch[j].n;
+EdgeShift.cpp:                                                if (t->branch[j].x == t->branch[cur_pairN1].x && t->branch[j].y != t->branch[cur_pairN1].y)
+EdgeShift.cpp:                                                else if (t->branch[j].y == t->branch[cur_pairN1].y && t->branch[j].x != t->branch[cur_pairN1].x)
+EdgeShift.cpp:                                                if (t->branch[j].x == t->branch[cur_pairN2].x && t->branch[j].y != t->branch[cur_pairN2].y)
+EdgeShift.cpp:                                                else if (t->branch[j].y == t->branch[cur_pairN2].y && t->branch[j].x != t->branch[cur_pairN2].x)
+EdgeShift.cpp:                                n = t->branch[cur_pairN2].n;
+EdgeShift.cpp:                                if (t->branch[n].x == t->branch[cur_pairN2].x && t->branch[n].y != t->branch[cur_pairN2].y)
+EdgeShift.cpp:                                else if (t->branch[n].y == t->branch[cur_pairN2].y && t->branch[n].x != t->branch[cur_pairN2].x)
+EdgeShift.cpp:                                        if (N2nbrH == t->branch[cur_pairN2].n) {
+EdgeShift.cpp:                                                t->branch[N1nbrH].n = cur_pairN2;
+EdgeShift.cpp:                                                t->branch[cur_pairN1].n = N2nbrH;
+EdgeShift.cpp:                                                t->branch[cur_pairN2].n = cur_pairN1;
+EdgeShift.cpp:                                                t->branch[N1nbrH].n = cur_pairN2;
+EdgeShift.cpp:                                                t->branch[N2nbrH].n = cur_pairN1;
+EdgeShift.cpp:                                        if (N2nbrV == t->branch[cur_pairN2].n) {
+EdgeShift.cpp:                                                t->branch[N1nbrV].n = cur_pairN2;
+EdgeShift.cpp:                                                t->branch[cur_pairN1].n = N2nbrV;
+EdgeShift.cpp:                                                t->branch[cur_pairN2].n = cur_pairN1;
+EdgeShift.cpp:                                                t->branch[N1nbrV].n = cur_pairN2;
+EdgeShift.cpp:                                                t->branch[N2nbrV].n = cur_pairN1;
+neighbors.cpp:        long best_i2;   /* index of current best nearest-neighbor */
+neighbors.cpp:        long best_dist; /* distance to best nearest-neighbor      */
+neighbors.cpp:    merge sorted[left..mid-1] with sorted[mid..right-1] by y-coordinate
+neighbors.cpp:          (size_t)(right-left)*sizeof(long) /* number of bytes */ 
+neighbors.cpp:   by {sorted[left],...,sorted[right-1]} 
+neighbors.cpp:  Brute-force nearest-neighbor computation for debugging purposes
+RSMT.cpp:                t->deg = 2;
+RSMT.cpp:                t->length = ADIFF(x[0], x[1]) + ADIFF(y[0], y[1]);
+RSMT.cpp:                t->branch = (Branch *)malloc(2 * sizeof(Branch));
+RSMT.cpp:                t->branch[0].x = x[0];
+RSMT.cpp:                t->branch[0].y = y[0];
+RSMT.cpp:                t->branch[0].n = 1;
+RSMT.cpp:                t->branch[1].x = x[1];
+RSMT.cpp:                t->branch[1].y = y[1];
+RSMT.cpp:                t->branch[1].n = 1;
+RSMT.cpp:                t->deg = 3;
+RSMT.cpp:                t->length = ADIFF(x_max, x_min) + ADIFF(y_max, y_min);
+RSMT.cpp:                t->branch = (Branch *)malloc(4 * sizeof(Branch));
+RSMT.cpp:                t->branch[0].x = x[0];
+RSMT.cpp:                t->branch[0].y = y[0];
+RSMT.cpp:                t->branch[0].n = 3;
+RSMT.cpp:                t->branch[1].x = x[1];
+RSMT.cpp:                t->branch[1].y = y[1];
+RSMT.cpp:                t->branch[1].n = 3;
+RSMT.cpp:                t->branch[2].x = x[2];
+RSMT.cpp:                t->branch[2].y = y[2];
+RSMT.cpp:                t->branch[2].n = 3;
+RSMT.cpp:                t->branch[3].x = x_mid;
+RSMT.cpp:                t->branch[3].y = y_mid;
+RSMT.cpp:                t->branch[3].n = 3;
+RSMT.cpp:                        t->branch[i].x = t->branch[i].x / 100;
+RSMT.cpp:                        t->branch[i].y = t->branch[i].y / ((int)(100 * coeffV));
+RSMT.cpp:                t->deg = 2;
+RSMT.cpp:                t->length = ADIFF(x[0], x[1]) + ADIFF(y[0], y[1]);
+RSMT.cpp:                t->branch = (Branch *)malloc(2 * sizeof(Branch));
+RSMT.cpp:                t->branch[0].x = x[0];
+RSMT.cpp:                t->branch[0].y = y[0];
+RSMT.cpp:                t->branch[0].n = 1;
+RSMT.cpp:                t->branch[1].x = x[1];
+RSMT.cpp:                t->branch[1].y = y[1];
+RSMT.cpp:                t->branch[1].n = 1;
+RSMT.cpp:                t->deg = 3;
+RSMT.cpp:                t->length = ADIFF(x_max, x_min) + ADIFF(y_max, y_min);
+RSMT.cpp:                t->branch = (Branch *)malloc(4 * sizeof(Branch));
+RSMT.cpp:                t->branch[0].x = x[0];
+RSMT.cpp:                t->branch[0].y = y[0];
+RSMT.cpp:                t->branch[0].n = 3;
+RSMT.cpp:                t->branch[1].x = x[1];
+RSMT.cpp:                t->branch[1].y = y[1];
+RSMT.cpp:                t->branch[1].n = 3;
+RSMT.cpp:                t->branch[2].x = x[2];
+RSMT.cpp:                t->branch[2].y = y[2];
+RSMT.cpp:                t->branch[2].n = 3;
+RSMT.cpp:                t->branch[3].x = x_mid;
+RSMT.cpp:                t->branch[3].y = y_mid;
+RSMT.cpp:                t->branch[3].n = 3;
+RSMT.cpp:                        t->branch[i].x = mapxy(t->branch[i].x, xs, nxs, d);
+RSMT.cpp:                        t->branch[i].y = mapxy(t->branch[i].y, ys, nys, d);

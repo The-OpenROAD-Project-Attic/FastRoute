@@ -42,6 +42,7 @@
 #include <algorithm>
 #include "DataType.h"
 #include "flute.h"
+#include "pdrev.h"
 #include "DataProc.h"
 #include "FastRoute.h"
 #include "utility.h"
@@ -111,7 +112,7 @@ void FT::setLayerOrientation(int x) {
         printf("layerOrientation = %d\n", layerOrientation);
 }
 
-void FT::addNet(char *name, int netIdx, int nPins, int minWidth, PIN pins[]) {
+void FT::addNet(char *name, int netIdx, int nPins, int minWidth, PIN pins[], float alpha) {
         int TD;
         int i, j, k;
         int pinX, pinY, pinL, netID, numPins, minwidth;
@@ -178,6 +179,7 @@ void FT::addNet(char *name, int netIdx, int nPins, int minWidth, PIN pins[]) {
                 nets[newnetID]->pinX = (short *)malloc(pinInd * sizeof(short));
                 nets[newnetID]->pinY = (short *)malloc(pinInd * sizeof(short));
                 nets[newnetID]->pinL = (short *)malloc(pinInd * sizeof(short));
+                nets[newnetID]->alpha = alpha;
 
                 for (j = 0; j < pinInd; j++) {
                         nets[newnetID]->pinX[j] = pinXarray[j];
@@ -349,11 +351,11 @@ void FT::initAuxVar() {
 
         seglistCnt = (int *)malloc(numValidNets * sizeof(int));
         seglist = (Segment *)malloc(segcount * sizeof(Segment));
-        trees = (Flute::Tree *)malloc(numValidNets * sizeof(Flute::Tree));
+        trees = (Tree *)malloc(numValidNets * sizeof(Tree));
         sttrees = (StTree *)malloc(numValidNets * sizeof(StTree));
-        gxs = (Flute::DTYPE **)malloc(numValidNets * sizeof(Flute::DTYPE *));
-        gys = (Flute::DTYPE **)malloc(numValidNets * sizeof(Flute::DTYPE *));
-        gs = (Flute::DTYPE **)malloc(numValidNets * sizeof(Flute::DTYPE *));
+        gxs = (DTYPE **)malloc(numValidNets * sizeof(DTYPE *));
+        gys = (DTYPE **)malloc(numValidNets * sizeof(DTYPE *));
+        gs = (DTYPE **)malloc(numValidNets * sizeof(DTYPE *));
 
         gridHV = XRANGE * YRANGE;
         gridH = (xGrid - 1) * yGrid;
@@ -836,6 +838,14 @@ int FT::run(std::vector<NET> &result) {
          * this function call for now.> */
         /* freeAllMemory(); */
         return (1);
+}
+
+void FT::usePdRev(){
+        pdRev = true;
+}
+
+void FT::setAlpha(float a){
+        alpha = a;
 }
 
 }  // namespace FastRoute

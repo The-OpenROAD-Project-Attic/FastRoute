@@ -77,7 +77,7 @@ class FT {
         void setLowerLeft(int x, int y);
         void setTileSize(int width, int height);
         void setLayerOrientation(int x);
-        void addNet(char *name, int netIdx, int nPIns, int minWIdth, PIN pins[]);
+        void addNet(char *name, int netIdx, int nPIns, int minWIdth, PIN pins[], float alpha);
         void initEdges();
         void setNumAdjustments(int nAdjustements);
         void addAdjustment(long x1, long y1, int l1, long x2, long y2, int l2, int reducedCap, bool isReduce = true);
@@ -88,6 +88,8 @@ class FT {
         int getEdgeCapacity(long x1, long y1, int l1, long x2, long y2, int l2);
         std::map<std::string, std::vector<PIN>> getNets();
         void setMaxNetDegree(int);
+        void usePdRev();
+        void setAlpha(float a);
 };
 }  // namespace FastRoute
 #endif /* __FASTROUTE_API__ */

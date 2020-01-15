@@ -47,6 +47,8 @@ namespace FastRoute {
 extern int xGrid, yGrid, numGrids, numNets, vCapacity, hCapacity, vCapacity3D[MAXLAYER], hCapacity3D[MAXLAYER];
 extern float vCapacity_lb, hCapacity_lb, vCapacity_ub, hCapacity_ub;
 extern int layerOrientation;
+extern bool pdRev;
+extern float alpha;
 
 extern int enlarge, costheight, ripup_threshold;
 extern int MaxDegree;
@@ -89,11 +91,11 @@ extern int *seglistIndex;  // the index for the segments for each net
 extern int *seglistCnt;    // the number of segements for each net
 extern int *segOrder;      // the order of segments for routing
 
-extern Flute::Tree *trees;      // the tree topologies
+extern Tree *trees;      // the tree topologies
 extern StTree *sttrees;  // the Steiner trees
-extern Flute::DTYPE **gxs;      // the copy of xs for nets, used for second FLUTE
-extern Flute::DTYPE **gys;      // the copy of xs for nets, used for second FLUTE
-extern Flute::DTYPE **gs;       // the copy of vertical sequence for nets, used for second FLUTE
+extern DTYPE **gxs;      // the copy of xs for nets, used for second FLUTE
+extern DTYPE **gys;      // the copy of xs for nets, used for second FLUTE
+extern DTYPE **gs;       // the copy of vertical sequence for nets, used for second FLUTE
 
 extern OrderNetPin *treeOrderPV;
 extern OrderTree *treeOrderCong;
