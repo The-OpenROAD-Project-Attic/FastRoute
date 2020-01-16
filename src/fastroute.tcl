@@ -41,6 +41,7 @@ sta::define_cmd_args "fastroute" {[-output_file out_file] \
                                            [-unidirectional_route] \
                                            [-pitches_in_tile pitches] \
                                            [-clock_net_routing] \
+                                           [-alpha alpha] \
 }
 
 proc fr_add_layer_adjustment { layer reductionPercentage } {
@@ -61,7 +62,7 @@ proc fr_set_alpha_for_net { net_name alpha } {
 
 proc fastroute { args } {
   sta::parse_key_args "fastroute" args \
-    keys {-output_file -capacity_adjustment -min_routing_layer -max_routing_layer -pitches_in_tile} \
+    keys {-output_file -capacity_adjustment -min_routing_layer -max_routing_layer -pitches_in_tile -alpha} \
     flags {-unidirectional_route -clock_net_routing}
 
   if { [info exists keys(-output_file)] } {
@@ -102,6 +103,11 @@ proc fastroute { args } {
     FastRoute::set_unidirectional_routing true
   } else {
     FastRoute::set_unidirectional_routing false
+  }
+
+  if { [info exists keys(-alpha) ] } {
+    set alpha $keys(-alpha)
+    FastRoute::set_alpha $alpha
   }
 
   if { [info exists flags(-clock_net_routing)] } {
