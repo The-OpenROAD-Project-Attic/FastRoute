@@ -51,7 +51,7 @@ using   namespace   std;
 #include <vector>
 #include "node.h"
 #include "edge.h"
-#include <tr1/unordered_map>
+#include <unordered_map>
 
 class Graph {
   public:

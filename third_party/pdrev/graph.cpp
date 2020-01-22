@@ -49,7 +49,7 @@
 #include <sstream>
 #include <string>
 #include <queue>
-#include <tr1/unordered_map>
+#include <unordered_map>
 #include <algorithm>
 #include "graph.h"
 #include <math.h>
