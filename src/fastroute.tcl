@@ -40,29 +40,17 @@ sta::define_cmd_args "fastroute" {[-output_file out_file] \
                                            [-max_routing_layer max_layer] \
                                            [-unidirectional_route] \
                                            [-pitches_in_tile pitches] \
+                                           [-layers_adjustments layers_adjustments] \
+                                           [-regions_adjustments regions_adjustments] \
+                                           [-nets_alphas_priorities nets_alphas] \
                                            [-clock_net_routing] \
                                            [-alpha alpha] \
 }
 
-proc fr_add_layer_adjustment { layer reductionPercentage } {
-  puts "Adjust layer $layer in [expr $reductionPercentage * 100]%"
-  FastRoute::add_layer_adjustment $layer $reductionPercentage
-}
-
-proc fr_add_region_adjustment { minX minY maxX maxY layer reductionPercentage } {
-  puts "Adjust region ($minX, $minY); ($maxX, $maxY) in layer $layer \
-        in [expr $reductionPercentage * 100]%"
-  FastRoute::add_region_adjustment $minX $minY $maxX $maxY $layer $reductionPercentage
-}
-
-proc fr_set_alpha_for_net { net_name alpha } {
-  puts "Alpha $alpha for net $net_name"
-  FastRoute::set_alpha_for_net $net_name $alpha
-}
-
 proc fastroute { args } {
   sta::parse_key_args "fastroute" args \
-    keys {-output_file -capacity_adjustment -min_routing_layer -max_routing_layer -pitches_in_tile -alpha} \
+    keys {-output_file -capacity_adjustment -min_routing_layer -max_routing_layer \
+          -pitches_in_tile -alpha -layers_adjustments -regions_adjustments -nets_alphas_priorities} \
     flags {-unidirectional_route -clock_net_routing}
 
   if { [info exists keys(-output_file)] } {
@@ -97,6 +85,43 @@ proc fastroute { args } {
   if { [info exists keys(-pitches_in_tile)] } {
     set pitches $keys(-pitches_in_tile)
     FastRoute::set_pitches_in_tile $pitches
+  }
+
+  if { [info exists keys(-layers_adjustments)] } {
+    set layers_adjustments $keys(-layers_adjustments)
+    foreach layer_adjustment $layers_adjustments {
+      set layer [lindex $layer_adjustment 0]
+      set reductionPercentage [lindex $layer_adjustment 1]
+
+      puts "Adjust layer $layer in [expr $reductionPercentage * 100]%"
+      FastRoute::add_layer_adjustment $layer $reductionPercentage
+    }
+  }
+  
+  if { [info exists keys(-regions_adjustments)] } {
+    set regions_adjustments $keys(-regions_adjustments)
+    foreach region_adjustment $regions_adjustments {
+      set minX [lindex $region_adjustment 0]
+      set minY [lindex $region_adjustment 1]
+      set maxX [lindex $region_adjustment 2]
+      set maxY [lindex $region_adjustment 3]
+      set layer [lindex $region_adjustment 4]
+      set reductionPercentage [lindex $region_adjustment 5]
+
+      puts "Adjust region ($minX, $minY); ($maxX, $maxY) in layer $layer \
+        in [expr $reductionPercentage * 100]%"
+      FastRoute::add_region_adjustment $minX $minY $maxX $maxY $layer $reductionPercentage
+    }
+  }
+  
+  if { [info exists keys(-nets_alphas_priorities)] } {
+    set nets_alphas $keys(-nets_alphas_priorities)
+    foreach net_alpha $nets_alphas {
+      set net_name [lindex $net_alpha 0]
+      set alpha [lindex $net_alpha 1]
+      puts "Alpha $alpha for net $net_name"
+      FastRoute::set_alpha_for_net $net_name $alpha
+    }
   }
 
   if { [info exists flags(-unidirectional_route)] } {
