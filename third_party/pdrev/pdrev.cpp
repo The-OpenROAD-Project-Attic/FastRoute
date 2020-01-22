@@ -17,9 +17,7 @@ void PdRev::addNet(int numPins, std::vector<unsigned> x, std::vector<unsigned> y
 void PdRev::config(){
         num_nets = my_graphs.size();
    //     measure.start_clock();
-        omp_set_num_threads(4);
 //        cout << "\nGenerating nearest neighbor graph..." << endl;
-#pragma omp parallel for
         for (unsigned i = 0; i < num_nets; ++i) {
                 // Guibas-Stolfi algorithm for computing nearest NE (north-east) neighbors
                 if (i == net_num || !runOneNet) {
@@ -36,7 +34,6 @@ void PdRev::runPDII(){
     //    measure.start_clock();
     //    cout << "\nRunning PD-II... alpha = "
     //            << alpha2 << endl;
-#pragma omp parallel for
         for (unsigned i = 0; i < num_nets; ++i) {
                 if (i == net_num || !runOneNet) {
                         my_graphs[i]-> PDBU_new_NN();
@@ -57,7 +54,6 @@ void PdRev::runPDII(){
 void PdRev::runDAS(){
         //measure.start_clock();
         //cout << "\nRunning Steiner algorithm..." << endl;
-#pragma omp parallel for
         for (unsigned i = 0; i < num_nets; ++i) {
                 if (i == net_num || !runOneNet) {
                         my_graphs[i]-> doSteiner_HoVW();
@@ -74,7 +70,6 @@ void PdRev::runDAS(){
         measure.stop_clock("HVW Steinerization");
 
         cout << "\nRunning DAS algorithm..." << endl; */
-#pragma omp parallel for
         for (unsigned i = 0; i < num_nets; ++i) {
                 if (i == net_num || !runOneNet) {
                         my_graphs[i]-> fix_max_dc();
