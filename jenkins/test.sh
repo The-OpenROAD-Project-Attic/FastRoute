@@ -1,1 +1,0 @@
-docker run -v $(pwd):/fastroute fastroute bash -c "./fastroute/jenkins/unit-test.sh"
