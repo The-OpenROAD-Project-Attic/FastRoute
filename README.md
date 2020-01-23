@@ -3,6 +3,8 @@ FastRoute
 
 **FastRoute** is an open-source global router.
 
+If you want to use this as part of the OpenROAD project you should build it and use it from inside the integrated [openroad app](https://github.com/The-OpenROAD-Project/OpenROAD). The standalone version is available as legacy code.
+
 The algorithm base is from FastRoute4.1, and the database comes from [OpenDB](https://github.com/The-OpenROAD-Project/OpenDB)
 
 
