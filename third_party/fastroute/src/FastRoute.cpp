@@ -504,7 +504,6 @@ int FT::run(std::vector<NET> &result) {
 
         t1 = clock();
         printf("\nReading Lookup Table ...\n");
-        Flute::readLUT();
         printf("\nDone reading table\n\n");
         t2 = clock();
         reading_Time = (float)(t2 - t1) / CLOCKS_PER_SEC;
