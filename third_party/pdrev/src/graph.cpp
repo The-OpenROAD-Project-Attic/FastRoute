@@ -48,19 +48,16 @@
 #include <fstream>
 #include <sstream>
 #include <string>
+#include <string.h>
 #include <queue>
 #include <unordered_map>
 #include <algorithm>
 #include "graph.h"
 #include <math.h>
 #include <deque>
-
-#include <boost/geometry.hpp>
-#include <boost/lexical_cast.hpp>
-#include <boost/geometry/geometries/point_xy.hpp>
-#include <boost/geometry/geometries/polygon.hpp>
-#include <boost/geometry/geometries/linestring.hpp>
-#include <boost/foreach.hpp>
+#include <vector>
+#include <cmath>
+#include <map>
 
 using namespace std;
 
@@ -3368,44 +3365,146 @@ bool Graph::get_overlap_lshape(vector<Node>& set_of_nodes, int index) {
     //End of get_overlap_lshape fn
 }
 
+bool Graph::segmentIntersection(std::pair<double, double> A, std::pair<double, double> B,
+                                std::pair<double, double> C, std::pair<double, double> D,
+                                std::pair<double, double> &out) {
+    double x, y;
+    double a1 = B.second - A.second; 
+    double b1 = A.first - B.first; 
+    double c1 = a1*(A.first) + b1*(A.second);
+    
+    double a2 = D.second - C.second; 
+    double b2 = C.first - D.first; 
+    double c2 = a2*(C.first)+ b2*(C.second);
+    
+    double determinant = a1*b2 - a2*b1;
+    
+    if (A == B && C == D && A != C) {
+        return false;
+    }
+  
+    if (determinant == 0) {
+        if (A == B) {
+            x = A.first;
+            y = A.second;
+            
+            if (x <= max(C.first, D.first) && x >= min(C.first, D.first) && 
+                y <= max(C.second, D.second) && y >= min(C.second, D.second)) {
+                std::pair<double, double> intersect(x, y);
+                out = intersect;
+                return true; 
+            }
+        }
+        
+        if (C == D) {
+            x = C.first;
+            y = C.second;
+            
+            if (x <= max(A.first, B.first) && x >= min(A.first, B.first) && 
+                y <= max(A.second, B.second) && y >= min(A.second, B.second)) {
+                std::pair<double, double> intersect(x, y);
+                out = intersect;
+                return true; 
+            }
+        }
+        
+        if (A == C || A == D) {
+            x = A.first;
+            y = A.second;
+            
+            std::pair<double, double> intersect(x, y);
+            out = intersect;
+            return true;
+        }
+        
+        if (B == C || B == D) {
+            x = B.first;
+            y = B.second;
+            
+            std::pair<double, double> intersect(x, y);
+            out = intersect;
+            return true;
+        }
+        
+        return false;
+    } else {
+        x = (b2*c1 - b1*c2)/determinant;
+        y = (a1*c2 - a2*c1)/determinant;
+        
+        if (x <= max(A.first, B.first) && x >= min(A.first, B.first) && 
+            y <= max(A.second, B.second) && y >= min(A.second, B.second) &&
+            x <= max(C.first, D.first) && x >= min(C.first, D.first) && 
+            y <= max(C.second, D.second) && y >= min(C.second, D.second)) {
+            std::pair<double, double> intersect(x, y);
+            out = intersect;
+            return true; 
+        } else {
+            return false;
+        }
+    }
+}
+
+void Graph::intersection(const std::vector<std::pair<double, double>> l1, 
+                         const std::vector<std::pair<double, double>> l2, 
+                         std::vector<std::pair<double, double>> &out) {
+    std::vector<std::pair<double, double>> tmpVec;
+    for (int i = 0; i < l1.size() - 1; i++) {
+        for (int j = 0; j < l2.size() - 1; j++) {
+            std::pair<double, double> intersect;
+            if (segmentIntersection(l1[i], l1[i+1], l2[j], l2[j+1], intersect)) {
+                tmpVec.push_back(intersect);
+            }
+        }
+    }
+    
+    out = tmpVec;
+}
+
+double Graph::length(std::vector<std::pair<double, double>> l) {
+    double totalLen = 0;
+    
+    if (l.size() <= 1) {
+        return 0;
+    }
+    
+    for (int i = 0; i < l.size()-1; i++) {
+        double tmpLen = std::sqrt((std::pow((l[i+1].first - l[i].first), 2) + 
+                              std::pow((l[i+1].second - l[i].second), 2)));
+        totalLen += tmpLen;
+    }
+
+    return totalLen;
+}
+
 unsigned Graph::calc_overlap(vector < vector<Node> > &set_of_nodes) {
     unsigned max_ov = 0, tmp_ov = 0;
-    typedef boost::geometry::model::d2::point_xy<double> line;
+    typedef std::pair<double, double> s_point;
     Node curr_node = set_of_nodes[0][0];
     vector<Node> all_pts, sorted_x, sorted_y;
     for (int i = 0; i < set_of_nodes.size(); i++) {
         for (unsigned j = i + 1; j < set_of_nodes.size(); j++) {
             vector<Node> n = set_of_nodes[i];
             vector<Node> m = set_of_nodes[j];
-            boost::geometry::model::linestring<line> line1, line2, output;
-            string s0("linestring(");
-            s0 = s0 + boost::lexical_cast<string>(n[0].x) + " " +
-                    boost::lexical_cast<string>(n[0].y) + ", " +
-                    boost::lexical_cast<string>(n[1].x) + " " +
-                    boost::lexical_cast<string>(n[1].y) + ", " +
-                    boost::lexical_cast<string>(n[2].x) + " " +
-                    boost::lexical_cast<string>(n[2].y) + ")";
-            string s1("linestring(");
-            s1 = s1 + boost::lexical_cast<string>(m[0].x) + " " +
-                    boost::lexical_cast<string>(m[0].y) + ", " +
-                    boost::lexical_cast<string>(m[1].x) + " " +
-                    boost::lexical_cast<string>(m[1].y) + ", " +
-                    boost::lexical_cast<string>(m[2].x) + " " +
-                    boost::lexical_cast<string>(m[2].y) + ")";
-            if (verbose > 2) {
-                cout << "String1 = " << s0 << endl;
-                cout << "String2 = " << s1 << endl;
-            }
-            boost::geometry::read_wkt(s0, line1);
-            boost::geometry::read_wkt(s1, line2);
+            
+            s_point pn0((double)n[0].x, (double)n[0].y);
+            s_point pn1((double)n[1].x, (double)n[1].y);
+            s_point pn2((double)n[2].x, (double)n[2].y);
+            
+            s_point pm0((double)m[0].x, (double)m[0].y);
+            s_point pm1((double)m[1].x, (double)m[1].y);
+            s_point pm2((double)m[2].x, (double)m[2].y);
+            
+            std::vector<s_point> line1 {pn0, pn1, pn2};
+            std::vector<s_point> line2 {pm0, pm1, pm2};
+            std::vector<s_point> output;
+            
+            intersection(line1, line2, output);
 
-            boost::geometry::intersection(line1, line2, output);
-
-            tmp_ov = (unsigned) boost::geometry::length(output);
-
-            //Known Problem - output-double, when converting to int for output_nodes, 232 becomes 231 for somereason
+            tmp_ov = (unsigned) length(output);
+            
+//            Known Problem - output-double, when converting to int for output_nodes, 232 becomes 231 for somereason
             vector<Node> output_nodes;
-            for (unsigned g = 0; g < output.size(); g++) output_nodes.push_back(Node(0, output[g].x(), output[g].y()));
+            for (unsigned g = 0; g < output.size(); g++) output_nodes.push_back(Node(0, output[g].first, output[g].second));
 
             make_unique(output_nodes);
 

@@ -200,6 +200,13 @@ class Graph {
     void        RemoveUnneceSTNodes();
     void        RemoveSTNodes();
     bool        IsSameDir(int cIdx, int nIdx);
+    
+    // Aux functions
+    void intersection(const std::vector<std::pair<double, double>> l1, const std::vector<std::pair<double, double>> l2, std::vector<std::pair<double, double>> &out);
+    double length(std::vector<std::pair<double, double>> l);
+    bool segmentIntersection(std::pair<double, double> A, std::pair<double, double> B,
+                                std::pair<double, double> C, std::pair<double, double> D,
+                                std::pair<double, double> &out);
 };
 
 #endif
