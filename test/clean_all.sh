@@ -39,7 +39,6 @@ srcdir="$testsdir/src"
 
 for subdir in $srcdir/*;
 do
-    rm -f ${subdir}/PO*
     rm -f ${subdir}/log.txt
     rm -f ${subdir}/test.log
     rm -f ${subdir}/out.guide

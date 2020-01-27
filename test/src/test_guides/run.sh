@@ -53,9 +53,6 @@ cp $testdir/src/test_guides/routeDesign.tcl $testdir/src/test_guides/run.tcl
 sed -i s#_LEF_#$lefFile#g $testdir/src/test_guides/run.tcl
 sed -i s#_DEF_#$defFile#g $testdir/src/test_guides/run.tcl
 
-ln -sf $testdir/../../../etc/POWV9.dat POWV9.dat
-ln -sf $testdir/../../../etc/POST9.dat POST9.dat
-
 $binary -no_init < run.tcl > log.txt 2>&1
 
 diff golden.guide out.guide
