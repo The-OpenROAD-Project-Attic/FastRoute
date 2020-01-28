@@ -1815,16 +1815,31 @@ int getOverflow3D(void) {
         total_usage = 0;
         cap = 0;
         //    fprintf(fph, "Horizontal Congestion\n");
+        
+        int *cap_per_layer;
+        int *usage_per_layer;
+        int *overflow_per_layer;
+        
+        cap_per_layer = (int *)malloc(sizeof(int) * (numLayers));
+        usage_per_layer = (int *)malloc(sizeof(int) * (numLayers));
+        overflow_per_layer = (int *)malloc(sizeof(int) * (numLayers));
 
         for (k = 0; k < numLayers; k++) {
+                cap_per_layer[k] = 0;
+                usage_per_layer[k] = 0;
+                overflow_per_layer[k] = 0;
                 for (i = 0; i < yGrid; i++) {
                         for (j = 0; j < xGrid - 1; j++) {
                                 grid = i * (xGrid - 1) + j + k * (xGrid - 1) * yGrid;
                                 total_usage += h_edges3D[grid].usage;
                                 overflow = h_edges3D[grid].usage - h_edges3D[grid].cap;
                                 cap += h_edges3D[grid].cap;
+                                
+                                cap_per_layer[k] += h_edges3D[grid].cap;
+                                usage_per_layer[k] += h_edges3D[grid].usage;
 
                                 if (overflow > 0) {
+                                        overflow_per_layer[k] += overflow;
                                         H_overflow += overflow;
                                         max_H_overflow = std::max(max_H_overflow, overflow);
                                 }
@@ -1836,8 +1851,12 @@ int getOverflow3D(void) {
                                 total_usage += v_edges3D[grid].usage;
                                 overflow = v_edges3D[grid].usage - v_edges3D[grid].cap;
                                 cap += v_edges3D[grid].cap;
-
+                                
+                                cap_per_layer[k] += v_edges3D[grid].cap;
+                                usage_per_layer[k] += v_edges3D[grid].usage;
+                                
                                 if (overflow > 0) {
+                                        overflow_per_layer[k] += overflow;
                                         V_overflow += overflow;
                                         max_V_overflow = std::max(max_V_overflow, overflow);
                                 }
@@ -1848,7 +1867,43 @@ int getOverflow3D(void) {
         max_overflow = std::max(max_H_overflow, max_V_overflow);
         totalOverflow = H_overflow + V_overflow;
 
-        printf(" > ----total Usage   : %d\n", total_usage);
+        printf(" > \n");
+        printf(" > --Final usage/overflow report: \n");
+        
+        printf(" > \n > ----Usage per layer: \n");
+
+        for (int l = 0; l < numLayers; l++) {
+                printf(" > --------Layer %d usage: %d\n", (l+1), usage_per_layer[l]);
+        }
+        
+        printf(" > \n > ----Capacity per layer: \n");
+
+        for (int l = 0; l < numLayers; l++) {
+                printf(" > --------Layer %d capacity: %d\n", (l+1), cap_per_layer[l]);
+        }
+        
+        printf(" > \n > ----Use percentage per layer: \n");
+
+        for (int l = 0; l < numLayers; l++) {
+                if (cap_per_layer[l] == 0) {
+                        printf(" > --------Layer %d use percentage: 0.0%%\n", (l+1));
+                        continue;
+                }
+                float use_percentage = (float)usage_per_layer[l] / (float)cap_per_layer[l];
+                use_percentage *= 100;
+                printf(" > --------Layer %d use percentage: %.2f%%\n", (l+1), use_percentage);
+        }
+        
+        printf(" > \n > ----Overflow per layer: \n");
+
+        for (int l = 0; l < numLayers; l++) {
+                printf(" > --------Layer %d overflow: %d\n", (l+1), overflow_per_layer[l]);
+        }
+        
+        
+        
+        printf(" > \n");
+        printf(" > ----Total Usage   : %d\n", total_usage);
         printf(" > ----Total Capacity: %d\n", cap);
         printf(" > ----Max H Overflow: %d\n", max_H_overflow);
         printf(" > ----Max V Overflow: %d\n", max_V_overflow);
