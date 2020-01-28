@@ -1719,14 +1719,14 @@ int getOverflow2Dmaze(int *maxOverflow, int *tUsage) {
         totalOverflow = H_overflow + V_overflow;
         *maxOverflow = max_overflow;
 
-        printf("total Usage   : %d\n", (int)total_usage);
-        printf("Max H Overflow: %d\n", max_H_overflow);
-        printf("Max V Overflow: %d\n", max_V_overflow);
-        printf("Max Overflow  : %d\n", max_overflow);
-        printf("Num Overflow e: %d\n", numedges);
-        printf("H   Overflow  : %d\n", H_overflow);
-        printf("V   Overflow  : %d\n", V_overflow);
-        printf("Final Overflow: %d\n\n", totalOverflow);
+        printf(" > ----total Usage   : %d\n", (int)total_usage);
+        printf(" > ----Max H Overflow: %d\n", max_H_overflow);
+        printf(" > ----Max V Overflow: %d\n", max_V_overflow);
+        printf(" > ----Max Overflow  : %d\n", max_overflow);
+        printf(" > ----Num Overflow e: %d\n", numedges);
+        printf(" > ----H   Overflow  : %d\n", H_overflow);
+        printf(" > ----V   Overflow  : %d\n", V_overflow);
+        printf(" > ----Final Overflow: %d\n > \n", totalOverflow);
 
         *tUsage = total_usage;
 
@@ -1790,16 +1790,16 @@ int getOverflow2D(int *maxOverflow) {
                 ahTH = 20;
         }
 
-        printf("total hCap    : %d\n", hCap);
-        printf("total vCap    : %d\n", vCap);
-        printf("total Usage   : %d\n", (int)total_usage);
-        printf("Max H Overflow: %d\n", max_H_overflow);
-        printf("Max V Overflow: %d\n", max_V_overflow);
-        printf("Max Overflow  : %d\n", max_overflow);
-        printf("Num Overflow e: %d\n", numedges);
-        printf("H   Overflow  : %d\n", H_overflow);
-        printf("V   Overflow  : %d\n", V_overflow);
-        printf("Final Overflow: %d\n\n", totalOverflow);
+        printf(" > ----total hCap    : %d\n", hCap);
+        printf(" > ----total vCap    : %d\n", vCap);
+        printf(" > ----total Usage   : %d\n", (int)total_usage);
+        printf(" > ----Max H Overflow: %d\n", max_H_overflow);
+        printf(" > ----Max V Overflow: %d\n", max_V_overflow);
+        printf(" > ----Max Overflow  : %d\n", max_overflow);
+        printf(" > ----Num Overflow e: %d\n", numedges);
+        printf(" > ----H   Overflow  : %d\n", H_overflow);
+        printf(" > ----V   Overflow  : %d\n", V_overflow);
+        printf(" > ----Final Overflow: %d\n > \n", totalOverflow);
 
         return (totalOverflow);
 }
@@ -1848,14 +1848,14 @@ int getOverflow3D(void) {
         max_overflow = std::max(max_H_overflow, max_V_overflow);
         totalOverflow = H_overflow + V_overflow;
 
-        printf("total Usage   : %d\n", total_usage);
-        printf("Total Capacity: %d\n", cap);
-        printf("Max H Overflow: %d\n", max_H_overflow);
-        printf("Max V Overflow: %d\n", max_V_overflow);
-        printf("Max Overflow  : %d\n", max_overflow);
-        printf("H   Overflow  : %d\n", H_overflow);
-        printf("V   Overflow  : %d\n", V_overflow);
-        printf("Final Overflow: %d\n\n", totalOverflow);
+        printf(" > ----total Usage   : %d\n", total_usage);
+        printf(" > ----Total Capacity: %d\n", cap);
+        printf(" > ----Max H Overflow: %d\n", max_H_overflow);
+        printf(" > ----Max V Overflow: %d\n", max_V_overflow);
+        printf(" > ----Max Overflow  : %d\n", max_overflow);
+        printf(" > ----H   Overflow  : %d\n", H_overflow);
+        printf(" > ----V   Overflow  : %d\n", V_overflow);
+        printf(" > ----Final Overflow: %d\n > \n", totalOverflow);
 
         return (total_usage);
 }

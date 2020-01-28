@@ -894,12 +894,13 @@ void gen_brk_RSMT(Bool congestionDriven, Bool reRoute, Bool genTree, Bool newTyp
                 }
         }  // loop i
 
-        printf("WIRELEN : %d, WIRELEN1 : %d\n", wl, wl1);
-        printf("NumSeg  : %d\n", totalNumSeg);
-        printf("NumShift: %d\n", numShift);
-        printf("totalnon %d\n", totalnon);
-        printf("Max %f, Min %f\n", coefMax, coefMin);
-        printf("cnt1 %d, cnt2 %d, cnt3 %d\n", cnt1, cnt2, cnt3);
+        printf(" > ----WIRELEN : %d, WIRELEN1 : %d\n", wl, wl1);
+        printf(" > ----NumSeg  : %d\n", totalNumSeg);
+        printf(" > ----NumShift: %d\n", numShift);
+        printf(" > ----totalnon %d\n", totalnon);
+        printf(" > ----Max %f, Min %f\n", coefMax, coefMin);
+        printf(" > ----cnt1 %d, cnt2 %d, cnt3 %d\n", cnt1, cnt2, cnt3);
+        printf(" > \n");
 }
 
 }  // namespace FastRoute

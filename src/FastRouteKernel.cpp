@@ -54,15 +54,16 @@ FastRouteKernel::FastRouteKernel() {
 }
 
 int FastRouteKernel::run() {
+        printHeader();
         if (_unidirectionalRoute) {
                 _minRoutingLayer = 2;
                 _fixLayer = 1;
         }
 
         if (_maxRoutingLayer == -1) {
-                std::cout << "Computing max routing layer...\n";
+                std::cout << " > Computing max routing layer...\n";
                 _maxRoutingLayer = _dbWrapper.computeMaxRoutingLayer();
-                std::cout << "Computing max routing layer... Done!\n";
+                std::cout << " > Computing max routing layer... Done!\n";
         }
 
         if (_clockNetRouting && _pdRev){
@@ -74,55 +75,55 @@ int FastRouteKernel::run() {
                 _dbWrapper.setSelectedMetal(_maxRoutingLayer);
         }
         
-        std::cout << "Initializing grid...\n";
+        std::cout << " > Initializing grid...\n";
         initGrid();
-        std::cout << "Initializing grid... Done!\n";
+        std::cout << " > Initializing grid... Done!\n";
         
-        std::cout << "Initializing routing layers...\n";
+        std::cout << " > Initializing routing layers...\n";
         initRoutingLayers();
-        std::cout << "Initializing routing layers... Done!\n";
+        std::cout << " > Initializing routing layers... Done!\n";
         
-        std::cout << "Initializing routing tracks...\n";
+        std::cout << " > Initializing routing tracks...\n";
         initRoutingTracks();
-        std::cout << "Initializing routing tracks... Done!\n";
+        std::cout << " > Initializing routing tracks... Done!\n";
             
-        std::cout << "Setting capacities...\n";
+        std::cout << " > Setting capacities...\n";
         setCapacities();
-        std::cout << "Setting capacities... Done!\n";
+        std::cout << " > Setting capacities... Done!\n";
         
-        std::cout << "Setting spacings and widths...\n";
+        std::cout << " > Setting spacings and widths...\n";
         setSpacingsAndMinWidths();
-        std::cout << "Setting spacings and widths... Done!\n";
+        std::cout << " > Setting spacings and widths... Done!\n";
         
-        std::cout << "Initializing nets...\n";
+        std::cout << " > Initializing nets...\n";
         initializeNets();
-        std::cout << "Initializing nets... Done!\n";
+        std::cout << " > Initializing nets... Done!\n";
         
-        std::cout << "Adjusting grid...\n";
+        std::cout << " > Adjusting grid...\n";
         computeGridAdjustments();
-        std::cout << "Adjusting grid... Done!\n";
+        std::cout << " > Adjusting grid... Done!\n";
         
-        std::cout << "Computing track adjustments...\n";
+        std::cout << " > Computing track adjustments...\n";
         computeTrackAdjustments();
-        std::cout << "Computing track adjustments... Done!\n";
+        std::cout << " > Computing track adjustments... Done!\n";
 
-        std::cout << "Computing obstacles adjustments...\n";
+        std::cout << " > Computing obstacles adjustments...\n";
         computeObstaclesAdjustments();
-        std::cout << "Computing obstacles adjustments... Done!\n";
+        std::cout << " > Computing obstacles adjustments... Done!\n";
                 
-        std::cout << "Computing user defined global adjustments...\n";
+        std::cout << " > Computing user defined global adjustments...\n";
         computeUserGlobalAdjustments();
-        std::cout << "Computing user defined global adjustments... Done!\n";
+        std::cout << " > Computing user defined global adjustments... Done!\n";
         
-        std::cout << "Computing user defined layers adjustments...\n";
+        std::cout << " > Computing user defined layers adjustments...\n";
         computeUserLayerAdjustments();
-        std::cout << "Computing user defined layers adjustments... Done!\n";
+        std::cout << " > Computing user defined layers adjustments... Done!\n";
         
         for (int i = 0; i < regionsReductionPercentage.size(); i++) {
                 if (regionsLayer[i] < 1)
                         break;
                 
-                std::cout << "Adjusting specific region in layer " << regionsLayer[i] << "...\n";
+                std::cout << " > Adjusting specific region in layer " << regionsLayer[i] << "...\n";
                 Coordinate lowerLeft = Coordinate(regionsMinX[i], regionsMinY[i]);
                 Coordinate upperRight = Coordinate(regionsMaxX[i], regionsMaxY[i]);
                 computeRegionAdjustments(lowerLeft, upperRight, regionsLayer[i], regionsReductionPercentage[i]);
@@ -130,9 +131,9 @@ int FastRouteKernel::run() {
 
         _fastRoute.initAuxVar();
         
-        std::cout << "Running FastRoute...\n";
+        std::cout << " > Running FastRoute...\n";
         _fastRoute.run(_result);
-        std::cout << "Running FastRoute... Done!\n";
+        std::cout << " > Running FastRoute... Done!\n";
         
         writeGuides();
         
@@ -140,6 +141,7 @@ int FastRouteKernel::run() {
 }
 
 void FastRouteKernel::startFastRoute() {
+        printHeader();
         _dbWrapper.setDB(_dbId);
         if (_unidirectionalRoute) {
                 _minRoutingLayer = 2;
@@ -147,9 +149,9 @@ void FastRouteKernel::startFastRoute() {
         }
 
         if (_maxRoutingLayer == -1) {
-                std::cout << "Computing max routing layer...\n";
+                std::cout << " > Computing max routing layer...\n";
                 _maxRoutingLayer = _dbWrapper.computeMaxRoutingLayer();
-                std::cout << "Computing max routing layer... Done!\n";
+                std::cout << " > Computing max routing layer... Done!\n";
         }
         
         if (_maxRoutingLayer < _selectedMetal) {
@@ -161,62 +163,62 @@ void FastRouteKernel::startFastRoute() {
                 _fastRoute.setAlpha(_alpha);
         }
         
-        std::cout << "Params:\n";
-        std::cout << "---- Min routing layer: " << _minRoutingLayer << "\n";
-        std::cout << "---- Max routing layer: " << _maxRoutingLayer << "\n";
-        std::cout << "---- Global adjustment: " << _adjustment << "\n";
-        std::cout << "---- Unidirectional routing: " << _unidirectionalRoute << "\n";
-        std::cout << "---- Clock net routing: " << _clockNetRouting << "\n";
+        std::cout << " > Params:\n";
+        std::cout << " > ---- Min routing layer: " << _minRoutingLayer << "\n";
+        std::cout << " > ---- Max routing layer: " << _maxRoutingLayer << "\n";
+        std::cout << " > ---- Global adjustment: " << _adjustment << "\n";
+        std::cout << " > ---- Unidirectional routing: " << _unidirectionalRoute << "\n";
+        std::cout << " > ---- Clock net routing: " << _clockNetRouting << "\n";
         
-        std::cout << "Initializing grid...\n";
+        std::cout << " > Initializing grid...\n";
         initGrid();
-        std::cout << "Initializing grid... Done!\n";
+        std::cout << " > Initializing grid... Done!\n";
         
-        std::cout << "Initializing routing layers...\n";
+        std::cout << " > Initializing routing layers...\n";
         initRoutingLayers();
-        std::cout << "Initializing routing layers... Done!\n";
+        std::cout << " > Initializing routing layers... Done!\n";
         
-        std::cout << "Initializing routing tracks...\n";
+        std::cout << " > Initializing routing tracks...\n";
         initRoutingTracks();
-        std::cout << "Initializing routing tracks... Done!\n";
+        std::cout << " > Initializing routing tracks... Done!\n";
             
-        std::cout << "Setting capacities...\n";
+        std::cout << " > Setting capacities...\n";
         setCapacities();
-        std::cout << "Setting capacities... Done!\n";
+        std::cout << " > Setting capacities... Done!\n";
         
-        std::cout << "Setting spacings and widths...\n";
+        std::cout << " > Setting spacings and widths...\n";
         setSpacingsAndMinWidths();
-        std::cout << "Setting spacings and widths... Done!\n";
+        std::cout << " > Setting spacings and widths... Done!\n";
         
-        std::cout << "Initializing nets...\n";
+        std::cout << " > Initializing nets...\n";
         initializeNets();
-        std::cout << "Initializing nets... Done!\n";
+        std::cout << " > Initializing nets... Done!\n";
         
-        std::cout << "Adjusting grid...\n";
+        std::cout << " > Adjusting grid...\n";
         computeGridAdjustments();
-        std::cout << "Adjusting grid... Done!\n";
+        std::cout << " > Adjusting grid... Done!\n";
         
-        std::cout << "Computing track adjustments...\n";
+        std::cout << " > Computing track adjustments...\n";
         computeTrackAdjustments();
-        std::cout << "Computing track adjustments... Done!\n";
+        std::cout << " > Computing track adjustments... Done!\n";
 
-        std::cout << "Computing obstacles adjustments...\n";
+        std::cout << " > Computing obstacles adjustments...\n";
         computeObstaclesAdjustments();
-        std::cout << "Computing obstacles adjustments... Done!\n";
+        std::cout << " > Computing obstacles adjustments... Done!\n";
                 
-        std::cout << "Computing user defined adjustments...\n";
+        std::cout << " > Computing user defined adjustments...\n";
         computeUserGlobalAdjustments();
-        std::cout << "Computing user defined adjustments... Done!\n";
+        std::cout << " > Computing user defined adjustments... Done!\n";
         
-        std::cout << "Computing user defined layers adjustments...\n";
+        std::cout << " > Computing user defined layers adjustments...\n";
         computeUserLayerAdjustments();
-        std::cout << "Computing user defined layers adjustments... Done!\n";
+        std::cout << " > Computing user defined layers adjustments... Done!\n";
         
         for (int i = 0; i < regionsReductionPercentage.size(); i++) {
                 if (regionsLayer[i] < 1)
                         break;
                 
-                std::cout << "Adjusting specific region in layer " << regionsLayer[i] << "...\n";
+                std::cout << " > Adjusting specific region in layer " << regionsLayer[i] << "...\n";
                 Coordinate lowerLeft = Coordinate(regionsMinX[i], regionsMinY[i]);
                 Coordinate upperRight = Coordinate(regionsMaxX[i], regionsMaxY[i]);
                 computeRegionAdjustments(lowerLeft, upperRight, regionsLayer[i], regionsReductionPercentage[i]);
@@ -226,9 +228,9 @@ void FastRouteKernel::startFastRoute() {
 }
 
 void FastRouteKernel::runFastRoute() {
-        std::cout << "Running FastRoute...\n";
+        std::cout << " > Running FastRoute...\n";
         _fastRoute.run(_result);
-        std::cout << "Running FastRoute... Done!\n";
+        std::cout << " > Running FastRoute... Done!\n";
 }
 
 void FastRouteKernel::initGrid() {        
@@ -282,9 +284,9 @@ void FastRouteKernel::setSpacingsAndMinWidths() {
 void FastRouteKernel::initializeNets() {
         _dbWrapper.initNetlist();
         
-        std::cout << "----Checking pin placement...\n";
+        std::cout << " > ----Checking pin placement...\n";
         checkPinPlacement();
-        std::cout << "----Checking pin placement... Done!\n";
+        std::cout << " > ----Checking pin placement... Done!\n";
         
         int idx = 0;
         _fastRoute.setNumberNets(_netlist.getNetCount());
@@ -389,7 +391,7 @@ void FastRouteKernel::computeGridAdjustments() {
                         vSpace = _grid.getMinWidths()[layer-1];
                         newVCapacity = std::floor((_grid.getTileWidth() + xExtra)/vSpace);
                 } else {
-                    std::cout << "[ERROR] Layer spacing not found. Exiting...\n";
+                    std::cout << " > [ERROR] Layer spacing not found. Exiting...\n";
                     std::exit(1);
                 }
                 
@@ -651,7 +653,7 @@ void FastRouteKernel::computeRegionAdjustments(Coordinate lowerBound, Coordinate
         
         if ((dieBox.getLowerBound().getX() > lowerBound.getX() && dieBox.getLowerBound().getY() > lowerBound.getY()) ||
             (dieBox.getUpperBound().getX() < upperBound.getX() && dieBox.getUpperBound().getY() < upperBound.getY())) {
-                std::cout << "ERROR: informed region is outside die area!\n";
+                std::cout << " > [ERROR] Informed region is outside die area!\n";
                 std::cout << "Informed region: (" << lowerBound.getX() << ", " << lowerBound.getY() << "); ("
                           << upperBound.getX() << ", " << upperBound.getY() << ")\n";
                 std::exit(-1);
@@ -731,7 +733,7 @@ void FastRouteKernel::computeObstaclesAdjustments() {
                 
                 bool direction = routingLayer.getPreferredDirection();
                 
-                std::cout << "----Processing " << layerObstacles.size() << 
+                std::cout << " > ----Processing " << layerObstacles.size() << 
                              " obstacles in Metal" << layer << "\n";
                 
                 int trackSpace = _grid.getMinWidths()[layer-1];
@@ -800,18 +802,18 @@ void FastRouteKernel::computeObstaclesAdjustments() {
 }
 
 void FastRouteKernel::writeGuides() {
-        std::cout << "Writing guides...\n";
+        std::cout << " > Writing guides...\n";
         std::ofstream guideFile;
         guideFile.open(_outfile);
         if (!guideFile.is_open()) {
-                std::cout << "Error in writeFile!" << std::endl;
+                std::cout << " > [ERROR] Guides file could not be open!" << std::endl;
                 guideFile.close();
                 std::exit(1);
         }
         RoutingLayer phLayerF;
         addRemainingGuides(_result);
         
-        std::cout << "Num routed nets: " << _result.size() << "\n";
+        std::cout << " > Num routed nets: " << _result.size() << "\n";
         int finalLayer;
         for (FastRoute::NET netRoute : _result) {
                 guideFile << netRoute.name << "\n";
@@ -834,8 +836,8 @@ void FastRouteKernel::writeGuides() {
                         if (route.initLayer == route.finalLayer) {
                                 if (route.initLayer < _minRoutingLayer && 
                                     route.initX != route.finalX && route.initY != route.finalX) {
-                                        std::cout << "[ERROR] Routing with guides in blocked metal\n"
-                                                "---- Net: " << netRoute.name << "\n";
+                                        std::cout << " > [ERROR] Routing with guides in blocked metal\n"
+                                                " > ---- Net: " << netRoute.name << "\n";
                                         std::exit(1);
                                 }
                                 Box box;
@@ -849,7 +851,7 @@ void FastRouteKernel::writeGuides() {
                                 finalLayer = route.finalLayer;
                         } else {
                                 if (abs(route.finalLayer - route.initLayer) > 1) {
-                                        std::cout << "ERROR: connection between"
+                                        std::cout << " > [ERROR] Connection between"
                                                      "non-adjacent layers";
                                         std::exit(1);
                                 } else {
@@ -895,7 +897,7 @@ void FastRouteKernel::writeGuides() {
         }
 
         guideFile.close();
-        std::cout << "Writing guides... Done!\n";
+        std::cout << " > Writing guides... Done!\n";
 }
 
 void FastRouteKernel::printGrid() {
@@ -910,6 +912,14 @@ void FastRouteKernel::printGrid() {
         std::cout << "******** Num layers: " << _grid.getNumLayers() << " ********\n";
         std::cout << "******** Num nets: " << _netlist.getNetCount() << " ********\n";
         std::cout << "******** Tile size: " << _grid.getPitchesInTile() << "\n";
+}
+
+void FastRouteKernel::printHeader() {
+        std::cout << "\n";
+        std::cout << " *****************\n";
+        std::cout << " *   FastRoute   *\n";        
+        std::cout << " *****************\n";
+        std::cout << "\n";
 }
 
 RoutingLayer FastRouteKernel::getRoutingLayerByIndex(int index) {
@@ -954,7 +964,7 @@ void FastRouteKernel::addRemainingGuides(std::vector<FastRoute::NET> &globalRout
                                 if (p > 0){
                                         if (pins[p].x != pins[p-1].x ||
                                                 pins[p].y != pins[p-1].y){
-                                                std::cout << "ERROR: Net " << netRoute.name << " not properly covered.";
+                                                std::cout << " > [ERROR] Net " << netRoute.name << " not properly covered.";
                                                 exit(-1);
                                         }
                                 }
@@ -1019,7 +1029,7 @@ void FastRouteKernel::addRemainingGuides(std::vector<FastRoute::NET> &globalRout
 void FastRouteKernel::mergeBox(std::vector<Box>& guideBox) {
         std::vector<Box> finalBox;
         if (guideBox.size() < 1) {
-                std::cout << "Error: guides vector is empty!!!\n";
+                std::cout << " > [ERROR] Guides vector is empty!!!\n";
                 std::exit(1);
         }
         finalBox.push_back(guideBox[0]);
@@ -1092,7 +1102,7 @@ void FastRouteKernel::checkPinPlacement() {
         
         for (Pin port : _netlist.getAllPorts()) {
                 if (port.getNumLayers() == 0) {
-                        std::cout << "ERROR: pin " << port.getName() << " does "
+                        std::cout << "[ERROR] Pin " << port.getName() << " does "
                             "not have layer assignment\n";
                         exit(1);
                 }
@@ -1105,7 +1115,7 @@ void FastRouteKernel::checkPinPlacement() {
                 
                 for (Coordinate pos : mapLayerToPositions[layer]) {
                         if (pos == port.getPosition()) {
-                                std::cout << "ERROR: at least 2 pins in position ("
+                                std::cout << "[ERROR] At least 2 pins in position ("
                                           << pos.getX() << ", " << pos.getY()
                                           << "), layer " << layer+1 << "\n";
                                 invalid = true;

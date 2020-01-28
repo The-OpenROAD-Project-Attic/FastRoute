@@ -161,6 +161,7 @@ public:
         }
         
         void printGrid();
+        void printHeader();
         
         // flow functions
         void writeGuides();

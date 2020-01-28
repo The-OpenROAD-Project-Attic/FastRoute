@@ -107,9 +107,7 @@ void FT::setTileSize(int width, int height) {
 }
 
 void FT::setLayerOrientation(int x) {
-        printf("layerOrientation = %d\n", layerOrientation);
         layerOrientation = x;
-        printf("layerOrientation = %d\n", layerOrientation);
 }
 
 void FT::addNet(char *name, int netIdx, int nPins, int minWidth, PIN pins[], float alpha) {
@@ -502,29 +500,22 @@ int FT::run(std::vector<NET> &result) {
         bmfl = BIG_INT;
         minofl = BIG_INT;
 
-        t1 = clock();
-        printf("\nReading Lookup Table ...\n");
-        printf("\nDone reading table\n\n");
-        t2 = clock();
-        reading_Time = (float)(t2 - t1) / CLOCKS_PER_SEC;
-        printf("Reading Time: %f sec\n", reading_Time);
-
         // call FLUTE to generate RSMT and break the nets into segments (2-pin nets)
 
         VIA = 2;
         //viacost = VIA;
         viacost = 0;
         gen_brk_RSMT(FALSE, FALSE, FALSE, FALSE, noADJ);
-        printf("first L\n");
+        printf(" > --first L\n");
         routeLAll(TRUE);
         gen_brk_RSMT(TRUE, TRUE, TRUE, FALSE, noADJ);
         getOverflow2D(&maxOverflow);
-        printf("second L\n");
+        printf(" > --second L\n");
         newrouteLAll(FALSE, TRUE);
         getOverflow2D(&maxOverflow);
         spiralRouteAll();
         newrouteZAll(10);
-        printf("first Z\n");
+        printf(" > --first Z\n");
         past_cong = getOverflow2D(&maxOverflow);
 
         convertToMazeroute();
@@ -548,7 +539,7 @@ int FT::run(std::vector<NET> &result) {
         for (i = 0; i < LVIter; i++) {
                 LOGIS_COF = std::max<float>(2.0 / (1 + log(maxOverflow)), LOGIS_COF);
                 LOGIS_COF = 2.0 / (1 + log(maxOverflow));
-                printf("LV routing round %d, enlarge %d \n", i, enlarge);
+                printf(" > --LV routing round %d, enlarge %d \n", i, enlarge);
                 routeLVAll(newTH, enlarge);
 
                 past_cong = getOverflow2Dmaze(&maxOverflow, &tUsage);
@@ -564,7 +555,7 @@ int FT::run(std::vector<NET> &result) {
 
         t3 = clock();
         reading_Time = (float)(t3 - t2) / CLOCKS_PER_SEC;
-        printf("LV Time: %f sec\n", reading_Time);
+        printf(" > --LV Time: %f sec\n", reading_Time);
         InitEstUsage();
 
         i = 1;
@@ -772,22 +763,22 @@ int FT::run(std::vector<NET> &result) {
 
         checkUsage();
 
-        printf("maze routing finished\n");
+        printf(" > --maze routing finished\n");
 
         t4 = clock();
         maze_Time = (float)(t4 - t3) / CLOCKS_PER_SEC;
-        printf("P3 runtime: %f sec\n", maze_Time);
+        printf(" > --P3 runtime: %f sec\n", maze_Time);
 
-        printf("Final 2D results: \n");
+        printf(" > --Final 2D results: \n");
         getOverflow2Dmaze(&maxOverflow, &tUsage);
 
-        printf("\nLayer Assignment Begins\n\n\n");
+        printf(" > \n > --Layer Assignment Begins\n");
         newLA();
-        printf("layer assignment finished\n");
+        printf(" > --layer assignment finished\n");
 
         t2 = clock();
         gen_brk_Time = (float)(t2 - t1) / CLOCKS_PER_SEC;
-        printf("2D + Layer Assignment Runtime: %f sec\n", gen_brk_Time);
+        printf(" > --2D + Layer Assignment Runtime: %f sec\n", gen_brk_Time);
 
         costheight = 3;
         viacost = 1;
@@ -801,14 +792,14 @@ int FT::run(std::vector<NET> &result) {
         }
 
         if (goingLV && past_cong == 0) {
-                printf("Post Processing Begins \n");
+                printf(" > --Post Processing Begins \n");
                 mazeRouteMSMDOrder3D(enlarge, 0, ripupTH3D);
 
                 //	mazeRouteMSMDOrder3D(enlarge, 0, 10 );
                 if (gen_brk_Time > 120) {
                         mazeRouteMSMDOrder3D(enlarge, 0, 12);
                 }
-                printf("Post Processsing finished, starting via filling\n");
+                printf(" > --Post Processsing finished, starting via filling\n");
         }
 
         fillVIA();
@@ -822,15 +813,15 @@ int FT::run(std::vector<NET> &result) {
 
         t4 = clock();
         maze_Time = (float)(t4 - t1) / CLOCKS_PER_SEC;
-        printf("Final routing length : %d\n", finallength);
-        printf("Final number of via  : %d\n", numVia);
-        printf("Final total length 1 : %d\n", finallength + numVia);
-        printf("Final total length 3 : %d\n", (finallength + 3 * numVia));
-        printf("3D runtime: %f sec\n", maze_Time);
+        printf(" > --Final routing length : %d\n", finallength);
+        printf(" > --Final number of via  : %d\n", numVia);
+        printf(" > --Final total length 1 : %d\n", finallength + numVia);
+        printf(" > --Final total length 3 : %d\n", (finallength + 3 * numVia));
+        printf(" > --3D runtime: %f sec\n", maze_Time);
 
-        std::cout << "Getting results...\n";
+        std::cout << " > --Getting results...\n";
         result = getResults();
-        std::cout << "Getting results... Done!\n";
+        std::cout << " > --Getting results... Done!\n";
 
         /* TODO:  <11-07-19, this function leads to a segfault, but as the OS
          * frees all memory after the application end (next line) we can omit
