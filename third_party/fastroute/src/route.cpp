@@ -1737,7 +1737,8 @@ void routeLVEnew(int netID, int edgeID, int threshold, int enlarge) {
 void routeLVAll(int threshold, int expand) {
         int netID, edgeID, numEdges, i, forange;
 
-        printf(" > ----%d threshold, %d expand\n", threshold, expand);
+        if (verbose > 1)
+            printf(" > ----%d threshold, %d expand\n", threshold, expand);
 
         h_costTable = (float *)calloc(10 * hCapacity, sizeof(float));
 

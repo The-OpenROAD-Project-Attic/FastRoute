@@ -75,6 +75,8 @@ int FastRouteKernel::run() {
                 _dbWrapper.setSelectedMetal(_maxRoutingLayer);
         }
         
+        _fastRoute.setVerbose(_verbose);
+        
         std::cout << " > Initializing grid...\n";
         initGrid();
         std::cout << " > Initializing grid... Done!\n";
@@ -162,6 +164,8 @@ void FastRouteKernel::startFastRoute() {
                 _fastRoute.usePdRev();
                 _fastRoute.setAlpha(_alpha);
         }
+        
+        _fastRoute.setVerbose(_verbose);
         
         std::cout << " > Params:\n";
         std::cout << " > ---- Min routing layer: " << _minRoutingLayer << "\n";

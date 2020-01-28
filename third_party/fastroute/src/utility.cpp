@@ -408,9 +408,12 @@ void fillVIA() {
                         }
                 }
         }
-        printf(" > ----via related to pin nodes %d\n", numVIAT1);
-        printf(" > ----via related stiner nodes %d\n", numVIAT2);
-        printf(" > --via filling finished\n");
+        
+        if (verbose > 1) {
+                printf(" > ----via related to pin nodes %d\n", numVIAT1);
+                printf(" > ----via related stiner nodes %d\n", numVIAT2);
+                printf(" > --via filling finished\n");
+        }
 }
 
 int threeDVIA() {
@@ -949,9 +952,11 @@ void newLA() {
                 }
         }
 
-        printf(" > \n > ----node processing\n");
+        if (verbose > 1)
+            printf(" > \n > ----node processing\n");
         newLayerAssignmentV4();
-        printf(" > ----layer assignment\n");
+        if (verbose > 1)
+            printf(" > ----layer assignment\n");
         ConvertToFull3DType2();
 }
 
@@ -1280,8 +1285,9 @@ void checkUsage() {
                         }
                 }
         }
-
-        printf(" > ----usage checked\n");
+        if (verbose > 1) {
+                printf(" > ----usage checked\n");
+        }
 }
 
 static int compareEdgeLen(const void *a, const void *b) {

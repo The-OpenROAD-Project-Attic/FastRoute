@@ -1719,14 +1719,16 @@ int getOverflow2Dmaze(int *maxOverflow, int *tUsage) {
         totalOverflow = H_overflow + V_overflow;
         *maxOverflow = max_overflow;
 
-        printf(" > ----total Usage   : %d\n", (int)total_usage);
-        printf(" > ----Max H Overflow: %d\n", max_H_overflow);
-        printf(" > ----Max V Overflow: %d\n", max_V_overflow);
-        printf(" > ----Max Overflow  : %d\n", max_overflow);
-        printf(" > ----Num Overflow e: %d\n", numedges);
-        printf(" > ----H   Overflow  : %d\n", H_overflow);
-        printf(" > ----V   Overflow  : %d\n", V_overflow);
-        printf(" > ----Final Overflow: %d\n > \n", totalOverflow);
+        if (verbose > 1) {
+                printf(" > ----total Usage   : %d\n", (int)total_usage);
+                printf(" > ----Max H Overflow: %d\n", max_H_overflow);
+                printf(" > ----Max V Overflow: %d\n", max_V_overflow);
+                printf(" > ----Max Overflow  : %d\n", max_overflow);
+                printf(" > ----Num Overflow e: %d\n", numedges);
+                printf(" > ----H   Overflow  : %d\n", H_overflow);
+                printf(" > ----V   Overflow  : %d\n", V_overflow);
+                printf(" > ----Final Overflow: %d\n > \n", totalOverflow);
+        }
 
         *tUsage = total_usage;
 
@@ -1789,17 +1791,19 @@ int getOverflow2D(int *maxOverflow) {
         } else {
                 ahTH = 20;
         }
-
-        printf(" > ----total hCap    : %d\n", hCap);
-        printf(" > ----total vCap    : %d\n", vCap);
-        printf(" > ----total Usage   : %d\n", (int)total_usage);
-        printf(" > ----Max H Overflow: %d\n", max_H_overflow);
-        printf(" > ----Max V Overflow: %d\n", max_V_overflow);
-        printf(" > ----Max Overflow  : %d\n", max_overflow);
-        printf(" > ----Num Overflow e: %d\n", numedges);
-        printf(" > ----H   Overflow  : %d\n", H_overflow);
-        printf(" > ----V   Overflow  : %d\n", V_overflow);
-        printf(" > ----Final Overflow: %d\n > \n", totalOverflow);
+        
+        if (verbose > 1) {
+                printf(" > ----total hCap    : %d\n", hCap);
+                printf(" > ----total vCap    : %d\n", vCap);
+                printf(" > ----total Usage   : %d\n", (int)total_usage);
+                printf(" > ----Max H Overflow: %d\n", max_H_overflow);
+                printf(" > ----Max V Overflow: %d\n", max_V_overflow);
+                printf(" > ----Max Overflow  : %d\n", max_overflow);
+                printf(" > ----Num Overflow e: %d\n", numedges);
+                printf(" > ----H   Overflow  : %d\n", H_overflow);
+                printf(" > ----V   Overflow  : %d\n", V_overflow);
+                printf(" > ----Final Overflow: %d\n > \n", totalOverflow);
+        }
 
         return (totalOverflow);
 }
@@ -1870,34 +1874,36 @@ int getOverflow3D(void) {
         printf(" > \n");
         printf(" > --Final usage/overflow report: \n");
         
-        printf(" > \n > ----Usage per layer: \n");
+        if (verbose > 0) {
+                printf(" > \n > ----Usage per layer: \n");
 
-        for (int l = 0; l < numLayers; l++) {
-                printf(" > --------Layer %d usage: %d\n", (l+1), usage_per_layer[l]);
-        }
-        
-        printf(" > \n > ----Capacity per layer: \n");
-
-        for (int l = 0; l < numLayers; l++) {
-                printf(" > --------Layer %d capacity: %d\n", (l+1), cap_per_layer[l]);
-        }
-        
-        printf(" > \n > ----Use percentage per layer: \n");
-
-        for (int l = 0; l < numLayers; l++) {
-                if (cap_per_layer[l] == 0) {
-                        printf(" > --------Layer %d use percentage: 0.0%%\n", (l+1));
-                        continue;
+                for (int l = 0; l < numLayers; l++) {
+                        printf(" > --------Layer %d usage: %d\n", (l+1), usage_per_layer[l]);
                 }
-                float use_percentage = (float)usage_per_layer[l] / (float)cap_per_layer[l];
-                use_percentage *= 100;
-                printf(" > --------Layer %d use percentage: %.2f%%\n", (l+1), use_percentage);
-        }
-        
-        printf(" > \n > ----Overflow per layer: \n");
 
-        for (int l = 0; l < numLayers; l++) {
-                printf(" > --------Layer %d overflow: %d\n", (l+1), overflow_per_layer[l]);
+                printf(" > \n > ----Capacity per layer: \n");
+
+                for (int l = 0; l < numLayers; l++) {
+                        printf(" > --------Layer %d capacity: %d\n", (l+1), cap_per_layer[l]);
+                }
+
+                printf(" > \n > ----Use percentage per layer: \n");
+
+                for (int l = 0; l < numLayers; l++) {
+                        if (cap_per_layer[l] == 0) {
+                                printf(" > --------Layer %d use percentage: 0.0%%\n", (l+1));
+                                continue;
+                        }
+                        float use_percentage = (float)usage_per_layer[l] / (float)cap_per_layer[l];
+                        use_percentage *= 100;
+                        printf(" > --------Layer %d use percentage: %.2f%%\n", (l+1), use_percentage);
+                }
+
+                printf(" > \n > ----Overflow per layer: \n");
+
+                for (int l = 0; l < numLayers; l++) {
+                        printf(" > --------Layer %d overflow: %d\n", (l+1), overflow_per_layer[l]);
+                }
         }
         
         

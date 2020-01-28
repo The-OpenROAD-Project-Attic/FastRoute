@@ -99,6 +99,7 @@ private:
         // Clock net routing variables
         bool _pdRev;
         float _alpha = 0.4;
+        int _verbose = 0;
         std::map<std::string, float> _netsAlpha;
         
         // main functions
@@ -158,6 +159,10 @@ public:
         void addAlphaForNet(char * netName, float alpha) {
                 std::string name(netName);
                 _netsAlpha[name] = alpha;
+        }
+        
+        void setVerbose(const int v) {
+                _verbose = v;
         }
         
         void printGrid();

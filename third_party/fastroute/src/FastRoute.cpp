@@ -506,16 +506,19 @@ int FT::run(std::vector<NET> &result) {
         //viacost = VIA;
         viacost = 0;
         gen_brk_RSMT(FALSE, FALSE, FALSE, FALSE, noADJ);
-        printf(" > --first L\n");
+        if (verbose > 1)
+                printf(" > --first L\n");
         routeLAll(TRUE);
         gen_brk_RSMT(TRUE, TRUE, TRUE, FALSE, noADJ);
         getOverflow2D(&maxOverflow);
-        printf(" > --second L\n");
+        if (verbose > 1)
+                printf(" > --second L\n");
         newrouteLAll(FALSE, TRUE);
         getOverflow2D(&maxOverflow);
         spiralRouteAll();
         newrouteZAll(10);
-        printf(" > --first Z\n");
+        if (verbose > 1)
+                printf(" > --first Z\n");
         past_cong = getOverflow2D(&maxOverflow);
 
         convertToMazeroute();
@@ -539,7 +542,8 @@ int FT::run(std::vector<NET> &result) {
         for (i = 0; i < LVIter; i++) {
                 LOGIS_COF = std::max<float>(2.0 / (1 + log(maxOverflow)), LOGIS_COF);
                 LOGIS_COF = 2.0 / (1 + log(maxOverflow));
-                printf(" > --LV routing round %d, enlarge %d \n", i, enlarge);
+                if (verbose > 1)
+                        printf(" > --LV routing round %d, enlarge %d \n", i, enlarge);
                 routeLVAll(newTH, enlarge);
 
                 past_cong = getOverflow2Dmaze(&maxOverflow, &tUsage);
@@ -555,7 +559,8 @@ int FT::run(std::vector<NET> &result) {
 
         t3 = clock();
         reading_Time = (float)(t3 - t2) / CLOCKS_PER_SEC;
-        printf(" > --LV Time: %f sec\n", reading_Time);
+        if (verbose > 1)
+                printf(" > --LV Time: %f sec\n", reading_Time);
         InitEstUsage();
 
         i = 1;
@@ -763,22 +768,30 @@ int FT::run(std::vector<NET> &result) {
 
         checkUsage();
 
-        printf(" > --maze routing finished\n");
+        if (verbose > 1)
+            printf(" > --maze routing finished\n");
 
         t4 = clock();
         maze_Time = (float)(t4 - t3) / CLOCKS_PER_SEC;
-        printf(" > --P3 runtime: %f sec\n", maze_Time);
+        
+        if (verbose > 1) {
+            printf(" > --P3 runtime: %f sec\n", maze_Time);
 
-        printf(" > --Final 2D results: \n");
+            printf(" > --Final 2D results: \n");
+        }
         getOverflow2Dmaze(&maxOverflow, &tUsage);
 
-        printf(" > \n > --Layer Assignment Begins\n");
+        if (verbose > 1)
+                printf(" > \n > --Layer Assignment Begins\n");
         newLA();
-        printf(" > --layer assignment finished\n");
+        if (verbose > 1)
+                printf(" > --layer assignment finished\n");
 
         t2 = clock();
         gen_brk_Time = (float)(t2 - t1) / CLOCKS_PER_SEC;
-        printf(" > --2D + Layer Assignment Runtime: %f sec\n", gen_brk_Time);
+        
+        if (verbose > 1)
+            printf(" > --2D + Layer Assignment Runtime: %f sec\n", gen_brk_Time);
 
         costheight = 3;
         viacost = 1;
@@ -792,14 +805,16 @@ int FT::run(std::vector<NET> &result) {
         }
 
         if (goingLV && past_cong == 0) {
-                printf(" > --Post Processing Begins \n");
+                if (verbose > 1)
+                    printf(" > --Post Processing Begins \n");
                 mazeRouteMSMDOrder3D(enlarge, 0, ripupTH3D);
 
                 //	mazeRouteMSMDOrder3D(enlarge, 0, 10 );
                 if (gen_brk_Time > 120) {
                         mazeRouteMSMDOrder3D(enlarge, 0, 12);
                 }
-                printf(" > --Post Processsing finished, starting via filling\n");
+                if (verbose > 1)
+                        printf(" > --Post Processsing finished, starting via filling\n");
         }
 
         fillVIA();
@@ -822,6 +837,7 @@ int FT::run(std::vector<NET> &result) {
         std::cout << " > --Getting results...\n";
         result = getResults();
         std::cout << " > --Getting results... Done!\n";
+        std::cout << " > \n";
 
         /* TODO:  <11-07-19, this function leads to a segfault, but as the OS
          * frees all memory after the application end (next line) we can omit
@@ -836,6 +852,10 @@ void FT::usePdRev(){
 
 void FT::setAlpha(float a){
         alpha = a;
+}
+
+void FT::setVerbose(int v){
+        verbose = v;
 }
 
 }  // namespace FastRoute

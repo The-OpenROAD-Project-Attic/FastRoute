@@ -105,6 +105,10 @@ void set_alpha_for_net(char * netName, float alpha) {
     fastRouteKernel->addAlphaForNet(netName, alpha);
 }
 
+void set_verbose(int v) {
+        fastRouteKernel->setVerbose(v);
+}
+
 void start_fastroute() {
         fastRouteKernel->startFastRoute();
 }

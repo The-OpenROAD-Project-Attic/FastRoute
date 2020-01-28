@@ -49,6 +49,7 @@ extern float vCapacity_lb, hCapacity_lb, vCapacity_ub, hCapacity_ub;
 extern int layerOrientation;
 extern bool pdRev;
 extern float alpha;
+extern int verbose;
 
 extern int enlarge, costheight, ripup_threshold;
 extern int MaxDegree;

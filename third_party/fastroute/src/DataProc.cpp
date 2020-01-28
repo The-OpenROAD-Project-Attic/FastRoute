@@ -57,6 +57,7 @@ float d2[YRANGE][XRANGE];
 int layerOrientation;
 bool pdRev;
 float alpha;
+int verbose;
 
 Bool HV[YRANGE][XRANGE];
 Bool hyperV[YRANGE][XRANGE];

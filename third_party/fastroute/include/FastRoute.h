@@ -93,6 +93,7 @@ class FT {
         void setMaxNetDegree(int);
         void usePdRev();
         void setAlpha(float a);
+        void setVerbose(int v);
 };
 }  // namespace FastRoute
 #endif /* __FASTROUTE_API__ */
