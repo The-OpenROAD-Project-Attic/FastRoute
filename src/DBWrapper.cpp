@@ -328,6 +328,7 @@ void DBWrapper::initNetlist() {
         odb::dbSet<odb::dbNet>::iterator nIter;
         
         for (nIter = nets.begin(); nIter != nets.end(); ++nIter) {
+                bool padFound = false;
                 std::vector<Pin> netPins;
                 
                 odb::dbNet* currNet = *nIter;
@@ -351,6 +352,18 @@ void DBWrapper::initNetlist() {
                         std::map<int, std::vector<Box>> pinBoxes;
                         
                         odb::dbMTerm* mTerm = currITerm->getMTerm();
+                        odb::dbMaster* master = mTerm->getMaster();
+                        
+                        if (master->getType() == odb::dbMasterType::PAD ||
+                            master->getType() == odb::dbMasterType::PAD_INPUT ||
+                            master->getType() == odb::dbMasterType::PAD_OUTPUT ||
+                            master->getType() == odb::dbMasterType::PAD_INOUT ||
+                            master->getType() == odb::dbMasterType::PAD_POWER ||
+                            master->getType() == odb::dbMasterType::PAD_SPACER) {
+                                padFound = true;
+                                break;
+                        }
+                        
                         std::string instName = currITerm->getInst()->getConstName();
                         pinName = mTerm->getConstName();
                         pinName = instName + ":" + pinName;
@@ -402,6 +415,10 @@ void DBWrapper::initNetlist() {
                                 Pin pin = Pin(pinName, pinPos, pinLayers, pinBoxes, netName, false);
                                 netPins.push_back(pin);
                         }
+                }
+                
+                if (padFound) {
+                        continue;
                 }
                 
                 // Iterate through all I/O pins
