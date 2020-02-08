@@ -42,5 +42,4 @@ do
     rm -f ${subdir}/log.txt
     rm -f ${subdir}/test.log
     rm -f ${subdir}/out.guide
-    rm -f ${subdir}/run.tcl
 done

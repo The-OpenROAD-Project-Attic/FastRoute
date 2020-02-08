@@ -47,13 +47,6 @@ binary=$1
 testdir=$2
 flexBinary="FlexRoute"
 
-lefFile="$testdir/input/input.lef"
-defFile="$testdir/input/input.def"
-
-cp $testdir/src/test_coverage/routeDesign.tcl $testdir/src/test_coverage/run.tcl
-sed -i s#_LEF_#$lefFile#g $testdir/src/test_coverage/run.tcl
-sed -i s#_DEF_#$defFile#g $testdir/src/test_coverage/run.tcl
-
 $binary -no_init < run.tcl > log.txt 2>&1
 ./$flexBinary run_checker_input.param > test.log 2>&1
 

@@ -46,13 +46,6 @@ fi
 binary=$1
 testdir=$2
 
-lefFile="$testdir/input/input.lef"
-defFile="$testdir/input/input.def"
-
-cp $testdir/src/test_wl/routeDesign.tcl $testdir/src/test_wl/run.tcl
-sed -i s#_LEF_#$lefFile#g $testdir/src/test_wl/run.tcl
-sed -i s#_DEF_#$defFile#g $testdir/src/test_wl/run.tcl
-
 $binary -no_init < run.tcl > test.log 2>&1
 
 obs_report=$(grep -e 'Final routing length' ./test.log)
