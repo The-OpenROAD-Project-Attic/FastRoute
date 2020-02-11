@@ -6,8 +6,9 @@ TritonRoute*
 *.dat
 *.log
 *.param
-support/ispd18/*
-support/ispd19/*
 .gdb_history
 src/TclInterfaceWrap.cpp
 nbproject/
+test/src/test_*/*.log
+test/src/test_*/*.guide
+test/src/test_*/*.txt
