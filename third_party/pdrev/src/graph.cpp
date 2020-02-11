@@ -474,14 +474,14 @@ bool Graph::IsOnEdge(Node &tNode, int idx) {
     }
     if (edges[idx].best_shape == 0) {
         if (((pNode.x == tNode.x && (tNode.y <= maxY && tNode.y >= minY))
-                || (cNode.y == tNode.y) && (tNode.x <= maxX && tNode.x >= minX))) {
+                || ((cNode.y == tNode.y) && (tNode.x <= maxX && tNode.x >= minX)))) {
             if (verbose > 3)
                 cout << "True" << endl;
             return true;
         }
     } else {
         if (((cNode.x == tNode.x && (tNode.y <= maxY && tNode.y >= minY))
-                || (pNode.y == tNode.y) && (tNode.x <= maxX && tNode.x >= minX))) {
+                || ((pNode.y == tNode.y) && (tNode.x <= maxX && tNode.x >= minX)))) {
             if (verbose > 3)
                 cout << "True" << endl;
             return true;

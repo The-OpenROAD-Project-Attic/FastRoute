@@ -894,7 +894,7 @@ void newrouteZ(int netID, int threshold) {
 
                 } else
                         /* TODO:  <19-07-19, add parentesis in the if below > */
-                        if (d == 2 && sttrees[netID].edges[ind].len > threshold > 4) {
+                        if (d == 2 && sttrees[netID].edges[ind].len > threshold  && threshold > 4) {
                         newrouteZ_edge(netID, ind);
                 }
         }

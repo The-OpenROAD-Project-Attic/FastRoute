@@ -43,3 +43,5 @@ do
     rm -f ${subdir}/test.log
     rm -f ${subdir}/out.guide
 done
+
+rm -f ${srcdir}/test_guides/guides_diff.log

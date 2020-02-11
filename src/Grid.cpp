@@ -36,6 +36,8 @@
 // POSSIBILITY OF SUCH DAMAGE.
 ////////////////////////////////////////////////////////////////////////////////
 
+#include <complex>
+
 #include "Grid.h"
 
 namespace FastRoute {
@@ -111,15 +113,15 @@ int Grid::computeTileReduce(const Box &obs, const Box &tile, int trackSpace, boo
         int reduce = -1;
         if (direction == RoutingLayer::VERTICAL) {
                 if (first) {
-                        reduce = floor(abs(tile.getUpperBound().getX() - obs.getLowerBound().getX()) / trackSpace);
+                        reduce = floor(std::abs(tile.getUpperBound().getX() - obs.getLowerBound().getX()) / trackSpace);
                 } else {
-                        reduce = floor(abs(obs.getUpperBound().getX() - tile.getLowerBound().getX()) / trackSpace);
+                        reduce = floor(std::abs(obs.getUpperBound().getX() - tile.getLowerBound().getX()) / trackSpace);
                 }
         } else {
                 if (first) {
-                        reduce = floor(abs(tile.getUpperBound().getY() - obs.getLowerBound().getY()) / trackSpace);
+                        reduce = floor(std::abs(tile.getUpperBound().getY() - obs.getLowerBound().getY()) / trackSpace);
                 } else {
-                        reduce = floor(abs(obs.getUpperBound().getY() - tile.getLowerBound().getY()) / trackSpace);
+                        reduce = floor(std::abs(obs.getUpperBound().getY() - tile.getLowerBound().getY()) / trackSpace);
                 }
         }
 

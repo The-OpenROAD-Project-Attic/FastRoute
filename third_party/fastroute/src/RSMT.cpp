@@ -150,6 +150,7 @@ int mapxy(int nx, int xs[], int nxs[], int d) {
         }
 
         if (min > max) printf("mapping error\n");
+        return -1;
 }
 
 void copyStTree(int ind, Tree rsmt) {
