@@ -48,13 +48,13 @@ testdir=$2
 
 $binary -no_init < run.tcl > log.txt 2>&1
 
-diff golden.guide out.guide
+diff golden.guide out.guide > guides_diff.log
 status=$?
 
 if [ $status -eq 0 ]
 then
 	exit $GREEN
 else
-        echo "     - [ERROR] Test failed. Check $testdir/src/test_guides/test.log and Check $testdir/src/test_guides/golden.guide"
+        echo "     - [ERROR] Test failed. Check $testdir/src/test_guides/guides_diff.log"
 	exit $RED
 fi
