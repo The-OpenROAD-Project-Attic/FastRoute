@@ -66,6 +66,10 @@ void run_fastroute();
 void run();
 void write_guides();
 
+//Temporary for congestion drive RePlAce
+void write_route();
+void write_est();
+
 }
 #endif
 

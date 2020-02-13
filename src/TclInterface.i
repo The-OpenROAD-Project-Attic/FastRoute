@@ -77,4 +77,8 @@ extern void run();
 
 extern void write_guides();
 
+extern void write_route();
+
+extern void write_est();
+
 }

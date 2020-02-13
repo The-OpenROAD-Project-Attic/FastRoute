@@ -102,6 +102,9 @@ private:
         int _verbose = 0;
         std::map<std::string, float> _netsAlpha;
         
+        // temporary for congestion driven replace
+        int _numAdjusts = 0;
+        
         // main functions
         void initGrid();
         void initRoutingLayers();
@@ -173,6 +176,10 @@ public:
         void startFastRoute();
         void runFastRoute();
         int run();
+        
+        // temporary for congestion drive replace
+        void writeRoute();
+        void writeEst();
 };
 
 }
