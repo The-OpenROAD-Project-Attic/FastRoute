@@ -78,6 +78,7 @@ private:
         bool _clockNetRouting;
         unsigned _dbId;
         const int _selectedMetal = 3;
+        int _overflowIterations = 15;
         
         // Layer adjustment variables
         std::vector<int> _layersToAdjust;
@@ -163,6 +164,10 @@ public:
         
         void setVerbose(const int v) {
                 _verbose = v;
+        }
+        
+        void setOverflowIterations(int iterations) {
+                _overflowIterations = iterations;
         }
         
         void printGrid();

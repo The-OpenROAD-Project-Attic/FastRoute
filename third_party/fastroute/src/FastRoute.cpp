@@ -456,6 +456,7 @@ int FT::run(std::vector<NET> &result) {
         int maxOverflow, past_cong, last_cong, finallength, numVia, ripupTH3D, newTH, healingTrigger;
         int updateType, minofl, minoflrnd, mazeRound, upType, cost_type, bmfl, bwcnt;
         Bool goingLV, healingNeed, noADJ, extremeNeeded, needOUTPUT;
+        int previousOverflow = 0;
 
         // TODO: check this size
         int maxPin = maxNetDegree;
@@ -576,7 +577,11 @@ int FT::run(std::vector<NET> &result) {
         cost_type = 1;
 
         InitLastUsage(upType);
-        while (totalOverflow > 0) {
+        if (totalOverflow > 0) {
+                printf(" > --Running extra iterations to remove overflow...\n");
+        }
+        
+        while (totalOverflow > 0 && i <= overflowIterations) {
                 if (THRESH_M > 15) {
                         THRESH_M -= thStep1;
                 } else if (THRESH_M >= 2) {
@@ -652,7 +657,7 @@ int FT::run(std::vector<NET> &result) {
                         L = 0;
                 }
 
-                printf("iteration %d, enlarge %d, costheight %d, threshold %d via cost %d \nlog_coef %f, healingTrigger %d cost_step %d L %d cost_type %d updatetype %d\n", i, enlarge, costheight, mazeedge_Threshold, VIA, LOGIS_COF, healingTrigger, cost_step, L, cost_type, upType);
+                printf(" > ----iteration %d, enlarge %d, costheight %d, threshold %d via cost %d \n > ----log_coef %f, healingTrigger %d cost_step %d L %d cost_type %d updatetype %d\n", i, enlarge, costheight, mazeedge_Threshold, VIA, LOGIS_COF, healingTrigger, cost_step, L, cost_type, upType);
                 mazeRouteMSMD(i, enlarge, costheight, ripup_threshold, mazeedge_Threshold, !(i % 3), cost_type);
                 last_cong = past_cong;
                 past_cong = getOverflow2Dmaze(&maxOverflow, &tUsage);
@@ -675,7 +680,7 @@ int FT::run(std::vector<NET> &result) {
 
                 if (maxOverflow < 150) {
                         if (i == 20 && past_cong > 200) {
-                                printf("Extra Run for hard benchmark\n");
+                                printf(" > ----Extra Run for hard benchmark\n");
                                 L = 0;
                                 upType = 3;
                                 stopDEC = TRUE;
@@ -757,6 +762,20 @@ int FT::run(std::vector<NET> &result) {
                         getOverflow2Dmaze(&maxOverflow, &tUsage);
                         break;
                 }
+                
+                if (previousOverflow != 0) {
+                        int overflowDiff = std::abs(previousOverflow - totalOverflow);
+                        float percentDiff = (float)overflowDiff/totalOverflow;
+                        if (percentDiff < 0.05) {
+                                printf("[ERROR] FastRoute cannot handle very congested design\n");
+                                std::exit(1);
+                        }
+                }
+        }
+        
+        if (totalOverflow > 0) {
+                printf("[ERROR] FastRoute cannot handle very congested design\n");
+                std::exit(2);
         }
 
         if (minofl > 0) {
@@ -856,6 +875,10 @@ void FT::setAlpha(float a){
 
 void FT::setVerbose(int v){
         verbose = v;
+}
+
+void FT::setOverflowIterations(int iterations){
+        overflowIterations = iterations;
 }
 
 }  // namespace FastRoute

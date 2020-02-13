@@ -50,6 +50,7 @@ extern int layerOrientation;
 extern bool pdRev;
 extern float alpha;
 extern int verbose;
+extern int overflowIterations;
 
 extern int enlarge, costheight, ripup_threshold;
 extern int MaxDegree;
