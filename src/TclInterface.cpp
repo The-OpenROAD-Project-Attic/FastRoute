@@ -109,6 +109,10 @@ void set_verbose(int v) {
         fastRouteKernel->setVerbose(v);
 }
 
+void set_overflow_iterations(int iterations) {
+        fastRouteKernel->setOverflowIterations(iterations);
+}
+
 void start_fastroute() {
         fastRouteKernel->startFastRoute();
 }

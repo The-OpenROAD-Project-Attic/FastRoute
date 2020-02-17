@@ -94,6 +94,7 @@ class FT {
         void usePdRev();
         void setAlpha(float a);
         void setVerbose(int v);
+        void setOverflowIterations(int iterations);
 };
 }  // namespace FastRoute
 #endif /* __FASTROUTE_API__ */
