@@ -390,7 +390,6 @@ std::vector<NET> FT::getResults() {
         short *gridsX, *gridsY, *gridsL;
         int netID, d, i, k, edgeID, nodeID, deg, lastX, lastY, lastL, xreal, yreal, l, routeLen;
         TreeEdge *treeedges, *treeedge;
-        FILE *fp;
         TreeNode *nodes;
         TreeEdge edge;
         std::vector<NET> netsOut;
@@ -455,7 +454,7 @@ int FT::run(std::vector<NET> &result) {
         int Ripvalue, LVIter, cost_step;
         int maxOverflow, past_cong, last_cong, finallength, numVia, ripupTH3D, newTH, healingTrigger;
         int updateType, minofl, minoflrnd, mazeRound, upType, cost_type, bmfl, bwcnt;
-        Bool goingLV, healingNeed, noADJ, extremeNeeded, needOUTPUT;
+        Bool goingLV, healingNeed, noADJ, extremeNeeded;
 
         // TODO: check this size
         int maxPin = maxNetDegree;
@@ -821,10 +820,6 @@ int FT::run(std::vector<NET> &result) {
         finallength = getOverflow3D();
         numVia = threeDVIA();
         checkRoute3D();
-
-        if (needOUTPUT) {
-                writeRoute3D(routingFile);
-        }
 
         t4 = clock();
         maze_Time = (float)(t4 - t1) / CLOCKS_PER_SEC;
