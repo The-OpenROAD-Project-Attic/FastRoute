@@ -68,6 +68,80 @@ void FT::setGridsAndLayers(int x, int y, int nLayers) {
         yGrid = y;
         numLayers = nLayers;
         numGrids = xGrid * yGrid;
+        
+        d1 = new float*[yGrid];
+        for (int i = 0; i < yGrid; i++) {
+                d1[i] = new float[xGrid];
+        }
+        
+        d2 = new float*[yGrid];
+        for (int i = 0; i < yGrid; i++) {
+                d2[i] = new float[xGrid];
+        }
+        
+        HV = new Bool*[yGrid];
+        for (int i = 0; i < yGrid; i++) {
+                HV[i] = new Bool[xGrid];
+        }
+        
+        hyperV = new Bool*[yGrid];
+        for (int i = 0; i < yGrid; i++) {
+                hyperV[i] = new Bool[xGrid];
+        }
+        
+        hyperH = new Bool*[yGrid];
+        for (int i = 0; i < yGrid; i++) {
+                hyperH[i] = new Bool[xGrid];
+        }
+        
+        inRegion = new Bool*[yGrid];
+        for (int i = 0; i < yGrid; i++) {
+                inRegion[i] = new Bool[xGrid];
+        }
+        
+        corrEdge = new int*[yGrid];
+        for (int i = 0; i < yGrid; i++) {
+                corrEdge[i] = new int[xGrid];
+        }
+        
+        costHVH = new float[xGrid];
+        costVHV = new float[yGrid];
+        costH = new float[yGrid];
+        costV = new float[xGrid];
+        costLR = new float[yGrid];
+        costTB = new float[xGrid];
+
+        costHVHtest = new float[yGrid];
+        costVtest = new float[xGrid];
+        costTBtest = new float[xGrid];
+        
+        d13D = new int[numLayers*yGrid*xGrid];
+        d23D = new short[numLayers*yGrid*xGrid];
+        
+        vCapacity3D = new int[numLayers];
+        hCapacity3D = new int[numLayers];
+        
+        MinWidth = new int[numLayers];
+        MinSpacing = new int[numLayers];
+        ViaSpacing = new int[numLayers];
+        
+        gridHs = new int[numLayers];
+        gridVs = new int[numLayers];
+        
+        layerGrid = new int*[numLayers];
+        for (int i = 0; i < numLayers; i++) {
+                layerGrid[i] = new int[MAXLEN];
+        }
+        
+        gridD = new int*[numLayers];
+        for (int i = 0; i < numLayers; i++) {
+                gridD[i] = new int[MAXLEN];
+        }
+        
+        viaLink = new int*[numLayers];
+        for (int i = 0; i < numLayers; i++) {
+                viaLink[i] = new int[MAXLEN];
+        }
 }
 
 void FT::addVCapacity(int verticalCapacity, int layer) {
@@ -355,7 +429,7 @@ void FT::initAuxVar() {
         gys = (DTYPE **)malloc(numValidNets * sizeof(DTYPE *));
         gs = (DTYPE **)malloc(numValidNets * sizeof(DTYPE *));
 
-        gridHV = XRANGE * YRANGE;
+        gridHV = xGrid * yGrid;
         gridH = (xGrid - 1) * yGrid;
         gridV = xGrid * (yGrid - 1);
         for (k = 0; k < numLayers; k++) {
@@ -377,7 +451,7 @@ void FT::initAuxVar() {
                 parentY3[i] = (short *)calloc(xGrid, sizeof(short));
         }
 
-        pop_heap2 = (Bool *)calloc(yGrid * XRANGE, sizeof(Bool));
+        pop_heap2 = (Bool *)calloc(yGrid * xGrid, sizeof(Bool));
 
         // allocate memory for priority queue
         heap1 = (float **)calloc((yGrid * xGrid), sizeof(float *));
