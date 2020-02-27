@@ -38,6 +38,9 @@
 
 #define MAXLEN 20000
 
+#define XRANGE 4000
+#define YRANGE 4000
+
 namespace FastRoute {
 
 // global variables
@@ -62,8 +65,8 @@ extern int mazeThreshold;  // the wirelen threshold to do maze routing
 extern Net **nets;
 extern Edge *h_edges, *v_edges;
 
-extern float **d1;
-extern float **d2;
+extern float d1[YRANGE][XRANGE];
+extern float d2[YRANGE][XRANGE];
 
 extern Bool **HV;
 extern Bool **hyperV;

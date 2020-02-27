@@ -45,16 +45,16 @@
 
 namespace FastRoute {
 
-float *costHVH;  // Horizontal first Z
-float *costVHV;  // Vertical first Z
-float *costH;    // Horizontal segment cost
-float *costV;    // Vertical segment cost
-float *costLR;   // Left and right boundary cost
-float *costTB;   // Top and bottom boundary cost
+float costHVH[XRANGE];  // Horizontal first Z
+float costVHV[YRANGE];  // Vertical first Z
+float costH[YRANGE];    // Horizontal segment cost
+float costV[XRANGE];    // Vertical segment cost
+float costLR[YRANGE];   // Left and right boundary cost
+float costTB[XRANGE];   // Top and bottom boundary cost
 
-float *costHVHtest;  // Vertical first Z
-float *costVtest;    // Vertical segment cost
-float *costTBtest;   // Top and bottom boundary cost
+float costHVHtest[YRANGE];  // Vertical first Z
+float costVtest[XRANGE];    // Vertical segment cost
+float costTBtest[XRANGE];   // Top and bottom boundary cost
 
 
 // estimate the routing by assigning 1 for H and V segments, 0.5 to both possible L for L segments
@@ -913,14 +913,11 @@ void newrouteZAll(int threshold) {
 void routeMonotonic(int netID, int edgeID, int threshold) {
         int i, j, cnt, x, xl, yl, xr, yr, n1, n2, x1, y1, x2, y2, grid, xGrid_1, ind_i, ind_j, ind_x;
         int vedge, hedge, segWidth, segHeight, curX, curY;
-        int *gridsX, *gridsY;
+        int gridsX[XRANGE + YRANGE], gridsY[XRANGE + YRANGE];
         float **cost, tmp;
         Bool **parent;  // remember the parent of a grid on the shortest path, TRUE - same x, FALSE - same y
         TreeEdge *treeedges, *treeedge;
         TreeNode *treenodes;
-        
-        gridsX = new int[xGrid + yGrid];
-        gridsY = new int[xGrid + yGrid];
 
         if (sttrees[netID].edges[edgeID].route.routelen > threshold)  // only route the non-degraded edges (len>0)
         {
@@ -1112,8 +1109,6 @@ void routeMonotonic(int netID, int edgeID, int threshold) {
 
                 }  // if(x1!=x2 || y1!=y2)
         }          // non-degraded edge
-        delete [] gridsX;
-        delete [] gridsY;
 }
 
 void routeMonotonicAll(int threshold) {
@@ -1451,14 +1446,11 @@ void spiralRouteAll() {
 void routeLVEnew(int netID, int edgeID, int threshold, int enlarge) {
         int i, j, cnt, xmin, xmax, ymin, ymax, n1, n2, x1, y1, x2, y2, grid, xGrid_1, deg, yminorig, ymaxorig;
         int vedge, hedge, bestp1x, bestp1y;
-        int *gridsX, *gridsY;
+        int gridsX[XRANGE + YRANGE], gridsY[XRANGE + YRANGE];
         float tmp1, tmp2, tmp3, tmp4, tmp, best;
         Bool LH1, LH2, BL1, BL2;
         TreeEdge *treeedges, *treeedge;
         TreeNode *treenodes;
-        
-        gridsX = new int[xGrid + yGrid];
-        gridsY = new int[xGrid + yGrid];
 
         if (sttrees[netID].edges[edgeID].len > threshold)  // only route the non-degraded edges (len>0)
         {
@@ -1740,9 +1732,6 @@ void routeLVEnew(int netID, int edgeID, int threshold, int enlarge) {
 
                 }  // if(x1!=x2 || y1!=y2)
         }          // non-degraded edge
-        
-        delete [] gridsX;
-        delete [] gridsY;
 }
 
 void routeLVAll(int threshold, int expand) {

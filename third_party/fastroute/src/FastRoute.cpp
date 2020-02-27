@@ -69,16 +69,6 @@ void FT::setGridsAndLayers(int x, int y, int nLayers) {
         numLayers = nLayers;
         numGrids = xGrid * yGrid;
         
-        d1 = new float*[yGrid];
-        for (int i = 0; i < yGrid; i++) {
-                d1[i] = new float[xGrid];
-        }
-        
-        d2 = new float*[yGrid];
-        for (int i = 0; i < yGrid; i++) {
-                d2[i] = new float[xGrid];
-        }
-        
         HV = new Bool*[yGrid];
         for (int i = 0; i < yGrid; i++) {
                 HV[i] = new Bool[xGrid];
@@ -103,17 +93,6 @@ void FT::setGridsAndLayers(int x, int y, int nLayers) {
         for (int i = 0; i < yGrid; i++) {
                 corrEdge[i] = new int[xGrid];
         }
-        
-        costHVH = new float[xGrid];
-        costVHV = new float[yGrid];
-        costH = new float[yGrid];
-        costV = new float[xGrid];
-        costLR = new float[yGrid];
-        costTB = new float[xGrid];
-
-        costHVHtest = new float[yGrid];
-        costVtest = new float[xGrid];
-        costTBtest = new float[xGrid];
         
         d13D = new int[numLayers*yGrid*xGrid];
         d23D = new short[numLayers*yGrid*xGrid];
@@ -451,7 +430,7 @@ void FT::initAuxVar() {
                 parentY3[i] = (short *)calloc(xGrid, sizeof(short));
         }
 
-        pop_heap2 = (Bool *)calloc(yGrid * xGrid, sizeof(Bool));
+        pop_heap2 = (Bool *)calloc(yGrid * XRANGE, sizeof(Bool));
 
         // allocate memory for priority queue
         heap1 = (float **)calloc((yGrid * xGrid), sizeof(float *));
