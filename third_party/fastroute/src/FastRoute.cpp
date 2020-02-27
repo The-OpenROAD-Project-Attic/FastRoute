@@ -509,7 +509,6 @@ int FT::run(std::vector<NET> &result) {
         int updateType, minofl, minoflrnd, mazeRound, upType, cost_type, bmfl, bwcnt;
 
         Bool goingLV, healingNeed, noADJ, extremeNeeded;
-        int previousOverflow = 0;
 
         // TODO: check this size
         int maxPin = maxNetDegree;
@@ -814,15 +813,6 @@ int FT::run(std::vector<NET> &result) {
                 if (i >= mazeRound) {
                         getOverflow2Dmaze(&maxOverflow, &tUsage);
                         break;
-                }
-                
-                if (previousOverflow != 0) {
-                        int overflowDiff = std::abs(previousOverflow - totalOverflow);
-                        float percentDiff = (float)overflowDiff/totalOverflow;
-                        if (percentDiff < 0.05) {
-                                printf("[ERROR] FastRoute cannot handle very congested design\n");
-                                std::exit(1);
-                        }
                 }
         }
         

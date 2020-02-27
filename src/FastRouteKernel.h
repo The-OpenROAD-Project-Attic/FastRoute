@@ -78,7 +78,7 @@ private:
         bool _clockNetRouting;
         unsigned _dbId;
         const int _selectedMetal = 3;
-        int _overflowIterations = 15;
+        int _overflowIterations = 50;
         
         // Layer adjustment variables
         std::vector<int> _layersToAdjust;
