@@ -409,13 +409,11 @@ void FastRouteKernel::computeGridAdjustments() {
                 if (!_grid.isPerfectRegularX()) {
                         for (int i = 1; i < yGrids; i++) {
                                 _fastRoute.addAdjustment(xGrids - 1, i - 1, layer, xGrids - 1, i, layer, newVCapacity, false);
-                                _numAdjusts++;
                         }
                 }
                 if (!_grid.isPerfectRegularY()) {
                         for (int i = 1; i < xGrids; i++) {
                                 _fastRoute.addAdjustment(i - 1, yGrids - 1, layer, i, yGrids - 1, layer, newHCapacity, false);
-                                _numAdjusts++;
                         }
                 }
         }
@@ -468,7 +466,6 @@ void FastRouteKernel::computeTrackAdjustments() {
                                 while (trackLocation >= _grid.getTileHeight()){
                                         for (int x = 1; x < _grid.getXGrids(); x++){
                                                 _fastRoute.addAdjustment(x - 1, y, layer.getIndex(), x, y, layer.getIndex(), 0);
-                                                _numAdjusts++;
                                         }
                                         y++;
                                         trackLocation -= _grid.getTileHeight();
@@ -478,7 +475,6 @@ void FastRouteKernel::computeTrackAdjustments() {
                                         int newCapacity = std::floor((float)remainingTile/trackSpace);
                                         for (int x = 1; x < _grid.getXGrids(); x++){
                                                 _fastRoute.addAdjustment(x - 1, y, layer.getIndex(), x, y, layer.getIndex(), newCapacity);
-                                                _numAdjusts++;
                                         }
                                 }
                                 
@@ -486,7 +482,6 @@ void FastRouteKernel::computeTrackAdjustments() {
                                 while (remainingFinalSpace >= _grid.getTileHeight() + extraSpace){
                                         for (int x = 1; x < _grid.getXGrids(); x++){
                                                 _fastRoute.addAdjustment(x - 1, y, layer.getIndex(), x, y, layer.getIndex(), 0);
-                                                _numAdjusts++;
                                         }
                                         y--;
                                         remainingFinalSpace -= (_grid.getTileHeight() + extraSpace);
@@ -497,7 +492,6 @@ void FastRouteKernel::computeTrackAdjustments() {
                                         int newCapacity = std::floor((float)remainingTile/trackSpace);
                                         for (int x = 1; x < _grid.getXGrids(); x++){
                                                 _fastRoute.addAdjustment(x - 1, y, layer.getIndex(), x, y, layer.getIndex(), newCapacity);
-                                                _numAdjusts++;
                                         }
                                 }
                         }
@@ -534,7 +528,6 @@ void FastRouteKernel::computeTrackAdjustments() {
                                 while (trackLocation >= _grid.getTileWidth()){
                                         for (int y = 1; y < _grid.getYGrids(); y++){
                                                 _fastRoute.addAdjustment(x, y - 1, layer.getIndex(), x, y, layer.getIndex(), 0);
-                                                _numAdjusts++;
                                         }
                                         x++;
                                         trackLocation -= _grid.getTileWidth();
@@ -544,7 +537,6 @@ void FastRouteKernel::computeTrackAdjustments() {
                                         int newCapacity = std::floor((float)remainingTile/trackSpace);
                                         for (int y = 1; y < _grid.getYGrids(); y++) {
                                                 _fastRoute.addAdjustment(x, y - 1, layer.getIndex(), x, y, layer.getIndex(), newCapacity);
-                                                _numAdjusts++;
                                         }
                                 }
                                 
@@ -552,7 +544,6 @@ void FastRouteKernel::computeTrackAdjustments() {
                                 while (remainingFinalSpace >= _grid.getTileWidth() + extraSpace){
                                         for (int y = 1; y < _grid.getYGrids(); y++){
                                                 _fastRoute.addAdjustment(x, y - 1, layer.getIndex(), x, y, layer.getIndex(), 0);
-                                                _numAdjusts++;
                                         }
                                         x--;
                                         remainingFinalSpace -= (_grid.getTileWidth() + extraSpace);
@@ -563,7 +554,6 @@ void FastRouteKernel::computeTrackAdjustments() {
                                         int newCapacity = std::floor((float)remainingTile/trackSpace);
                                         for (int y = 1; y < _grid.getYGrids(); y++){
                                                 _fastRoute.addAdjustment(x, y - 1, layer.getIndex(), x, y, layer.getIndex(), newCapacity);
-                                                _numAdjusts++;
                                         }
                                 }
                         }
@@ -598,7 +588,6 @@ void FastRouteKernel::computeUserGlobalAdjustments() {
                                         int edgeCap = _fastRoute.getEdgeCapacity(x - 1, y - 1, layer, x, y - 1, layer);
                                         int newHCapacity = std::floor((float)edgeCap * (1 - _adjustment));
                                         _fastRoute.addAdjustment(x - 1, y - 1, layer, x, y - 1, layer, newHCapacity);
-                                        _numAdjusts++;
                                 }
                         }
                 }
@@ -609,7 +598,6 @@ void FastRouteKernel::computeUserGlobalAdjustments() {
                                         int edgeCap = _fastRoute.getEdgeCapacity(x - 1, y - 1, layer, x - 1, y, layer);
                                         int newVCapacity = std::floor((float)edgeCap * (1 - _adjustment));
                                         _fastRoute.addAdjustment(x - 1, y - 1, layer, x - 1, y, layer, newVCapacity);
-                                        _numAdjusts++;
                                 }
                         }
                 }
@@ -642,7 +630,6 @@ void FastRouteKernel::computeUserLayerAdjustments() {
                                         int edgeCap = _fastRoute.getEdgeCapacity(x - 1, y - 1, layer, x, y - 1, layer);
                                         int newHCapacity = std::floor((float)edgeCap * (1 - adjustment));
                                         _fastRoute.addAdjustment(x - 1, y - 1, layer, x, y - 1, layer, newHCapacity);
-                                        _numAdjusts++;
                                 }
                         }
                 }
@@ -653,7 +640,6 @@ void FastRouteKernel::computeUserLayerAdjustments() {
                                         int edgeCap = _fastRoute.getEdgeCapacity(x - 1, y - 1, layer, x - 1, y, layer);
                                         int newVCapacity = std::floor((float)edgeCap * (1 - adjustment));
                                         _fastRoute.addAdjustment(x - 1, y - 1, layer, x - 1, y, layer, newVCapacity);
-                                        _numAdjusts++;
                                 }
                         }
                 }
@@ -702,17 +688,14 @@ void FastRouteKernel::computeRegionAdjustments(Coordinate lowerBound, Coordinate
                                         if (edgeCap < 0)
                                                 edgeCap = 0;
                                         _fastRoute.addAdjustment(x, y, layer, x + 1, y, layer, edgeCap);
-                                        _numAdjusts++;
                                 } else if (y == lastTile._y) {
                                         edgeCap -= lastTileReduce;
                                         if (edgeCap < 0)
                                                 edgeCap = 0;
                                         _fastRoute.addAdjustment(x, y, layer, x + 1, y, layer, edgeCap);
-                                        _numAdjusts++;
                                 } else {
                                         edgeCap -= edgeCap*reductionPercentage;
                                         _fastRoute.addAdjustment(x, y, layer, x + 1, y, layer, 0);
-                                        _numAdjusts++;
                                 }
                         }
                 }
@@ -726,17 +709,14 @@ void FastRouteKernel::computeRegionAdjustments(Coordinate lowerBound, Coordinate
                                         if (edgeCap < 0)
                                                 edgeCap = 0;
                                         _fastRoute.addAdjustment(x, y, layer, x, y + 1, layer, edgeCap);
-                                        _numAdjusts++;
                                 } else if (x == lastTile._x) {
                                         edgeCap -= lastTileReduce;
                                         if (edgeCap < 0)
                                                 edgeCap = 0;
                                         _fastRoute.addAdjustment(x, y, layer, x, y + 1, layer, edgeCap);
-                                        _numAdjusts++;
                                 } else {
                                         edgeCap -= edgeCap*reductionPercentage;
                                         _fastRoute.addAdjustment(x, y, layer, x, y + 1, layer, 0);
-                                        _numAdjusts++;
                                 }
                         }
                 }
@@ -789,17 +769,14 @@ void FastRouteKernel::computeObstaclesAdjustments() {
                                                         if (edgeCap < 0)
                                                                 edgeCap = 0;
                                                         _fastRoute.addAdjustment(x, y, layer, x + 1, y, layer, edgeCap);
-                                                        _numAdjusts++;
                                                 } else if (y == lastTile._y) {
                                                         int edgeCap = _fastRoute.getEdgeCapacity(x, y, layer, x + 1, y, layer);
                                                         edgeCap -= lastTileReduce;
                                                         if (edgeCap < 0)
                                                                 edgeCap = 0;
                                                         _fastRoute.addAdjustment(x, y, layer, x + 1, y, layer, edgeCap);
-                                                        _numAdjusts++;
                                                 } else {
                                                         _fastRoute.addAdjustment(x, y, layer, x + 1, y, layer, 0);
-                                                        _numAdjusts++;
                                                 }
                                         }
                                 }
@@ -812,17 +789,14 @@ void FastRouteKernel::computeObstaclesAdjustments() {
                                                         if (edgeCap < 0)
                                                                 edgeCap = 0;
                                                         _fastRoute.addAdjustment(x, y, layer, x, y + 1, layer, edgeCap);
-                                                        _numAdjusts++;
                                                 } else if (x == lastTile._x) {
                                                         int edgeCap = _fastRoute.getEdgeCapacity(x, y, layer, x, y + 1, layer);
                                                         edgeCap -= lastTileReduce;
                                                         if (edgeCap < 0)
                                                                 edgeCap = 0;
                                                         _fastRoute.addAdjustment(x, y, layer, x, y + 1, layer, edgeCap);
-                                                        _numAdjusts++;
                                                 } else {
                                                         _fastRoute.addAdjustment(x, y, layer, x, y + 1, layer, 0);
-                                                        _numAdjusts++;
                                                 }
                                         }
                                 }
@@ -1171,6 +1145,29 @@ void FastRouteKernel::writeRoute() {
                 std::exit(0);
         }
         
+        int xGrids = _grid.getXGrids();
+        int yGrids = _grid.getYGrids();
+        
+        for (int layer = 1; layer <= _grid.getNumLayers(); layer++) {
+                for (int y = 1; y < yGrids; y++) {
+                        for (int x = 1; x < xGrids; x++) {
+                                int edgeCap = _fastRoute.getEdgeCapacity(x - 1, y - 1, layer, x, y - 1, layer);
+                                if (edgeCap != _grid.getHorizontalEdgesCapacities()[layer - 1]) {
+                                    _numAdjusts++;
+                                }
+                        }
+                }
+                
+                for (int x = 1; x < xGrids; x++) {
+                        for (int y = 1; y < yGrids; y++) {
+                                int edgeCap = _fastRoute.getEdgeCapacity(x - 1, y - 1, layer, x - 1, y, layer);
+                                if (edgeCap != _grid.getVerticalEdgesCapacities()[layer - 1]) {
+                                        _numAdjusts++;
+                                }
+                        }
+                }
+        }
+        
         routeFile << "Grid                : " << _grid.getXGrids() << " " << _grid.getYGrids() << " " << _grid.getNumLayers() << "\n";
         routeFile << "VerticalCapacity    :";
         for (int vCap : _grid.getVerticalEdgesCapacities()) {
@@ -1206,9 +1203,6 @@ void FastRouteKernel::writeRoute() {
         routeFile << "TileSize            : " << _grid.getTileWidth() << " " << _grid.getTileHeight() << "\n";
         routeFile << "BlockagePorosity    : 0\n";
         routeFile << "NumEdgeCapacityAdjustments : " << _numAdjusts << "\n";
-        
-        int xGrids = _grid.getXGrids();
-        int yGrids = _grid.getYGrids();
         
         for (int layer = 1; layer <= _grid.getNumLayers(); layer++) {
                 for (int y = 1; y < yGrids; y++) {
