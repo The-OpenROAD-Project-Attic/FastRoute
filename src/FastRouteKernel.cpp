@@ -1182,8 +1182,8 @@ void FastRouteKernel::writeRoute() {
         routeFile << "\n";
         
         routeFile << "MinWireWidth        :";
-        for (int minWidth : _grid.getMinWidths()) {
-                routeFile << " " << minWidth;
+        for (int i = 0; i <  _grid.getMinWidths().size(); i++) {
+                routeFile << " " << 1;
         }
         routeFile << "\n";
         
