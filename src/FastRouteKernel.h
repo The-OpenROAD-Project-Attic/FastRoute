@@ -162,16 +162,17 @@ public:
                 _netsAlpha[name] = alpha;
         }
         
-        void setVerbose(const int v) {
-                _verbose = v;
-        }
+        void setVerbose(const int v) { _verbose = v; }
         
-        void setOverflowIterations(int iterations) {
-                _overflowIterations = iterations;
-        }
+        void setOverflowIterations(int iterations) { _overflowIterations = iterations; }
         
         void printGrid();
         void printHeader();
+        
+        // antenna functions
+        void mergeSegments(FastRoute::NET &net);
+        void breakSegment(ROUTE segment, long maxLength, std::vector<ROUTE> &newSegments);
+        void fixLongSegments();
         
         // flow functions
         void writeGuides();

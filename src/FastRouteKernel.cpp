@@ -237,6 +237,10 @@ void FastRouteKernel::runFastRoute() {
         std::cout << " > Running FastRoute...\n";
         _fastRoute.run(_result);
         std::cout << " > Running FastRoute... Done!\n";
+        
+        std::cout << " > Fixing long segments...\n";
+        fixLongSegments();
+        std::cout << " > Fixing long segments... Done!\n";
 }
 
 void FastRouteKernel::initGrid() {        
@@ -1133,6 +1137,181 @@ void FastRouteKernel::checkPinPlacement() {
         if (invalid) {
                 std::exit(-1);
         }
+}
+
+void FastRouteKernel::mergeSegments(FastRoute::NET &net) {
+        std::vector<ROUTE> segments = net.route;
+        std::vector<ROUTE> finalSegments;
+        if (segments.size() < 1) {
+                std::cout << " > [ERROR] Segments vector is empty!!!\n";
+                std::exit(1);
+        }
+        finalSegments.push_back(segments[0]);
+        
+        int i = 0;
+        while (i < segments.size() - 1) {
+                ROUTE segment0 = segments[i];
+                ROUTE segment1 = segments[i+1];
+                
+                if (segment0.initLayer != segment0.finalLayer ||
+                    segment1.initLayer != segment1.finalLayer) { // if one of the segments is a via, skip
+                        i++;
+                        continue;
+                }
+                
+                if (segment0.initLayer != segment1.initLayer ||
+                    segment0.finalLayer != segment1.finalLayer) { // if the segments are in different layers
+                        i++;
+                        continue;
+                }
+                
+                if (segment0.finalX == segment1.initX && segment0.finalY == segment1.initY) { // if segment 0 connects to the end of segment 1
+                        segment0.finalX = segment1.finalX;
+                        segment0.finalY = segment1.finalY;
+                        segments[i] = segment0;
+                        segments.erase(segments.begin() + i + 1);
+                } else {
+                        i++;
+                }
+        }
+        
+        net.route = segments;
+}
+
+void FastRouteKernel::breakSegment(ROUTE actualSegment, long maxLength, std::vector<ROUTE> &newSegments) {
+        long segmentLength = std::abs(actualSegment.finalX - actualSegment.initX)
+                           + std::abs(actualSegment.finalY - actualSegment.initY);
+        
+        long segLenViolation = segmentLength/maxLength;
+        
+        if (segLenViolation < 1) {
+                std::cout << "[WARNING] Segment does not violate max length\n";
+                return;
+        }
+        
+        if (segLenViolation <= 3) {
+                int newSegsLen = segmentLength/3;
+                ROUTE segment;
+                ROUTE segment0, via0, via1, segment1, via2, via3, segment2;
+                bool horizontal;
+                
+                if (actualSegment.initX == actualSegment.finalX) { // Vertical segment
+                        horizontal = false;
+                        if (actualSegment.finalY > actualSegment.initY) {
+                                segment = actualSegment;
+                        } else {
+                                segment = {actualSegment.initX, actualSegment.finalY, actualSegment.initLayer,
+                                           actualSegment.finalX, actualSegment.initY, actualSegment.finalLayer};
+                        }
+                        
+                        segment0 = {segment.initX, segment.initY, segment.initLayer,
+                                    segment.finalX, segment.initY + newSegsLen, segment.finalLayer};
+                        
+                        via0 = {segment0.finalX, segment0.finalY, segment0.initLayer,
+                                segment0.finalX, segment0.finalY, segment0.initLayer + 1};
+                        
+                        via1 = {via0.finalX, via0.finalY, via0.finalLayer,
+                                via0.finalX, via0.finalY, via0.finalLayer + 1};
+                        
+                        segment1 = {via1.finalX, via1.finalY, via1.finalLayer,
+                                    via1.finalX, via1.finalY + newSegsLen, via1.finalLayer};
+                        
+                        via2 = {segment1.finalX, segment1.finalY, segment1.finalLayer,
+                                segment1.finalX, segment1.finalY, segment1.finalLayer - 1};
+
+                        via3 = {via2.finalX, via2.finalY, via2.finalLayer,
+                                via2.finalX, via2.finalY, via2.finalLayer - 1};
+
+                        segment2 = {via3.finalX, via3.finalY, via3.finalLayer,
+                                    via3.finalX, segment.finalY, via3.finalLayer};
+                } else if (actualSegment.initY == actualSegment.finalY) { // Horizontal segment
+                        horizontal = true;
+                        if (actualSegment.finalX > actualSegment.initX) {
+                                segment = actualSegment;
+                        } else {
+                                segment = {actualSegment.finalX, actualSegment.initY, actualSegment.initLayer,
+                                           actualSegment.initX, actualSegment.finalY, actualSegment.finalLayer};
+                        }
+                    
+                        segment0 = {segment.initX, segment.initY, segment.initLayer,
+                                    segment.initX + newSegsLen, segment.initY, segment.finalLayer};
+                        
+                        via0 = {segment0.finalX, segment0.finalY, segment0.initLayer,
+                                segment0.finalX, segment0.finalY, segment0.initLayer + 1};
+                        
+                        via1 = {via0.finalX, via0.finalY, via0.finalLayer,
+                                via0.finalX, via0.finalY, via0.finalLayer + 1};
+                        
+                        segment1 = {via1.finalX, via1.finalY, via1.finalLayer,
+                                    via1.finalX + newSegsLen, via1.finalY, via1.finalLayer};
+                        
+                        via2 = {segment1.finalX, segment1.finalY, segment1.finalLayer,
+                                segment1.finalX, segment1.finalY, segment1.finalLayer - 1};
+
+                        via3 = {via2.finalX, via2.finalY, via2.finalLayer,
+                                via2.finalX, via2.finalY, via2.finalLayer - 1};
+
+                        segment2 = {via3.finalX, via3.finalY, via3.finalLayer,
+                                    segment.finalX, via3.finalY, via3.finalLayer};
+                } else {
+                        std::cout << "[ERROR] Invalid segment\n";
+                        std::exit(1);
+                }
+                
+                long segmentsTotalLen = std::abs(segment0.finalX - segment0.initX)
+                                 + std::abs(segment0.finalY - segment0.initY)
+                                 + std::abs(segment1.finalX - segment1.initX)
+                                 + std::abs(segment1.finalY - segment1.initY)
+                                 + std::abs(segment2.finalX - segment2.initX)
+                                 + std::abs(segment2.finalY - segment2.initY);
+                
+                if (segmentsTotalLen != segmentLength) {
+                        std::cout << "[ERROR] New segments does not sum the original segment length\n";
+                        std::cout << "    Original length: " << segmentLength << "; new segments length: " << segmentsTotalLen << "\n";
+                        std::cout << "    Horizontal: " << horizontal << "\n";
+                        return;
+                }
+                
+                newSegments.push_back(segment0);
+                newSegments.push_back(via0);
+                newSegments.push_back(via1);
+                newSegments.push_back(segment1);
+                newSegments.push_back(via2);
+                newSegments.push_back(via3);
+                newSegments.push_back(segment2);
+        } else {
+                std::cout << "[TODO] Handle segments more than 3 times greater than the limit\n";
+        }
+}
+
+void FastRouteKernel::fixLongSegments() {
+        long maxLength = 80000; // TODO: compute max length for each gate of a net
+        addRemainingGuides(_result);
+        for (FastRoute::NET &netRoute : _result) {
+                mergeSegments(netRoute);
+        }
+        
+        int fixedSegs = 0;
+        for (FastRoute::NET &netRoute : _result) {
+                ROUTE segment;
+                int cnt = 0;
+                for (ROUTE seg : netRoute.route) {
+                        long segLen = std::abs(seg.finalX - seg.initX)
+                                    + std::abs(seg.finalY - seg.initY);
+                        if (segLen >= maxLength) {
+                                std::cout << "Net " << netRoute.name << " routing is being modified\n";
+                                segment = seg;
+                                netRoute.route.erase(netRoute.route.begin() + cnt);
+                                std::vector<ROUTE> newSegs;
+                                breakSegment(segment, maxLength, newSegs);
+                                netRoute.route.insert(netRoute.route.begin() + cnt, newSegs.begin(), newSegs.end());
+                                fixedSegs++;
+                        }
+                        cnt++;
+                }
+        }
+        
+        std::cout << " > ----#Fixed segments: " << fixedSegs << "\n";
 }
 
 }
