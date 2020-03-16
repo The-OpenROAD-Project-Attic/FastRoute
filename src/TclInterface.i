@@ -71,6 +71,8 @@ extern void set_verbose(int v);
 
 extern void set_overflow_iterations(int iterations);
 
+extern void set_max_routing_length(float maxLength);
+
 extern void start_fastroute();
 
 extern void run_fastroute();

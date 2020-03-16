@@ -113,6 +113,10 @@ void set_overflow_iterations(int iterations) {
         fastRouteKernel->setOverflowIterations(iterations);
 }
 
+void set_max_routing_length(float maxLength) {
+	fastRouteKernel->setMaxLength(maxLength);
+}
+
 void start_fastroute() {
         fastRouteKernel->startFastRoute();
 }

@@ -58,18 +58,23 @@ private:
         std::map<int, std::vector<Box>> _boxesPerLayer;
         std::string _netName;
         bool _isPort;
+        int _type;
         
         void sortLayers() { std::sort(_layers.begin(), _layers.end()); }
         
 public:
+        static const int SINK = 0;
+        static const int SOURCE = 1;
+        static const int OTHER = 2;
+        
         Pin() = default;
         Pin(const std::string& name, Coordinate position,
             const std::vector<int> layers,
             const std::map<int, std::vector<Box>>& boxesPerLayer,
-            const std::string& netName, bool isPort)
+            const std::string& netName, bool isPort, int type)
             : _name(name), _position(position), _layers(layers),
             _boxesPerLayer(boxesPerLayer), _netName(netName),
-            _isPort(isPort) { sortLayers(); }
+            _isPort(isPort), _type(type) { sortLayers(); }
         
         std::string getName() const { return _name; }
         Coordinate getPosition() const { return _position; }
@@ -79,6 +84,7 @@ public:
         std::map<int, std::vector<Box>> getBoxes() const { return _boxesPerLayer; }
         std::string getNetName() const { return _netName; }
         bool isPort() const { return _isPort; }
+        int getType() const { return _type; }
 };
 
 }

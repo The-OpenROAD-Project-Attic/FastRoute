@@ -54,6 +54,9 @@
 #include "Netlist.h"
 #include "RoutingLayer.h"
 #include "RoutingTracks.h"
+#include "Node.h"
+#include "Segment.h"
+#include "SteinerTree.h"
 #include "../include/FastRoute.h"
 
 namespace FastRoute {
@@ -79,6 +82,8 @@ private:
         unsigned _dbId;
         const int _selectedMetal = 3;
         int _overflowIterations = 50;
+	float _maxLength = -1;
+	long _maxRoutingLength = -1;
         
         // Layer adjustment variables
         std::vector<int> _layersToAdjust;
@@ -126,6 +131,14 @@ private:
         
         // check functions
         void checkPinPlacement();
+        void checkSinksAndSource();
+        
+        // antenna functions
+        void mergeSegments(FastRoute::NET &net);
+        void breakSegment(ROUTE segment, long maxLength, std::vector<ROUTE> &newSegments);
+        void fixLongSegments();
+        SteinerTree createSteinerTree(std::vector<ROUTE> route, std::vector<Pin> pins);
+	bool checkSteinerTree(SteinerTree sTree);
 
 public:
 	FastRouteKernel();
@@ -165,14 +178,10 @@ public:
         void setVerbose(const int v) { _verbose = v; }
         
         void setOverflowIterations(int iterations) { _overflowIterations = iterations; }
+	void setMaxLength (float maxLength) { _maxLength = maxLength; }
         
         void printGrid();
         void printHeader();
-        
-        // antenna functions
-        void mergeSegments(FastRoute::NET &net);
-        void breakSegment(ROUTE segment, long maxLength, std::vector<ROUTE> &newSegments);
-        void fixLongSegments();
         
         // flow functions
         void writeGuides();

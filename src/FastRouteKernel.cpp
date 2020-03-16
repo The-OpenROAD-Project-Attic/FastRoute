@@ -175,6 +175,7 @@ void FastRouteKernel::startFastRoute() {
         std::cout << " > ---- Global adjustment: " << _adjustment << "\n";
         std::cout << " > ---- Unidirectional routing: " << _unidirectionalRoute << "\n";
         std::cout << " > ---- Clock net routing: " << _clockNetRouting << "\n";
+	std::cout << " > ---- Max routing length: " << _maxLength << "um\n";
         
         std::cout << " > Initializing grid...\n";
         initGrid();
@@ -230,6 +231,10 @@ void FastRouteKernel::startFastRoute() {
                 computeRegionAdjustments(lowerLeft, upperRight, regionsLayer[i], regionsReductionPercentage[i]);
         }
 
+	if (_maxLength != -1) {
+		_maxRoutingLength = _maxLength * _grid.getDatabaseUnit();
+	}
+
         _fastRoute.initAuxVar();
 }
 
@@ -239,8 +244,12 @@ void FastRouteKernel::runFastRoute() {
         std::cout << " > Running FastRoute... Done!\n";
         
         std::cout << " > Fixing long segments...\n";
-        fixLongSegments();
-        std::cout << " > Fixing long segments... Done!\n";
+        if (_maxRoutingLength == -1) {
+		std::cout << "[WARNING] Max routing length not defined. Skipping...\n";
+	} else {
+		fixLongSegments();
+        	std::cout << " > Fixing long segments... Done!\n";
+	}
 }
 
 void FastRouteKernel::initGrid() {        
@@ -297,6 +306,10 @@ void FastRouteKernel::initializeNets() {
         std::cout << " > ----Checking pin placement...\n";
         checkPinPlacement();
         std::cout << " > ----Checking pin placement... Done!\n";
+        
+        std::cout << " > ----Checking sinks/source...\n";
+        checkSinksAndSource();
+        std::cout << " > ----Checking sinks/source... Done!\n";
         
         int idx = 0;
         _fastRoute.setNumberNets(_netlist.getNetCount());
@@ -1139,6 +1152,35 @@ void FastRouteKernel::checkPinPlacement() {
         }
 }
 
+void FastRouteKernel::checkSinksAndSource() {
+        bool invalid = false;
+        
+        for (Net net : _netlist.getNets()) {
+                if (net.getNumPins() < 2) {
+                        continue;
+                }
+                int sourceCnt = 0;
+                int sinkCnt = 0;
+                for (Pin pin : net.getPins()) {
+                        if (pin.getType() == Pin::SOURCE) {
+                                sourceCnt++;
+                        } else if (pin.getType() == Pin::SINK) {
+                                sinkCnt++;
+                        }
+                }
+                
+                if (net.getNumPins() != (sinkCnt+sourceCnt) || sourceCnt != 1) {
+                        invalid = true;
+                        std::cout << "[ERROR] Net " << net.getName() << " has invalid sinks/source distribution\n";
+                        std::cout << "    #Sinks: " << sinkCnt << "; #sources: " << sourceCnt << "\n";
+                }
+        }
+        
+        if (invalid) {
+                std::exit(1);
+        }
+}
+
 void FastRouteKernel::mergeSegments(FastRoute::NET &net) {
         std::vector<ROUTE> segments = net.route;
         std::vector<ROUTE> finalSegments;
@@ -1146,7 +1188,6 @@ void FastRouteKernel::mergeSegments(FastRoute::NET &net) {
                 std::cout << " > [ERROR] Segments vector is empty!!!\n";
                 std::exit(1);
         }
-        finalSegments.push_back(segments[0]);
         
         int i = 0;
         while (i < segments.size() - 1) {
@@ -1285,33 +1326,218 @@ void FastRouteKernel::breakSegment(ROUTE actualSegment, long maxLength, std::vec
 }
 
 void FastRouteKernel::fixLongSegments() {
-        long maxLength = 80000; // TODO: compute max length for each gate of a net
-        addRemainingGuides(_result);
+	int fixedSegs = 0;
+
+	addRemainingGuides(_result);
         for (FastRoute::NET &netRoute : _result) {
                 mergeSegments(netRoute);
-        }
-        
-        int fixedSegs = 0;
-        for (FastRoute::NET &netRoute : _result) {
-                ROUTE segment;
-                int cnt = 0;
-                for (ROUTE seg : netRoute.route) {
-                        long segLen = std::abs(seg.finalX - seg.initX)
+		bool possibleViolation = false;
+		for (ROUTE seg : netRoute.route) {
+			long segLen = std::abs(seg.finalX - seg.initX)
                                     + std::abs(seg.finalY - seg.initY);
-                        if (segLen >= maxLength) {
-                                std::cout << "Net " << netRoute.name << " routing is being modified\n";
-                                segment = seg;
-                                netRoute.route.erase(netRoute.route.begin() + cnt);
-                                std::vector<ROUTE> newSegs;
-                                breakSegment(segment, maxLength, newSegs);
-                                netRoute.route.insert(netRoute.route.begin() + cnt, newSegs.begin(), newSegs.end());
-                                fixedSegs++;
-                        }
-                        cnt++;
-                }
+
+			if (segLen >= _maxRoutingLength) {
+				possibleViolation = true;
+			}
+		}
+
+		if (!possibleViolation)
+			continue;
+
+                SteinerTree sTree;
+                Net net = _netlist.getNetByName(netRoute.name);
+                std::vector<Pin> pins = net.getPins();
+                std::vector<ROUTE> route = netRoute.route;
+                sTree = createSteinerTree(route, pins);
+		if (checkSteinerTree(sTree) != true) {
+		       	std::cout << "Invalid Steiner tree for net " << netRoute.name << "\n";
+			continue;	
+		}
+ 
+	        std::vector<Segment> segsToFix;
+		
+		std::vector<Node> sinks = sTree.getSinks();
+		for (Node sink : sinks) {
+			std::vector<Segment> segments = sTree.getNodeSegments(sink);
+			Segment seg = segments[0];
+			while (seg.getParent() != -1) {
+				int index = seg.getParent();
+				long segLen = std::abs(seg.getLastNode().getPosition().getX() - seg.getFirstNode().getPosition().getX())
+					    + std::abs(seg.getLastNode().getPosition().getY() - seg.getFirstNode().getPosition().getY());
+
+				if (segLen >= _maxRoutingLength) {
+					segsToFix.push_back(seg);
+				}
+				seg = sTree.getSegmentByIndex(index);
+			}
+		}
+ 
+                ROUTE segment;
+                for (Segment s : segsToFix) {
+			int cnt = 0;
+			for (ROUTE seg : netRoute.route) {
+        	                if (s.getLastNode().getPosition().getX() == seg.finalX && s.getLastNode().getPosition().getY() == seg.finalY &&
+				    s.getFirstNode().getPosition().getX() == seg.initX && s.getFirstNode().getPosition().getY() == seg.initY &&
+				    s.getFirstNode().getLayer() == seg.initLayer && s.getLastNode().getLayer() == seg.finalLayer) {
+	                                std::cout << " > --Net " << netRoute.name << " routing was modified\n";
+                                	segment = seg;
+                        	        netRoute.route.erase(netRoute.route.begin() + cnt);
+                	                std::vector<ROUTE> newSegs;
+        	                        breakSegment(segment, _maxRoutingLength, newSegs);
+	                                netRoute.route.insert(netRoute.route.begin() + cnt, newSegs.begin(), newSegs.end());
+                               		fixedSegs++;
+                        	}
+                        	cnt++;
+                	}
+		}
         }
         
-        std::cout << " > ----#Fixed segments: " << fixedSegs << "\n";
+        std::cout << " > ----#Modified segments: " << fixedSegs << "\n";
+}
+
+SteinerTree FastRouteKernel::createSteinerTree(std::vector<ROUTE> route, std::vector<Pin> pins) {
+        SteinerTree sTree;
+        
+        // Add pin nodes
+        for (Pin pin : pins) {
+                Coordinate pinPosition;
+                int topLayer = pin.getTopLayer();
+
+                std::vector<Box> pinBoxes = pin.getBoxes()[topLayer];
+                std::vector<Coordinate> pinPositionsOnGrid;
+                Coordinate posOnGrid;
+
+                for (Box pinBox : pinBoxes) {
+                        posOnGrid = _grid.getPositionOnGrid(pinBox.getMiddle());
+                        pinPositionsOnGrid.push_back(posOnGrid);
+                }
+
+                int votes = -1;
+
+                for (Coordinate pos : pinPositionsOnGrid) {
+                        int equals = std::count(pinPositionsOnGrid.begin(),
+                                                pinPositionsOnGrid.end(),
+                                                pos);
+                        if (equals > votes) {
+                                pinPosition = pos;
+                                votes = equals;
+                        }
+                }
+                
+                Node node;
+                if (pin.getType() == Pin::SINK) {
+                        node = Node(pinPosition, pin.getTopLayer(), SINK);
+                } else if (pin.getType() == Pin::SOURCE) {
+                        node = Node(pinPosition, pin.getTopLayer(), SOURCE);
+                } else {
+                        std::cout << "[ERROR] Pin is not assigned with type\n";
+                }
+                
+                sTree.addNode(node);
+        }
+        
+        int indexCnt = 0;
+        
+        // Add steiner nodes and segments
+        for (ROUTE wire : route) {
+                Segment segment;
+                Node node0 = Node(wire.initX, wire.initY, wire.initLayer, STEINER);
+                Node node1 = Node(wire.finalX, wire.finalY, wire.finalLayer, STEINER);
+                
+                Node firstNode, lastNode;
+                if (!sTree.getNodeIfExists(node0, firstNode)) {
+                        firstNode = node0;
+                }
+                
+                if (!sTree.getNodeIfExists(node1, lastNode)) {
+                        lastNode = node1;
+                }
+                
+                if (firstNode != node0 || lastNode != node1 ||
+                    firstNode.getType() == INVALID || lastNode.getType() == INVALID) {
+                        std::cout << "[ERROR] Fail when creating steiner nodes\n";
+                }
+                
+                segment = Segment(indexCnt, firstNode, lastNode, -1);
+                sTree.addSegment(segment);
+                indexCnt++;
+        }       
+
+        // Set parents for each segment
+        std::vector<Segment> parents;
+        std::vector<Node> parentsNodes;
+        int numSegs = sTree.getSegments().size();
+        Node source = sTree.getSource();
+        int parentIdx = -1;
+        
+        int counter = 0;
+
+	while (parents.size() < numSegs) {
+		std::vector<Segment> segsAttachedToSource = sTree.getNodeSegments(source);
+		int newSegsAttached = 0;
+		for (Segment & seg : segsAttachedToSource) {
+			bool parentExists = false;
+			for (Segment parent : parents) {
+				if (parent == seg) {
+					parentExists = true;
+				}
+			}
+
+			if (parentExists) {
+				continue;
+			}
+			
+			newSegsAttached++;
+			seg.setParent(parentIdx);
+			parents.push_back(seg);
+			parentsNodes.push_back(source);
+		}
+
+		parentIdx = parents[counter].getIndex();
+		if (parentsNodes[counter] == parents[counter].getFirstNode()) {
+			source = parents[counter].getLastNode();
+		} else if (parentsNodes[counter] == parents[counter].getLastNode()) {
+			source = parents[counter].getFirstNode();
+		} else if (newSegsAttached != 0) {
+			std::cout << "[ERROR]\n";
+			exit(1);
+		}
+		
+		counter++;
+		if (counter > numSegs) {
+			std::cout << "[WARNING] Fail when create Steiner tree\n";
+			sTree.setSegments(parents);
+			return sTree;
+		}
+	}
+
+	sTree.setSegments(parents);
+
+        return sTree;
+}
+
+bool FastRouteKernel::checkSteinerTree(SteinerTree sTree) {
+	std::vector<Node> sinks = sTree.getSinks();
+	for (Node sink : sinks) {
+		std::vector<Segment> segments = sTree.getNodeSegments(sink);
+		if (segments.size() != 1) {
+			return false;
+		}
+
+		int cnt = 0;
+		Segment seg = segments[0];
+		while (seg.getParent() != -1) {
+			if (cnt > sTree.getSegments().size()) {
+				return false;
+			}
+			int index = seg.getParent();
+			seg = sTree.getSegmentByIndex(index);
+
+			cnt++;
+		}
+	}
+
+	return true;
 }
 
 }

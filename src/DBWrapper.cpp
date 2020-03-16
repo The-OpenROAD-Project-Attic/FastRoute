@@ -107,7 +107,7 @@ void DBWrapper::initGrid(int maxLayer) {
         *_grid = Grid(lowerLeftX, lowerLeftY, coreBBox->xMax(), coreBBox->yMax(),
                      tileWidth, tileHeight, xGrids, yGrids, perfectRegularX,
                      perfectRegularY, numLayers, genericVector, genericVector,
-                     genericVector, genericVector, genericMap);
+                     genericVector, genericVector, genericMap, tech->getLefUnits());
 }
 
 void DBWrapper::initRoutingLayers(std::vector<RoutingLayer>& routingLayers, int maxLayer) {
@@ -350,6 +350,7 @@ void DBWrapper::initNetlist() {
                         std::string pinName;
                         std::vector<int> pinLayers;
                         std::map<int, std::vector<Box>> pinBoxes;
+                        int type;
                         
                         odb::dbMTerm* mTerm = currITerm->getMTerm();
                         odb::dbMaster* master = mTerm->getMaster();
@@ -367,6 +368,12 @@ void DBWrapper::initNetlist() {
                         std::string instName = currITerm->getInst()->getConstName();
                         pinName = mTerm->getConstName();
                         pinName = instName + ":" + pinName;
+                        
+                        if (mTerm->getIoType() == odb::dbIoType::INPUT) {
+                                type = Pin::SINK;
+                        } else if (mTerm->getIoType() == odb::dbIoType::OUTPUT) {
+                                type = Pin::SOURCE;
+                        }
                         
                         odb::dbSet<odb::dbMPin> mTermPins = mTerm->getMPins();
                         odb::dbSet<odb::dbMPin>::iterator pinIter;
@@ -412,7 +419,7 @@ void DBWrapper::initNetlist() {
                                 }
                                 
                                 Coordinate pinPos = Coordinate(pX, pY);
-                                Pin pin = Pin(pinName, pinPos, pinLayers, pinBoxes, netName, false);
+                                Pin pin = Pin(pinName, pinPos, pinLayers, pinBoxes, netName, false, type);
                                 netPins.push_back(pin);
                         }
                 }
@@ -429,6 +436,7 @@ void DBWrapper::initNetlist() {
                         int posX, posY;
                         odb::dbBTerm* currBTerm = *bIter;
                         std::string pinName;
+                        int type;
                         
                         currBTerm->getFirstPinLocation(posX, posY);
                         
@@ -438,6 +446,12 @@ void DBWrapper::initNetlist() {
                         pinName = currBTerm->getConstName();
                         odb::dbSet<odb::dbBPin> bTermPins = currBTerm->getBPins();
                         odb::dbSet<odb::dbBPin>::iterator pinIter;
+                        
+                        if (currBTerm->getIoType() == odb::dbIoType::INPUT) {
+                                type = Pin::SOURCE;
+                        } else if (currBTerm->getIoType() == odb::dbIoType::OUTPUT) {
+                                type = Pin::SINK;
+                        }
                         
                         for (pinIter = bTermPins.begin(); pinIter != bTermPins.end(); pinIter++) {
                                 Coordinate lowerBound;
@@ -467,7 +481,7 @@ void DBWrapper::initNetlist() {
                         }
                         
                         Coordinate pinPos = Coordinate(posX, posY);
-                        Pin pin = Pin(pinName, pinPos, pinLayers, pinBoxes, netName, true);
+                        Pin pin = Pin(pinName, pinPos, pinLayers, pinBoxes, netName, true, type);
                         netPins.push_back(pin);
                 }
                 _netlist->addNet(netName, signalType, netPins);

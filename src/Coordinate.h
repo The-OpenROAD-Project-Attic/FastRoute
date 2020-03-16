@@ -56,6 +56,10 @@ public:
                 return (_x == coord._x && _y == coord._y);
         }
         
+        bool operator!=(const Coordinate& coord) {
+                return (_x != coord._x || _y != coord._y);
+        }
+        
         void setX(const DBU x) { _x = x; }
         void setY(const DBU y) { _y = y; }
         DBU getX() const { return _x; }
