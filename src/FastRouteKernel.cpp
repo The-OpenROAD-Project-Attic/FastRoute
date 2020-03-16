@@ -757,7 +757,7 @@ void FastRouteKernel::computeObstaclesAdjustments() {
                 bool direction = routingLayer.getPreferredDirection();
                 
                 std::cout << " > ----Processing " << layerObstacles.size() << 
-                             " obstacles in Metal" << layer << "\n";
+                             " obstacles in layer " << layer << "\n";
                 
                 int trackSpace = _grid.getMinWidths()[layer-1];
                 
