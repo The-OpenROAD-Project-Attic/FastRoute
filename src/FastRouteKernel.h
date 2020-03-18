@@ -187,7 +187,6 @@ public:
         
         // flow functions
         void writeGuides();
-	void writeEst();
         void startFastRoute();
         void runFastRoute();
         int run();
