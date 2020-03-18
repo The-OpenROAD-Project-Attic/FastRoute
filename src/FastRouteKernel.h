@@ -134,8 +134,10 @@ private:
         void checkSinksAndSource();
         
         // antenna functions
+	bool segmentsOverlaps(ROUTE seg0, ROUTE seg1, ROUTE &newSeg);
         void mergeSegments(FastRoute::NET &net);
-        void breakSegment(ROUTE segment, long maxLength, std::vector<ROUTE> &newSegments);
+	bool checkResource(ROUTE segment);
+        bool breakSegment(ROUTE segment, long maxLength, std::vector<ROUTE> &newSegments);
         void fixLongSegments();
         SteinerTree createSteinerTree(std::vector<ROUTE> route, std::vector<Pin> pins);
 	bool checkSteinerTree(SteinerTree sTree);
@@ -185,6 +187,7 @@ public:
         
         // flow functions
         void writeGuides();
+	void writeEst();
         void startFastRoute();
         void runFastRoute();
         int run();

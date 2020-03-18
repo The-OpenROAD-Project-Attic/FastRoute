@@ -86,7 +86,8 @@ class FT {
         std::vector<NET> getResults();
 
         int getEdgeCapacity(long x1, long y1, int l1, long x2, long y2, int l2);
-        std::map<std::string, std::vector<PIN>> getNets();
+	int getEdgeCurrentResource(long x1, long y1, int l1, long x2, long y2, int l2);
+	std::map<std::string, std::vector<PIN>> getNets();
         void setMaxNetDegree(int);
         void usePdRev();
         void setAlpha(float a);

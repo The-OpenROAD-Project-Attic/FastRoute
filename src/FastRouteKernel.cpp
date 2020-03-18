@@ -838,7 +838,8 @@ void FastRouteKernel::writeGuides() {
         
         std::cout << " > Num routed nets: " << _result.size() << "\n";
         int finalLayer;
-        for (FastRoute::NET netRoute : _result) {
+        for (FastRoute::NET &netRoute : _result) {
+                mergeSegments(netRoute);
                 guideFile << netRoute.name << "\n";
                 guideFile << "(\n";
                 std::vector<Box> guideBox;
@@ -921,6 +922,7 @@ void FastRouteKernel::writeGuides() {
 
         guideFile.close();
         std::cout << " > Writing guides... Done!\n";
+	writeEst();
 }
 
 void FastRouteKernel::printGrid() {
@@ -1191,6 +1193,7 @@ void FastRouteKernel::mergeSegments(FastRoute::NET &net) {
         
         int i = 0;
         while (i < segments.size() - 1) {
+		ROUTE newSeg = segments[i];
                 ROUTE segment0 = segments[i];
                 ROUTE segment1 = segments[i+1];
                 
@@ -1206,12 +1209,10 @@ void FastRouteKernel::mergeSegments(FastRoute::NET &net) {
                         continue;
                 }
                 
-                if (segment0.finalX == segment1.initX && segment0.finalY == segment1.initY) { // if segment 0 connects to the end of segment 1
-                        segment0.finalX = segment1.finalX;
-                        segment0.finalY = segment1.finalY;
-                        segments[i] = segment0;
+                if (segmentsOverlaps(segment0, segment1, newSeg)) { // if segment 0 connects to the end of segment 1		
+                        segments[i] = newSeg;
                         segments.erase(segments.begin() + i + 1);
-                } else {
+		} else {
                         i++;
                 }
         }
@@ -1219,7 +1220,69 @@ void FastRouteKernel::mergeSegments(FastRoute::NET &net) {
         net.route = segments;
 }
 
-void FastRouteKernel::breakSegment(ROUTE actualSegment, long maxLength, std::vector<ROUTE> &newSegments) {
+bool FastRouteKernel::segmentsOverlaps(ROUTE seg0, ROUTE seg1, ROUTE &newSeg) {
+	long initX0 = std::min(seg0.initX, seg0.finalX);
+	long initY0 = std::min(seg0.initY, seg0.finalY);
+	long finalX0 = std::max(seg0.finalX, seg0.initX);
+	long finalY0 = std::max(seg0.finalY, seg0.initY);
+
+	long initX1 = std::min(seg1.initX, seg1.finalX);
+	long initY1 = std::min(seg1.initY, seg1.finalY);
+	long finalX1 = std::max(seg1.finalX, seg1.initX);
+	long finalY1 = std::max(seg1.finalY, seg1.initY);
+
+	if (initX0 == finalX0 && initX1 == finalX1 && initX0 == initX1) { // vertical segments aligned
+		if ((initY0 >= initY1 && initY0 <= finalY1) || 
+		    (finalY0 >= initY1 && finalY0 <= finalY1)) {
+			newSeg.initX = std::min(initX0, initX1);
+			newSeg.initY = std::min(initY0, initY1);
+			newSeg.finalX = std::max(finalX0, finalX1);
+                        newSeg.finalY = std::max(finalY0, finalY1);
+			return true;
+		}
+	} else if (initY0 == finalY0 && initY1 == finalY1 && initY0 == initY1) { // horizontal segments aligned
+		if ((initX0 >= initX1 && initX0 <= finalX1) || 
+		    (finalX0 >= initX1 && finalX0 <= finalX1)) {
+			newSeg.initX = std::min(initX0, initX1);
+			newSeg.initY = std::min(initY0, initY1);
+			newSeg.finalX = std::max(finalX0, finalX1);
+                        newSeg.finalY = std::max(finalY0, finalY1);
+			return true;
+		}
+	}
+
+	return false;
+}
+
+bool FastRouteKernel::checkResource(ROUTE segment) {
+	int x1 = (int)((segment.initX - _grid.getLowerLeftX()) / _grid.getTileWidth());
+	int y1 = (int)((segment.initY - _grid.getLowerLeftY()) / _grid.getTileHeight());
+	int l1 = segment.initLayer;
+
+	int x2 = (int)((segment.finalX - _grid.getLowerLeftX()) / _grid.getTileWidth());
+	int y2 = (int)((segment.finalY - _grid.getLowerLeftY()) / _grid.getTileHeight());
+	int l2 = segment.finalLayer;
+
+	if (y1 == y2) { // horizontal segment
+		for (int i = x1; i < x2-1; i++) {
+			int edgeResource = _fastRoute.getEdgeCurrentResource(i, y1, l1, i+1, y2, l2);
+			if (edgeResource == 0) {
+				return false;
+			}
+		}
+	} else if (x1 == x2) {
+		for (int i = y1; i < y2-1; i++) {
+			int edgeResource = _fastRoute.getEdgeCurrentResource(x1, i, l1, x2, i+1, l2);
+			if (edgeResource == 0) {
+				return false;
+			}
+		}
+	}
+	
+	return true;
+}
+
+bool FastRouteKernel::breakSegment(ROUTE actualSegment, long maxLength, std::vector<ROUTE> &newSegments) {
         long segmentLength = std::abs(actualSegment.finalX - actualSegment.initX)
                            + std::abs(actualSegment.finalY - actualSegment.initY);
         
@@ -1227,9 +1290,14 @@ void FastRouteKernel::breakSegment(ROUTE actualSegment, long maxLength, std::vec
         
         if (segLenViolation < 1) {
                 std::cout << "[WARNING] Segment does not violate max length\n";
-                return;
+                return false;
         }
         
+	if (actualSegment.finalLayer + 2 > _maxRoutingLayer) {
+	//	std::cout << "[WARNING] Bridge cannot be inserted. No upper layer available\n";
+		return false;
+	}
+
         if (segLenViolation <= 3) {
                 int newSegsLen = segmentLength/3;
                 ROUTE segment;
@@ -1298,7 +1366,12 @@ void FastRouteKernel::breakSegment(ROUTE actualSegment, long maxLength, std::vec
                         std::cout << "[ERROR] Invalid segment\n";
                         std::exit(1);
                 }
-                
+               
+		if (!checkResource(segment1)) {
+		//	std::cout << "[WARNING] Unable to create bridge for segment. No available resources\n";
+			return false;
+		}
+
                 long segmentsTotalLen = std::abs(segment0.finalX - segment0.initX)
                                  + std::abs(segment0.finalY - segment0.initY)
                                  + std::abs(segment1.finalX - segment1.initX)
@@ -1310,7 +1383,7 @@ void FastRouteKernel::breakSegment(ROUTE actualSegment, long maxLength, std::vec
                         std::cout << "[ERROR] New segments does not sum the original segment length\n";
                         std::cout << "    Original length: " << segmentLength << "; new segments length: " << segmentsTotalLen << "\n";
                         std::cout << "    Horizontal: " << horizontal << "\n";
-                        return;
+                        return false;
                 }
                 
                 newSegments.push_back(segment0);
@@ -1320,9 +1393,14 @@ void FastRouteKernel::breakSegment(ROUTE actualSegment, long maxLength, std::vec
                 newSegments.push_back(via2);
                 newSegments.push_back(via3);
                 newSegments.push_back(segment2);
+
+		return true;
         } else {
-                std::cout << "[TODO] Handle segments more than 3 times greater than the limit\n";
+//                std::cout << "[TODO] Handle segments more than 3 times greater than the limit\n";
+                return false;
         }
+
+	return false;
 }
 
 void FastRouteKernel::fixLongSegments() {
@@ -1350,7 +1428,7 @@ void FastRouteKernel::fixLongSegments() {
                 std::vector<ROUTE> route = netRoute.route;
                 sTree = createSteinerTree(route, pins);
 		if (checkSteinerTree(sTree) != true) {
-		       	std::cout << "Invalid Steiner tree for net " << netRoute.name << "\n";
+//		       	std::cout << "Invalid Steiner tree for net " << netRoute.name << "\n";
 			continue;	
 		}
  
@@ -1379,11 +1457,14 @@ void FastRouteKernel::fixLongSegments() {
         	                if (s.getLastNode().getPosition().getX() == seg.finalX && s.getLastNode().getPosition().getY() == seg.finalY &&
 				    s.getFirstNode().getPosition().getX() == seg.initX && s.getFirstNode().getPosition().getY() == seg.initY &&
 				    s.getFirstNode().getLayer() == seg.initLayer && s.getLastNode().getLayer() == seg.finalLayer) {
-	                                std::cout << " > --Net " << netRoute.name << " routing was modified\n";
+	                                // std::cout << " > --Net " << netRoute.name << " routing was modified\n";
                                 	segment = seg;
+					std::vector<ROUTE> newSegs;
+					bool success = breakSegment(segment, _maxRoutingLength, newSegs);
+					if (!success) {
+						continue;
+					}
                         	        netRoute.route.erase(netRoute.route.begin() + cnt);
-                	                std::vector<ROUTE> newSegs;
-        	                        breakSegment(segment, _maxRoutingLength, newSegs);
 	                                netRoute.route.insert(netRoute.route.begin() + cnt, newSegs.begin(), newSegs.end());
                                		fixedSegs++;
                         	}
@@ -1505,7 +1586,7 @@ SteinerTree FastRouteKernel::createSteinerTree(std::vector<ROUTE> route, std::ve
 		
 		counter++;
 		if (counter > numSegs) {
-			std::cout << "[WARNING] Fail when create Steiner tree\n";
+		//	std::cout << "[WARNING] Fail when create Steiner tree\n";
 			sTree.setSegments(parents);
 			return sTree;
 		}
@@ -1538,6 +1619,30 @@ bool FastRouteKernel::checkSteinerTree(SteinerTree sTree) {
 	}
 
 	return true;
+}
+
+void FastRouteKernel::writeEst() {
+	        std::cout << " > Writing est file...\n";
+		        std::ofstream estFile;
+			        estFile.open(_outfile + ".est");
+
+				        if (!estFile.is_open()) {
+						                std::cout << "Error in writeFile!" << std::endl;
+								                estFile.close();
+										                std::exit(0);
+												        }
+
+					        for (FastRoute::NET netRoute : _result) {
+							                estFile << netRoute.name << " " << netRoute.id << " " << netRoute.route.size() << "\n";
+									                for (FastRoute::ROUTE route : netRoute.route) {
+												                        estFile << "(" << route.initX << "," << route.initY << "," << route.initLayer << ")-(" << route.finalX << "," << route.finalY << "," << route.finalLayer << ")\n";
+															                }
+		estFile << "!\n";
+	}
+
+	estFile.close();
+						        
+	std::cout << " > Writing est file... Done!\n";
 }
 
 }
