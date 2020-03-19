@@ -121,6 +121,17 @@ void FT::setGridsAndLayers(int x, int y, int nLayers) {
         for (int i = 0; i < numLayers; i++) {
                 viaLink[i] = new int[MAXLEN];
         }
+        
+        costHVH = new float[xGrid];  // Horizontal first Z
+        costVHV = new float[yGrid];  // Vertical first Z
+        costH = new float[yGrid];    // Horizontal segment cost
+        costV = new float[xGrid];    // Vertical segment cost
+        costLR = new float[yGrid];   // Left and right boundary cost
+        costTB = new float[xGrid];   // Top and bottom boundary cost
+
+        costHVHtest = new float[yGrid];  // Vertical first Z
+        costVtest = new float[xGrid];    // Vertical segment cost
+        costTBtest = new float[xGrid];   // Top and bottom boundary cost
 }
 
 void FT::addVCapacity(int verticalCapacity, int layer) {
@@ -430,7 +441,7 @@ void FT::initAuxVar() {
                 parentY3[i] = (short *)calloc(xGrid, sizeof(short));
         }
 
-        pop_heap2 = (Bool *)calloc(yGrid * XRANGE, sizeof(Bool));
+        pop_heap2 = (Bool *)calloc(yGrid * xGrid, sizeof(Bool));
 
         // allocate memory for priority queue
         heap1 = (float **)calloc((yGrid * xGrid), sizeof(float *));

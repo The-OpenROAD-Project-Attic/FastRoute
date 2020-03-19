@@ -729,8 +729,13 @@ int copyGrids(TreeNode *treenodes, int n1, int n2, TreeEdge *treeedges, int edge
 void updateRouteType1(TreeNode *treenodes, int n1, int A1, int A2, int E1x, int E1y, TreeEdge *treeedges, int edge_n1A1, int edge_n1A2) {
         int i, cnt, A1x, A1y, A2x, A2y;
         int cnt_n1A1, cnt_n1A2, E1_pos;
-        int gridsX_n1A1[XRANGE + YRANGE], gridsY_n1A1[XRANGE + YRANGE], gridsX_n1A2[XRANGE + YRANGE], gridsY_n1A2[XRANGE + YRANGE];
+        int *gridsX_n1A1, *gridsY_n1A1, *gridsX_n1A2, *gridsY_n1A2;
 
+        gridsX_n1A1 = new int [yGrid + xGrid];
+        gridsY_n1A1 = new int [yGrid + xGrid];
+        gridsX_n1A2 = new int [yGrid + xGrid];
+        gridsY_n1A2 = new int [yGrid + xGrid];
+        
         A1x = treenodes[A1].x;
         A1y = treenodes[A1].y;
         A2x = treenodes[A2].x;
@@ -841,9 +846,18 @@ void updateRouteType2(TreeNode *treenodes, int n1, int A1, int A2, int C1, int C
         int edge_n1C1, edge_n1C2, edge_A1A2;
         int cnt_n1A1, cnt_n1A2, cnt_C1C2, E1_pos;
         int len_A1A2, len_n1C1, len_n1C2;
-        int gridsX_n1A1[XRANGE + YRANGE], gridsY_n1A1[XRANGE + YRANGE];
-        int gridsX_n1A2[XRANGE + YRANGE], gridsY_n1A2[XRANGE + YRANGE];
-        int gridsX_C1C2[XRANGE + YRANGE], gridsY_C1C2[XRANGE + YRANGE];
+        int *gridsX_n1A1, *gridsY_n1A1;
+        int *gridsX_n1A2, *gridsY_n1A2;
+        int *gridsX_C1C2, *gridsY_C1C2;
+        
+        gridsX_n1A1 = new int [yGrid + xGrid];
+        gridsY_n1A1 = new int [yGrid + xGrid];
+        
+        gridsX_n1A2 = new int [yGrid + xGrid];
+        gridsY_n1A2 = new int [yGrid + xGrid];
+        
+        gridsX_C1C2 = new int [yGrid + xGrid];
+        gridsY_C1C2 = new int [yGrid + xGrid];
 
         A1x = treenodes[A1].x;
         A1y = treenodes[A1].y;
@@ -1015,13 +1029,18 @@ void mazeRouteMSMD(int iter, int expand, float costHeight, int ripup_threshold, 
         Bool hypered, enter;
         int i, j, deg, edgeID, n1, n2, n1x, n1y, n2x, n2y, ymin, ymax, xmin, xmax, curX, curY, crossX, crossY, tmpX, tmpY, tmpi, min_x, min_y, num_edges;
         int regionX1, regionX2, regionY1, regionY2;
-        int heapLen1, heapLen2, ind, ind1, tmpind, gridsX[XRANGE], gridsY[XRANGE], tmp_gridsX[XRANGE], tmp_gridsY[XRANGE];
+        int heapLen1, heapLen2, ind, ind1, tmpind, *gridsX, *gridsY, *tmp_gridsX, *tmp_gridsY;
         int endpt1, endpt2, A1, A2, B1, B2, C1, C2, D1, D2, cnt, cnt_n1n2;
         int edge_n1n2, edge_n1A1, edge_n1A2, edge_n1C1, edge_n1C2, edge_A1A2, edge_C1C2;
         int edge_n2B1, edge_n2B2, edge_n2D1, edge_n2D2, edge_B1B2, edge_D1D2;
         int E1x, E1y, E2x, E2y;
         int tmp_grid, tmp_cost;
         int preX, preY, origENG, edgeREC;
+        
+        gridsX = new int[xGrid];
+        gridsY = new int[yGrid];
+        tmp_gridsX = new int[xGrid];
+        tmp_gridsY = new int[yGrid];
 
         float tmp, *dtmp;
         TreeEdge *treeedges, *treeedge;
@@ -1063,7 +1082,7 @@ void mazeRouteMSMD(int iter, int expand, float costHeight, int ripup_threshold, 
                 }
         }
 
-        forange = yGrid * XRANGE;
+        forange = yGrid * xGrid;
         for (i = 0; i < forange; i++) {
                 pop_heap2[i] = FALSE;
         }
@@ -1154,8 +1173,8 @@ void mazeRouteMSMD(int iter, int expand, float costHeight, int ripup_threshold, 
                                         while (pop_heap2[ind1] == FALSE)  // stop until the grid position been popped out from both heap1 and heap2
                                         {
                                                 // relax all the adjacent grids within the enlarged region for source subtree
-                                                curX = ind1 % XRANGE;
-                                                curY = ind1 / XRANGE;
+                                                curX = ind1 % xGrid;
+                                                curY = ind1 / xGrid;
                                                 if (d1[curY][curX] != 0) {
                                                         if (HV[curY][curX]) {
                                                                 preX = parentX1[curY][curX];
@@ -1341,8 +1360,8 @@ void mazeRouteMSMD(int iter, int expand, float costHeight, int ripup_threshold, 
                                         for (i = 0; i < heapLen2; i++)
                                                 pop_heap2[(heap2[i] - (float *)d2)] = FALSE;
 
-                                        crossX = ind1 % XRANGE;
-                                        crossY = ind1 / XRANGE;
+                                        crossX = ind1 % xGrid;
+                                        crossY = ind1 / xGrid;
 
                                         cnt = 0;
                                         curX = crossX;
