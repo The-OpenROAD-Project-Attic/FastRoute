@@ -97,6 +97,9 @@ void FT::setGridsAndLayers(int x, int y, int nLayers) {
         d13D = new int[numLayers*yGrid*xGrid];
         d23D = new short[numLayers*yGrid*xGrid];
         
+        d1 = new float[yGrid*xGrid];
+        d2 = new float[yGrid*xGrid];
+        
         vCapacity3D = new int[numLayers];
         hCapacity3D = new int[numLayers];
         

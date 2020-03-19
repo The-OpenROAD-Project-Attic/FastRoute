@@ -52,8 +52,8 @@ int totalOverflow;  // total # overflow
 int mazeThreshold;  // the wirelen threshold to do maze routing
 Net** nets;
 Edge *h_edges, *v_edges;
-float **d1;
-float **d2;
+float *d1;
+float *d2;
 //float d1[YRANGE][XRANGE];
 //float d2[YRANGE][XRANGE];
 int layerOrientation;

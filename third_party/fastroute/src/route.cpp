@@ -1508,18 +1508,18 @@ void routeLVEnew(int netID, int edgeID, int threshold, int enlarge) {
                         xGrid_1 = xGrid - 1;  // tmp variable to save runtime
 
                         for (j = ymin; j <= ymax; j++) {
-                                d1[j][xmin] = 0;
+                                *(d1 + j*yGrid + xmin) = 0;
                         }
                         // update other columns
                         for (i = xmin; i <= xmax; i++) {
-                                d2[ymin][i] = 0;
+                                *(d1 + ymin*yGrid + i) = 0;
                         }
 
                         for (j = ymin; j <= ymax; j++) {
                                 grid = j * xGrid_1 + xmin;
                                 for (i = xmin; i < xmax; i++) {
                                         tmp = h_costTable[h_edges[grid].red + h_edges[grid].usage];
-                                        d1[j][i + 1] = d1[j][i] + tmp;
+                                        *(d1 + j*yGrid + (i+1)) = *(d1 + j*yGrid + i) + tmp;
                                         grid++;
                                 }
                                 // update the cost of a column of grids by v-edges
@@ -1530,7 +1530,7 @@ void routeLVEnew(int netID, int edgeID, int threshold, int enlarge) {
                                 grid = j * xGrid + xmin;
                                 for (i = xmin; i <= xmax; i++) {
                                         tmp = h_costTable[v_edges[grid].red + v_edges[grid].usage];
-                                        d2[j + 1][i] = d2[j][i] + tmp;
+                                        *(d2 + (j + 1)*yGrid + i) = *(d2 + j*yGrid + i) + tmp;
                                         grid++;
                                 }
                                 // update the cost of a column of grids by v-edges
@@ -1540,10 +1540,10 @@ void routeLVEnew(int netID, int edgeID, int threshold, int enlarge) {
 
                         for (j = ymin; j <= ymax; j++) {
                                 for (i = xmin; i <= xmax; i++) {
-                                        tmp1 = ADIFF(d2[j][x1], d2[y1][x1]) + ADIFF(d1[j][i], d1[j][x1]);  // yfirst for point 1
-                                        tmp2 = ADIFF(d2[j][i], d2[y1][i]) + ADIFF(d1[y1][i], d1[y1][x1]);
-                                        tmp3 = ADIFF(d2[y2][i], d2[j][i]) + ADIFF(d1[y2][i], d1[y2][x2]);
-                                        tmp4 = ADIFF(d2[y2][x2], d2[j][x2]) + ADIFF(d1[j][x2], d1[j][i]);  // xifrst for mid point
+                                        tmp1 = ADIFF(*(d2 + j*yGrid + x1), *(d2 + y1*yGrid + x1)) + ADIFF(*(d1 + j*yGrid + i), *(d1 + j*yGrid + x1));  // yfirst for point 1
+                                        tmp2 = ADIFF(*(d2 + j*yGrid + i), *(d2 + y1*yGrid + i)) + ADIFF(*(d1 + y1*yGrid + i), *(d1 + y1*yGrid + x1));
+                                        tmp3 = ADIFF(*(d2 + y2*yGrid + i), *(d2 + j*yGrid + i)) + ADIFF(*(d1 + y2*yGrid + i), *(d1 + y2*yGrid + x2));
+                                        tmp4 = ADIFF(*(d2 + y2*yGrid + x2), *(d2 + j*yGrid + x2)) + ADIFF(*(d1 + j*yGrid + x2), *(d1 + j*yGrid + i));  // xifrst for mid point
 
                                         tmp = tmp1 + tmp4;
                                         LH1 = FALSE;
