@@ -109,7 +109,7 @@ void DBWrapper::initGrid(int maxLayer) {
         *_grid = Grid(lowerLeftX, lowerLeftY, rect.xMax(), rect.yMax(),
                      tileWidth, tileHeight, xGrids, yGrids, perfectRegularX,
                      perfectRegularY, numLayers, genericVector, genericVector,
-                     genericVector, genericVector, genericMap);
+                     genericVector, genericVector, genericMap, tech->getLefUnits());
 }
 
 void DBWrapper::initRoutingLayers(std::vector<RoutingLayer>& routingLayers, int maxLayer) {

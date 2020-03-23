@@ -67,6 +67,7 @@ private:
         std::vector<int> _horizontalEdgesCapacities;
         std::vector<int> _verticalEdgesCapacities;
         std::map<int, std::vector<Box>> _obstacles;
+        int _databaseUnit;
         
 public:
         Grid () = default;
@@ -80,7 +81,7 @@ public:
              const std::vector<int> minWidths,
              const std::vector<int> horizontalCapacities,
              const std::vector<int> verticalCapacities,
-             const std::map<int, std::vector<Box>> obstacles)
+             const std::map<int, std::vector<Box>> obstacles, int databaseUnit)
             : _lowerLeftX(lowerLeftX), _lowerLeftY(lowerLeftY),
               _upperRightX(upperRightX), _upperRightY(upperRightY),
               _tileWidth(tileWidth), _tileHeight(tileHeight),
@@ -90,7 +91,7 @@ public:
               _numLayers(numLayers), _spacings(spacings), _minWidths(minWidths),
               _horizontalEdgesCapacities(horizontalCapacities),
               _verticalEdgesCapacities(verticalCapacities),
-              _obstacles(obstacles) {}
+              _obstacles(obstacles), _databaseUnit(databaseUnit) {}
         
         typedef struct {
                 int _x;
@@ -122,6 +123,8 @@ public:
         
         std::vector<int> getSpacings() const { return _spacings; }
         std::vector<int> getMinWidths() const { return _minWidths; }
+        
+        int getDatabaseUnit() const { return _databaseUnit; }
         
         void addSpacing(int value, int layer) { _spacings[layer] = value; }
         void addMinWidth(int value, int layer) { _minWidths[layer] = value; }

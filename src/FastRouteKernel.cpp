@@ -243,11 +243,16 @@ void FastRouteKernel::startFastRoute() {
 
 void FastRouteKernel::runFastRoute() {
         std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
+        
         std::cout << " > Running FastRoute...\n";
         _fastRoute.run(_result);
         std::cout << " > Running FastRoute... Done!\n";
+        
+        computeWirelength();
+        
         std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
-        std::cout << " > Elapsed time: " << (std::chrono::duration_cast<std::chrono::microseconds>(end - begin).count()) /1000000.0 << "\n";
+        std::cout << " > ---- Elapsed time: " << (std::chrono::duration_cast<std::chrono::microseconds>(end - begin).count()) /1000000.0 << "\n";
+        std::cout << " > \n";
 }
 
 void FastRouteKernel::initGrid() {        
@@ -839,6 +844,7 @@ void FastRouteKernel::writeGuides() {
         std::cout << " > Num routed nets: " << _result.size() << "\n";
         int finalLayer;
         for (FastRoute::NET netRoute : _result) {
+                mergeSegments(netRoute);
                 guideFile << netRoute.name << "\n";
                 guideFile << "(\n";
                 std::vector<Box> guideBox;
@@ -1150,6 +1156,94 @@ void FastRouteKernel::checkPinPlacement() {
         if (invalid) {
                 std::exit(-1);
         }
+}
+
+void FastRouteKernel::computeWirelength() {
+        DBU totalWirelength = 0;
+        for (FastRoute::NET netRoute : _result) {
+                for (ROUTE route : netRoute.route) {
+                        DBU routeWl = std::abs(route.finalX - route.initX) +
+                                      std::abs(route.finalY - route.initY);
+                        totalWirelength += routeWl;
+
+                        if (routeWl > 0) {
+                                totalWirelength += (_grid.getTileWidth() + _grid.getTileHeight())/2;
+                        }
+                }
+        }
+        std::cout << " > Final report:\n";
+        std::cout << " > ---- Total wirelength: " << (float)totalWirelength/_grid.getDatabaseUnit() << " um\n";
+}
+
+void FastRouteKernel::mergeSegments(FastRoute::NET &net) {
+        std::vector<ROUTE> segments = net.route;
+        std::vector<ROUTE> finalSegments;
+        if (segments.size() < 1) {
+                std::cout << " > [ERROR] Segments vector is empty!!!\n";
+                std::exit(1);
+        }
+        
+        int i = 0;
+        while (i < segments.size() - 1) {
+		ROUTE newSeg = segments[i];
+                ROUTE segment0 = segments[i];
+                ROUTE segment1 = segments[i+1];
+                
+                if (segment0.initLayer != segment0.finalLayer ||
+                    segment1.initLayer != segment1.finalLayer) { // if one of the segments is a via, skip
+                        i++;
+                        continue;
+                }
+                
+                if (segment0.initLayer != segment1.initLayer ||
+                    segment0.finalLayer != segment1.finalLayer) { // if the segments are in different layers
+                        i++;
+                        continue;
+                }
+                
+                if (segmentsOverlaps(segment0, segment1, newSeg)) { // if segment 0 connects to the end of segment 1		
+                        segments[i] = newSeg;
+                        segments.erase(segments.begin() + i + 1);
+		} else {
+                        i++;
+                }
+        }
+        
+        net.route = segments;
+}
+
+bool FastRouteKernel::segmentsOverlaps(ROUTE seg0, ROUTE seg1, ROUTE &newSeg) {
+	long initX0 = std::min(seg0.initX, seg0.finalX);
+	long initY0 = std::min(seg0.initY, seg0.finalY);
+	long finalX0 = std::max(seg0.finalX, seg0.initX);
+	long finalY0 = std::max(seg0.finalY, seg0.initY);
+
+	long initX1 = std::min(seg1.initX, seg1.finalX);
+	long initY1 = std::min(seg1.initY, seg1.finalY);
+	long finalX1 = std::max(seg1.finalX, seg1.initX);
+	long finalY1 = std::max(seg1.finalY, seg1.initY);
+
+	if (initX0 == finalX0 && initX1 == finalX1 && initX0 == initX1) { // vertical segments aligned
+		if ((initY0 >= initY1 && initY0 <= finalY1) || 
+		    (finalY0 >= initY1 && finalY0 <= finalY1)) {
+			newSeg.initX = std::min(initX0, initX1);
+			newSeg.initY = std::min(initY0, initY1);
+			newSeg.finalX = std::max(finalX0, finalX1);
+                        newSeg.finalY = std::max(finalY0, finalY1);
+			return true;
+		}
+	} else if (initY0 == finalY0 && initY1 == finalY1 && initY0 == initY1) { // horizontal segments aligned
+		if ((initX0 >= initX1 && initX0 <= finalX1) || 
+		    (finalX0 >= initX1 && finalX0 <= finalX1)) {
+			newSeg.initX = std::min(initX0, initX1);
+			newSeg.initY = std::min(initY0, initY1);
+			newSeg.finalX = std::max(finalX0, finalX1);
+                        newSeg.finalY = std::max(finalY0, finalY1);
+			return true;
+		}
+	}
+
+	return false;
 }
 
 }
