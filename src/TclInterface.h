@@ -60,6 +60,7 @@ void set_alpha(float alpha);
 void set_alpha_for_net(char * netName, float alpha);
 void set_verbose(int v);
 void set_overflow_iterations(int iterations);
+void set_grid_origin(long x, long y);
 
 // Run
 void start_fastroute();

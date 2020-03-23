@@ -177,6 +177,9 @@ void FastRouteKernel::startFastRoute() {
         std::cout << " > ---- Global adjustment: " << _adjustment << "\n";
         std::cout << " > ---- Unidirectional routing: " << _unidirectionalRoute << "\n";
         std::cout << " > ---- Clock net routing: " << _clockNetRouting << "\n";
+        if (_gridOrigin.getX() != 0 && _gridOrigin.getY() != 0) {
+            std::cout << " > ---- Grid origin: (" << _gridOrigin.getX() << ", " << _gridOrigin.getY() << ")\n";
+        }
         
         std::cout << " > Initializing grid...\n";
         initGrid();
@@ -249,6 +252,12 @@ void FastRouteKernel::runFastRoute() {
 
 void FastRouteKernel::initGrid() {        
         _dbWrapper.initGrid(_maxRoutingLayer);
+        
+        if (_gridOrigin.getX() != 0 && _gridOrigin.getY() != 0) {
+                _grid.setLowerLeftX(_gridOrigin.getX());
+                _grid.setLowerLeftY(_gridOrigin.getY());
+        }
+        
         _dbWrapper.computeCapacities(_maxRoutingLayer);
         _dbWrapper.computeSpacingsAndMinWidth(_maxRoutingLayer);
         _dbWrapper.initObstacles();

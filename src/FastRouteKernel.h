@@ -79,6 +79,7 @@ private:
         unsigned _dbId;
         const int _selectedMetal = 3;
         int _overflowIterations = 50;
+        Coordinate _gridOrigin = Coordinate(0, 0);
         
         // Layer adjustment variables
         std::vector<int> _layersToAdjust;
@@ -168,6 +169,10 @@ public:
         
         void setOverflowIterations(int iterations) {
                 _overflowIterations = iterations;
+        }
+        
+        void setGridOrigin(long x, long y) {
+                _gridOrigin = Coordinate(x, y);
         }
         
         void printGrid();

@@ -47,13 +47,15 @@ sta::define_cmd_args "fastroute" {[-output_file out_file] \
                                            [-alpha alpha] \
                                            [-verbose verbose] \
                                            [-overflow_iterations iterations] \
+                                           [-grid_origin origin] \
 }
 
 proc fastroute { args } {
   sta::parse_key_args "fastroute" args \
     keys {-output_file -capacity_adjustment -min_routing_layer -max_routing_layer \
           -pitches_in_tile -alpha -verbose -layers_adjustments \
-          -regions_adjustments -nets_alphas_priorities -overflow_iterations} \
+          -regions_adjustments -nets_alphas_priorities -overflow_iterations \
+          -grid_origin} \
     flags {-unidirectional_routing -clock_net_routing}
 
   if { [info exists keys(-output_file)] } {
@@ -154,6 +156,15 @@ proc fastroute { args } {
   } else {
     FastRoute::set_clock_net_routing false
     FastRoute::set_pdrev false
+  }
+
+  if { [info exists keys(-grid_origin)] } {
+    set origin $keys(-grid_origin)
+
+    set origin_x [lindex $origin 0]
+    set origin_y [lindex $origin 1]
+
+    FastRoute::set_grid_origin $origin_x $origin_y
   }
 
   FastRoute::start_fastroute
