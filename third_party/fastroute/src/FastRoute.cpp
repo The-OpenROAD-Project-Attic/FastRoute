@@ -497,7 +497,7 @@ int FT::run(std::vector<NET> &result) {
         char degreeFile[STRINGLEN];
         char optionS[STRINGLEN];
         clock_t t1, t2, t3, t4;
-        float gen_brk_Time, reading_Time, P1_Time, P2_Time, P3_Time, maze_Time, totalTime, congestionmap_time;
+        float gen_brk_Time, P1_Time, P2_Time, P3_Time, maze_Time, totalTime, congestionmap_time;
         int iter, last_totalOverflow, diff_totalOverflow, enlarge, ripup_threshold;
         int i, j, past_overflow, cur_overflow;
         int L_afterSTOP;
@@ -611,9 +611,6 @@ int FT::run(std::vector<NET> &result) {
         //	past_cong = getOverflow2Dmaze( &maxOverflow);
 
         t3 = clock();
-        reading_Time = (float)(t3 - t2) / CLOCKS_PER_SEC;
-        if (verbose > 1)
-                printf(" > --LV Time: %f sec\n", reading_Time);
         InitEstUsage();
 
         i = 1;
@@ -886,11 +883,9 @@ int FT::run(std::vector<NET> &result) {
 
         t4 = clock();
         maze_Time = (float)(t4 - t1) / CLOCKS_PER_SEC;
-        printf(" > --Final routing length : %d\n", finallength);
-        printf(" > --Final number of via  : %d\n", numVia);
-        printf(" > --Final total length 1 : %d\n", finallength + numVia);
-        printf(" > --Final total length 3 : %d\n", (finallength + 3 * numVia));
-        printf(" > --3D runtime: %f sec\n", maze_Time);
+        printf(" > --Final usage          : %d\n", finallength);
+        printf(" > --Final number of vias : %d\n", numVia);
+        printf(" > --Final usage 3D       : %d\n", (finallength + 3 * numVia));
 
         std::cout << " > --Getting results...\n";
         result = getResults();
