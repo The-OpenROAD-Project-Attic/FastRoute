@@ -113,6 +113,10 @@ void set_overflow_iterations(int iterations) {
         fastRouteKernel->setOverflowIterations(iterations);
 }
 
+void set_grid_origin(long x, long y) {
+        fastRouteKernel->setGridOrigin(x, y);
+}
+
 void start_fastroute() {
         fastRouteKernel->startFastRoute();
 }

@@ -100,6 +100,9 @@ public:
         long getLowerLeftX() const { return _lowerLeftX; }
         long getLowerLeftY() const { return _lowerLeftY; }
         
+        void setLowerLeftX(long x) { _lowerLeftX = x; }
+        void setLowerLeftY(long y) { _lowerLeftY = y; }
+        
         long getUpperRightX() const { return _upperRightX; }
         long getUpperRightY() const { return _upperRightY; }
         

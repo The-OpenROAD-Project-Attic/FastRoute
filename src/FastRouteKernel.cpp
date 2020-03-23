@@ -43,6 +43,7 @@
 #include <utility>
 #include <fstream>
 #include <istream>
+#include <chrono>
 
 #include "FastRouteKernel.h"
 
@@ -144,6 +145,7 @@ int FastRouteKernel::run() {
 }
 
 void FastRouteKernel::startFastRoute() {
+        std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
         printHeader();
         _dbWrapper.setDB(_dbId);
         if (_unidirectionalRoute) {
@@ -175,6 +177,9 @@ void FastRouteKernel::startFastRoute() {
         std::cout << " > ---- Global adjustment: " << _adjustment << "\n";
         std::cout << " > ---- Unidirectional routing: " << _unidirectionalRoute << "\n";
         std::cout << " > ---- Clock net routing: " << _clockNetRouting << "\n";
+        if (_gridOrigin.getX() != 0 && _gridOrigin.getY() != 0) {
+            std::cout << " > ---- Grid origin: (" << _gridOrigin.getX() << ", " << _gridOrigin.getY() << ")\n";
+        }
         
         std::cout << " > Initializing grid...\n";
         initGrid();
@@ -231,16 +236,28 @@ void FastRouteKernel::startFastRoute() {
         }
 
         _fastRoute.initAuxVar();
+        std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
+        
+        std::cout << " > Elapsed time: " << (std::chrono::duration_cast<std::chrono::microseconds>(end - begin).count()) /1000000.0 << "\n";
 }
 
 void FastRouteKernel::runFastRoute() {
+        std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
         std::cout << " > Running FastRoute...\n";
         _fastRoute.run(_result);
         std::cout << " > Running FastRoute... Done!\n";
+        std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
+        std::cout << " > Elapsed time: " << (std::chrono::duration_cast<std::chrono::microseconds>(end - begin).count()) /1000000.0 << "\n";
 }
 
 void FastRouteKernel::initGrid() {        
         _dbWrapper.initGrid(_maxRoutingLayer);
+        
+        if (_gridOrigin.getX() != 0 && _gridOrigin.getY() != 0) {
+                _grid.setLowerLeftX(_gridOrigin.getX());
+                _grid.setLowerLeftY(_gridOrigin.getY());
+        }
+        
         _dbWrapper.computeCapacities(_maxRoutingLayer);
         _dbWrapper.computeSpacingsAndMinWidth(_maxRoutingLayer);
         _dbWrapper.initObstacles();
