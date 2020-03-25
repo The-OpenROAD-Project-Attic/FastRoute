@@ -38,13 +38,10 @@
 
 #define MAXLEN 20000
 
-//#define XRANGE 4000
-//#define YRANGE 4000
-
 namespace FastRoute {
 
 // global variables
-extern int xGrid, yGrid, numGrids, numNets, vCapacity, hCapacity, *vCapacity3D, *hCapacity3D;
+extern int xGrid, yGrid, maxGrid, numGrids, numNets, vCapacity, hCapacity, *vCapacity3D, *hCapacity3D;
 extern float vCapacity_lb, hCapacity_lb, vCapacity_ub, hCapacity_ub;
 extern int layerOrientation;
 extern bool pdRev;
@@ -67,8 +64,6 @@ extern Edge *h_edges, *v_edges;
 
 extern float *d1;
 extern float *d2;
-//extern float d1[YRANGE][XRANGE];
-//extern float d2[YRANGE][XRANGE];
 
 extern Bool **HV;
 extern Bool **hyperV;

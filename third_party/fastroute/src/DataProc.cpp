@@ -39,7 +39,7 @@
 namespace FastRoute {
 
 // Global variables
-int xGrid, yGrid, numGrids, numNets, *vCapacity3D, *hCapacity3D;
+int xGrid, yGrid, maxGrid, numGrids, numNets, *vCapacity3D, *hCapacity3D;
 float vCapacity_lb, hCapacity_lb, vCapacity_ub, hCapacity_ub;
 int MaxDegree;
 int *MinWidth, *MinSpacing, *ViaSpacing;

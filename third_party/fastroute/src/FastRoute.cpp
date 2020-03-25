@@ -66,6 +66,7 @@ int MD = 0;
 void FT::setGridsAndLayers(int x, int y, int nLayers) {
         xGrid = x;
         yGrid = y;
+        maxGrid = std::max(x, y);
         numLayers = nLayers;
         numGrids = xGrid * yGrid;
         
@@ -97,8 +98,8 @@ void FT::setGridsAndLayers(int x, int y, int nLayers) {
         d13D = new int[numLayers*yGrid*xGrid];
         d23D = new short[numLayers*yGrid*xGrid];
         
-        d1 = new float[yGrid*xGrid];
-        d2 = new float[yGrid*xGrid];
+        d1 = new float[maxGrid * maxGrid];
+        d2 = new float[maxGrid * maxGrid];
         
         vCapacity3D = new int[numLayers];
         hCapacity3D = new int[numLayers];
@@ -125,16 +126,16 @@ void FT::setGridsAndLayers(int x, int y, int nLayers) {
                 viaLink[i] = new int[MAXLEN];
         }
         
-        costHVH = new float[xGrid];  // Horizontal first Z
-        costVHV = new float[yGrid];  // Vertical first Z
-        costH = new float[yGrid];    // Horizontal segment cost
-        costV = new float[xGrid];    // Vertical segment cost
-        costLR = new float[yGrid];   // Left and right boundary cost
-        costTB = new float[xGrid];   // Top and bottom boundary cost
+        costHVH = new float[maxGrid];  // Horizontal first Z
+        costVHV = new float[maxGrid];  // Vertical first Z
+        costH = new float[maxGrid];    // Horizontal segment cost
+        costV = new float[maxGrid];    // Vertical segment cost
+        costLR = new float[maxGrid];   // Left and right boundary cost
+        costTB = new float[maxGrid];   // Top and bottom boundary cost
 
-        costHVHtest = new float[yGrid];  // Vertical first Z
-        costVtest = new float[xGrid];    // Vertical segment cost
-        costTBtest = new float[xGrid];   // Top and bottom boundary cost
+        costHVHtest = new float[maxGrid];  // Vertical first Z
+        costVtest = new float[maxGrid];    // Vertical segment cost
+        costTBtest = new float[maxGrid];   // Top and bottom boundary cost
 }
 
 void FT::addVCapacity(int verticalCapacity, int layer) {
