@@ -839,6 +839,11 @@ void updateRouteType1(TreeNode *treenodes, int n1, int A1, int A2, int E1x, int 
         treeedges[edge_n1A2].route.type = MAZEROUTE;
         treeedges[edge_n1A2].route.routelen = cnt - 1;
         treeedges[edge_n1A2].len = ADIFF(A2x, E1x) + ADIFF(A2y, E1y);
+        
+        delete[] gridsX_n1A1;
+        delete[] gridsY_n1A1;
+        delete[] gridsX_n1A2;
+        delete[] gridsY_n1A2;
 }
 
 void updateRouteType2(TreeNode *treenodes, int n1, int A1, int A2, int C1, int C2, int E1x, int E1y, TreeEdge *treeedges, int edge_n1A1, int edge_n1A2, int edge_C1C2) {
@@ -957,6 +962,15 @@ void updateRouteType2(TreeNode *treenodes, int n1, int A1, int A2, int C1, int C
                 treeedges[edge_n1C2].route.gridsY[cnt] = gridsY_C1C2[i];
                 cnt++;
         }
+        
+        delete[] gridsX_n1A1;
+        delete[] gridsY_n1A1;
+        
+        delete[] gridsX_n1A2;
+        delete[] gridsY_n1A2;
+        
+        delete[] gridsX_C1C2;
+        delete[] gridsY_C1C2;
 }
 
 void reInitTree(int netID) {
@@ -1684,6 +1698,11 @@ void mazeRouteMSMD(int iter, int expand, float costHeight, int ripup_threshold, 
         if (!v_costTable) {
                 free(v_costTable);
         }
+        
+        delete[] gridsX;
+        delete[] gridsY;
+        delete[] tmp_gridsX;
+        delete[] tmp_gridsY;
 
         // free memory
 }

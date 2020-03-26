@@ -141,6 +141,8 @@ int FastRouteKernel::run() {
         
         writeGuides();
         
+        _fastRoute.deleteGlobalArrays();
+        
         return 0;
 }
 
@@ -249,6 +251,8 @@ void FastRouteKernel::runFastRoute() {
         std::cout << " > Running FastRoute... Done!\n";
         
         computeWirelength();
+        
+        _fastRoute.deleteGlobalArrays();
         
         std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
         std::cout << " > ---- Elapsed time: " << (std::chrono::duration_cast<std::chrono::microseconds>(end - begin).count()) /1000000.0 << "\n";

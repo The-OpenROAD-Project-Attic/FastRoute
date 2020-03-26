@@ -1112,6 +1112,9 @@ void routeMonotonic(int netID, int edgeID, int threshold) {
 
                 }  // if(x1!=x2 || y1!=y2)
         }          // non-degraded edge
+        
+        delete[] gridsX;
+        delete[] gridsY;
 }
 
 void routeMonotonicAll(int threshold) {
@@ -1738,6 +1741,9 @@ void routeLVEnew(int netID, int edgeID, int threshold, int enlarge) {
 
                 }  // if(x1!=x2 || y1!=y2)
         }          // non-degraded edge
+        
+        delete[] gridsX;
+        delete[] gridsY;
 }
 
 void routeLVAll(int threshold, int expand) {

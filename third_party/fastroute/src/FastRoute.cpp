@@ -914,6 +914,75 @@ int FT::run(std::vector<NET> &result) {
         return (1);
 }
 
+void FT::deleteGlobalArrays() {
+        for (int i = 0; i < yGrid; i++) {
+                delete[] HV[i];
+        }
+        delete[] HV;
+        
+        for (int i = 0; i < yGrid; i++) {
+                delete[] hyperV[i];
+        }
+        delete[] hyperV;
+        
+        for (int i = 0; i < yGrid; i++) {
+                delete[] hyperH[i];
+        }
+        delete[] hyperH;
+        
+        for (int i = 0; i < yGrid; i++) {
+                delete[] inRegion[i];
+        }
+        delete[] inRegion;
+        
+        for (int i = 0; i < yGrid; i++) {
+                delete[] corrEdge[i];
+        }
+        delete[] corrEdge;
+        
+        delete[] d13D;
+        delete[] d23D;
+        
+        delete[] d1;
+        delete[] d2;
+        
+        delete[] vCapacity3D;
+        delete[] hCapacity3D;
+        
+        delete[] MinWidth;
+        delete[] MinSpacing;
+        delete[] ViaSpacing;
+        
+        delete[] gridHs;
+        delete[] gridVs;
+        
+        for (int i = 0; i < numLayers; i++) {
+                delete[] layerGrid[i];
+        }
+        delete[] layerGrid;
+        
+        for (int i = 0; i < numLayers; i++) {
+                delete[] gridD[i];
+        }
+        delete[] gridD;
+        
+        for (int i = 0; i < numLayers; i++) {
+                delete[] viaLink[i];
+        }
+        delete[] viaLink;
+        
+        delete[] costHVH;
+        delete[] costVHV;
+        delete[] costH;
+        delete[] costV;
+        delete[] costLR;
+        delete[] costTB;
+
+        delete[] costHVHtest;
+        delete[] costVtest;
+        delete[] costTBtest;
+}
+
 void FT::usePdRev(){
         pdRev = true;
 }
