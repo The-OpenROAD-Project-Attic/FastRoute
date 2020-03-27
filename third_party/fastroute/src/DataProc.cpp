@@ -61,6 +61,7 @@ bool pdRev;
 float alpha;
 int verbose;
 int overflowIterations;
+bool pdRevForHighFanout;
 
 Bool **HV;
 Bool **hyperV;

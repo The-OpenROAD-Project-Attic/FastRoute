@@ -999,4 +999,8 @@ void FT::setOverflowIterations(int iterations){
         overflowIterations = iterations;
 }
 
+void FT::setPDRevForHighFanout(bool pdRevHihgFanout){
+        pdRevForHighFanout = pdRevHihgFanout;
+}
+
 }  // namespace FastRoute
