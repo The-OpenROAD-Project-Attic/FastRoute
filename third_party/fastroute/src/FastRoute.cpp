@@ -999,7 +999,7 @@ void FT::setOverflowIterations(int iterations){
         overflowIterations = iterations;
 }
 
-void FT::setPDRevForHighFanout(bool pdRevHihgFanout){
+void FT::setPDRevForHighFanout(int pdRevHihgFanout){
         pdRevForHighFanout = pdRevHihgFanout;
 }
 

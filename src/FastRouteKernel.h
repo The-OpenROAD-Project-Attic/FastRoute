@@ -80,7 +80,7 @@ private:
         const int _selectedMetal = 3;
         int _overflowIterations = 50;
         Coordinate _gridOrigin = Coordinate(0, 0);
-        bool _pdRevForHighFanout = false;
+        int _pdRevForHighFanout = -1;
         
         // Layer adjustment variables
         std::vector<int> _layersToAdjust;
@@ -179,7 +179,7 @@ public:
                 _gridOrigin = Coordinate(x, y);
         }
         
-        void setPDRevForHighFanout(bool pdRevForHighFanout) {
+        void setPDRevForHighFanout(int pdRevForHighFanout) {
                 _pdRevForHighFanout = pdRevForHighFanout;
         }
 

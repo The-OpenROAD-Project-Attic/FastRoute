@@ -48,7 +48,7 @@ sta::define_cmd_args "fastroute" {[-output_file out_file] \
                                            [-verbose verbose] \
                                            [-overflow_iterations iterations] \
                                            [-grid_origin origin] \
-                                           [-pdrev_for_high_fanout] \
+                                           [-pdrev_for_high_fanout fanout] \
 }
 
 proc fastroute { args } {
@@ -56,8 +56,8 @@ proc fastroute { args } {
     keys {-output_file -capacity_adjustment -min_routing_layer -max_routing_layer \
           -pitches_in_tile -alpha -verbose -layers_adjustments \
           -regions_adjustments -nets_alphas_priorities -overflow_iterations \
-          -grid_origin} \
-    flags {-unidirectional_routing -clock_net_routing -pdrev_for_high_fanout}
+          -grid_origin -pdrev_for_high_fanout} \
+    flags {-unidirectional_routing -clock_net_routing}
 
   if { [info exists keys(-output_file)] } {
     set out_file $keys(-output_file)
@@ -168,8 +168,10 @@ proc fastroute { args } {
     FastRoute::set_grid_origin $origin_x $origin_y
   }
 
-  if { [info exists flags(-pdrev_for_high_fanout)] } {
-    FastRoute::set_pdrev_for_high_fanout true
+  if { [info exists keys(-pdrev_for_high_fanout)] } {
+    set faonut $keys(-pdrev_for_high_fanout)
+
+    FastRoute::set_pdrev_for_high_fanout $faonut
   }
 
   FastRoute::start_fastroute

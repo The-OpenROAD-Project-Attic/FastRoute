@@ -170,6 +170,10 @@ void FastRouteKernel::startFastRoute() {
                 _fastRoute.usePdRev();
                 _fastRoute.setAlpha(_alpha);
         }
+
+        if (_pdRevForHighFanout != -1) {
+                _fastRoute.setAlpha(_alpha);
+        }
         
         _fastRoute.setVerbose(_verbose);
         _fastRoute.setOverflowIterations(_overflowIterations);

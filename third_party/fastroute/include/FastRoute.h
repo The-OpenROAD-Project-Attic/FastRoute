@@ -96,7 +96,7 @@ class FT {
         void setAlpha(float a);
         void setVerbose(int v);
         void setOverflowIterations(int iterations);
-        void setPDRevForHighFanout(bool pdRevHihgFanout);
+        void setPDRevForHighFanout(int pdRevHihgFanout);
 };
 }  // namespace FastRoute
 #endif /* __FASTROUTE_API__ */

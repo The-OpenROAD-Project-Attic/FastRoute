@@ -117,7 +117,7 @@ void set_grid_origin(long x, long y) {
         fastRouteKernel->setGridOrigin(x, y);
 }
 
-void set_pdrev_for_high_fanout(bool pdRevForHighFanout) {
+void set_pdrev_for_high_fanout(int pdRevForHighFanout) {
         fastRouteKernel->setPDRevForHighFanout(pdRevForHighFanout);
 }
 

@@ -821,7 +821,7 @@ void gen_brk_RSMT(Bool congestionDriven, Bool reRoute, Bool genTree, Bool newTyp
                 if (noADJ) {
                         coeffV = 1.2;
                 }
-                if (pdRev || (pdRevForHighFanout && nets[i]->deg >= 20)){
+                if (pdRev || (pdRevForHighFanout > 0 && nets[i]->deg >= pdRevForHighFanout)){
                         PD::PdRev pd;
                         std::vector<unsigned> vecX(x, x + d);
                         std::vector<unsigned> vecY(y, y + d);
