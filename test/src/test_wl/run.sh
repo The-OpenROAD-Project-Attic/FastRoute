@@ -48,8 +48,7 @@ testdir=$2
 
 $binary -no_init < run.tcl > test.log 2>&1
 
-obs_report=$(grep -e 'Final routing length' ./test.log)
-
+obs_report=$(grep -q -e ' > ---- Total wirelength:' ./test.log)
 
 if grep -q -e "$obs_report" golden.wl;
 then

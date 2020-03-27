@@ -48,7 +48,7 @@ testdir=$2
 
 $binary -no_init < run.tcl > test.log 2>&1
 
-overflow_report=$(grep -e 'Final routing length' ./test.log)
+overflow_report=$(grep -e ' > ---- Total wirelength:' ./test.log)
 
 
 if grep -q -e "$overflow_report" golden.overflow;
