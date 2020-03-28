@@ -68,6 +68,59 @@ void FT::setGridsAndLayers(int x, int y, int nLayers) {
         yGrid = y;
         numLayers = nLayers;
         numGrids = xGrid * yGrid;
+        
+        HV = new Bool*[yGrid];
+        for (int i = 0; i < yGrid; i++) {
+                HV[i] = new Bool[xGrid];
+        }
+        
+        hyperV = new Bool*[yGrid];
+        for (int i = 0; i < yGrid; i++) {
+                hyperV[i] = new Bool[xGrid];
+        }
+        
+        hyperH = new Bool*[yGrid];
+        for (int i = 0; i < yGrid; i++) {
+                hyperH[i] = new Bool[xGrid];
+        }
+        
+        inRegion = new Bool*[yGrid];
+        for (int i = 0; i < yGrid; i++) {
+                inRegion[i] = new Bool[xGrid];
+        }
+        
+        corrEdge = new int*[yGrid];
+        for (int i = 0; i < yGrid; i++) {
+                corrEdge[i] = new int[xGrid];
+        }
+        
+        d13D = new int[numLayers*yGrid*xGrid];
+        d23D = new short[numLayers*yGrid*xGrid];
+        
+        vCapacity3D = new int[numLayers];
+        hCapacity3D = new int[numLayers];
+        
+        MinWidth = new int[numLayers];
+        MinSpacing = new int[numLayers];
+        ViaSpacing = new int[numLayers];
+        
+        gridHs = new int[numLayers];
+        gridVs = new int[numLayers];
+        
+        layerGrid = new int*[numLayers];
+        for (int i = 0; i < numLayers; i++) {
+                layerGrid[i] = new int[MAXLEN];
+        }
+        
+        gridD = new int*[numLayers];
+        for (int i = 0; i < numLayers; i++) {
+                gridD[i] = new int[MAXLEN];
+        }
+        
+        viaLink = new int*[numLayers];
+        for (int i = 0; i < numLayers; i++) {
+                viaLink[i] = new int[MAXLEN];
+        }
 }
 
 void FT::addVCapacity(int verticalCapacity, int layer) {
@@ -355,7 +408,7 @@ void FT::initAuxVar() {
         gys = (DTYPE **)malloc(numValidNets * sizeof(DTYPE *));
         gs = (DTYPE **)malloc(numValidNets * sizeof(DTYPE *));
 
-        gridHV = XRANGE * YRANGE;
+        gridHV = xGrid * yGrid;
         gridH = (xGrid - 1) * yGrid;
         gridV = xGrid * (yGrid - 1);
         for (k = 0; k < numLayers; k++) {
@@ -390,7 +443,6 @@ std::vector<NET> FT::getResults() {
         short *gridsX, *gridsY, *gridsL;
         int netID, d, i, k, edgeID, nodeID, deg, lastX, lastY, lastL, xreal, yreal, l, routeLen;
         TreeEdge *treeedges, *treeedge;
-        FILE *fp;
         TreeNode *nodes;
         TreeEdge edge;
         std::vector<NET> netsOut;
@@ -455,7 +507,8 @@ int FT::run(std::vector<NET> &result) {
         int Ripvalue, LVIter, cost_step;
         int maxOverflow, past_cong, last_cong, finallength, numVia, ripupTH3D, newTH, healingTrigger;
         int updateType, minofl, minoflrnd, mazeRound, upType, cost_type, bmfl, bwcnt;
-        Bool goingLV, healingNeed, noADJ, extremeNeeded, needOUTPUT;
+
+        Bool goingLV, healingNeed, noADJ, extremeNeeded;
 
         // TODO: check this size
         int maxPin = maxNetDegree;
@@ -576,7 +629,11 @@ int FT::run(std::vector<NET> &result) {
         cost_type = 1;
 
         InitLastUsage(upType);
-        while (totalOverflow > 0) {
+        if (totalOverflow > 0) {
+                printf(" > --Running extra iterations to remove overflow...\n");
+        }
+        
+        while (totalOverflow > 0 && i <= overflowIterations) {
                 if (THRESH_M > 15) {
                         THRESH_M -= thStep1;
                 } else if (THRESH_M >= 2) {
@@ -652,7 +709,7 @@ int FT::run(std::vector<NET> &result) {
                         L = 0;
                 }
 
-                printf("iteration %d, enlarge %d, costheight %d, threshold %d via cost %d \nlog_coef %f, healingTrigger %d cost_step %d L %d cost_type %d updatetype %d\n", i, enlarge, costheight, mazeedge_Threshold, VIA, LOGIS_COF, healingTrigger, cost_step, L, cost_type, upType);
+                printf(" > ----iteration %d, enlarge %d, costheight %d, threshold %d via cost %d \n > ----log_coef %f, healingTrigger %d cost_step %d L %d cost_type %d updatetype %d\n", i, enlarge, costheight, mazeedge_Threshold, VIA, LOGIS_COF, healingTrigger, cost_step, L, cost_type, upType);
                 mazeRouteMSMD(i, enlarge, costheight, ripup_threshold, mazeedge_Threshold, !(i % 3), cost_type);
                 last_cong = past_cong;
                 past_cong = getOverflow2Dmaze(&maxOverflow, &tUsage);
@@ -675,7 +732,7 @@ int FT::run(std::vector<NET> &result) {
 
                 if (maxOverflow < 150) {
                         if (i == 20 && past_cong > 200) {
-                                printf("Extra Run for hard benchmark\n");
+                                printf(" > ----Extra Run for hard benchmark\n");
                                 L = 0;
                                 upType = 3;
                                 stopDEC = TRUE;
@@ -758,6 +815,11 @@ int FT::run(std::vector<NET> &result) {
                         break;
                 }
         }
+        
+        if (totalOverflow > 0) {
+                printf("[ERROR] FastRoute cannot handle very congested design\n");
+                std::exit(2);
+        }
 
         if (minofl > 0) {
                 printf("\n\n minimal ofl %d, occuring at round %d\n\n", minofl, minoflrnd);
@@ -822,10 +884,6 @@ int FT::run(std::vector<NET> &result) {
         numVia = threeDVIA();
         checkRoute3D();
 
-        if (needOUTPUT) {
-                writeRoute3D(routingFile);
-        }
-
         t4 = clock();
         maze_Time = (float)(t4 - t1) / CLOCKS_PER_SEC;
         printf(" > --Final routing length : %d\n", finallength);
@@ -856,6 +914,10 @@ void FT::setAlpha(float a){
 
 void FT::setVerbose(int v){
         verbose = v;
+}
+
+void FT::setOverflowIterations(int iterations){
+        overflowIterations = iterations;
 }
 
 }  // namespace FastRoute

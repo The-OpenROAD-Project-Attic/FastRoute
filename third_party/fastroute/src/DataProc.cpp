@@ -39,10 +39,10 @@
 namespace FastRoute {
 
 // Global variables
-int xGrid, yGrid, numGrids, numNets, vCapacity3D[MAXLAYER], hCapacity3D[MAXLAYER];
+int xGrid, yGrid, numGrids, numNets, *vCapacity3D, *hCapacity3D;
 float vCapacity_lb, hCapacity_lb, vCapacity_ub, hCapacity_ub;
 int MaxDegree;
-int MinWidth[MAXLAYER], MinSpacing[MAXLAYER], ViaSpacing[MAXLAYER];
+int *MinWidth, *MinSpacing, *ViaSpacing;
 int xcorner, ycorner, wTile, hTile;
 int enlarge, costheight, ripup_threshold, ahTH;
 int numValidNets;  // # nets need to be routed (having pins in different grids)
@@ -58,12 +58,13 @@ int layerOrientation;
 bool pdRev;
 float alpha;
 int verbose;
+int overflowIterations;
 
-Bool HV[YRANGE][XRANGE];
-Bool hyperV[YRANGE][XRANGE];
-Bool hyperH[YRANGE][XRANGE];
+Bool **HV;
+Bool **hyperV;
+Bool **hyperH;
 
-int corrEdge[YRANGE][XRANGE];
+int **corrEdge;
 int SLOPE;
 
 float LB;
@@ -97,21 +98,21 @@ OrderTree* treeOrderCong;
 int numTreeedges;
 int viacost;
 
-int layerGrid[MAXLAYER][MAXLEN];
-int gridD[MAXLAYER][MAXLEN];
-int viaLink[MAXLAYER][MAXLEN];
+int **layerGrid;
+int **gridD;
+int **viaLink;
 
-int d13D[MAXLAYER][YRANGE][XRANGE];
-short d23D[MAXLAYER][YRANGE][XRANGE];
+int *d13D;
+short *d23D;
 
 dirctionT*** directions3D;
 int*** corrEdge3D;
 parent3D*** pr3D;
 
 int mazeedge_Threshold;
-Bool inRegion[YRANGE][XRANGE];
+Bool **inRegion;
 
-int gridHV, gridH, gridV, gridHs[MAXLAYER], gridVs[MAXLAYER];
+int gridHV, gridH, gridV, *gridHs, *gridVs;
 
 int** heap13D;
 short** heap23D;

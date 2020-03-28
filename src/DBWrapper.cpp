@@ -30,7 +30,6 @@ void DBWrapper::initGrid(int maxLayer) {
                 std::exit(1);
         }
         
-        odb::dbBox* coreBBox = block->getBBox();
         odb::dbTechLayer* selectedLayer = tech->findRoutingLayer(selectedMetal);
         
         if (!selectedLayer) {
@@ -62,11 +61,14 @@ void DBWrapper::initGrid(int maxLayer) {
                 std::exit(1);
         }
         
-        long lowerLeftX = coreBBox->xMin();
-        long lowerLeftY = coreBBox->yMin();
+        odb::Rect rect;
+        block->getDieArea(rect);
         
-        long upperRightX = coreBBox->xMax() - lowerLeftX;
-        long upperRightY = coreBBox->yMax() - lowerLeftY;
+        long lowerLeftX = rect.xMin();
+        long lowerLeftY = rect.yMin();
+        
+        long upperRightX = rect.xMax() - lowerLeftX;
+        long upperRightY = rect.yMax() - lowerLeftY;
         
         long tileWidth = _grid->getPitchesInTile() * trackSpacing;
         long tileHeight = _grid->getPitchesInTile() * trackSpacing;
@@ -104,7 +106,7 @@ void DBWrapper::initGrid(int maxLayer) {
         std::vector<int> genericVector(numLayers);
         std::map<int, std::vector<Box>> genericMap;
         
-        *_grid = Grid(lowerLeftX, lowerLeftY, coreBBox->xMax(), coreBBox->yMax(),
+        *_grid = Grid(lowerLeftX, lowerLeftY, rect.xMax(), rect.yMax(),
                      tileWidth, tileHeight, xGrids, yGrids, perfectRegularX,
                      perfectRegularY, numLayers, genericVector, genericVector,
                      genericVector, genericVector, genericMap);
@@ -373,7 +375,7 @@ void DBWrapper::initNetlist() {
                         
                         odb::dbInst* inst = currITerm->getInst();
                         inst->getOrigin(pX, pY);
-                        odb::adsPoint origin = odb::adsPoint(pX, pY);
+                        odb::Point origin = odb::Point(pX, pY);
                         odb::dbTransform transform(inst->getOrient(), origin);
                         
                         for (pinIter = mTermPins.begin(); pinIter != mTermPins.end(); pinIter++) {
@@ -388,7 +390,7 @@ void DBWrapper::initNetlist() {
                                 
                                 for (geomIter = geometries.begin(); geomIter != geometries.end(); geomIter++) {
                                         odb::dbBox* box = *geomIter;
-                                        odb::adsRect rect;
+                                        odb::Rect rect;
                                         box->getBox(rect);
                                         transform.apply(rect);
                                         
@@ -487,7 +489,7 @@ void DBWrapper::initObstacles() {
                 std::cout << "[ERROR] odb::dbBlock not found! Exiting...\n";
                 std::exit(1);
         }
-        
+
         odb::dbSet<odb::dbObstruction> obstructions = block->getObstructions();
         
         odb::dbSet<odb::dbObstruction>::iterator obstructIter;
@@ -515,7 +517,7 @@ void DBWrapper::initObstacles() {
                 odb::dbMaster* master = currInst->getMaster();
                 
                 currInst->getOrigin(pX, pY);
-                odb::adsPoint origin = odb::adsPoint(pX, pY);
+                odb::Point origin = odb::Point(pX, pY);
                 
                 odb::dbTransform transform(currInst->getOrient(), origin);
                 
@@ -526,7 +528,7 @@ void DBWrapper::initObstacles() {
                         odb::dbBox* currBox = *boxIter;
                         int layer = currBox->getTechLayer()->getRoutingLevel();
                         
-                        odb::adsRect rect;
+                        odb::Rect rect;
                         currBox->getBox(rect);
                         transform.apply(rect);
 
@@ -534,6 +536,74 @@ void DBWrapper::initObstacles() {
                         Coordinate upperBound = Coordinate(rect.xMax(), rect.yMax());
                         Box obstacleBox = Box(lowerBound, upperBound, layer);
                         _grid->addObstacle(layer, obstacleBox);
+                }
+        }
+        
+        // Get nets obstructions (routing wires and pdn wires)
+        odb::dbSet<odb::dbNet> nets = block->getNets();
+        
+        if (nets.size() == 0) {
+                std::cout << "[ERROR] Design without nets. Exiting...\n";
+                std::exit(1);
+        }
+        
+        odb::dbSet<odb::dbNet>::iterator nIter;
+        
+        for (nIter = nets.begin(); nIter != nets.end(); ++nIter) {
+                odb::dbNet* currNet = *nIter;
+                
+                uint wireCnt = 0, viaCnt = 0;
+                currNet->getWireCount(wireCnt, viaCnt);
+                if (wireCnt < 1)
+                        continue;
+                
+                if (currNet->getSigType() == odb::dbSigType::POWER ||
+                    currNet->getSigType() == odb::dbSigType::GROUND) {
+                        odb::dbSet<odb::dbSWire> swires = currNet->getSWires();
+                        
+                        odb::dbSet<odb::dbSWire>::iterator itr;
+                        for (itr = swires.begin(); itr != swires.end(); ++itr) {
+                                odb::dbSWire* swire = *itr;
+                                odb::dbSet<odb::dbSBox> wires = swire->getWires();
+                                odb::dbSet<odb::dbSBox>::iterator box_itr;
+                                for (box_itr = wires.begin(); box_itr != wires.end(); ++box_itr) {
+                                        odb::dbSBox* s = *box_itr;
+                                        if (s->isVia()) {
+                                                continue;
+                                        } else {
+                                                odb::Rect wireRect;
+                                                s->getBox(wireRect);
+                                                int l = s->getTechLayer()->getRoutingLevel();
+                                                
+                                                Coordinate lowerBound = Coordinate(wireRect.xMin(), wireRect.yMin());
+                                                Coordinate upperBound = Coordinate(wireRect.xMax(), wireRect.yMax());
+                                                Box obstacleBox = Box(lowerBound, upperBound, l);
+                                                _grid->addObstacle(l, obstacleBox);
+                                        }
+                                }
+                        }
+                } else {
+                        odb::dbWirePath path;
+                        odb::dbWirePathShape pshape;
+                        odb::dbWire* wire = currNet->getWire();
+                        
+                        odb::dbWirePathItr pitr;
+                        for (pitr.begin(wire); pitr.getNextPath(path);) {
+                                while (pitr.getNextShape(pshape)) {
+                                        if (pshape.shape.isVia()) {
+                                                continue;
+                                        } else {
+                                                odb::Rect wireRect;
+                                                pshape.shape.getBox(wireRect);
+                                                int l = pshape.shape.getTechLayer()->getRoutingLevel();
+                                                
+                                                Coordinate lowerBound = Coordinate(wireRect.xMin(), wireRect.yMin());
+                                                Coordinate upperBound = Coordinate(wireRect.xMax(), wireRect.yMax());
+                                                Box obstacleBox = Box(lowerBound, upperBound, l);
+                                                _grid->addObstacle(l, obstacleBox);
+                                        }
+                                }
+                        }
                 }
         }
 }

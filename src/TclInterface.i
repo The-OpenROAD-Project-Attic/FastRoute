@@ -69,6 +69,8 @@ extern void set_alpha_for_net(char * netName, float alpha);
 
 extern void set_verbose(int v);
 
+extern void set_overflow_iterations(int iterations);
+
 extern void start_fastroute();
 
 extern void run_fastroute();

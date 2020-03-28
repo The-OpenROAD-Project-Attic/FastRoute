@@ -76,6 +76,7 @@ int FastRouteKernel::run() {
         }
         
         _fastRoute.setVerbose(_verbose);
+        _fastRoute.setOverflowIterations(_overflowIterations);
         
         std::cout << " > Initializing grid...\n";
         initGrid();
@@ -166,6 +167,7 @@ void FastRouteKernel::startFastRoute() {
         }
         
         _fastRoute.setVerbose(_verbose);
+        _fastRoute.setOverflowIterations(_overflowIterations);
         
         std::cout << " > Params:\n";
         std::cout << " > ---- Min routing layer: " << _minRoutingLayer << "\n";
@@ -738,7 +740,7 @@ void FastRouteKernel::computeObstaclesAdjustments() {
                 bool direction = routingLayer.getPreferredDirection();
                 
                 std::cout << " > ----Processing " << layerObstacles.size() << 
-                             " obstacles in Metal" << layer << "\n";
+                             " obstacles in layer " << layer << "\n";
                 
                 int trackSpace = _grid.getMinWidths()[layer-1];
                 

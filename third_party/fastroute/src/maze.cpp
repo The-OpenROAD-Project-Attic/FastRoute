@@ -287,7 +287,7 @@ void updateCongestionHistory(int round, int upType) {
 
         maxlimit = 0;
 
-        printf("updateType %d\n", upType);
+        printf(" > ----updateType %d\n", upType);
 
         if (upType == 1) {
                 for (i = 0; i < yGrid; i++) {

@@ -1314,7 +1314,7 @@ void spiralRouteAll() {
 
                 for (d = 0; d < 2 * deg - 2; d++) {
                         treenodes[d].topL = -1;
-                        treenodes[d].botL = MAXLAYER;
+                        treenodes[d].botL = numLayers;
                         //treenodes[d].l = 0;
                         treenodes[d].assigned = FALSE;
                         treenodes[d].stackAlias = d;
