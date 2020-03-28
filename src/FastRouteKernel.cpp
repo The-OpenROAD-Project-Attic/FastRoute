@@ -1243,6 +1243,20 @@ void FastRouteKernel::writeEst() {
         }
 
         for (FastRoute::NET netRoute : _result) {
+                int validTiles = 0;
+                for (FastRoute::ROUTE route : netRoute.route) {
+                        if (route.initX == route.finalX && route.initY == route.finalY &&
+                            route.initLayer == route.finalLayer) {
+                            continue;
+                        }
+                        validTiles++;
+                }
+
+                if (validTiles == 0) {
+                        estFile << netRoute.name << " " << netRoute.id << " " << validTiles << "\n";
+                        estFile << "!\n";
+                        continue;
+                }
                 estFile << netRoute.name << " " << netRoute.id << " " << netRoute.route.size() << "\n";
                 for (FastRoute::ROUTE route : netRoute.route) {
                         estFile << "(" << route.initX << "," << route.initY << "," << route.initLayer << ")-(" << route.finalX << "," << route.finalY << "," << route.finalLayer << ")\n";
