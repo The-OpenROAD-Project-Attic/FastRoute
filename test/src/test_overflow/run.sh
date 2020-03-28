@@ -48,13 +48,23 @@ testdir=$2
 
 $binary -no_init < run.tcl > test.log 2>&1
 
-overflow_report=$(grep -e ' > ---- Total wirelength:' ./test.log)
+gold_overflow=$(grep -Eo "[0-9]+\.[0-9]+" golden.overflow)
+reported_overflow=$(grep -Eo "[0-9]+\.[0-9]+" test.log | tail -2 | head -1)
 
+difference=0
+if (( $(echo "$gold_overflow < $reported_overflow" | bc -l) ));
+then
+	difference=$(echo "1 - ($gold_overflow/$reported_overflow)" | bc -l )
+else
+	difference=$(echo "1 - ($reported_overflow/$gold_overflow)" | bc -l )
+fi
 
-if grep -q -e "$overflow_report" golden.overflow;
+difference_percent=$(echo "$difference*100" | bc -l)
+
+if (( $(echo "$difference < 0.05" | bc -l) ));
 then
 	exit $GREEN
 else
-        echo "     - [ERROR] Test failed. Check $testdir/src/test_overflow/test.log and Check $testdir/src/test_overflow/golden.overflow"
+    echo "     - [ERROR] Test failed. Wirelength difference of $difference_percent%"
 	exit $RED
 fi

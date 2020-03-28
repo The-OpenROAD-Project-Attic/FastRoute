@@ -1182,7 +1182,7 @@ void FastRouteKernel::computeWirelength() {
                 }
         }
         std::cout << " > Final report:\n";
-        std::cout << " > ---- Total wirelength: " << (float)totalWirelength/_grid.getDatabaseUnit() << " um\n";
+        std::cout << std::fixed << " > ---- Total wirelength: " << (float)totalWirelength/_grid.getDatabaseUnit() << " um\n";
 }
 
 void FastRouteKernel::mergeSegments(FastRoute::NET &net) {

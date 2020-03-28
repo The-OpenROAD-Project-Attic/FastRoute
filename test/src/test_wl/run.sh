@@ -48,12 +48,23 @@ testdir=$2
 
 $binary -no_init < run.tcl > test.log 2>&1
 
-obs_report=$(grep -q -e ' > ---- Total wirelength:' ./test.log)
+gold_wl=$(grep -Eo "[0-9]+\.[0-9]+" golden.wl)
+reported_wl=$(grep -Eo "[0-9]+\.[0-9]+" test.log | tail -2 | head -1)
 
-if grep -q -e "$obs_report" golden.wl;
+difference=0
+if (( $(echo "$gold_wl < $reported_wl" | bc -l) ));
+then
+	difference=$(echo "1 - ($gold_wl/$reported_wl)" | bc -l )
+else
+	difference=$(echo "1 - ($reported_wl/$gold_wl)" | bc -l )
+fi
+
+difference_percent=$(echo "$difference*100" | bc -l)
+
+if (( $(echo "$difference < 0.05" | bc -l) ));
 then
 	exit $GREEN
 else
-        echo "     - [ERROR] Test failed. Check $testdir/src/test_wl/test.log and Check $testdir/src/test_wl/golden.wl"
+    echo "     - [ERROR] Test failed. Wirelength difference of $difference_percent%"
 	exit $RED
 fi
