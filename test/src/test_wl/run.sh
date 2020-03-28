@@ -51,20 +51,27 @@ $binary -no_init < run.tcl > test.log 2>&1
 gold_wl=$(grep -Eo "[0-9]+\.[0-9]+" golden.wl)
 reported_wl=$(grep -Eo "[0-9]+\.[0-9]+" test.log | tail -2 | head -1)
 
+gold_wl=${gold_wl%.*}
+reported_wl=${reported_wl%.*}
+
 difference=0
-if (( $(echo "$gold_wl < $reported_wl" | bc -l) ));
+
+if [ $gold_wl -lt $reported_wl ];
 then
-	difference=$(echo "1 - ($gold_wl/$reported_wl)" | bc -l )
+	gold_wl=$(( $gold_wl*100 ))
+	ratio=$(( $gold_wl/$reported_wl ))
+
+	difference=$(( 100-$ratio ))
 else
-	difference=$(echo "1 - ($reported_wl/$gold_wl)" | bc -l )
+	reported_wl=$(( $reported_wl*100 ))
+	ratio=$(( $reported_wl/$gold_wl ))
+	difference=$(( 100-$ratio ))
 fi
 
-difference_percent=$(echo "$difference*100" | bc -l)
-
-if (( $(echo "$difference < 0.05" | bc -l) ));
+if [ $difference -lt 5 ];
 then
 	exit $GREEN
 else
-    echo "     - [ERROR] Test failed. Wirelength difference of $difference_percent%"
+    echo "     - [ERROR] Test failed. Wirelength difference of $difference%"
 	exit $RED
 fi
