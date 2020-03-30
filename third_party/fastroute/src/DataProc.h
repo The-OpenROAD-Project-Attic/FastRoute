@@ -49,6 +49,7 @@ extern float alpha;
 extern int verbose;
 extern int overflowIterations;
 extern int pdRevForHighFanout;
+extern bool allowOverflow;
 
 extern int enlarge, costheight, ripup_threshold;
 extern int MaxDegree;

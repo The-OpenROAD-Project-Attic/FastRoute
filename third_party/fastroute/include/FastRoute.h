@@ -97,6 +97,7 @@ class FT {
         void setVerbose(int v);
         void setOverflowIterations(int iterations);
         void setPDRevForHighFanout(int pdRevHihgFanout);
+        void setAllowOverflow(bool allow);
 };
 }  // namespace FastRoute
 #endif /* __FASTROUTE_API__ */

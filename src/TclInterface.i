@@ -75,6 +75,8 @@ extern void set_grid_origin(long x, long y);
 
 extern void set_pdrev_for_high_fanout(int pdRevForHighFanout);
 
+extern void set_allow_overflow(bool allowOverflow);
+
 extern void start_fastroute();
 
 extern void run_fastroute();

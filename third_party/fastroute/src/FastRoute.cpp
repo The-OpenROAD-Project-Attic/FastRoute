@@ -828,9 +828,13 @@ int FT::run(std::vector<NET> &result) {
                 }
         }
         
-        if (totalOverflow > 0) {
+        if (totalOverflow > 0 && !allowOverflow) {
                 printf("[ERROR] FastRoute cannot handle very congested design\n");
                 std::exit(2);
+        }
+
+        if (allowOverflow && totalOverflow > 0) {
+                printf("[WARNING] Global routing finished with overflow!");
         }
 
         if (minofl > 0) {
@@ -1001,6 +1005,10 @@ void FT::setOverflowIterations(int iterations){
 
 void FT::setPDRevForHighFanout(int pdRevHihgFanout){
         pdRevForHighFanout = pdRevHihgFanout;
+}
+
+void FT::setAllowOverflow(bool allow) {
+        allowOverflow = allow;
 }
 
 }  // namespace FastRoute

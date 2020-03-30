@@ -79,6 +79,7 @@ int FastRouteKernel::run() {
         _fastRoute.setVerbose(_verbose);
         _fastRoute.setOverflowIterations(_overflowIterations);
         _fastRoute.setPDRevForHighFanout(_pdRevForHighFanout);
+        _fastRoute.setAllowOverflow(_allowOverflow);
         
         std::cout << " > Initializing grid...\n";
         initGrid();
@@ -178,6 +179,7 @@ void FastRouteKernel::startFastRoute() {
         _fastRoute.setVerbose(_verbose);
         _fastRoute.setOverflowIterations(_overflowIterations);
         _fastRoute.setPDRevForHighFanout(_pdRevForHighFanout);
+        _fastRoute.setAllowOverflow(_allowOverflow);
         
         std::cout << " > Params:\n";
         std::cout << " > ---- Min routing layer: " << _minRoutingLayer << "\n";
@@ -874,7 +876,7 @@ void FastRouteKernel::writeGuides() {
                         }
                         if (route.initLayer == route.finalLayer) {
                                 if (route.initLayer < _minRoutingLayer && 
-                                    route.initX != route.finalX && route.initY != route.finalX) {
+                                    route.initX != route.finalX && route.initY != route.finalY) {
                                         std::cout << " > [ERROR] Routing with guides in blocked metal\n"
                                                 " > ---- Net: " << netRoute.name << "\n";
                                         std::exit(1);

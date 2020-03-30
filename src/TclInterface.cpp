@@ -121,6 +121,10 @@ void set_pdrev_for_high_fanout(int pdRevForHighFanout) {
         fastRouteKernel->setPDRevForHighFanout(pdRevForHighFanout);
 }
 
+void set_allow_overflow(bool allowOverflow) {
+        fastRouteKernel->setAllowOverflow(allowOverflow);
+}
+
 void start_fastroute() {
         fastRouteKernel->startFastRoute();
 }

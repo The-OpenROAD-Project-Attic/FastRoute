@@ -81,6 +81,7 @@ private:
         int _overflowIterations = 50;
         Coordinate _gridOrigin = Coordinate(0, 0);
         int _pdRevForHighFanout = -1;
+        bool _allowOverflow = false;
         
         // Layer adjustment variables
         std::vector<int> _layersToAdjust;
@@ -181,6 +182,10 @@ public:
         
         void setPDRevForHighFanout(int pdRevForHighFanout) {
                 _pdRevForHighFanout = pdRevForHighFanout;
+        }
+
+        void setAllowOverflow(bool allowOverflow) {
+                _allowOverflow = allowOverflow;
         }
 
         void printGrid();
