@@ -1,1 +1,1 @@
- > --Final routing length : 3455
+ > ---- Total wirelength: 14469.000000 um

@@ -113,6 +113,18 @@ void set_overflow_iterations(int iterations) {
         fastRouteKernel->setOverflowIterations(iterations);
 }
 
+void set_grid_origin(long x, long y) {
+        fastRouteKernel->setGridOrigin(x, y);
+}
+
+void set_pdrev_for_high_fanout(int pdRevForHighFanout) {
+        fastRouteKernel->setPDRevForHighFanout(pdRevForHighFanout);
+}
+
+void set_allow_overflow(bool allowOverflow) {
+        fastRouteKernel->setAllowOverflow(allowOverflow);
+}
+
 void start_fastroute() {
         fastRouteKernel->startFastRoute();
 }

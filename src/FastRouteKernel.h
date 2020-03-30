@@ -79,6 +79,9 @@ private:
         unsigned _dbId;
         const int _selectedMetal = 3;
         int _overflowIterations = 50;
+        Coordinate _gridOrigin = Coordinate(0, 0);
+        int _pdRevForHighFanout = -1;
+        bool _allowOverflow = false;
         
         // Layer adjustment variables
         std::vector<int> _layersToAdjust;
@@ -116,6 +119,7 @@ private:
         void computeUserLayerAdjustments();
         void computeRegionAdjustments(Coordinate lowerBound, Coordinate upperBound, int layer, float reductionPercentage);
         void computeObstaclesAdjustments();
+        void computeWirelength();
         
         // aux functions
         RoutingLayer getRoutingLayerByIndex(int index);
@@ -123,6 +127,8 @@ private:
         void addRemainingGuides(std::vector<FastRoute::NET> &globalRoute);
         void mergeBox(std::vector<Box>& guideBox);
         Box globalRoutingToBox(const FastRoute::ROUTE &route);
+        bool segmentsOverlaps(ROUTE seg0, ROUTE seg1, ROUTE &newSeg);
+        void mergeSegments(FastRoute::NET &net);
         
         // check functions
         void checkPinPlacement();
@@ -170,6 +176,18 @@ public:
                 _overflowIterations = iterations;
         }
         
+        void setGridOrigin(long x, long y) {
+                _gridOrigin = Coordinate(x, y);
+        }
+        
+        void setPDRevForHighFanout(int pdRevForHighFanout) {
+                _pdRevForHighFanout = pdRevForHighFanout;
+        }
+
+        void setAllowOverflow(bool allowOverflow) {
+                _allowOverflow = allowOverflow;
+        }
+
         void printGrid();
         void printHeader();
         
