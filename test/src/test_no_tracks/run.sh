@@ -16,6 +16,7 @@ grep -q "missing track structure" log.txt
 
 status=$?
 
+mkdir -p ../../results/test_no_tracks
 cp log.txt ../../results/test_no_tracks/fastroute.log
 
 if [ $status -eq 0 ]; then

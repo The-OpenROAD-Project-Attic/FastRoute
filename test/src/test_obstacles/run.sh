@@ -50,6 +50,7 @@ $binary -no_init < run.tcl > test.log 2>&1
 
 obs_report=$(grep -e '----Processing' ./test.log)
 
+mkdir -p ../../results/test_obstacles
 cp test.log ../../results/test_obstacles/fastroute.log
 
 if grep -q -e "$obs_report" golden.obs;

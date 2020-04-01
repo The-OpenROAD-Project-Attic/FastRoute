@@ -68,6 +68,7 @@ else
 	difference=$(( 100-$ratio ))
 fi
 
+mkdir -p ../../results/test_wl
 cp test.log ../../results/test_wl/fastroute.log
 
 if [ $difference -lt 5 ];

@@ -51,6 +51,7 @@ $binary -no_init < run.tcl > log.txt 2>&1
 diff golden.guide out.guide > guides_diff.log
 status=$?
 
+mkdir -p ../../results/test_guides
 cp log.txt ../../results/test_guides/fastroute.log
 cp guides_diff.log ../../results/test_guides/
 

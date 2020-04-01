@@ -56,6 +56,7 @@ reported_wl=${reported_wl%.*}
 
 difference=0
 
+mkdir -p ../../results/test_overflow
 cp test.log ../../results/test_overflow/fastroute.log
 
 if [ $gold_wl -lt $reported_wl ];
