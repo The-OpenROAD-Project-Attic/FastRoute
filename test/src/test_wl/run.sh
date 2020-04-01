@@ -68,6 +68,8 @@ else
 	difference=$(( 100-$ratio ))
 fi
 
+cp test.log ../../results/test_wl/fastroute.log
+
 if [ $difference -lt 5 ];
 then
 	exit $GREEN

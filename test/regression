@@ -38,17 +38,11 @@
 
 test_script=./run.sh
 
-echo ""
-echo "************************"
-echo "* FastRoute unit tests *"
-echo "************************"
-echo ""
-
 testdir=$(cd "$(dirname "$0")" && pwd -P)
 binary=$testdir/../../../build/src/openroad
 failed=0
+passed=0
 
-echo " > FastRoute binary: $binary"
 if [ ! -e $binary ] ; 
 then
 	echo "    - Binary not found. Exiting...\n" 
@@ -58,7 +52,7 @@ fi
 for unit_test_path in ${testdir}/src/* ; 
 do
 	test_name=$(basename $unit_test_path)
-	echo " > Now running $test_name..."
+	echo -ne "$test_name"
 
 	if [ ! -e $unit_test_path/$test_script ] ; 
 	then
@@ -73,18 +67,18 @@ do
 
 	if [ $test_return_code == 0 ];
 	then
-		echo "     - Test returned GREEN (passed)"
-	elif [ $test_return_code == 1 ];
-	then
-		echo "     - Test return YELLOW (passed)"
+		echo " passed"
+		passed=$(( $passed+1 ))
 	else
-		echo "     - Test returned RED (failed)"
+		echo " failed"
 		failed=1
 	fi
 done
 
-echo ""
-echo "FastRoute tests finished!"
+echo "------------------------------------------------------"
+echo "Passed $passed"
+echo "See /OpenROAD/src/FastRoute/test/results for log files"
+echo "------------------------------------------------------"
 
 if [ $failed -gt 0 ]
 then

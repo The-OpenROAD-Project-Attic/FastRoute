@@ -56,6 +56,8 @@ reported_wl=${reported_wl%.*}
 
 difference=0
 
+cp test.log ../../results/test_overflow/fastroute.log
+
 if [ $gold_wl -lt $reported_wl ];
 then
 	gold_wl=$(( $gold_wl*100 ))

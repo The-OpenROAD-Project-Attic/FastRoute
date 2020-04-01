@@ -50,6 +50,9 @@ flexBinary="FlexRoute"
 $binary -no_init < run.tcl > log.txt 2>&1
 ./$flexBinary run_checker_input.param > test.log 2>&1
 
+cp log.txt ../../results/test_coverage/fastroute.log
+cp test.log ../../results/test_coverage/coverage.log
+
 if grep -q "complete post process guides ..." test.log;
 then
 	exit $GREEN

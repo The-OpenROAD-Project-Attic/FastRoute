@@ -16,6 +16,8 @@ grep -q "missing track structure" log.txt
 
 status=$?
 
+cp log.txt ../../results/test_no_tracks/fastroute.log
+
 if [ $status -eq 0 ]; then
     exit $GREEN
 else
