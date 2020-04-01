@@ -313,7 +313,7 @@ void DBWrapper::computeSpacingsAndMinWidth(int maxLayer) {
         }
 }
 
-void DBWrapper::initNetlist() {
+void DBWrapper::initNetlist(bool routeNetsWithPad) {
         Box dieArea(_grid->getLowerLeftX(), _grid->getLowerLeftY(),
                     _grid->getUpperRightX(), _grid->getUpperRightY(), -1);
         
@@ -359,13 +359,14 @@ void DBWrapper::initNetlist() {
                         odb::dbMTerm* mTerm = currITerm->getMTerm();
                         odb::dbMaster* master = mTerm->getMaster();
                         
-                        if (master->getType() == odb::dbMasterType::PAD ||
+                        if ((master->getType() == odb::dbMasterType::PAD ||
                             master->getType() == odb::dbMasterType::PAD_INPUT ||
                             master->getType() == odb::dbMasterType::PAD_OUTPUT ||
                             master->getType() == odb::dbMasterType::PAD_INOUT ||
                             master->getType() == odb::dbMasterType::PAD_POWER ||
                             master->getType() == odb::dbMasterType::PAD_SPACER ||
-                            master->getType() == odb::dbMasterType::PAD_AREAIO) {
+                            master->getType() == odb::dbMasterType::PAD_AREAIO) &&
+                            !routeNetsWithPad) {
                                 padFound = true;
                                 break;
                         }

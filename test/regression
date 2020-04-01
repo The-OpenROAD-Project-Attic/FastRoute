@@ -67,10 +67,10 @@ do
 
 	if [ $test_return_code == 0 ];
 	then
-		echo " passed"
+		echo " pass"
 		passed=$(( $passed+1 ))
 	else
-		echo " failed"
+		echo " fail"
 		failed=1
 	fi
 done

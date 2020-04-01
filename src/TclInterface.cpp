@@ -125,6 +125,10 @@ void set_allow_overflow(bool allowOverflow) {
         fastRouteKernel->setAllowOverflow(allowOverflow);
 }
 
+void set_route_nets_with_pad(bool routePad) {
+        fastRouteKernel->setRouteNetsWithPad(routePad);
+}
+
 void start_fastroute() {
         fastRouteKernel->startFastRoute();
 }
