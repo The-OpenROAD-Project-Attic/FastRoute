@@ -82,6 +82,7 @@ proc fastroute { args } {
     FastRoute::set_min_layer 1
   }
 
+  set max_layer -1
   if { [info exists keys(-max_routing_layer)] } {
     set max_layer $keys(-max_routing_layer)
     FastRoute::set_max_layer $max_layer
@@ -179,7 +180,16 @@ proc fastroute { args } {
     FastRoute::set_allow_overflow true
   }
 
+  for {set layer 1} {$layer <= $max_layer} {set layer [expr $layer+1]} {
+    if { [ord::db_layer_has_hor_tracks $layer] && \
+         [ord::db_layer_has_ver_tracks $layer] } {
+      continue
+    } else {
+      ord::error "missing track structure"
+    }
+  }
+
   FastRoute::start_fastroute
-  FastRoute::run_fastroute
-  FastRoute::write_guides
+    FastRoute::run_fastroute
+    FastRoute::write_guides
 }
