@@ -61,7 +61,7 @@ void DBWrapper::initGrid(int maxLayer) {
                 std::exit(1);
         }
         
-        odb::adsRect rect;
+        odb::Rect rect;
         block->getDieArea(rect);
         
         long lowerLeftX = rect.xMin();
@@ -382,7 +382,7 @@ void DBWrapper::initNetlist() {
                         
                         odb::dbInst* inst = currITerm->getInst();
                         inst->getOrigin(pX, pY);
-                        odb::adsPoint origin = odb::adsPoint(pX, pY);
+                        odb::Point origin = odb::Point(pX, pY);
                         odb::dbTransform transform(inst->getOrient(), origin);
                         
                         for (pinIter = mTermPins.begin(); pinIter != mTermPins.end(); pinIter++) {
@@ -397,7 +397,7 @@ void DBWrapper::initNetlist() {
                                 
                                 for (geomIter = geometries.begin(); geomIter != geometries.end(); geomIter++) {
                                         odb::dbBox* box = *geomIter;
-                                        odb::adsRect rect;
+                                        odb::Rect rect;
                                         box->getBox(rect);
                                         transform.apply(rect);
                                         
@@ -531,7 +531,7 @@ void DBWrapper::initObstacles() {
                 odb::dbMaster* master = currInst->getMaster();
                 
                 currInst->getOrigin(pX, pY);
-                odb::adsPoint origin = odb::adsPoint(pX, pY);
+                odb::Point origin = odb::Point(pX, pY);
                 
                 odb::dbTransform transform(currInst->getOrient(), origin);
                 
@@ -542,7 +542,7 @@ void DBWrapper::initObstacles() {
                         odb::dbBox* currBox = *boxIter;
                         int layer = currBox->getTechLayer()->getRoutingLevel();
                         
-                        odb::adsRect rect;
+                        odb::Rect rect;
                         currBox->getBox(rect);
                         transform.apply(rect);
 
@@ -585,7 +585,7 @@ void DBWrapper::initObstacles() {
                                         if (s->isVia()) {
                                                 continue;
                                         } else {
-                                                odb::adsRect wireRect;
+                                                odb::Rect wireRect;
                                                 s->getBox(wireRect);
                                                 int l = s->getTechLayer()->getRoutingLevel();
                                                 
@@ -607,7 +607,7 @@ void DBWrapper::initObstacles() {
                                         if (pshape.shape.isVia()) {
                                                 continue;
                                         } else {
-                                                odb::adsRect wireRect;
+                                                odb::Rect wireRect;
                                                 pshape.shape.getBox(wireRect);
                                                 int l = pshape.shape.getTechLayer()->getRoutingLevel();
                                                 

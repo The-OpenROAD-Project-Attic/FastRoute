@@ -38,11 +38,15 @@
 #ifndef MAKEFASTROUTE_H
 #define MAKEFASTROUTE_H
 
+namespace FastRoute {
+       class FastRouteKernel;
+}
+
 namespace ord {
 
 class OpenRoad;
 
-void * makeFastRoute();
+FastRoute::FastRouteKernel* makeFastRoute();
 
 void initFastRoute(OpenRoad *openroad);
 

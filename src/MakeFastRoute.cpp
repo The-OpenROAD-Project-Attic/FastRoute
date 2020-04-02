@@ -56,7 +56,7 @@ extern int Fastroute_Init(Tcl_Interp *interp);
 
 namespace ord {
 
-void *makeFastRoute()
+FastRoute::FastRouteKernel* makeFastRoute()
 {
         return FastRoute::fastRouteKernel;
 }
