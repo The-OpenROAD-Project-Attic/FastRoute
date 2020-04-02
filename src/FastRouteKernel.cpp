@@ -233,6 +233,13 @@ void FastRouteKernel::startFastRoute() {
 
 	if (_maxLength != -1) {
 		_maxRoutingLength = _maxLength * _grid.getDatabaseUnit();
+		for (int i = 1; i <= _maxRoutingLayer; i++) {
+			if (_layersMaxLength.find(i) == _layersMaxLength.end()) {
+				_layersMaxRoutingLength[i] = _maxRoutingLength;
+			} else {
+				_layersMaxRoutingLength[i] = _layersMaxLength[i] * _grid.getDatabaseUnit();
+			}
+		}
 	}
 
         _fastRoute.initAuxVar();
@@ -1412,7 +1419,7 @@ void FastRouteKernel::fixLongSegments() {
 			long segLen = std::abs(seg.finalX - seg.initX)
                                     + std::abs(seg.finalY - seg.initY);
 
-			if (segLen >= _maxRoutingLength) {
+			if (segLen >= _layersMaxRoutingLength[seg.finalLayer]) {
 				possibleViolation = true;
 			}
 		}
@@ -1441,7 +1448,7 @@ void FastRouteKernel::fixLongSegments() {
 				long segLen = std::abs(seg.getLastNode().getPosition().getX() - seg.getFirstNode().getPosition().getX())
 					    + std::abs(seg.getLastNode().getPosition().getY() - seg.getFirstNode().getPosition().getY());
 
-				if (segLen >= _maxRoutingLength) {
+				if (segLen >= _layersMaxRoutingLength[seg.getFirstNode().getLayer()]) {
 					segsToFix.push_back(seg);
 				}
 				seg = sTree.getSegmentByIndex(index);
@@ -1457,7 +1464,7 @@ void FastRouteKernel::fixLongSegments() {
 				    s.getFirstNode().getLayer() == seg.initLayer && s.getLastNode().getLayer() == seg.finalLayer) {
                                 	segment = seg;
 					std::vector<ROUTE> newSegs;
-					bool success = breakSegment(segment, _maxRoutingLength, newSegs);
+					bool success = breakSegment(segment, _layersMaxRoutingLength[seg.finalLayer], newSegs);
 					if (!success) {
 						continue;
 					}

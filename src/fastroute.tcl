@@ -47,7 +47,8 @@ sta::define_cmd_args "fastroute" {[-output_file out_file] \
                                            [-alpha alpha] \
                                            [-verbose verbose] \
                                            [-overflow_iterations iterations] \
-					   [-max_routing_length max_length] \
+					                                 [-max_routing_length max_length] \
+                                           [-max_length_per_layer max_length_per_layer] \
 }
 
 proc fastroute { args } {
@@ -55,7 +56,7 @@ proc fastroute { args } {
     keys {-output_file -capacity_adjustment -min_routing_layer -max_routing_layer \
           -pitches_in_tile -alpha -verbose -layers_adjustments \
           -regions_adjustments -nets_alphas_priorities -overflow_iterations \
-	  -max_routing_length} \
+	  -max_routing_length -max_length_per_layer} \
     flags {-unidirectional_routing -clock_net_routing}
 
   if { [info exists keys(-output_file)] } {
@@ -159,8 +160,19 @@ proc fastroute { args } {
   }
 
   if { [info exists keys(-max_routing_length)] } {
-	set max_length $keys(-max_routing_length)
-	FastRoute::set_max_routing_length $max_length
+	  set max_length $keys(-max_routing_length)
+	  FastRoute::set_max_routing_length $max_length
+  }
+
+  if { [info exists keys(-max_length_per_layer)] } {
+    set max_length_per_layer $keys(-max_length_per_layer)
+    foreach length_per_layer $max_length_per_layer {
+      set layer [lindex $length_per_layer 0]
+      set length [lindex $length_per_layer 1]
+
+      puts "Max length in layer $layer:  $length um"
+      FastRoute::add_layer_max_length $layer $length
+    }
   }
 
   FastRoute::start_fastroute

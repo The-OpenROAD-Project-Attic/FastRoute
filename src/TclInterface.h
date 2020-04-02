@@ -61,6 +61,7 @@ void set_alpha_for_net(char * netName, float alpha);
 void set_verbose(int v);
 void set_overflow_iterations(int iterations);
 void set_max_routing_length(float maxLength);
+void add_layer_max_length(int layer, float length);
 
 // Run
 void start_fastroute();

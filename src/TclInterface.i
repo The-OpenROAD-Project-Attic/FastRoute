@@ -73,6 +73,8 @@ extern void set_overflow_iterations(int iterations);
 
 extern void set_max_routing_length(float maxLength);
 
+extern void add_layer_max_length(int layer, float length);
+
 extern void start_fastroute();
 
 extern void run_fastroute();
