@@ -121,6 +121,22 @@ void add_layer_max_length(int layer, float length) {
         fastRouteKernel->addLayerMaxLength(layer, length);
 }
 
+void set_grid_origin(long x, long y) {
+        fastRouteKernel->setGridOrigin(x, y);
+}
+
+void set_pdrev_for_high_fanout(int pdRevForHighFanout) {
+        fastRouteKernel->setPDRevForHighFanout(pdRevForHighFanout);
+}
+
+void set_allow_overflow(bool allowOverflow) {
+        fastRouteKernel->setAllowOverflow(allowOverflow);
+}
+
+void set_route_nets_with_pad(bool routePad) {
+        fastRouteKernel->setRouteNetsWithPad(routePad);
+}
+
 void start_fastroute() {
         fastRouteKernel->startFastRoute();
 }

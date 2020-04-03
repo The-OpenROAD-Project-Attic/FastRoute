@@ -67,8 +67,8 @@ void DBWrapper::initGrid(int maxLayer) {
         long lowerLeftX = rect.xMin();
         long lowerLeftY = rect.yMin();
         
-        long upperRightX = rect.xMax() - lowerLeftX;
-        long upperRightY = rect.yMax() - lowerLeftY;
+        long upperRightX = rect.xMax();
+        long upperRightY = rect.yMax();
         
         long tileWidth = _grid->getPitchesInTile() * trackSpacing;
         long tileHeight = _grid->getPitchesInTile() * trackSpacing;
@@ -313,7 +313,10 @@ void DBWrapper::computeSpacingsAndMinWidth(int maxLayer) {
         }
 }
 
-void DBWrapper::initNetlist() {
+void DBWrapper::initNetlist(bool routeNetsWithPad) {
+        Box dieArea(_grid->getLowerLeftX(), _grid->getLowerLeftY(),
+                    _grid->getUpperRightX(), _grid->getUpperRightY(), -1);
+        
         odb::dbBlock* block = _chip->getBlock();
         if (!block) {
                 std::cout << "[ERROR] ads::dbBlock not found! Exiting...\n";
@@ -339,7 +342,7 @@ void DBWrapper::initNetlist() {
                     currNet->getSWires().size() > 0) {
                         continue;
                 }
-                std::string netName =currNet->getConstName();
+                std::string netName = currNet->getConstName();
                 std::string signalType = currNet->getSigType().getString();
                 
                 // Iterate through all instance pins
@@ -357,12 +360,14 @@ void DBWrapper::initNetlist() {
                         odb::dbMTerm* mTerm = currITerm->getMTerm();
                         odb::dbMaster* master = mTerm->getMaster();
                         
-                        if (master->getType() == odb::dbMasterType::PAD ||
+                        if ((master->getType() == odb::dbMasterType::PAD ||
                             master->getType() == odb::dbMasterType::PAD_INPUT ||
                             master->getType() == odb::dbMasterType::PAD_OUTPUT ||
                             master->getType() == odb::dbMasterType::PAD_INOUT ||
                             master->getType() == odb::dbMasterType::PAD_POWER ||
-                            master->getType() == odb::dbMasterType::PAD_SPACER) {
+                            master->getType() == odb::dbMasterType::PAD_SPACER ||
+                            master->getType() == odb::dbMasterType::PAD_AREAIO) &&
+                            !routeNetsWithPad) {
                                 padFound = true;
                                 break;
                         }
@@ -412,6 +417,9 @@ void DBWrapper::initNetlist() {
                                         upperBound = Coordinate(rect.xMax(), 
                                                                 rect.yMax());
                                         pinBox = Box(lowerBound, upperBound, pinLayer);
+                                        if (!dieArea.inside(pinBox)) {
+                                                std::cout << "[WARNING] Pin " << pinName << " is outside die area\n";
+                                        }
                                         pinBoxes[pinLayer].push_back(pinBox);
                                 }
                                 
@@ -474,6 +482,9 @@ void DBWrapper::initNetlist() {
                                 upperBound = Coordinate(currBTermBox->xMax(), 
                                                         currBTermBox->yMax());
                                 pinBox = Box(lowerBound, upperBound, pinLayer);
+                                if (!dieArea.inside(pinBox)) {
+                                        std::cout << "[WARNING] Pin " << pinName << " is outside die area\n";
+                                }
                                 pinBoxes[pinLayer].push_back(pinBox);
                         }
                         
@@ -491,6 +502,9 @@ void DBWrapper::initNetlist() {
 }
 
 void DBWrapper::initObstacles() {
+        Box dieArea(_grid->getLowerLeftX(), _grid->getLowerLeftY(),
+                    _grid->getUpperRightX(), _grid->getUpperRightY(), -1);
+        
         // Get routing obstructions
         odb::dbTech* tech = _db->getTech();
         if (!tech) {
@@ -516,6 +530,9 @@ void DBWrapper::initObstacles() {
                 Coordinate lowerBound = Coordinate(obstructBox->xMin(), obstructBox->yMin());
                 Coordinate upperBound = Coordinate(obstructBox->xMax(), obstructBox->yMax());
                 Box obstacleBox = Box(lowerBound, upperBound, layer);
+                if (!dieArea.inside(obstacleBox)) {
+                        std::cout << "[WARNING] Found obstacle outside die area\n";
+                }
                 _grid->addObstacle(layer, obstacleBox);
         }
         
@@ -549,6 +566,9 @@ void DBWrapper::initObstacles() {
                         Coordinate lowerBound = Coordinate(rect.xMin(), rect.yMin());
                         Coordinate upperBound = Coordinate(rect.xMax(), rect.yMax());
                         Box obstacleBox = Box(lowerBound, upperBound, layer);
+                        if (!dieArea.inside(obstacleBox)) {
+                                std::cout << "[WARNING] Found obstacle outside die area in instance " << currInst->getConstName() << "\n";
+                        }
                         _grid->addObstacle(layer, obstacleBox);
                 }
         }
@@ -592,6 +612,10 @@ void DBWrapper::initObstacles() {
                                                 Coordinate lowerBound = Coordinate(wireRect.xMin(), wireRect.yMin());
                                                 Coordinate upperBound = Coordinate(wireRect.xMax(), wireRect.yMax());
                                                 Box obstacleBox = Box(lowerBound, upperBound, l);
+                                                if (!dieArea.inside(obstacleBox)) {
+                                                        std::cout << "[WARNING] Net " << currNet->getConstName()
+                                                                  << " has wires outside die area\n";
+                                                }
                                                 _grid->addObstacle(l, obstacleBox);
                                         }
                                 }
@@ -614,6 +638,10 @@ void DBWrapper::initObstacles() {
                                                 Coordinate lowerBound = Coordinate(wireRect.xMin(), wireRect.yMin());
                                                 Coordinate upperBound = Coordinate(wireRect.xMax(), wireRect.yMax());
                                                 Box obstacleBox = Box(lowerBound, upperBound, l);
+                                                if (!dieArea.inside(obstacleBox)) {
+                                                        std::cout << "[WARNING] Net " << currNet->getConstName()
+                                                                  << " has wires outside die area\n";
+                                                }
                                                 _grid->addObstacle(l, obstacleBox);
                                         }
                                 }

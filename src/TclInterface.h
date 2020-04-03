@@ -62,6 +62,10 @@ void set_verbose(int v);
 void set_overflow_iterations(int iterations);
 void set_max_routing_length(float maxLength);
 void add_layer_max_length(int layer, float length);
+void set_grid_origin(long x, long y);
+void set_pdrev_for_high_fanout(int pdRevForHighFanout);
+void set_allow_overflow(bool allowOverflow);
+void set_route_nets_with_pad(bool routePad);
 
 // Run
 void start_fastroute();

@@ -43,6 +43,7 @@
 #include <utility>
 #include <fstream>
 #include <istream>
+#include <chrono>
 
 #include "FastRouteKernel.h"
 
@@ -77,6 +78,8 @@ int FastRouteKernel::run() {
         
         _fastRoute.setVerbose(_verbose);
         _fastRoute.setOverflowIterations(_overflowIterations);
+        _fastRoute.setPDRevForHighFanout(_pdRevForHighFanout);
+        _fastRoute.setAllowOverflow(_allowOverflow);
         
         std::cout << " > Initializing grid...\n";
         initGrid();
@@ -140,10 +143,13 @@ int FastRouteKernel::run() {
         
         writeGuides();
         
+        _fastRoute.deleteGlobalArrays();
+        
         return 0;
 }
 
 void FastRouteKernel::startFastRoute() {
+        std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
         printHeader();
         _dbWrapper.setDB(_dbId);
         if (_unidirectionalRoute) {
@@ -165,9 +171,15 @@ void FastRouteKernel::startFastRoute() {
                 _fastRoute.usePdRev();
                 _fastRoute.setAlpha(_alpha);
         }
+
+        if (_pdRevForHighFanout != -1) {
+                _fastRoute.setAlpha(_alpha);
+        }
         
         _fastRoute.setVerbose(_verbose);
         _fastRoute.setOverflowIterations(_overflowIterations);
+        _fastRoute.setPDRevForHighFanout(_pdRevForHighFanout);
+        _fastRoute.setAllowOverflow(_allowOverflow);
         
         std::cout << " > Params:\n";
         std::cout << " > ---- Min routing layer: " << _minRoutingLayer << "\n";
@@ -175,7 +187,11 @@ void FastRouteKernel::startFastRoute() {
         std::cout << " > ---- Global adjustment: " << _adjustment << "\n";
         std::cout << " > ---- Unidirectional routing: " << _unidirectionalRoute << "\n";
         std::cout << " > ---- Clock net routing: " << _clockNetRouting << "\n";
-	std::cout << " > ---- Max routing length: " << _maxLength << "um\n";
+	    std::cout << " > ---- Max routing length: " << _maxLength << "um\n";
+        
+        if (_gridOrigin.getX() != 0 && _gridOrigin.getY() != 0) {
+            std::cout << " > ---- Grid origin: (" << _gridOrigin.getX() << ", " << _gridOrigin.getY() << ")\n";
+        }
         
         std::cout << " > Initializing grid...\n";
         initGrid();
@@ -243,24 +259,43 @@ void FastRouteKernel::startFastRoute() {
 	}
 
         _fastRoute.initAuxVar();
+        std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
+        
+        std::cout << " > Elapsed time: " << (std::chrono::duration_cast<std::chrono::microseconds>(end - begin).count()) /1000000.0 << "\n";
 }
 
 void FastRouteKernel::runFastRoute() {
+        std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
+        
         std::cout << " > Running FastRoute...\n";
         _fastRoute.run(_result);
         std::cout << " > Running FastRoute... Done!\n";
         
         std::cout << " > Fixing long segments...\n";
         if (_maxRoutingLength == -1) {
-		std::cout << "[WARNING] Max routing length not defined. Skipping...\n";
-	} else {
-		fixLongSegments();
-        	std::cout << " > Fixing long segments... Done!\n";
-	}
+		        std::cout << "[WARNING] Max routing length not defined. Skipping...\n";
+    	} else {
+    		fixLongSegments();
+            	std::cout << " > Fixing long segments... Done!\n";
+    	}
+        computeWirelength();
+        
+        _fastRoute.deleteGlobalArrays();
+        
+        std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
+        std::cout << " > ---- Elapsed time: " << (std::chrono::duration_cast<std::chrono::microseconds>(end - begin).count()) /1000000.0 << "\n";
+        std::cout << " > \n";
+
 }
 
 void FastRouteKernel::initGrid() {        
         _dbWrapper.initGrid(_maxRoutingLayer);
+        
+        if (_gridOrigin.getX() != 0 && _gridOrigin.getY() != 0) {
+                _grid.setLowerLeftX(_gridOrigin.getX());
+                _grid.setLowerLeftY(_gridOrigin.getY());
+        }
+        
         _dbWrapper.computeCapacities(_maxRoutingLayer);
         _dbWrapper.computeSpacingsAndMinWidth(_maxRoutingLayer);
         _dbWrapper.initObstacles();
@@ -308,7 +343,7 @@ void FastRouteKernel::setSpacingsAndMinWidths() {
 }
 
 void FastRouteKernel::initializeNets() {
-        _dbWrapper.initNetlist();
+        _dbWrapper.initNetlist(_routeNetsWithPad);
         
         std::cout << " > ----Checking pin placement...\n";
         checkPinPlacement();
@@ -845,7 +880,9 @@ void FastRouteKernel::writeGuides() {
         
         std::cout << " > Num routed nets: " << _result.size() << "\n";
         int finalLayer;
-        for (FastRoute::NET &netRoute : _result) {
+
+        for (FastRoute::NET netRoute : _result) {
+                mergeSegments(netRoute);
                 guideFile << netRoute.name << "\n";
                 guideFile << "(\n";
                 std::vector<Box> guideBox;
@@ -865,7 +902,7 @@ void FastRouteKernel::writeGuides() {
                         }
                         if (route.initLayer == route.finalLayer) {
                                 if (route.initLayer < _minRoutingLayer && 
-                                    route.initX != route.finalX && route.initY != route.finalX) {
+                                    route.initX != route.finalX && route.initY != route.finalY) {
                                         std::cout << " > [ERROR] Routing with guides in blocked metal\n"
                                                 " > ---- Net: " << netRoute.name << "\n";
                                         std::exit(1);
@@ -1186,6 +1223,23 @@ void FastRouteKernel::checkSinksAndSource() {
         if (invalid) {
                 std::exit(1);
         }
+}
+
+void FastRouteKernel::computeWirelength() {
+        DBU totalWirelength = 0;
+        for (FastRoute::NET netRoute : _result) {
+                for (ROUTE route : netRoute.route) {
+                        DBU routeWl = std::abs(route.finalX - route.initX) +
+                                      std::abs(route.finalY - route.initY);
+                        totalWirelength += routeWl;
+
+                        if (routeWl > 0) {
+                                totalWirelength += (_grid.getTileWidth() + _grid.getTileHeight())/2;
+                        }
+                }
+        }
+        std::cout << " > Final report:\n";
+        std::cout << std::fixed << " > ---- Total wirelength: " << (float)totalWirelength/_grid.getDatabaseUnit() << " um\n";
 }
 
 void FastRouteKernel::mergeSegments(FastRoute::NET &net) {

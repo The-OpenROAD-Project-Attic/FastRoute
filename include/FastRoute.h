@@ -84,6 +84,7 @@ class FT {
         void initAuxVar();
         int run(std::vector<NET> &);
         std::vector<NET> getResults();
+        void deleteGlobalArrays();
 
         int getEdgeCapacity(long x1, long y1, int l1, long x2, long y2, int l2);
 	int getEdgeCurrentResource(long x1, long y1, int l1, long x2, long y2, int l2);
@@ -93,6 +94,8 @@ class FT {
         void setAlpha(float a);
         void setVerbose(int v);
         void setOverflowIterations(int iterations);
+        void setPDRevForHighFanout(int pdRevHihgFanout);
+        void setAllowOverflow(bool allow);
 };
 }  // namespace FastRoute
 #endif /* __FASTROUTE_API__ */

@@ -72,6 +72,7 @@ public:
         Coordinate getMiddle();
         
         bool overlap(Box box);
+        bool inside(Box box);
 };
 
 }
