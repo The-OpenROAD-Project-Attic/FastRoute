@@ -47,14 +47,19 @@ sta::define_cmd_args "fastroute" {[-output_file out_file] \
                                            [-alpha alpha] \
                                            [-verbose verbose] \
                                            [-overflow_iterations iterations] \
+                                           [-grid_origin origin] \
+                                           [-pdrev_for_high_fanout fanout] \
+                                           [-allow_overflow] \
+                                           [-route_nets_with_pad] \
 }
 
 proc fastroute { args } {
   sta::parse_key_args "fastroute" args \
     keys {-output_file -capacity_adjustment -min_routing_layer -max_routing_layer \
           -pitches_in_tile -alpha -verbose -layers_adjustments \
-          -regions_adjustments -nets_alphas_priorities -overflow_iterations} \
-    flags {-unidirectional_routing -clock_net_routing}
+          -regions_adjustments -nets_alphas_priorities -overflow_iterations \
+          -grid_origin -pdrev_for_high_fanout} \
+    flags {-unidirectional_routing -clock_net_routing -allow_overflow -route_nets_with_pad}
 
   if { [info exists keys(-output_file)] } {
     set out_file $keys(-output_file)
@@ -78,6 +83,7 @@ proc fastroute { args } {
     FastRoute::set_min_layer 1
   }
 
+  set max_layer -1
   if { [info exists keys(-max_routing_layer)] } {
     set max_layer $keys(-max_routing_layer)
     FastRoute::set_max_layer $max_layer
@@ -156,7 +162,39 @@ proc fastroute { args } {
     FastRoute::set_pdrev false
   }
 
+  if { [info exists keys(-grid_origin)] } {
+    set origin $keys(-grid_origin)
+
+    set origin_x [lindex $origin 0]
+    set origin_y [lindex $origin 1]
+
+    FastRoute::set_grid_origin $origin_x $origin_y
+  }
+
+  if { [info exists keys(-pdrev_for_high_fanout)] } {
+    set faonut $keys(-pdrev_for_high_fanout)
+
+    FastRoute::set_pdrev_for_high_fanout $faonut
+  }
+
+  if { [info exists flags(-allow_overflow)] } {
+    FastRoute::set_allow_overflow true
+  }
+
+  if { [info exists flags(-route_nets_with_pad)] } {
+    FastRoute::set_route_nets_with_pad true
+  }
+
+  for {set layer 1} {$layer <= $max_layer} {set layer [expr $layer+1]} {
+    if { [ord::db_layer_has_hor_tracks $layer] && \
+         [ord::db_layer_has_ver_tracks $layer] } {
+      continue
+    } else {
+      ord::error "missing track structure"
+    }
+  }
+
   FastRoute::start_fastroute
-  FastRoute::run_fastroute
-  FastRoute::write_guides
+    FastRoute::run_fastroute
+    FastRoute::write_guides
 }

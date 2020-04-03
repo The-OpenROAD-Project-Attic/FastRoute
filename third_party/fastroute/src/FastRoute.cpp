@@ -66,6 +66,7 @@ int MD = 0;
 void FT::setGridsAndLayers(int x, int y, int nLayers) {
         xGrid = x;
         yGrid = y;
+        maxGrid = std::max(x, y);
         numLayers = nLayers;
         numGrids = xGrid * yGrid;
         
@@ -97,6 +98,9 @@ void FT::setGridsAndLayers(int x, int y, int nLayers) {
         d13D = new int[numLayers*yGrid*xGrid];
         d23D = new short[numLayers*yGrid*xGrid];
         
+        d1 = new float[maxGrid * maxGrid];
+        d2 = new float[maxGrid * maxGrid];
+        
         vCapacity3D = new int[numLayers];
         hCapacity3D = new int[numLayers];
         
@@ -121,6 +125,17 @@ void FT::setGridsAndLayers(int x, int y, int nLayers) {
         for (int i = 0; i < numLayers; i++) {
                 viaLink[i] = new int[MAXLEN];
         }
+        
+        costHVH = new float[maxGrid];  // Horizontal first Z
+        costVHV = new float[maxGrid];  // Vertical first Z
+        costH = new float[maxGrid];    // Horizontal segment cost
+        costV = new float[maxGrid];    // Vertical segment cost
+        costLR = new float[maxGrid];   // Left and right boundary cost
+        costTB = new float[maxGrid];   // Top and bottom boundary cost
+
+        costHVHtest = new float[maxGrid];  // Vertical first Z
+        costVtest = new float[maxGrid];    // Vertical segment cost
+        costTBtest = new float[maxGrid];   // Top and bottom boundary cost
 }
 
 void FT::addVCapacity(int verticalCapacity, int layer) {
@@ -430,7 +445,7 @@ void FT::initAuxVar() {
                 parentY3[i] = (short *)calloc(xGrid, sizeof(short));
         }
 
-        pop_heap2 = (Bool *)calloc(yGrid * XRANGE, sizeof(Bool));
+        pop_heap2 = (Bool *)calloc(yGrid * xGrid, sizeof(Bool));
 
         // allocate memory for priority queue
         heap1 = (float **)calloc((yGrid * xGrid), sizeof(float *));
@@ -497,7 +512,7 @@ int FT::run(std::vector<NET> &result) {
         char degreeFile[STRINGLEN];
         char optionS[STRINGLEN];
         clock_t t1, t2, t3, t4;
-        float gen_brk_Time, reading_Time, P1_Time, P2_Time, P3_Time, maze_Time, totalTime, congestionmap_time;
+        float gen_brk_Time, P1_Time, P2_Time, P3_Time, maze_Time, totalTime, congestionmap_time;
         int iter, last_totalOverflow, diff_totalOverflow, enlarge, ripup_threshold;
         int i, j, past_overflow, cur_overflow;
         int L_afterSTOP;
@@ -611,9 +626,6 @@ int FT::run(std::vector<NET> &result) {
         //	past_cong = getOverflow2Dmaze( &maxOverflow);
 
         t3 = clock();
-        reading_Time = (float)(t3 - t2) / CLOCKS_PER_SEC;
-        if (verbose > 1)
-                printf(" > --LV Time: %f sec\n", reading_Time);
         InitEstUsage();
 
         i = 1;
@@ -816,9 +828,13 @@ int FT::run(std::vector<NET> &result) {
                 }
         }
         
-        if (totalOverflow > 0) {
+        if (totalOverflow > 0 && !allowOverflow) {
                 printf("[ERROR] FastRoute cannot handle very congested design\n");
                 std::exit(2);
+        }
+
+        if (allowOverflow && totalOverflow > 0) {
+                printf("[WARNING] Global routing finished with overflow!");
         }
 
         if (minofl > 0) {
@@ -886,11 +902,9 @@ int FT::run(std::vector<NET> &result) {
 
         t4 = clock();
         maze_Time = (float)(t4 - t1) / CLOCKS_PER_SEC;
-        printf(" > --Final routing length : %d\n", finallength);
-        printf(" > --Final number of via  : %d\n", numVia);
-        printf(" > --Final total length 1 : %d\n", finallength + numVia);
-        printf(" > --Final total length 3 : %d\n", (finallength + 3 * numVia));
-        printf(" > --3D runtime: %f sec\n", maze_Time);
+        printf(" > --Final usage          : %d\n", finallength);
+        printf(" > --Final number of vias : %d\n", numVia);
+        printf(" > --Final usage 3D       : %d\n", (finallength + 3 * numVia));
 
         std::cout << " > --Getting results...\n";
         result = getResults();
@@ -902,6 +916,75 @@ int FT::run(std::vector<NET> &result) {
          * this function call for now.> */
         /* freeAllMemory(); */
         return (1);
+}
+
+void FT::deleteGlobalArrays() {
+        for (int i = 0; i < yGrid; i++) {
+                delete[] HV[i];
+        }
+        delete[] HV;
+        
+        for (int i = 0; i < yGrid; i++) {
+                delete[] hyperV[i];
+        }
+        delete[] hyperV;
+        
+        for (int i = 0; i < yGrid; i++) {
+                delete[] hyperH[i];
+        }
+        delete[] hyperH;
+        
+        for (int i = 0; i < yGrid; i++) {
+                delete[] inRegion[i];
+        }
+        delete[] inRegion;
+        
+        for (int i = 0; i < yGrid; i++) {
+                delete[] corrEdge[i];
+        }
+        delete[] corrEdge;
+        
+        delete[] d13D;
+        delete[] d23D;
+        
+        delete[] d1;
+        delete[] d2;
+        
+        delete[] vCapacity3D;
+        delete[] hCapacity3D;
+        
+        delete[] MinWidth;
+        delete[] MinSpacing;
+        delete[] ViaSpacing;
+        
+        delete[] gridHs;
+        delete[] gridVs;
+        
+        for (int i = 0; i < numLayers; i++) {
+                delete[] layerGrid[i];
+        }
+        delete[] layerGrid;
+        
+        for (int i = 0; i < numLayers; i++) {
+                delete[] gridD[i];
+        }
+        delete[] gridD;
+        
+        for (int i = 0; i < numLayers; i++) {
+                delete[] viaLink[i];
+        }
+        delete[] viaLink;
+        
+        delete[] costHVH;
+        delete[] costVHV;
+        delete[] costH;
+        delete[] costV;
+        delete[] costLR;
+        delete[] costTB;
+
+        delete[] costHVHtest;
+        delete[] costVtest;
+        delete[] costTBtest;
 }
 
 void FT::usePdRev(){
@@ -918,6 +1001,14 @@ void FT::setVerbose(int v){
 
 void FT::setOverflowIterations(int iterations){
         overflowIterations = iterations;
+}
+
+void FT::setPDRevForHighFanout(int pdRevHihgFanout){
+        pdRevForHighFanout = pdRevHihgFanout;
+}
+
+void FT::setAllowOverflow(bool allow) {
+        allowOverflow = allow;
 }
 
 }  // namespace FastRoute

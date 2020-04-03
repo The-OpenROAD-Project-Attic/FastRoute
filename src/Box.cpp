@@ -69,4 +69,15 @@ bool Box::overlap(Box box) {
         return (dx < 0 && dy < 0);
 }
 
+bool Box::inside(Box box) {
+        return (box.getLowerBound().getX() >= _lowerBound.getX()) &&
+               (box.getLowerBound().getX() <= _upperBound.getX()) &&
+               (box.getLowerBound().getY() >= _lowerBound.getY()) &&
+               (box.getLowerBound().getY() <= _upperBound.getY()) &&
+               (box.getUpperBound().getX() >= _lowerBound.getX()) &&
+               (box.getUpperBound().getX() <= _upperBound.getX()) &&
+               (box.getUpperBound().getY() >= _lowerBound.getY()) &&
+               (box.getUpperBound().getY() <= _upperBound.getY());
+}
+
 }
