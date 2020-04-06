@@ -882,7 +882,6 @@ void FastRouteKernel::writeGuides() {
         int finalLayer;
 
         for (FastRoute::NET netRoute : _result) {
-                mergeSegments(netRoute);
                 guideFile << netRoute.name << "\n";
                 guideFile << "(\n";
                 std::vector<Box> guideBox;
