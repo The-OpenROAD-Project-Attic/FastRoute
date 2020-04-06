@@ -35,7 +35,7 @@
 // POSSIBILITY OF SUCH DAMAGE.
 ////////////////////////////////////////////////////////////////////////////////
 
-#include "StaMain.hh"
+#include "sta/StaMain.hh"
 #include "MakeFastRoute.h"
 #include "openroad/OpenRoad.hh"
 #include "FastRouteKernel.h"

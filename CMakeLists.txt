@@ -93,7 +93,7 @@ target_include_directories(${LIB_NAME} PUBLIC
         ${CMAKE_CURRENT_SOURCE_DIR}/third_party/pdrev/include
         ${OPENDB_HOME}/include/
         ${OPENROAD_HOME}/include
-        ${OPENSTA_HOME}/app
+        ${OPENSTA_HOME}/include
         ${FASTROUTE_HOME}/src
 	${TCL_INCLUDE_PATH}
         )
