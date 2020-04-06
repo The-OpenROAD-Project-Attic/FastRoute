@@ -557,6 +557,49 @@ void DBWrapper::initObstacles() {
                         }
                         _grid->addObstacle(layer, obstacleBox);
                 }
+
+                odb::dbSet<odb::dbMTerm> mTerms = master->getMTerms();
+                odb::dbSet<odb::dbMTerm>::iterator termIter;
+
+                for (termIter = mTerms.begin(); termIter != mTerms.end(); termIter++) {
+                        odb::dbMTerm* mTerm = *termIter;
+                        odb::dbSet<odb::dbMPin> mTermPins = mTerm->getMPins();
+                        odb::dbSet<odb::dbMPin>::iterator pinIter;
+
+                        for (pinIter = mTermPins.begin(); pinIter != mTermPins.end(); pinIter++) {
+                                Coordinate lowerBound;
+                                Coordinate upperBound;
+                                Box pinBox;
+                                int pinLayer;
+
+                                odb::dbMPin* currMTermPin = *pinIter;
+                                odb::dbSet<odb::dbBox> geometries = currMTermPin->getGeometry();
+                                odb::dbSet<odb::dbBox>::iterator geomIter;
+
+                                for (geomIter = geometries.begin(); geomIter != geometries.end(); geomIter++) {
+                                        odb::dbBox* box = *geomIter;
+                                        odb::Rect rect;
+                                        box->getBox(rect);
+                                        transform.apply(rect);
+
+                                        odb::dbTechLayer* techLayer = box->getTechLayer();
+                                        if (techLayer->getType().getValue() != odb::dbTechLayerType::ROUTING) {
+                                                continue;
+                                        }
+
+                                        pinLayer = techLayer->getRoutingLevel();
+                                        lowerBound = Coordinate(rect.xMin(), 
+                                                                rect.yMin());
+                                        upperBound = Coordinate(rect.xMax(), 
+                                                                rect.yMax());
+                                        pinBox = Box(lowerBound, upperBound, pinLayer);
+                                        if (!dieArea.inside(pinBox)) {
+                                                std::cout << "[WARNING] Found pin outside die area in instance " << currInst->getConstName() << "\n";
+                                        }
+                                        _grid->addObstacle(pinLayer, pinBox);
+                                }
+                        }
+                }
         }
         
         // Get nets obstructions (routing wires and pdn wires)
