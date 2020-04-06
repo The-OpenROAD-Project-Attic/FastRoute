@@ -47,7 +47,7 @@ sta::define_cmd_args "fastroute" {[-output_file out_file] \
                                            [-alpha alpha] \
                                            [-verbose verbose] \
                                            [-overflow_iterations iterations] \
-					                                 [-max_routing_length max_length] \
+					   [-max_routing_length max_length] \
                                            [-max_length_per_layer max_length_per_layer] \
                                            [-grid_origin origin] \
                                            [-pdrev_for_high_fanout fanout] \
@@ -60,7 +60,7 @@ proc fastroute { args } {
     keys {-output_file -capacity_adjustment -min_routing_layer -max_routing_layer \
           -pitches_in_tile -alpha -verbose -layers_adjustments \
           -regions_adjustments -nets_alphas_priorities -overflow_iterations \
-          -grid_origin -pdrev_for_high_fanout} \
+          -grid_origin -pdrev_for_high_fanout -max_routing_length -max_length_per_layer} \
     flags {-unidirectional_routing -clock_net_routing -allow_overflow -route_nets_with_pad}
 
   if { [info exists keys(-output_file)] } {
