@@ -61,9 +61,9 @@ public:
         void addSegment(Segment segment);
         void addNode(Node node);
 
-	void printSegments();
-		
-	void setSegments(std::vector<Segment> segments) { _segments = segments; }
+        void printSegments();
+                
+        void setSegments(std::vector<Segment> segments) { _segments = segments; }
         
         bool nodeExists(Node node);
         bool getNodeIfExists(Node node, Node &requestedNode);

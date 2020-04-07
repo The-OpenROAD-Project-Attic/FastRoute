@@ -42,26 +42,26 @@
 namespace FastRoute {
 
 void SteinerTree::printSegments() {
-	for (Segment seg : _segments) {
-		std::cout << "(" << seg.getFirstNode().getPosition().getX() << ", " <<
-			     seg.getFirstNode().getPosition().getY() << ", " <<
-			     seg.getFirstNode().getLayer() << "); (" <<
-			     seg.getLastNode().getPosition().getX() << ", " <<
-			     seg.getLastNode().getPosition().getY() << ", " << 
-			     seg.getLastNode().getLayer() << ")\n";
-	}
+        for (Segment seg : _segments) {
+                std::cout << "(" << seg.getFirstNode().getPosition().getX() << ", " <<
+                             seg.getFirstNode().getPosition().getY() << ", " <<
+                             seg.getFirstNode().getLayer() << "); (" <<
+                             seg.getLastNode().getPosition().getX() << ", " <<
+                             seg.getLastNode().getPosition().getY() << ", " << 
+                             seg.getLastNode().getLayer() << ")\n";
+        }
 }
 
 void SteinerTree::addNode(Node node) {
         if (!nodeExists(node)) {
                 _nodes.push_back(node);
-	} else if(node.getType() == SOURCE) {
-		for (Node &n : _nodes) {
-			if (n == node) {
-				n.setType(SOURCE);
-			}
-		}
-	}
+        } else if(node.getType() == SOURCE) {
+                for (Node &n : _nodes) {
+                        if (n == node) {
+                                n.setType(SOURCE);
+                        }
+                }
+        }
 }
 
 void SteinerTree::addSegment(Segment segment) {
