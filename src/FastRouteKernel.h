@@ -66,6 +66,8 @@ protected:
         std::vector<RoutingTracks> _allRoutingTracks;
 
 private:
+        const float transitionLayerAdjust = 0.6;
+
         DBWrapper _dbWrapper;
         FT _fastRoute;
         std::string _outfile = "output.guide";

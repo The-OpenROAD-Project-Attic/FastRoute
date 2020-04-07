@@ -7,6 +7,7 @@
 #include <string>
 #include <utility>
 #include <map>
+#include <set>
 
 #include "Coordinate.h"
 #include "Box.h"
@@ -507,6 +508,8 @@ void DBWrapper::initObstacles() {
         odb::dbSet<odb::dbObstruction> obstructions = block->getObstructions();
         
         odb::dbSet<odb::dbObstruction>::iterator obstructIter;
+        int obstructionsCnt = 0;
+
         for (obstructIter = obstructions.begin(); obstructIter != obstructions.end(); obstructIter++) {
                 odb::dbObstruction* currObstruct = *obstructIter;
                 odb::dbBox* obstructBox = currObstruct->getBBox();
@@ -520,16 +523,23 @@ void DBWrapper::initObstacles() {
                         std::cout << "[WARNING] Found obstacle outside die area\n";
                 }
                 _grid->addObstacle(layer, obstacleBox);
+                obstructionsCnt++;
         }
         
+        std::cout << "[INFO] #DB Obstructions: " << obstructionsCnt << "\n";
+
         // Get instance obstructions
         odb::dbSet<odb::dbInst> insts;
         insts = block->getInsts();
         
         odb::dbSet<odb::dbInst>::iterator instIter;
         
+        int macrosCnt = 0;
+        int obstaclesCnt = 0;
         for (instIter = insts.begin(); instIter != insts.end(); instIter++) {
                 int pX, pY;
+                bool isMacro = false;
+
                 odb::dbInst* currInst = *instIter;
                 odb::dbMaster* master = currInst->getMaster();
                 
@@ -539,6 +549,10 @@ void DBWrapper::initObstacles() {
                 odb::dbTransform transform(currInst->getOrient(), origin);
                 
                 odb::dbSet<odb::dbBox> obstructions = master->getObstructions();
+                if (master->getType() == odb::dbMasterType::BLOCK) {
+                        macrosCnt++;
+                        isMacro = true;
+                }
                 odb::dbSet<odb::dbBox>::iterator boxIter;
                 
                 for (boxIter = obstructions.begin(); boxIter != obstructions.end(); boxIter++) {
@@ -556,7 +570,12 @@ void DBWrapper::initObstacles() {
                                 std::cout << "[WARNING] Found obstacle outside die area in instance " << currInst->getConstName() << "\n";
                         }
                         _grid->addObstacle(layer, obstacleBox);
+                        obstaclesCnt++;
                 }
+
+                // if (isMacro) { // Get cut layer obstacles
+                //         ;
+                // }
 
                 odb::dbSet<odb::dbMTerm> mTerms = master->getMTerms();
                 odb::dbSet<odb::dbMTerm>::iterator termIter;
@@ -601,6 +620,9 @@ void DBWrapper::initObstacles() {
                         }
                 }
         }
+
+        std::cout << "[INFO] #DB Obstacles: " << obstaclesCnt << "\n";
+        std::cout << "[INFO] #DB Macros: " << macrosCnt << "\n";
         
         // Get nets obstructions (routing wires and pdn wires)
         odb::dbSet<odb::dbNet> nets = block->getNets();
@@ -712,4 +734,103 @@ int DBWrapper::computeMaxRoutingLayer() {
         return maxRoutingLayer;
 }
 
+std::set<int> DBWrapper::findTransitionLayers(int maxRoutingLayer) {
+        std::set<int> transitionLayers;
+        odb::dbTech* tech = _db->getTech();
+        odb::dbSet<odb::dbTechVia> vias = tech->getVias();
+        
+        if (vias.size() == 0) {
+                std::cout << "[ERROR] Tech without vias. Exiting...\n";
+                std::exit(1);
+        }
+        
+        odb::dbSet<odb::dbTechVia>::iterator vIter;
+
+        for (vIter = vias.begin(); vIter != vias.end(); ++vIter) {
+                odb::dbTechVia* currVia = *vIter;
+                odb::dbSet<odb::dbBox> viaBoxes = currVia->getBoxes();
+
+                int bottomWidth = -1;
+                int topWidth = -1;
+                int cutWidth = -1;
+
+                odb::dbTechLayer *bottomLayer;
+                odb::dbTechLayer *topLayer;
+                odb::dbTechLayer *cutLayer;
+
+                odb::dbSet<odb::dbBox>::iterator boxIter;
+                for (boxIter = viaBoxes.begin(); boxIter != viaBoxes.end(); boxIter++) {
+                        odb::dbBox* currBox = *boxIter;
+                        odb::dbTechLayer* layer = currBox->getTechLayer();
+
+                        if (layer->getConstName() == currVia->getBottomLayer()->getConstName()) {
+                                bottomLayer = layer;
+                                int tmpWidth = currBox->xMax() - currBox->xMin();
+                                if (tmpWidth >= bottomWidth) {
+                                        bottomWidth = tmpWidth;
+                                }
+                        } else if (layer->getConstName() == currVia->getTopLayer()->getConstName()) {
+                                topLayer = layer;
+                                int tmpWidth = currBox->xMax() - currBox->xMin();
+                                if (tmpWidth >= topWidth) {
+                                        topWidth = tmpWidth;
+                                }
+                        } else {
+                                cutLayer = layer;
+                                int tmpWidth = currBox->xMax() - currBox->xMin();
+                                if (tmpWidth >= cutWidth) {
+                                        bottomWidth = tmpWidth;
+                                }
+                        }
+                }
+
+                if (bottomLayer->getRoutingLevel() >= maxRoutingLayer || bottomLayer->getRoutingLevel() <= 4)
+                        continue;
+
+                if (bottomWidth > bottomLayer->getWidth()) {
+                        transitionLayers.insert(bottomLayer->getRoutingLevel());
+                }
+        }
+
+        std::cout << "#Transition layers: " << transitionLayers.size() << "\n";
+
+        return transitionLayers;
 }
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
