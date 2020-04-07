@@ -216,6 +216,7 @@ public:
         // flow functions
         void writeGuides();
         void startFastRoute();
+        void estimateRC();
         void runFastRoute();
         int run();
 };
