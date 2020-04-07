@@ -82,7 +82,7 @@ private:
         unsigned _dbId;
         const int _selectedMetal = 3;
         int _overflowIterations = 50;
-    	float _maxLength = -1;
+            float _maxLength = -1;
         std::map<int, float> _layersMaxLength;
         Coordinate _gridOrigin = Coordinate(0, 0);
         int _pdRevForHighFanout = -1;
@@ -143,16 +143,16 @@ private:
         void checkSinksAndSource();
         
         // antenna functions
-	    bool segmentsOverlaps(ROUTE seg0, ROUTE seg1, ROUTE &newSeg);
+            bool segmentsOverlaps(ROUTE seg0, ROUTE seg1, ROUTE &newSeg);
         void mergeSegments(FastRoute::NET &net);
-	    bool checkResource(ROUTE segment);
+            bool checkResource(ROUTE segment);
         bool breakSegment(ROUTE segment, long maxLength, std::vector<ROUTE> &newSegments);
         void fixLongSegments();
         SteinerTree createSteinerTree(std::vector<ROUTE> route, std::vector<Pin> pins);
-	    bool checkSteinerTree(SteinerTree sTree);
+            bool checkSteinerTree(SteinerTree sTree);
 
 public:
-	FastRouteKernel();
+        FastRouteKernel();
         
         void setAdjustment(const float adjustment) { _adjustment = adjustment; }
         void setMinRoutingLayer(const int minLayer) { _minRoutingLayer = minLayer; }
@@ -189,7 +189,7 @@ public:
         void setVerbose(const int v) { _verbose = v; }
         
         void setOverflowIterations(int iterations) { _overflowIterations = iterations; }
-	    void setMaxLength (float maxLength) { _maxLength = maxLength; }
+            void setMaxLength (float maxLength) { _maxLength = maxLength; }
         void addLayerMaxLength (int layer, float length) {
                 _layersMaxLength[layer] = length;
         }

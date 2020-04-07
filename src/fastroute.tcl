@@ -47,7 +47,7 @@ sta::define_cmd_args "fastroute" {[-output_file out_file] \
                                            [-alpha alpha] \
                                            [-verbose verbose] \
                                            [-overflow_iterations iterations] \
-					   [-max_routing_length max_length] \
+                                           [-max_routing_length max_length] \
                                            [-max_length_per_layer max_length_per_layer] \
                                            [-grid_origin origin] \
                                            [-pdrev_for_high_fanout fanout] \
@@ -167,8 +167,8 @@ proc fastroute { args } {
   }
 
   if { [info exists keys(-max_routing_length)] } {
-	  set max_length $keys(-max_routing_length)
-	  FastRoute::set_max_routing_length $max_length
+          set max_length $keys(-max_routing_length)
+          FastRoute::set_max_routing_length $max_length
   }
 
   if { [info exists keys(-max_length_per_layer)] } {

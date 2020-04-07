@@ -1494,38 +1494,38 @@ void FastRouteKernel::fixLongSegments() {
                 sTree = createSteinerTree(route, pins);
                         if (checkSteinerTree(sTree) != true) {
                                        // std::cout << "Invalid Steiner tree for net " << netRoute.name << "\n";
-                        	    continue;	
-        		}
+                                    continue;        
+                        }
          
-        	    std::vector<Segment> segsToFix;
-        		
-        		std::vector<Node> sinks = sTree.getSinks();
-        		for (Node sink : sinks) {
-        			    std::vector<Segment> segments = sTree.getNodeSegments(sink);
-        			    Segment seg = segments[0];
-        			    while (seg.getParent() != -1) {
-        				    int index = seg.getParent();
-        				    long segLen = std::abs(seg.getLastNode().getPosition().getX() - seg.getFirstNode().getPosition().getX())
-        					            + std::abs(seg.getLastNode().getPosition().getY() - seg.getFirstNode().getPosition().getY());
+                    std::vector<Segment> segsToFix;
+                        
+                        std::vector<Node> sinks = sTree.getSinks();
+                        for (Node sink : sinks) {
+                                    std::vector<Segment> segments = sTree.getNodeSegments(sink);
+                                    Segment seg = segments[0];
+                                    while (seg.getParent() != -1) {
+                                            int index = seg.getParent();
+                                            long segLen = std::abs(seg.getLastNode().getPosition().getX() - seg.getFirstNode().getPosition().getX())
+                                                            + std::abs(seg.getLastNode().getPosition().getY() - seg.getFirstNode().getPosition().getY());
 
-        				    if (segLen >= _layersMaxRoutingLength[seg.getFirstNode().getLayer()]) {
-        					        segsToFix.push_back(seg);
-        				    }
-        				    seg = sTree.getSegmentByIndex(index);
-        			}
-        		}
+                                            if (segLen >= _layersMaxRoutingLength[seg.getFirstNode().getLayer()]) {
+                                                        segsToFix.push_back(seg);
+                                            }
+                                            seg = sTree.getSegmentByIndex(index);
+                                }
+                        }
          
                 ROUTE segment;
                 for (Segment s : segsToFix) {
-        			    int cnt = 0;
-        			    for (ROUTE seg : netRoute.route) {
-                	            if (s.getLastNode().getPosition().getX() == seg.finalX && s.getLastNode().getPosition().getY() == seg.finalY &&
-        				            s.getFirstNode().getPosition().getX() == seg.initX && s.getFirstNode().getPosition().getY() == seg.initY &&
-        				            s.getFirstNode().getLayer() == seg.initLayer && s.getLastNode().getLayer() == seg.finalLayer) {
+                                    int cnt = 0;
+                                    for (ROUTE seg : netRoute.route) {
+                                    if (s.getLastNode().getPosition().getX() == seg.finalX && s.getLastNode().getPosition().getY() == seg.finalY &&
+                                                    s.getFirstNode().getPosition().getX() == seg.initX && s.getFirstNode().getPosition().getY() == seg.initY &&
+                                                    s.getFirstNode().getLayer() == seg.initLayer && s.getLastNode().getLayer() == seg.finalLayer) {
                                         segment = seg;
-        					            std::vector<ROUTE> newSegs;
-        					            bool success = breakSegment(segment, _layersMaxRoutingLength[seg.finalLayer], newSegs);
-        				                    if (!success) {
+                                                            std::vector<ROUTE> newSegs;
+                                                            bool success = breakSegment(segment, _layersMaxRoutingLength[seg.finalLayer], newSegs);
+                                                            if (!success) {
                                                                        continue;
                                                             }
                                             netRoute.route.erase(netRoute.route.begin() + cnt);

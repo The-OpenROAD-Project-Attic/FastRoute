@@ -71,14 +71,14 @@ public:
         
         void setParent(int parent) { _parent = parent; }
 
-	void printSegment() {
-		std::cout << "----(" << _firstNode.getPosition().getX() << ", " <<
-			    _firstNode.getPosition().getY() << ", " <<
-			    _firstNode.getLayer() << "); (" << 
-			    _lastNode.getPosition().getX() << ", " <<
-			    _lastNode.getPosition().getY() << ", " <<
-			    _lastNode.getLayer() << ")\n";
-	};
+        void printSegment() {
+                std::cout << "----(" << _firstNode.getPosition().getX() << ", " <<
+                            _firstNode.getPosition().getY() << ", " <<
+                            _firstNode.getLayer() << "); (" << 
+                            _lastNode.getPosition().getX() << ", " <<
+                            _lastNode.getPosition().getY() << ", " <<
+                            _lastNode.getLayer() << ")\n";
+        };
 };
 
 }
