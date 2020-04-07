@@ -146,7 +146,7 @@ void run_fastroute() {
 }
 
 void estimate_rc() {
-
+        fastRouteKernel->estimateRC();
 }
 
 void run() {
