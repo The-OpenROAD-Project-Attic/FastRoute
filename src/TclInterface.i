@@ -71,6 +71,14 @@ extern void set_verbose(int v);
 
 extern void set_overflow_iterations(int iterations);
 
+extern void set_grid_origin(long x, long y);
+
+extern void set_pdrev_for_high_fanout(int pdRevForHighFanout);
+
+extern void set_allow_overflow(bool allowOverflow);
+
+extern void set_route_nets_with_pad(bool routePad);
+
 extern void start_fastroute();
 
 extern void run_fastroute();

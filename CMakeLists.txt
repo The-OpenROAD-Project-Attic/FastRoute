@@ -58,9 +58,6 @@ add_subdirectory(third_party/pdrev)
 set(CMAKE_CXX_STANDARD 11)
 set(Boost_USE_STATIC_LIBS ON)
 
-# Finds tcl
-include(FindTCL.cmake)
-
 # Loads swig and generates the tcl wrapper file
 find_package(SWIG REQUIRED)
 
@@ -96,7 +93,7 @@ target_include_directories(${LIB_NAME} PUBLIC
         ${CMAKE_CURRENT_SOURCE_DIR}/third_party/pdrev/include
         ${OPENDB_HOME}/include/
         ${OPENROAD_HOME}/include
-        ${OPENSTA_HOME}/app
+        ${OPENSTA_HOME}/include
         ${FASTROUTE_HOME}/src
 	${TCL_INCLUDE_PATH}
         )

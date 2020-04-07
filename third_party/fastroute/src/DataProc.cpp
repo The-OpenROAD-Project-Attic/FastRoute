@@ -39,7 +39,7 @@
 namespace FastRoute {
 
 // Global variables
-int xGrid, yGrid, numGrids, numNets, *vCapacity3D, *hCapacity3D;
+int xGrid, yGrid, maxGrid, numGrids, numNets, *vCapacity3D, *hCapacity3D;
 float vCapacity_lb, hCapacity_lb, vCapacity_ub, hCapacity_ub;
 int MaxDegree;
 int *MinWidth, *MinSpacing, *ViaSpacing;
@@ -52,13 +52,15 @@ int totalOverflow;  // total # overflow
 int mazeThreshold;  // the wirelen threshold to do maze routing
 Net** nets;
 Edge *h_edges, *v_edges;
-float d1[YRANGE][XRANGE];
-float d2[YRANGE][XRANGE];
+float *d1;
+float *d2;
 int layerOrientation;
 bool pdRev;
 float alpha;
 int verbose;
 int overflowIterations;
+int pdRevForHighFanout;
+bool allowOverflow;
 
 Bool **HV;
 Bool **hyperV;
