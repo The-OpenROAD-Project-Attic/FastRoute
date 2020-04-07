@@ -61,7 +61,7 @@ proc fastroute { args } {
     keys {-output_file -capacity_adjustment -min_routing_layer -max_routing_layer \
           -pitches_in_tile -alpha -verbose -layers_adjustments \
           -regions_adjustments -nets_alphas_priorities -overflow_iterations \
-          -grid_origin -pdrev_for_high_fanout} \
+          -grid_origin -pdrev_for_high_fanout -max_routing_length -max_length_per_layer} \
     flags {-unidirectional_routing -clock_net_routing -allow_overflow -route_nets_with_pad \
            -estimateRC}
 
@@ -138,9 +138,9 @@ proc fastroute { args } {
   }
 
   if { [info exists flags(-unidirectional_routing)] } {
-    FastRoute::set_unidirectional_routing true
+    FastRoute::set_unidirectional_routing 1
   } else {
-    FastRoute::set_unidirectional_routing false
+    FastRoute::set_unidirectional_routing 0
   }
 
   if { [info exists keys(-alpha) ] } {
@@ -159,11 +159,11 @@ proc fastroute { args } {
   }
 
   if { [info exists flags(-clock_net_routing)] } {
-    FastRoute::set_clock_net_routing true
-    FastRoute::set_pdrev true
+    FastRoute::set_clock_net_routing 1
+    FastRoute::set_pdrev 1
   } else {
-    FastRoute::set_clock_net_routing false
-    FastRoute::set_pdrev false
+    FastRoute::set_clock_net_routing 0
+    FastRoute::set_pdrev 0
   }
 
   if { [info exists keys(-max_routing_length)] } {
@@ -198,11 +198,11 @@ proc fastroute { args } {
   }
 
   if { [info exists flags(-allow_overflow)] } {
-    FastRoute::set_allow_overflow true
+    FastRoute::set_allow_overflow 1
   }
 
   if { [info exists flags(-route_nets_with_pad)] } {
-    FastRoute::set_route_nets_with_pad true
+    FastRoute::set_route_nets_with_pad 1
   }
 
   for {set layer 1} {$layer <= $max_layer} {set layer [expr $layer+1]} {
