@@ -83,6 +83,8 @@ extern void set_allow_overflow(bool allowOverflow);
 
 extern void set_route_nets_with_pad(bool routePad);
 
+extern void estimate_rc();
+
 extern void start_fastroute();
 
 extern void run_fastroute();

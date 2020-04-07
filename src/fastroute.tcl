@@ -53,6 +53,7 @@ sta::define_cmd_args "fastroute" {[-output_file out_file] \
                                            [-pdrev_for_high_fanout fanout] \
                                            [-allow_overflow] \
                                            [-route_nets_with_pad] \
+                                           [-estimateRC] \
 }
 
 proc fastroute { args } {
@@ -60,8 +61,9 @@ proc fastroute { args } {
     keys {-output_file -capacity_adjustment -min_routing_layer -max_routing_layer \
           -pitches_in_tile -alpha -verbose -layers_adjustments \
           -regions_adjustments -nets_alphas_priorities -overflow_iterations \
-          -grid_origin -pdrev_for_high_fanout -max_routing_length -max_length_per_layer} \
-    flags {-unidirectional_routing -clock_net_routing -allow_overflow -route_nets_with_pad}
+          -grid_origin -pdrev_for_high_fanout} \
+    flags {-unidirectional_routing -clock_net_routing -allow_overflow -route_nets_with_pad \
+           -estimateRC}
 
   if { [info exists keys(-output_file)] } {
     set out_file $keys(-output_file)
@@ -136,9 +138,9 @@ proc fastroute { args } {
   }
 
   if { [info exists flags(-unidirectional_routing)] } {
-    FastRoute::set_unidirectional_routing 1
+    FastRoute::set_unidirectional_routing true
   } else {
-    FastRoute::set_unidirectional_routing 0
+    FastRoute::set_unidirectional_routing false
   }
 
   if { [info exists keys(-alpha) ] } {
@@ -157,11 +159,11 @@ proc fastroute { args } {
   }
 
   if { [info exists flags(-clock_net_routing)] } {
-    FastRoute::set_clock_net_routing 1
-    FastRoute::set_pdrev 1
+    FastRoute::set_clock_net_routing true
+    FastRoute::set_pdrev true
   } else {
-    FastRoute::set_clock_net_routing 0
-    FastRoute::set_pdrev 0
+    FastRoute::set_clock_net_routing false
+    FastRoute::set_pdrev false
   }
 
   if { [info exists keys(-max_routing_length)] } {
@@ -196,11 +198,11 @@ proc fastroute { args } {
   }
 
   if { [info exists flags(-allow_overflow)] } {
-    FastRoute::set_allow_overflow 1
+    FastRoute::set_allow_overflow true
   }
 
   if { [info exists flags(-route_nets_with_pad)] } {
-    FastRoute::set_route_nets_with_pad 1
+    FastRoute::set_route_nets_with_pad true
   }
 
   for {set layer 1} {$layer <= $max_layer} {set layer [expr $layer+1]} {
@@ -213,6 +215,10 @@ proc fastroute { args } {
   }
 
   FastRoute::start_fastroute
-  FastRoute::run_fastroute
-  FastRoute::write_guides
+  if {[info exists flags(-estimateRC)]} {
+    FastRoute::estimate_rc
+  } else {
+    FastRoute::run_fastroute
+    FastRoute::write_guides
+  }
 }
