@@ -49,96 +49,14 @@
 
 #include "Coordinate.h"
 #include "Box.h"
-#include "DBWrapper.h"
-#include "Grid.h"
-#include "Netlist.h"
 #include "RoutingLayer.h"
 #include "RoutingTracks.h"
-#include "include/FastRoute.h"
 
 namespace FastRoute {
 
 class FastRouteKernel {
-protected:
-        Netlist _netlist;
-        Grid _grid;
-        std::vector<RoutingLayer> _routingLayers;
-        std::vector<RoutingTracks> _allRoutingTracks;
-
-private:
-        DBWrapper _dbWrapper;
-        FT _fastRoute;
-        std::string _outfile = "output.guide";
-        float _adjustment = 0.0;
-        int _minRoutingLayer = 1;
-        int _maxRoutingLayer = -1;
-        bool _unidirectionalRoute = false;
-        int _fixLayer;
-        bool _interactiveMode;
-        bool _clockNetRouting;
-        unsigned _dbId;
-        const int _selectedMetal = 3;
-        int _overflowIterations = 50;
-        Coordinate _gridOrigin = Coordinate(0, 0);
-        int _pdRevForHighFanout = -1;
-        bool _allowOverflow = false;
-        bool _routeNetsWithPad = false;
-        
-        // Layer adjustment variables
-        std::vector<int> _layersToAdjust;
-        std::vector<float> _layersReductionPercentage;
-        
-        // Region adjustment variables
-        std::vector<int> regionsMinX;
-        std::vector<int> regionsMinY;
-        std::vector<int> regionsMaxX;
-        std::vector<int> regionsMaxY;
-        std::vector<int> regionsLayer;
-        std::vector<float> regionsReductionPercentage;
-
-        std::vector<int> _vCapacities;
-        std::vector<int> _hCapacities;
-        std::vector<FastRoute::NET> _result;
-        std::map<std::string, int> _netsDegree;
-
-        // Clock net routing variables
-        bool _pdRev;
-        float _alpha = 0.4;
-        int _verbose = 0;
-        std::map<std::string, float> _netsAlpha;
-        
-        // temporary for congestion driven replace
-        int _numAdjusts = 0;
-        
-        // main functions
-        void initGrid();
-        void initRoutingLayers();
-        void initRoutingTracks();
-        void setCapacities();
-        void setSpacingsAndMinWidths();
-        void initializeNets();
-        void computeGridAdjustments();
-        void computeTrackAdjustments();
-        void computeUserGlobalAdjustments();
-        void computeUserLayerAdjustments();
-        void computeRegionAdjustments(Coordinate lowerBound, Coordinate upperBound, int layer, float reductionPercentage);
-        void computeObstaclesAdjustments();
-        void computeWirelength();
-        
-        // aux functions
-        RoutingLayer getRoutingLayerByIndex(int index);
-        RoutingTracks getRoutingTracksByIndex(int layer);
-        void addRemainingGuides(std::vector<FastRoute::NET> &globalRoute);
-        void mergeBox(std::vector<Box>& guideBox);
-        Box globalRoutingToBox(const FastRoute::ROUTE &route);
-        bool segmentsOverlaps(ROUTE seg0, ROUTE seg1, ROUTE &newSeg);
-        void mergeSegments(FastRoute::NET &net);
-        
-        // check functions
-        void checkPinPlacement();
-
 public:
-	FastRouteKernel();
+    FastRouteKernel();
         
         void setAdjustment(const float adjustment) { _adjustment = adjustment; }
         void setMinRoutingLayer(const int minLayer) { _minRoutingLayer = minLayer; }

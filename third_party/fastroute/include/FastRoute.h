@@ -63,12 +63,12 @@ typedef struct {
         std::vector<ROUTE> route;
 } NET;
 
-std::map<std::string, std::vector<PIN>> allNets;
-int maxNetDegree;
-
 class FT {
        public:
         FT() = default;
+
+        std::map<std::string, std::vector<PIN>> allNets;
+        int maxNetDegree;
 
         void setGridsAndLayers(int x, int y, int nLayers);
         void addVCapacity(int verticalCapacity, int layer);
