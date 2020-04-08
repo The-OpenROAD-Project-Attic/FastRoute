@@ -42,26 +42,26 @@
 
 namespace FastRoute {
 
-typedef struct {
+struct PIN {
         long x;
         long y;
         int layer;
-} PIN;
+};
 
-typedef struct {
+struct ROUTE {
         long initX;
         long initY;
         int initLayer;
         long finalX;
         long finalY;
         int finalLayer;
-} ROUTE;
+};
 
-typedef struct {
+struct NET {
         std::string name;
         int id;
         std::vector<ROUTE> route;
-} NET;
+};
 
 class FT {
        public:

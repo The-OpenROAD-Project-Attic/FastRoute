@@ -46,74 +46,127 @@
 #include <utility>
 #include <fstream>
 #include <istream>
-
-#include "Coordinate.h"
-#include "Box.h"
-#include "RoutingLayer.h"
-#include "RoutingTracks.h"
+#include <map>
 
 namespace FastRoute {
 
+class FT;
+class Box;
+class Coordinate;
+class DBWrapper;
+class Grid;
+class Netlist;
+class RoutingTracks;
+class RoutingLayer;
+struct NET;
+struct ROUTE;
+struct PIN;
+
 class FastRouteKernel {
+protected:
+        Netlist* _netlist = nullptr;
+        Grid* _grid = nullptr;
+        std::vector<RoutingLayer> *_routingLayers = nullptr;
+        std::vector<RoutingTracks> *_allRoutingTracks = nullptr;
+
+private:
+        // Objects variables
+        DBWrapper* _dbWrapper = nullptr;
+        FT* _fastRoute = nullptr;
+        Coordinate* _gridOrigin = nullptr;
+        std::vector<FastRoute::NET> *_result;
+
+        // Flow variables
+        std::string _outfile;
+        float _adjustment;
+        int _minRoutingLayer;
+        int _maxRoutingLayer;
+        bool _unidirectionalRoute;
+        int _fixLayer;
+        bool _interactiveMode;
+        bool _clockNetRouting;
+        unsigned _dbId;
+        const int _selectedMetal = 3;
+        int _overflowIterations;
+        int _pdRevForHighFanout;
+        bool _allowOverflow;
+        bool _routeNetsWithPad;
+        std::vector<int> _vCapacities;
+        std::vector<int> _hCapacities;
+        std::map<std::string, int> _netsDegree;
+
+        // Layer adjustment variables
+        std::vector<int> _layersToAdjust;
+        std::vector<float> _layersReductionPercentage;
+        
+        // Region adjustment variables
+        std::vector<int> regionsMinX;
+        std::vector<int> regionsMinY;
+        std::vector<int> regionsMaxX;
+        std::vector<int> regionsMaxY;
+        std::vector<int> regionsLayer;
+        std::vector<float> regionsReductionPercentage;
+
+        // Clock net routing variables
+        bool _pdRev;
+        float _alpha;
+        int _verbose;
+        std::map<std::string, float> _netsAlpha;
+        
+        // temporary for congestion driven replace
+        int _numAdjusts = 0;
+        
+        // main functions
+        void initGrid();
+        void initRoutingLayers();
+        void initRoutingTracks();
+        void setCapacities();
+        void setSpacingsAndMinWidths();
+        void initializeNets();
+        void computeGridAdjustments();
+        void computeTrackAdjustments();
+        void computeUserGlobalAdjustments();
+        void computeUserLayerAdjustments();
+        void computeRegionAdjustments(Coordinate lowerBound, Coordinate upperBound, int layer, float reductionPercentage);
+        void computeObstaclesAdjustments();
+        void computeWirelength();
+        
+        // aux functions
+        RoutingLayer getRoutingLayerByIndex(int index);
+        RoutingTracks getRoutingTracksByIndex(int layer);
+        void addRemainingGuides(std::vector<FastRoute::NET> &globalRoute);
+        void mergeBox(std::vector<Box>& guideBox);
+        Box globalRoutingToBox(const FastRoute::ROUTE &route);
+        bool segmentsOverlaps(ROUTE seg0, ROUTE seg1, ROUTE &newSeg);
+        void mergeSegments(FastRoute::NET &net);
+        
+        // check functions
+        void checkPinPlacement();
+
 public:
-    FastRouteKernel();
+        FastRouteKernel();
+        ~FastRouteKernel();
         
-        void setAdjustment(const float adjustment) { _adjustment = adjustment; }
-        void setMinRoutingLayer(const int minLayer) { _minRoutingLayer = minLayer; }
-        void setMaxRoutingLayer(const int maxLayer) { _maxRoutingLayer = maxLayer; }
-        void setUnidirectionalRoute(const bool unidirRoute) { _unidirectionalRoute = unidirRoute; }
-        void setClockNetRouting(const bool clockNetRouting) { _clockNetRouting = clockNetRouting; }
-        void setPDRev(const bool pdRev) { _pdRev = pdRev; }
-        void setAlpha(const float alpha) { _alpha = alpha; }
-        void setOutputFile(const std::string& outfile) { _outfile = outfile; }
-        void setPitchesInTile(const int pitchesInTile) { _grid.setPitchesInTile(pitchesInTile); }
-        void setDbId(unsigned idx) { _dbId = idx; }
-        unsigned getDbId() { return _dbId; }
-        
-        void addLayerAdjustment(int layer, float reductionPercentage) {
-                _layersToAdjust.push_back(layer);
-                _layersReductionPercentage.push_back(reductionPercentage);
-        }
-        
-        void addRegionAdjustment(int minX, int minY, int maxX, int maxY,
-                                 int layer, float reductionPercentage) {
-                regionsMinX.push_back(minX);
-                regionsMinY.push_back(minY);
-                regionsMaxX.push_back(maxX);
-                regionsMaxY.push_back(maxY);
-                regionsLayer.push_back(layer);
-                regionsReductionPercentage.push_back(reductionPercentage);
-        }
-        
-        void addAlphaForNet(char * netName, float alpha) {
-                std::string name(netName);
-                _netsAlpha[name] = alpha;
-        }
-        
-        void setVerbose(const int v) {
-                _verbose = v;
-        }
-        
-        void setOverflowIterations(int iterations) {
-                _overflowIterations = iterations;
-        }
-        
-        void setGridOrigin(long x, long y) {
-                _gridOrigin = Coordinate(x, y);
-        }
-        
-        void setPDRevForHighFanout(int pdRevForHighFanout) {
-                _pdRevForHighFanout = pdRevForHighFanout;
-        }
-
-        void setAllowOverflow(bool allowOverflow) {
-                _allowOverflow = allowOverflow;
-        }
-
-        void setRouteNetsWithPad(bool routeNetsWithPad) {
-                _routeNetsWithPad = routeNetsWithPad;
-        }
-
+        void setAdjustment(const float adjustment);
+        void setMinRoutingLayer(const int minLayer);
+        void setMaxRoutingLayer(const int maxLayer);
+        void setUnidirectionalRoute(const bool unidirRoute);
+        void setClockNetRouting(const bool clockNetRouting);
+        void setPDRev(const bool pdRev);
+        void setAlpha(const float alpha);
+        void setOutputFile(const std::string& outfile);
+        void setPitchesInTile(const int pitchesInTile);
+        void setDbId(unsigned idx);
+        unsigned getDbId();
+        void addLayerAdjustment(int layer, float reductionPercentage);
+        void addRegionAdjustment(int minX, int minY, int maxX, int maxY, int layer, float reductionPercentage);
+        void addAlphaForNet(char * netName, float alpha);
+        void setVerbose(const int v);
+        void setOverflowIterations(int iterations);
+        void setGridOrigin(long x, long y);
+        void setPDRevForHighFanout(int pdRevForHighFanout);
+        void setAllowOverflow(bool allowOverflow);
+        void setRouteNetsWithPad(bool routeNetsWithPad);
         void printGrid();
         void printHeader();
         
@@ -121,7 +174,6 @@ public:
         void writeGuides();
         void startFastRoute();
         void runFastRoute();
-        int run();
         
         // temporary for congestion drive replace
         void writeRoute();
