@@ -54,100 +54,6 @@ FastRouteKernel::FastRouteKernel() {
         _interactiveMode = true;
 }
 
-int FastRouteKernel::run() {
-        printHeader();
-        if (_unidirectionalRoute) {
-                _minRoutingLayer = 2;
-                _fixLayer = 1;
-        }
-
-        if (_maxRoutingLayer == -1) {
-                std::cout << " > Computing max routing layer...\n";
-                _maxRoutingLayer = _dbWrapper.computeMaxRoutingLayer();
-                std::cout << " > Computing max routing layer... Done!\n";
-        }
-
-        if (_clockNetRouting && _pdRev){
-                _fastRoute.usePdRev();
-                _fastRoute.setAlpha(_alpha);
-        }
-        
-        if (_maxRoutingLayer < _selectedMetal) {
-                _dbWrapper.setSelectedMetal(_maxRoutingLayer);
-        }
-        
-        _fastRoute.setVerbose(_verbose);
-        _fastRoute.setOverflowIterations(_overflowIterations);
-        _fastRoute.setPDRevForHighFanout(_pdRevForHighFanout);
-        _fastRoute.setAllowOverflow(_allowOverflow);
-        
-        std::cout << " > Initializing grid...\n";
-        initGrid();
-        std::cout << " > Initializing grid... Done!\n";
-        
-        std::cout << " > Initializing routing layers...\n";
-        initRoutingLayers();
-        std::cout << " > Initializing routing layers... Done!\n";
-        
-        std::cout << " > Initializing routing tracks...\n";
-        initRoutingTracks();
-        std::cout << " > Initializing routing tracks... Done!\n";
-            
-        std::cout << " > Setting capacities...\n";
-        setCapacities();
-        std::cout << " > Setting capacities... Done!\n";
-        
-        std::cout << " > Setting spacings and widths...\n";
-        setSpacingsAndMinWidths();
-        std::cout << " > Setting spacings and widths... Done!\n";
-        
-        std::cout << " > Initializing nets...\n";
-        initializeNets();
-        std::cout << " > Initializing nets... Done!\n";
-        
-        std::cout << " > Adjusting grid...\n";
-        computeGridAdjustments();
-        std::cout << " > Adjusting grid... Done!\n";
-        
-        std::cout << " > Computing track adjustments...\n";
-        computeTrackAdjustments();
-        std::cout << " > Computing track adjustments... Done!\n";
-
-        std::cout << " > Computing obstacles adjustments...\n";
-        computeObstaclesAdjustments();
-        std::cout << " > Computing obstacles adjustments... Done!\n";
-                
-        std::cout << " > Computing user defined global adjustments...\n";
-        computeUserGlobalAdjustments();
-        std::cout << " > Computing user defined global adjustments... Done!\n";
-        
-        std::cout << " > Computing user defined layers adjustments...\n";
-        computeUserLayerAdjustments();
-        std::cout << " > Computing user defined layers adjustments... Done!\n";
-        
-        for (int i = 0; i < regionsReductionPercentage.size(); i++) {
-                if (regionsLayer[i] < 1)
-                        break;
-                
-                std::cout << " > Adjusting specific region in layer " << regionsLayer[i] << "...\n";
-                Coordinate lowerLeft = Coordinate(regionsMinX[i], regionsMinY[i]);
-                Coordinate upperRight = Coordinate(regionsMaxX[i], regionsMaxY[i]);
-                computeRegionAdjustments(lowerLeft, upperRight, regionsLayer[i], regionsReductionPercentage[i]);
-        }
-
-        _fastRoute.initAuxVar();
-        
-        std::cout << " > Running FastRoute...\n";
-        _fastRoute.run(_result);
-        std::cout << " > Running FastRoute... Done!\n";
-        
-        writeGuides();
-        
-        _fastRoute.deleteGlobalArrays();
-        
-        return 0;
-}
-
 void FastRouteKernel::startFastRoute() {
         std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
         printHeader();
@@ -839,6 +745,94 @@ void FastRouteKernel::computeObstaclesAdjustments() {
                         }
                 }
         }
+}
+
+void FastRouteKernel::setAdjustment(const float adjustment) { 
+        _adjustment = adjustment;
+}
+
+void FastRouteKernel::setMinRoutingLayer(const int minLayer) {
+        _minRoutingLayer = minLayer;
+}
+
+void FastRouteKernel::setMaxRoutingLayer(const int maxLayer) {
+        _maxRoutingLayer = maxLayer;
+}
+
+void FastRouteKernel::setUnidirectionalRoute(const bool unidirRoute) {
+        _unidirectionalRoute = unidirRoute;
+}
+
+void FastRouteKernel::setClockNetRouting(const bool clockNetRouting) {
+        _clockNetRouting = clockNetRouting;
+}
+
+void FastRouteKernel::setPDRev(const bool pdRev) {
+        _pdRev = pdRev;
+}
+
+void FastRouteKernel::setAlpha(const float alpha) {
+        _alpha = alpha;
+}
+
+void FastRouteKernel::setOutputFile(const std::string& outfile) {
+        _outfile = outfile;
+}
+
+void FastRouteKernel::setPitchesInTile(const int pitchesInTile) {
+        _grid.setPitchesInTile(pitchesInTile);
+}
+
+void FastRouteKernel::setDbId(unsigned idx) {
+        _dbId = idx;
+}
+
+unsigned FastRouteKernel::getDbId() {
+        return _dbId;
+}
+
+void FastRouteKernel::addLayerAdjustment(int layer, float reductionPercentage) {
+        _layersToAdjust.push_back(layer);
+        _layersReductionPercentage.push_back(reductionPercentage);
+}
+
+void FastRouteKernel::addRegionAdjustment(int minX, int minY, int maxX, int maxY,
+                         int layer, float reductionPercentage) {
+        regionsMinX.push_back(minX);
+        regionsMinY.push_back(minY);
+        regionsMaxX.push_back(maxX);
+        regionsMaxY.push_back(maxY);
+        regionsLayer.push_back(layer);
+        regionsReductionPercentage.push_back(reductionPercentage);
+}
+
+void FastRouteKernel::addAlphaForNet(char * netName, float alpha) {
+        std::string name(netName);
+        _netsAlpha[name] = alpha;
+}
+
+void FastRouteKernel::setVerbose(const int v) {
+        _verbose = v;
+}
+
+void FastRouteKernel::setOverflowIterations(int iterations) {
+        _overflowIterations = iterations;
+}
+
+void FastRouteKernel::setGridOrigin(long x, long y) {
+        _gridOrigin = Coordinate(x, y);
+}
+
+void FastRouteKernel::setPDRevForHighFanout(int pdRevForHighFanout) {
+        _pdRevForHighFanout = pdRevForHighFanout;
+}
+
+void FastRouteKernel::setAllowOverflow(bool allowOverflow) {
+        _allowOverflow = allowOverflow;
+}
+
+void FastRouteKernel::setRouteNetsWithPad(bool routeNetsWithPad) {
+        _routeNetsWithPad = routeNetsWithPad;
 }
 
 void FastRouteKernel::writeGuides() {

@@ -137,10 +137,6 @@ void run_fastroute() {
         fastRouteKernel->runFastRoute();
 }
 
-void run() {
-        fastRouteKernel->run();
-}
-
 void write_guides() {
         fastRouteKernel->writeGuides();
 }
