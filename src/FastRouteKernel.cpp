@@ -46,6 +46,7 @@
 #include <chrono>
 
 #include "FastRouteKernel.h"
+#include "RcTreeBuilder.h"
 
 namespace FastRoute {
 
@@ -290,7 +291,24 @@ void FastRouteKernel::runFastRoute() {
 
 void FastRouteKernel::estimateRC() {
         runFastRoute();
+        addRemainingGuides(_result);
+        for (FastRoute::NET &netRoute : _result) {
+                mergeSegments(netRoute);
         
+                SteinerTree sTree;
+                Net net = _netlist.getNetByName(netRoute.name);
+                std::vector<Pin> pins = net.getPins();
+                std::vector<ROUTE> route = netRoute.route;
+                sTree = createSteinerTree(route, pins);
+                if (!checkSteinerTree(sTree)) {
+                        std::cout << " [ERROR] Error on Steiner tree of net " 
+                                  << netRoute.name << "\n";
+                        continue;
+                }
+                
+                RcTreeBuilder builder(net, sTree);
+                builder.run();
+        }
 }
 
 void FastRouteKernel::initGrid() {        

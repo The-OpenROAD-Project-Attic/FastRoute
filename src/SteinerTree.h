@@ -55,8 +55,8 @@ private:
 public:
         SteinerTree() = default;
         
-        std::vector<Node> getNodes() { return _nodes; }
-        std::vector<Segment> getSegments() { return _segments; }
+        const std::vector<Node>& getNodes() const { return _nodes; }
+        const std::vector<Segment>& getSegments() const { return _segments; }
         
         void addSegment(Segment segment);
         void addNode(Node node);
