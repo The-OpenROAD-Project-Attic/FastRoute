@@ -52,11 +52,11 @@ public:
                 _y = y;
         }
         
-        bool operator==(const Coordinate& coord) {
+        bool operator==(const Coordinate& coord) const {
                 return (_x == coord._x && _y == coord._y);
         }
         
-        bool operator!=(const Coordinate& coord) {
+        bool operator!=(const Coordinate& coord) const {
                 return (_x != coord._x || _y != coord._y);
         }
         

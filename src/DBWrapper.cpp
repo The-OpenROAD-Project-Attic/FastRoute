@@ -374,7 +374,7 @@ void DBWrapper::initNetlist(bool routeNetsWithPad) {
                         
                         std::string instName = currITerm->getInst()->getConstName();
                         pinName = mTerm->getConstName();
-                        pinName = instName + ":" + pinName;
+                        pinName = instName + "/" + pinName;
                         
                         if (mTerm->getIoType() == odb::dbIoType::INPUT) {
                                 type = Pin::SINK;
@@ -668,12 +668,12 @@ int DBWrapper::computeMaxRoutingLayer() {
         }
         
         for (int layer = 1; layer <= tech->getRoutingLayerCount(); layer++) {          
-                odb::dbTechLayer* techayer = tech->findRoutingLayer(layer);
-                if (!techayer) {
+                odb::dbTechLayer* techLayer = tech->findRoutingLayer(layer);
+                if (!techLayer) {
                         std::cout << "[ERROR] Layer" << selectedMetal << " not found! Exiting...\n";
                         std::exit(1);
                 }
-                odb::dbTrackGrid* selectedTrack = block->findTrackGrid(techayer);
+                odb::dbTrackGrid* selectedTrack = block->findTrackGrid(techLayer);
                 if (!selectedTrack) {
                     break;
                 }
@@ -681,6 +681,18 @@ int DBWrapper::computeMaxRoutingLayer() {
         }
         
         return maxRoutingLayer;
+}
+
+void DBWrapper::getLayerRC(unsigned layerId, float& r, float& c) {
+        odb::dbTech* tech = _db->getTech();
+        odb::dbTechLayer* techLayer = tech->findRoutingLayer(layerId);
+        r = techLayer->getResistance();
+        c = techLayer->getCapacitance();    
+}
+
+float DBWrapper::dbuToMeters(unsigned dbu) {
+        odb::dbBlock* block = _chip->getBlock();
+        return (float) dbu / (block->getDbUnitsPerMicron() * 1E+6);
 }
 
 }

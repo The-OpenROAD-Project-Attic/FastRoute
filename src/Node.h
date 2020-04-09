@@ -62,11 +62,11 @@ public:
         Node(const DBU x, const DBU y, const int layer, const NodeType type)
             : _position(Coordinate(x, y)), _layer(layer), _type(type) {}
         
-        bool operator==(const Node& node) {
+        bool operator==(const Node& node) const {
                 return (_position == node._position && _layer == node._layer);
         }
         
-        bool operator!=(const Node& node) {
+        bool operator!=(const Node& node) const {
                 return (_position != node._position || _layer != node._layer);
         }
 

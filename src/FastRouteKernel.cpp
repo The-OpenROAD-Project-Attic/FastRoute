@@ -294,9 +294,12 @@ void FastRouteKernel::estimateRC() {
         addRemainingGuides(_result);
         for (FastRoute::NET &netRoute : _result) {
                 mergeSegments(netRoute);
-        
+                 
                 SteinerTree sTree;
                 Net net = _netlist.getNetByName(netRoute.name);
+                if(net.getName() == "net36") {
+                        std::cout << netRoute.route.size() << "\n";
+                }
                 std::vector<Pin> pins = net.getPins();
                 std::vector<ROUTE> route = netRoute.route;
                 sTree = createSteinerTree(route, pins);
@@ -306,7 +309,7 @@ void FastRouteKernel::estimateRC() {
                         continue;
                 }
                 
-                RcTreeBuilder builder(net, sTree);
+                RcTreeBuilder builder(net, sTree, _grid, _dbWrapper);
                 builder.run();
         }
 }
@@ -1485,7 +1488,7 @@ bool FastRouteKernel::breakSegment(ROUTE actualSegment, long maxLength, std::vec
 }
 
 void FastRouteKernel::fixLongSegments() {
-            int fixedSegs = 0;
+        int fixedSegs = 0;
         int possibleViols = 0;
 
             addRemainingGuides(_result);
@@ -1611,10 +1614,12 @@ SteinerTree FastRouteKernel::createSteinerTree(std::vector<ROUTE> route, std::ve
                 Node firstNode, lastNode;
                 if (!sTree.getNodeIfExists(node0, firstNode)) {
                         firstNode = node0;
+                        sTree.addNode(node0);
                 }
                 
                 if (!sTree.getNodeIfExists(node1, lastNode)) {
                         lastNode = node1;
+                        sTree.addNode(node1);
                 }
                 
                 if (firstNode != node0 || lastNode != node1 ||
