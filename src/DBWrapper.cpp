@@ -684,10 +684,18 @@ int DBWrapper::computeMaxRoutingLayer() {
 }
 
 void DBWrapper::getLayerRC(unsigned layerId, float& r, float& c) {
+        odb::dbBlock* block = _chip->getBlock();
         odb::dbTech* tech = _db->getTech();
         odb::dbTechLayer* techLayer = tech->findRoutingLayer(layerId);
-        r = techLayer->getResistance();
-        c = techLayer->getCapacitance();    
+        
+        float layerWidth = (float) techLayer->getWidth() / 
+                            block->getDbUnitsPerMicron();
+        float resOhmPerMicron =  techLayer->getResistance() / layerWidth;
+        float capPfPerMicron = (1.0/block->getDbUnitsPerMicron()) * layerWidth 
+                                * techLayer->getCapacitance() + 2 * techLayer->getEdgeCapacitance();
+        
+        r = 1E+6 * resOhmPerMicron; // Meters
+        c = 1E+6 * 1E-12 * techLayer->getCapacitance(); // F/m2 
 }
 
 float DBWrapper::dbuToMeters(unsigned dbu) {

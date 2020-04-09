@@ -6,6 +6,7 @@
 #include "sta/Network.hh"
 #include "sta/Parasitics.hh"
 #include "sta/ParasiticsClass.hh"
+#include "sta/Units.hh"
 
 
 namespace FastRoute {
@@ -33,6 +34,9 @@ void RcTreeBuilder::initStaData() {
 
         // Init network
         _network = dbSta->network();
+       
+        // Init units
+        _units = dbSta->units(); 
         
         _debug = _net->getName() == "net36";
 }
@@ -63,7 +67,11 @@ void RcTreeBuilder::createSteinerNodes() {
 
 void RcTreeBuilder::computeGlobalParasitics() {
         const std::vector<Node>& nodes = _steinerTree->getNodes();
-                
+        
+        if (_debug) {
+                std::cout << "[DEBUG] Reporting global segments of net " << _net->getName() << "\n";        
+        }
+
         for (const Segment& segment : _steinerTree->getSegments()) {
                 const Node& node1 = segment.getFirstNode();
                 const Node& node2 = segment.getLastNode();
@@ -90,8 +98,17 @@ void RcTreeBuilder::computeGlobalParasitics() {
                         // Finally multiply
                         res = rUnit * wirelength;
                         cap = cUnit * wirelength;
+                        
+                        if (_debug) {
+                                std::cout << "[DEBUG] Layer ID: " << layerId << " dbuWirelength: " << dbuWirelength;
+                                std::cout << std::scientific;
+                                std::cout << " rUnit: " << rUnit << " cUnit: " << cUnit << "\n"; 
+                                std::cout << "[DEBUG]    wirelength: " << wirelength << " res: " << res << " cap: " << cap << "\n";
+                                std::cout << std::fixed;
+                        }
                 }
-               
+              
+
                 _parasitics->incrCap(n1, cap/2.0, _analysisPoint);
                 _parasitics->makeResistor(nullptr, n1, n2, res, _analysisPoint);
                 _parasitics->incrCap(n2, cap/2.0, _analysisPoint);
@@ -100,7 +117,12 @@ void RcTreeBuilder::computeGlobalParasitics() {
 
 unsigned RcTreeBuilder::computeDist(const Node& n1, const Node& n2) const {
         return std::abs(n1.getPosition().getX() - n2.getPosition().getX()) +
-               std::abs(n1.getPosition().getX() - n2.getPosition().getX());
+               std::abs(n1.getPosition().getY() - n2.getPosition().getY());
+}
+
+unsigned RcTreeBuilder::computeDist(const Coordinate& coord, const Node& n) const {
+        return std::abs(coord.getX() - n.getPosition().getX()) +
+               std::abs(coord.getY() - n.getPosition().getY());
 }
 
 void RcTreeBuilder::computeLocalParasitics() {
@@ -113,6 +135,10 @@ void RcTreeBuilder::computeLocalParasitics() {
                 }
         }
 
+        if (_debug) {
+                std::cout << "[DEBUG] Reporting local segments of net " << _net->getName() << "\n";        
+        }
+
         const std::vector<Pin>& pins = _net->getPins();
         for (const Pin &pin : pins) {
                 // Sta pin
@@ -121,10 +147,49 @@ void RcTreeBuilder::computeLocalParasitics() {
 
                 int nodeToConnect = findNodeToConnect(pin, pinNodes);
                 sta::ParasiticNode* n2 = _parasitics->ensureParasiticNode(_parasitic, _staNet, nodeToConnect);        
+               
+                Coordinate pinCoord = computePinCoordinate(pin); 
+               
+                unsigned dbuWirelength = computeDist(pinCoord, nodes[nodeToConnect]);
+                float wirelength = _dbWrapper->dbuToMeters(dbuWirelength);
                 
-                _parasitics->makeResistor(nullptr, n1, n2, 1000, _analysisPoint);
+                // Then get layer r/c-unit from the DB
+                unsigned layerId = pin.getTopLayer();
+                float rUnit = 0.0, cUnit = 0.0;
+                _dbWrapper->getLayerRC(layerId, rUnit, cUnit);
+
+                // Finally multiply
+                float res = rUnit * wirelength;
+                float cap = cUnit * wirelength;
+
+                if (_debug) {
+                        std::cout << "[DEBUG] Layer ID: " << layerId << " dbuWirelength: " << dbuWirelength;
+                        std::cout << std::scientific;
+                        std::cout << " rUnit: " << rUnit << " cUnit: " << cUnit << "\n"; 
+                        std::cout << "[DEBUG]    wirelength: " << wirelength << " res: " << res << " cap: " << cap << "\n";
+                        std::cout << std::fixed;
+                }
+
+                _parasitics->incrCap(n1, cap/2.0, _analysisPoint);
+                _parasitics->makeResistor(nullptr, n1, n2, res, _analysisPoint);
+                _parasitics->incrCap(n2, cap/2.0, _analysisPoint);
         }
 }      
+
+Coordinate RcTreeBuilder::computePinCoordinate(const Pin pin) const {
+        unsigned topLayer = pin.getTopLayer();
+        std::vector<Box> pinBoxes = pin.getBoxes()[topLayer];
+        unsigned x = 0;
+        unsigned y = 0;
+        for (Box pinBox : pinBoxes) {
+               x += pinBox.getMiddle().getX(); 
+               y += pinBox.getMiddle().getY(); 
+        }
+        x /= pinBoxes.size();
+        y /= pinBoxes.size();
+
+        return Coordinate(x, y);         
+}
 
 int RcTreeBuilder::findNodeToConnect(const Pin& pin, const std::vector<unsigned>& pinNodes) const {
         std::vector<Node> nodes = _steinerTree->getNodes();
@@ -174,6 +239,7 @@ void RcTreeBuilder::reportParasitics() {
                 
         }
 
+        std::cout << std::scientific;
         std::cout << "Resistors: \n";
         sta::ParasiticDeviceIterator *deviceIt = _parasitics->deviceIterator(_parasitic);
         while (deviceIt->hasNext()) {
@@ -185,7 +251,7 @@ void RcTreeBuilder::reportParasitics() {
                 sta::ParasiticNode* node1 = _parasitics->node1(device);
                 sta::ParasiticNode* node2 = _parasitics->node2(device);
                 std::cout << _parasitics->name(node1) << " " << _parasitics->name(node2) << " " ;
-                std::cout << _parasitics->value(device, _analysisPoint) << "\n";        
+                std::cout << _units->resistanceUnit()->asString( _parasitics->value(device, _analysisPoint)) << "\n";        
         }
         
         std::cout << "Capacitors: \n";
@@ -194,8 +260,10 @@ void RcTreeBuilder::reportParasitics() {
                 sta::ParasiticNode *node = nodeIt->next();
                 
                 std::cout << _parasitics->name(node) << " " ;
-                std::cout << _parasitics->nodeGndCap(node, _analysisPoint) << "\n";        
+                std::cout << _units->capacitanceUnit()->asString(_parasitics->nodeGndCap(node, _analysisPoint)) << "\n";        
         }
+        
+        std::cout << std::fixed;
 }
 
 }

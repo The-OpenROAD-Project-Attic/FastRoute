@@ -12,6 +12,7 @@ namespace sta {
         class Parasitics;
         class Parasitic;
         class ParasiticAnalysisPt;
+        class Units;
 }
 
 namespace FastRoute {
@@ -33,6 +34,8 @@ protected:
         int findNodeToConnect(const Pin& pin,
                               const std::vector<unsigned>& pinNodes) const;
         unsigned computeDist(const Node& n1, const Node& n2) const;
+        unsigned computeDist(const Coordinate& coord, const Node& n) const;
+        Coordinate computePinCoordinate(const Pin pin) const;
 
         Net*                      _net           = nullptr;
         Grid*                     _grid          = nullptr;
@@ -43,6 +46,7 @@ protected:
         sta::Parasitics*          _parasitics    = nullptr;
         sta::ParasiticAnalysisPt* _analysisPoint = nullptr; 
         sta::Network*             _network       = nullptr;
+        sta::Units*               _units         = nullptr;
         bool                      _debug         = false;
 };
 
