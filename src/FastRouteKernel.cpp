@@ -58,6 +58,7 @@
 namespace FastRoute {
 
 FastRouteKernel::FastRouteKernel() {
+        // Allocate memory for objects
         _netlist = new Netlist;
         _grid = new Grid;
         _dbWrapper = new DBWrapper;
@@ -68,7 +69,23 @@ FastRouteKernel::FastRouteKernel() {
         _result = new std::vector<FastRoute::NET>;
 
         *_dbWrapper = DBWrapper(_netlist, _grid);
-        _interactiveMode = true;
+
+        // Initialize variables
+        float _adjustment = 0.0;
+        int _minRoutingLayer = 1;
+        int _maxRoutingLayer = -1;
+        bool _unidirectionalRoute = 0;
+        int _fixLayer = 0;
+        bool _clockNetRouting = 0;
+        int _overflowIterations = 500;
+        int _pdRevForHighFanout = -1;
+        bool _allowOverflow = 0;
+        bool _routeNetsWithPad = 0;
+        
+        // Clock net routing variables
+        bool _pdRev = 0;
+        float _alpha = 0;
+        int _verbose = 0;
 }
 
 FastRouteKernel::~FastRouteKernel() {
@@ -89,6 +106,8 @@ void FastRouteKernel::startFastRoute() {
         if (_unidirectionalRoute) {
                 _minRoutingLayer = 2;
                 _fixLayer = 1;
+        } else {
+                _fixLayer = 0;
         }
 
         if (_maxRoutingLayer == -1) {

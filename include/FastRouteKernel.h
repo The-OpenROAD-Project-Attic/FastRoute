@@ -83,7 +83,6 @@ private:
         int _maxRoutingLayer;
         bool _unidirectionalRoute;
         int _fixLayer;
-        bool _interactiveMode;
         bool _clockNetRouting;
         unsigned _dbId;
         const int _selectedMetal = 3;
