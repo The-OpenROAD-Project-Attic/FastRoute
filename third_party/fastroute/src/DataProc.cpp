@@ -39,10 +39,10 @@
 namespace FastRoute {
 
 // Global variables
-int xGrid, yGrid, maxGrid, numGrids, numNets, *vCapacity3D, *hCapacity3D;
+int xGrid, yGrid, numGrids, numNets, vCapacity3D[MAXLAYER], hCapacity3D[MAXLAYER];
 float vCapacity_lb, hCapacity_lb, vCapacity_ub, hCapacity_ub;
 int MaxDegree;
-int *MinWidth, *MinSpacing, *ViaSpacing;
+int MinWidth[MAXLAYER], MinSpacing[MAXLAYER], ViaSpacing[MAXLAYER];
 int xcorner, ycorner, wTile, hTile;
 int enlarge, costheight, ripup_threshold, ahTH;
 int numValidNets;  // # nets need to be routed (having pins in different grids)
@@ -52,8 +52,8 @@ int totalOverflow;  // total # overflow
 int mazeThreshold;  // the wirelen threshold to do maze routing
 Net** nets;
 Edge *h_edges, *v_edges;
-float *d1;
-float *d2;
+float d1[YRANGE][XRANGE];
+float d2[YRANGE][XRANGE];
 int layerOrientation;
 bool pdRev;
 float alpha;
@@ -62,11 +62,11 @@ int overflowIterations;
 int pdRevForHighFanout;
 bool allowOverflow;
 
-Bool **HV;
-Bool **hyperV;
-Bool **hyperH;
+Bool HV[YRANGE][XRANGE];
+Bool hyperV[YRANGE][XRANGE];
+Bool hyperH[YRANGE][XRANGE];
 
-int **corrEdge;
+int corrEdge[YRANGE][XRANGE];
 int SLOPE;
 
 float LB;
@@ -86,7 +86,6 @@ char benchFile[STRINGLEN];
 Segment* seglist;
 int* seglistIndex;  // the index for the segments for each net
 int* seglistCnt;    // the number of segements for each net
-int* segOrder;      // the order of segments for routing
 Tree* trees;        // the tree topologies
 StTree* sttrees;    // the Steiner trees
 DTYPE** gxs;        // the copy of xs for nets, used for second FLUTE
@@ -100,21 +99,21 @@ OrderTree* treeOrderCong;
 int numTreeedges;
 int viacost;
 
-int **layerGrid;
-int **gridD;
-int **viaLink;
+int layerGrid[MAXLAYER][MAXLEN];
+int gridD[MAXLAYER][MAXLEN];
+int viaLink[MAXLAYER][MAXLEN];
 
-int *d13D;
-short *d23D;
+int d13D[MAXLAYER][YRANGE][XRANGE];
+short d23D[MAXLAYER][YRANGE][XRANGE];
 
 dirctionT*** directions3D;
 int*** corrEdge3D;
 parent3D*** pr3D;
 
 int mazeedge_Threshold;
-Bool **inRegion;
+Bool inRegion[YRANGE][XRANGE];
 
-int gridHV, gridH, gridV, *gridHs, *gridVs;
+int gridHV, gridH, gridV, gridHs[MAXLAYER], gridVs[MAXLAYER];
 
 int** heap13D;
 short** heap23D;
@@ -139,59 +138,5 @@ void init_usage() {
                 h_edges[i].usage = 0;
         for (i = 0; i < (yGrid - 1) * xGrid; i++)
                 v_edges[i].usage = 0;
-}
-
-void freeAllMemory() {
-        int i, deg, numEdges, edgeID;
-        TreeEdge* treeedge;
-
-        for (i = 0; i < numValidNets; i++) {
-                free(nets[i]->pinX);
-                free(nets[i]->pinY);
-                free(nets[i]->pinL);
-                free(nets[i]);
-        }
-        free(seglistIndex);
-        free(seglistCnt);
-        free(seglist);
-        free(h_edges);
-        free(v_edges);
-        free(h_edges3D);
-        free(v_edges3D);
-        free(segOrder);
-
-        for (i = 0; i < numValidNets; i++)
-                free(trees[i].branch);
-        free(trees);
-
-        for (i = 0; i < numValidNets; i++) {
-                deg = sttrees[i].deg;
-                numEdges = 2 * deg - 3;
-                for (edgeID = 0; edgeID < numEdges; edgeID++) {
-                        treeedge = &(sttrees[i].edges[edgeID]);
-                        if (treeedge->len > 0) {
-                                free(treeedge->route.gridsX);
-                                free(treeedge->route.gridsY);
-                                free(treeedge->route.gridsL);
-                        }
-                }
-                free(sttrees[i].nodes);
-                free(sttrees[i].edges);
-        }
-        free(sttrees);
-
-        for (i = 0; i < yGrid; i++) {
-                free(parentX1[i]);
-                free(parentY1[i]);
-                free(parentX3[i]);
-                free(parentY3[i]);
-        }
-        free(parentX1);
-        free(parentY1);
-        free(parentX3);
-        free(parentY3);
-        free(pop_heap2);
-        free(heap1);
-        free(heap2);
 }
 }  // namespace FastRoute
