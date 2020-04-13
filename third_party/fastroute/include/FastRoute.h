@@ -66,6 +66,7 @@ struct NET {
 class FT {
        public:
         FT() = default;
+        ~FT();
 
         std::map<std::string, std::vector<PIN>> allNets;
         int maxNetDegree;
