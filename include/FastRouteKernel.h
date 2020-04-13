@@ -145,6 +145,8 @@ private:
 public:
         FastRouteKernel();
         ~FastRouteKernel();
+        void init();
+        void reset();
         
         void setAdjustment(const float adjustment);
         void setMinRoutingLayer(const int minLayer);

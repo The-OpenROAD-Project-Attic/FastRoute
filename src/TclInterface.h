@@ -68,6 +68,7 @@ void set_route_nets_with_pad(bool routePad);
 // Run
 void start_fastroute();
 void run_fastroute();
+void reset_fastroute();
 void write_guides();
 
 //Temporary for congestion drive RePlAce

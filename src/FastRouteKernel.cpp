@@ -58,6 +58,10 @@
 namespace FastRoute {
 
 FastRouteKernel::FastRouteKernel() {
+        init();
+}
+
+void FastRouteKernel::init() {
         // Allocate memory for objects
         _netlist = new Netlist;
         _grid = new Grid;
@@ -88,7 +92,7 @@ FastRouteKernel::FastRouteKernel() {
         int _verbose = 0;
 }
 
-FastRouteKernel::~FastRouteKernel() {
+void FastRouteKernel::reset() {
         delete _netlist;
         delete _grid;
         delete _dbWrapper;
@@ -97,6 +101,12 @@ FastRouteKernel::~FastRouteKernel() {
         delete _routingLayers;
         delete _allRoutingTracks;
         delete _result;
+
+        init();
+}
+
+FastRouteKernel::~FastRouteKernel() {
+        reset();
 }
 
 void FastRouteKernel::startFastRoute() {
