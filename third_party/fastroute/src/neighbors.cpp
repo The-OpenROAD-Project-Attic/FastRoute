@@ -429,7 +429,7 @@ void check_nn(
         long i, j, oct;
         nn_array* nn1;
 
-        nn1 = (nn_array*)calloc((size_t)n, (size_t)sizeof(nn_array));
+        nn1 = new nn_array[(size_t)n];
         brute_force_nearest_neighbors(n, pt, nn1);
 
         for (i = 0; i < n; i++) {
