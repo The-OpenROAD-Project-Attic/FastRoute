@@ -42,6 +42,7 @@ FastRoute::set_capacity_adjustment 0.0
 FastRoute::set_min_layer 1
 FastRoute::set_max_layer -1
 FastRoute::set_verbose 2
+FastRoute::set_grid_origin 0 0
 
 FastRoute::start_fastroute
 FastRoute::run_fastroute
