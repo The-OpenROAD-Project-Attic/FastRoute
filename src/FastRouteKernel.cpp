@@ -67,7 +67,7 @@ void FastRouteKernel::init() {
         _grid = new Grid;
         _dbWrapper = new DBWrapper;
         _fastRoute = new FT;
-        _gridOrigin = new Coordinate;
+        _gridOrigin = new Coordinate(0, 0);
         _routingLayers = new std::vector<RoutingLayer>;
         _allRoutingTracks = new std::vector<RoutingTracks>;
         _result = new std::vector<FastRoute::NET>;
@@ -75,21 +75,22 @@ void FastRouteKernel::init() {
         *_dbWrapper = DBWrapper(_netlist, _grid);
 
         // Initialize variables
-        float _adjustment = 0.0;
-        int _minRoutingLayer = 1;
-        int _maxRoutingLayer = -1;
-        bool _unidirectionalRoute = 0;
-        int _fixLayer = 0;
-        bool _clockNetRouting = 0;
-        int _overflowIterations = 500;
-        int _pdRevForHighFanout = -1;
-        bool _allowOverflow = 0;
-        bool _routeNetsWithPad = 0;
+        _outfile = "out.guide";
+        _adjustment = 0.0;
+        _minRoutingLayer = 1;
+        _maxRoutingLayer = -1;
+        _unidirectionalRoute = 0;
+        _fixLayer = 0;
+        _clockNetRouting = 0;
+        _overflowIterations = 500;
+        _pdRevForHighFanout = -1;
+        _allowOverflow = 0;
+        _routeNetsWithPad = 0;
         
         // Clock net routing variables
-        bool _pdRev = 0;
-        float _alpha = 0;
-        int _verbose = 0;
+        _pdRev = 0;
+        _alpha = 0;
+        _verbose = 0;
 }
 
 void FastRouteKernel::reset() {
@@ -102,11 +103,44 @@ void FastRouteKernel::reset() {
         delete _allRoutingTracks;
         delete _result;
 
+        _vCapacities.clear();
+        _hCapacities.clear();
+        _netsDegree.clear();
+        _layersToAdjust.clear();
+        _layersReductionPercentage.clear();
+        regionsMinX.clear();
+        regionsMinY.clear();
+        regionsMaxX.clear();
+        regionsMaxY.clear();
+        regionsLayer.clear();
+        regionsReductionPercentage.clear();
+        _netsAlpha.clear();
+
         init();
 }
 
 FastRouteKernel::~FastRouteKernel() {
-        reset();
+        delete _netlist;
+        delete _grid;
+        delete _dbWrapper;
+        delete _fastRoute;
+        delete _gridOrigin;
+        delete _routingLayers;
+        delete _allRoutingTracks;
+        delete _result;
+
+        _vCapacities.clear();
+        _hCapacities.clear();
+        _netsDegree.clear();
+        _layersToAdjust.clear();
+        _layersReductionPercentage.clear();
+        regionsMinX.clear();
+        regionsMinY.clear();
+        regionsMaxX.clear();
+        regionsMaxY.clear();
+        regionsLayer.clear();
+        regionsReductionPercentage.clear();
+        _netsAlpha.clear();
 }
 
 void FastRouteKernel::startFastRoute() {
