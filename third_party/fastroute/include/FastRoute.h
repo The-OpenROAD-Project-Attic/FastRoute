@@ -65,7 +65,7 @@ struct NET {
 
 class FT {
        public:
-        FT() = default;
+        FT();
         ~FT();
 
         std::map<std::string, std::vector<PIN>> allNets;

@@ -56,13 +56,28 @@
 
 namespace FastRoute {
 
-int newnetID = 0;
-int segcount = 0;
+int newnetID;
+int segcount;
 int pinInd;
 int numAdjust;
-int vCapacity = 0;
-int hCapacity = 0;
-int MD = 0;
+int vCapacity;
+int hCapacity;
+int MD;
+
+FT::FT() {
+        newnetID = 0;
+        segcount = 0;
+        pinInd;
+        numAdjust;
+        vCapacity = 0;
+        hCapacity = 0;
+        MD = 0;
+
+        for (int i = 0; i < MAXLAYER; i++) {
+                vCapacity3D[i] = 0;
+                hCapacity3D[i] = 0;
+        }
+}
 
 FT::~FT() {
         int i, deg, numEdges, edgeID;
@@ -94,10 +109,12 @@ FT::~FT() {
 
         if (treeOrderPV != NULL) {
                 delete[] treeOrderPV;
+                treeOrderPV = NULL;
         }
 
         if (treeOrderCong != NULL) {
                 delete[] treeOrderCong;
+                treeOrderCong = NULL;
         }
 
         delete[] h_edges3D;
@@ -177,7 +194,6 @@ void FT::addViaSpacing(int spacing, int layer) {
 
 void FT::setNumberNets(int nNets) {
         numNets = nNets;
-        std::cout << "Allocating " << numNets << " for nets...\n";
         nets = new Net*[numNets];
         for (int i = 0; i < numNets; i++)
                 nets[i] = new Net;
@@ -297,6 +313,8 @@ void FT::initEdges() {
 
         h_edges = new Edge[((xGrid - 1) * yGrid)];
         v_edges = new Edge[(xGrid * (yGrid - 1))];
+
+        init_usage();
 
         v_edges3D = new Edge3D[(numLayers * xGrid * yGrid)];
         h_edges3D = new Edge3D[(numLayers * xGrid * yGrid)];
@@ -1000,7 +1018,6 @@ void FT::deleteGlobalArrays() {
         // delete[] costHVHtest;
         // delete[] costVtest;
         // delete[] costTBtest;
-        printf("On hold\n");
 }
 
 void FT::usePdRev(){

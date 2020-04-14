@@ -48,11 +48,11 @@ static Point* _pt;
   For efficiency purposes auxiliary arrays are allocated as globals 
 */
 
-long max_arrays_size = 0;
-nn_array* nn = (nn_array*)NULL;
-Point* sheared = (Point*)NULL;
-long* sorted = (long*)NULL;
-long* aux = (long*)NULL;
+long max_arrays_size;
+nn_array* nn;
+Point* sheared;
+long* sorted;
+long* aux;
 
 /***************************************************************************/
 /*
@@ -60,6 +60,12 @@ long* aux = (long*)NULL;
 */
 
 void allocate_nn_arrays(long n) {
+        max_arrays_size = 0;
+        nn = (nn_array*)NULL;
+        sheared = (Point*)NULL;
+        sorted = (long*)NULL;
+        aux = (long*)NULL;
+        
         if (max_arrays_size < n) {
                 nn = (nn_array*)realloc((void*)nn, (size_t)n * sizeof(nn_array));
                 sheared = (Point*)realloc((void*)sheared, (size_t)n * sizeof(Point));
@@ -467,7 +473,7 @@ void check_nn(
                 }
         }
 
-        free(nn1);
+        delete[] nn1;
 }
 
 /***************************************************************************/
