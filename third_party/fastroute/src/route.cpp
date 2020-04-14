@@ -1722,8 +1722,8 @@ void routeLVEnew(int netID, int edgeID, int threshold, int enlarge) {
                         cnt++;
 
                         treeedge->route.routelen = cnt - 1;
-                        treeedge->route.gridsX = new short[cnt];
-                        treeedge->route.gridsY = new short[cnt];new short[cnt];
+                        treeedge->route.gridsX = (short *)calloc(cnt, sizeof(short));
+                        treeedge->route.gridsY = (short *)calloc(cnt, sizeof(short));
 
                         for (i = 0; i < cnt; i++) {
                                 treeedge->route.gridsX[i] = gridsX[i];

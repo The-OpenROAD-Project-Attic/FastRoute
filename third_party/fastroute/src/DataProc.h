@@ -38,8 +38,8 @@
 
 #define MAXLEN 20000
 
-#define XRANGE 2000
-#define YRANGE 2000
+#define XRANGE 4000
+#define YRANGE 4000
 
 namespace FastRoute {
 

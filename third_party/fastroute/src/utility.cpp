@@ -222,13 +222,13 @@ void ConvertToFull3DType2() {
                                 newCNT++;
                                 // last grid -> node2 finished
                                 if (treeedges[edgeID].route.type == MAZEROUTE) {
-                                        delete[] treeedges[edgeID].route.gridsX;
-                                        delete[] treeedges[edgeID].route.gridsY;
-                                        delete[] treeedges[edgeID].route.gridsL;
+                                        free(treeedges[edgeID].route.gridsX);
+                                        free(treeedges[edgeID].route.gridsY);
+                                        free(treeedges[edgeID].route.gridsL);
                                 }
-                                treeedge->route.gridsX = new short[newCNT];
-                                treeedge->route.gridsY = new short[newCNT];
-                                treeedge->route.gridsL = new short[newCNT];
+                                treeedge->route.gridsX = (short *)calloc(newCNT, sizeof(short));
+                                treeedge->route.gridsY = (short *)calloc(newCNT, sizeof(short));
+                                treeedge->route.gridsL = (short *)calloc(newCNT, sizeof(short));
                                 treeedge->route.type = MAZEROUTE;
                                 treeedge->route.routelen = newCNT - 1;
 
@@ -389,13 +389,13 @@ void fillVIA() {
                                         // last grid -> node2 finished
 
                                         if (treeedges[edgeID].route.type == MAZEROUTE) {
-                                                delete[] treeedges[edgeID].route.gridsX;
-                                                delete[] treeedges[edgeID].route.gridsY;
-                                                delete[] treeedges[edgeID].route.gridsL;
+                                                free(treeedges[edgeID].route.gridsX);
+                                                free(treeedges[edgeID].route.gridsY);
+                                                free(treeedges[edgeID].route.gridsL);
                                         }
-                                        treeedge->route.gridsX = new short[newCNT];
-                                        treeedge->route.gridsY = new short[newCNT];
-                                        treeedge->route.gridsL = new short[newCNT];
+                                        treeedge->route.gridsX = (short *)calloc(newCNT, sizeof(short));
+                                        treeedge->route.gridsY = (short *)calloc(newCNT, sizeof(short));
+                                        treeedge->route.gridsL = (short *)calloc(newCNT, sizeof(short));
                                         treeedge->route.type = MAZEROUTE;
                                         treeedge->route.routelen = newCNT - 1;
 

@@ -478,13 +478,13 @@ void updateRouteType13D(int netID, TreeNode *treenodes, int n1, int A1, int A2, 
         // reallocate memory for route.gridsX and route.gridsY
         if (treeedges[edge_n1A1].route.type == MAZEROUTE && treeedges[edge_n1A1].route.routelen > 0)  // if originally allocated, free them first
         {
-                delete[] treeedges[edge_n1A1].route.gridsX;
-                delete[] treeedges[edge_n1A1].route.gridsY;
-                delete[] treeedges[edge_n1A1].route.gridsL;
+                free(treeedges[edge_n1A1].route.gridsX);
+                free(treeedges[edge_n1A1].route.gridsY);
+                free(treeedges[edge_n1A1].route.gridsL);
         }
-        treeedges[edge_n1A1].route.gridsX = new short[E1_pos1+1];
-        treeedges[edge_n1A1].route.gridsY = new short[E1_pos1+1];
-        treeedges[edge_n1A1].route.gridsL = new short[E1_pos1+1];
+        treeedges[edge_n1A1].route.gridsX = (short *)calloc((E1_pos1 + 1), sizeof(short));
+        treeedges[edge_n1A1].route.gridsY = (short *)calloc((E1_pos1 + 1), sizeof(short));
+        treeedges[edge_n1A1].route.gridsL = (short *)calloc((E1_pos1 + 1), sizeof(short));
 
         if (A1x <= E1x) {
                 cnt = 0;
@@ -521,13 +521,13 @@ void updateRouteType13D(int netID, TreeNode *treenodes, int n1, int A1, int A2, 
         }
 
         if (cnt_n1A2 > 1) {
-                treeedges[edge_n1A2].route.gridsX = new short[(cnt_n1A1 + cnt_n1A2 - E1_pos2 - 1 + ADIFF(gridsL_n1A1[cnt_n1A1 - 1], gridsL_n1A2[0]))];
-                treeedges[edge_n1A2].route.gridsY = new short[(cnt_n1A1 + cnt_n1A2 - E1_pos2 - 1 + ADIFF(gridsL_n1A1[cnt_n1A1 - 1], gridsL_n1A2[0]))];
-                treeedges[edge_n1A2].route.gridsL = new short[(cnt_n1A1 + cnt_n1A2 - E1_pos2 - 1 + ADIFF(gridsL_n1A1[cnt_n1A1 - 1], gridsL_n1A2[0]))];
+                treeedges[edge_n1A2].route.gridsX = (short *)calloc((cnt_n1A1 + cnt_n1A2 - E1_pos2 - 1 + ADIFF(gridsL_n1A1[cnt_n1A1 - 1], gridsL_n1A2[0])), sizeof(short));
+                treeedges[edge_n1A2].route.gridsY = (short *)calloc((cnt_n1A1 + cnt_n1A2 - E1_pos2 - 1 + ADIFF(gridsL_n1A1[cnt_n1A1 - 1], gridsL_n1A2[0])), sizeof(short));
+                treeedges[edge_n1A2].route.gridsL = (short *)calloc((cnt_n1A1 + cnt_n1A2 - E1_pos2 - 1 + ADIFF(gridsL_n1A1[cnt_n1A1 - 1], gridsL_n1A2[0])), sizeof(short));
         } else {
-                treeedges[edge_n1A2].route.gridsX = new short[(cnt_n1A1 + cnt_n1A2 - E1_pos2 - 1)];
-                treeedges[edge_n1A2].route.gridsY = new short[(cnt_n1A1 + cnt_n1A2 - E1_pos2 - 1)];
-                treeedges[edge_n1A2].route.gridsL = new short[(cnt_n1A1 + cnt_n1A2 - E1_pos2 - 1)];
+                treeedges[edge_n1A2].route.gridsX = (short *)calloc((cnt_n1A1 + cnt_n1A2 - E1_pos2 - 1), sizeof(short));
+                treeedges[edge_n1A2].route.gridsY = (short *)calloc((cnt_n1A1 + cnt_n1A2 - E1_pos2 - 1), sizeof(short));
+                treeedges[edge_n1A2].route.gridsL = (short *)calloc((cnt_n1A1 + cnt_n1A2 - E1_pos2 - 1), sizeof(short));
         }
 
         if (E1x <= A2x) {
@@ -643,9 +643,9 @@ void updateRouteType23D(int netID, TreeNode *treenodes, int n1, int A1, int A2, 
         // combine grids on original (A1, n1) and (n1, A2) to new (A1, A2)
         // allocate memory for gridsX[] and gridsY[] of edge_A1A2
         if (treeedges[edge_A1A2].route.type == MAZEROUTE) {
-                delete[] treeedges[edge_A1A2].route.gridsX;
-                delete[] treeedges[edge_A1A2].route.gridsY;
-                delete[] treeedges[edge_A1A2].route.gridsL;
+                free(treeedges[edge_A1A2].route.gridsX);
+                free(treeedges[edge_A1A2].route.gridsY);
+                free(treeedges[edge_A1A2].route.gridsL);
         }
         len_A1A2 = cnt_n1A1 + cnt_n1A2 - 1;
 
@@ -658,9 +658,9 @@ void updateRouteType23D(int netID, TreeNode *treenodes, int n1, int A1, int A2, 
                         extraLen = ADIFF(gridsL_n1A1[cnt_n1A1 - 1], gridsL_n1A2[0]);
                         len_A1A2 += extraLen;
                 }
-                treeedges[edge_A1A2].route.gridsX = new short[len_A1A2];
-                treeedges[edge_A1A2].route.gridsY = new short[len_A1A2];
-                treeedges[edge_A1A2].route.gridsL = new short[len_A1A2];
+                treeedges[edge_A1A2].route.gridsX = (short *)calloc(len_A1A2, sizeof(short));
+                treeedges[edge_A1A2].route.gridsY = (short *)calloc(len_A1A2, sizeof(short));
+                treeedges[edge_A1A2].route.gridsL = (short *)calloc(len_A1A2, sizeof(short));
                 treeedges[edge_A1A2].route.routelen = len_A1A2 - 1;
                 treeedges[edge_A1A2].len = ADIFF(A1x, A2x) + ADIFF(A1y, A2y);
 
@@ -731,28 +731,28 @@ void updateRouteType23D(int netID, TreeNode *treenodes, int n1, int A1, int A2, 
 
         // allocate memory for gridsX[] and gridsY[] of edge_n1C1 and edge_n1C2
         if (treeedges[edge_n1C1].route.type == MAZEROUTE && treeedges[edge_n1C1].route.routelen > 0) {
-                delete[] treeedges[edge_n1C1].route.gridsX;
-                delete[] treeedges[edge_n1C1].route.gridsY;
-                delete[] treeedges[edge_n1C1].route.gridsL;
+                free(treeedges[edge_n1C1].route.gridsX);
+                free(treeedges[edge_n1C1].route.gridsY);
+                free(treeedges[edge_n1C1].route.gridsL);
         }
         len_n1C1 = E1_pos1 + 1;
 
-        treeedges[edge_n1C1].route.gridsX = new short[len_n1C1];
-        treeedges[edge_n1C1].route.gridsY = new short[len_n1C1];
-        treeedges[edge_n1C1].route.gridsL = new short[len_n1C1];
+        treeedges[edge_n1C1].route.gridsX = (short *)calloc(len_n1C1, sizeof(short));
+        treeedges[edge_n1C1].route.gridsY = (short *)calloc(len_n1C1, sizeof(short));
+        treeedges[edge_n1C1].route.gridsL = (short *)calloc(len_n1C1, sizeof(short));
         treeedges[edge_n1C1].route.routelen = len_n1C1 - 1;
         treeedges[edge_n1C1].len = ADIFF(C1x, E1x) + ADIFF(C1y, E1y);
 
         if (treeedges[edge_n1C2].route.type == MAZEROUTE && treeedges[edge_n1C2].route.routelen > 0) {
-                delete[] treeedges[edge_n1C2].route.gridsX;
-                delete[] treeedges[edge_n1C2].route.gridsY;
-                delete[] treeedges[edge_n1C2].route.gridsL;
+                free(treeedges[edge_n1C2].route.gridsX);
+                free(treeedges[edge_n1C2].route.gridsY);
+                free(treeedges[edge_n1C2].route.gridsL);
         }
         len_n1C2 = cnt_C1C2 - E1_pos2;
 
-        treeedges[edge_n1C2].route.gridsX = new short[len_n1C2];
-        treeedges[edge_n1C2].route.gridsY = new short[len_n1C2];
-        treeedges[edge_n1C2].route.gridsL = new short[len_n1C2];
+        treeedges[edge_n1C2].route.gridsX = (short *)calloc(len_n1C2, sizeof(short));
+        treeedges[edge_n1C2].route.gridsY = (short *)calloc(len_n1C2, sizeof(short));
+        treeedges[edge_n1C2].route.gridsL = (short *)calloc(len_n1C2, sizeof(short));
         treeedges[edge_n1C2].route.routelen = len_n1C2 - 1;
         treeedges[edge_n1C2].len = ADIFF(C2x, E1x) + ADIFF(C2y, E1y);
 
@@ -1446,14 +1446,15 @@ void mazeRouteMSMDOrder3D(int expand, int ripupTHlb, int ripupTHub) {
 
                                         // update route for edge (n1, n2) and edge usage
                                         if (treeedges[edge_n1n2].route.type == MAZEROUTE) {
-                                                delete[] treeedges[edge_n1n2].route.gridsX;
-                                                delete[] treeedges[edge_n1n2].route.gridsY;
-                                                delete[] treeedges[edge_n1n2].route.gridsL;
+                                                free(treeedges[edge_n1n2].route.gridsX);
+                                                free(treeedges[edge_n1n2].route.gridsY);
+                                                free(treeedges[edge_n1n2].route.gridsL);
                                         }
 
-                                        treeedges[edge_n1n2].route.gridsX = new short[newcnt_n1n2];
-                                        treeedges[edge_n1n2].route.gridsY = new short[newcnt_n1n2];
-                                        treeedges[edge_n1n2].route.gridsL = new short[newcnt_n1n2];
+                                        // printf("size alloc: %d\n", newcnt_n1n2);
+                                        treeedges[edge_n1n2].route.gridsX = (short *)calloc(newcnt_n1n2, sizeof(short));
+                                        treeedges[edge_n1n2].route.gridsY = (short *)calloc(newcnt_n1n2, sizeof(short));
+                                        treeedges[edge_n1n2].route.gridsL = (short *)calloc(newcnt_n1n2, sizeof(short));
                                         treeedges[edge_n1n2].route.type = MAZEROUTE;
                                         treeedges[edge_n1n2].route.routelen = newcnt_n1n2 - 1;
                                         treeedges[edge_n1n2].len = ADIFF(E1x, E2x) + ADIFF(E1y, E2y);
