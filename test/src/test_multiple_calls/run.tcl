@@ -37,11 +37,11 @@
 read_lef "input.lef"
 read_def "input.def"
 
-#fastroute
 FastRoute::set_output_file "out.guide"
 FastRoute::set_capacity_adjustment 0.0
 FastRoute::set_min_layer 1
 FastRoute::set_max_layer -1
+FastRoute::set_verbose 2
 
 FastRoute::start_fastroute
 FastRoute::run_fastroute
@@ -52,7 +52,8 @@ FastRoute::reset_fastroute
 FastRoute::set_output_file "out2.guide"
 FastRoute::set_capacity_adjustment 0.15
 FastRoute::set_min_layer 1
-FastRoute::set_max_layer 9
+FastRoute::set_max_layer 10
+FastRoute::set_verbose 2
 
 FastRoute::start_fastroute
 FastRoute::run_fastroute
