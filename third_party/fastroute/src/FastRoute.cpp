@@ -544,7 +544,7 @@ int FT::run(std::vector<NET> &result) {
         char routingFile[STRINGLEN];
         char degreeFile[STRINGLEN];
         char optionS[STRINGLEN];
-        clock_t t1, t2, t3, t4;
+        clock_t t1 = 0, t2 = 0, t3 = 0, t4 = 0;
         float gen_brk_Time, P1_Time, P2_Time, P3_Time, maze_Time, totalTime, congestionmap_time;
         int iter, last_totalOverflow, diff_totalOverflow, enlarge, ripup_threshold;
         int i, j, past_overflow, cur_overflow;
@@ -602,6 +602,8 @@ int FT::run(std::vector<NET> &result) {
         minofl = BIG_INT;
 
         // call FLUTE to generate RSMT and break the nets into segments (2-pin nets)
+
+        t1 = clock();
 
         VIA = 2;
         //viacost = VIA;
