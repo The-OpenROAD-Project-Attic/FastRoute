@@ -86,6 +86,7 @@ private:
         bool _clockNetRouting;
         unsigned _dbId;
         const int _selectedMetal = 3;
+        const float transitionLayerAdjust = 0.6;
         int _overflowIterations;
         int _pdRevForHighFanout;
         bool _allowOverflow;
