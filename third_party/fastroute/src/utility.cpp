@@ -755,7 +755,7 @@ void newLayerAssignmentV4() {
                         treeedge = &(treeedges[edgeID]);
                         if (treeedge->len > 0) {
                                 routeLen = treeedge->route.routelen;
-                                treeedge->route.gridsL = new short[routeLen+1];
+                                treeedge->route.gridsL = (short *)calloc(routeLen+1, sizeof(short));
                                 treeedge->assigned = FALSE;
                         }
                 }
@@ -1146,13 +1146,13 @@ void StNetOrder() {
 
                         gridsX = treeedge->route.gridsX;
                         gridsY = treeedge->route.gridsY;
-                        for (i = 0; i <= treeedge->route.routelen; i++) {
-                                if (gridsX[i] == gridsX[i + 1])  // a vertical edge
+                        for (i = 0; i < treeedge->route.routelen; i++) {
+                                if (gridsX[i] == gridsX[i + 1]) // a vertical edge
                                 {
                                         min_y = std::min(gridsY[i], gridsY[i + 1]);
                                         grid = min_y * xGrid + gridsX[i];
                                         treeOrderCong[j].xmin += std::max(0, v_edges[grid].usage - v_edges[grid].cap);
-                                } else  ///if(gridsY[i]==gridsY[i+1])// a horizontal edge
+                                } else // a horizontal edge
                                 {
                                         min_x = std::min(gridsX[i], gridsX[i + 1]);
                                         grid = gridsY[i] * (xGrid - 1) + min_x;

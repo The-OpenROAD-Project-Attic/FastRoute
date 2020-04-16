@@ -515,9 +515,9 @@ void updateRouteType13D(int netID, TreeNode *treenodes, int n1, int A1, int A2, 
         // reallocate memory for route.gridsX and route.gridsY
         if (treeedges[edge_n1A2].route.type == MAZEROUTE && treeedges[edge_n1A2].route.routelen > 0)  // if originally allocated, free them first
         {
-                delete[] treeedges[edge_n1A2].route.gridsX;
-                delete[] treeedges[edge_n1A2].route.gridsY;
-                delete[] treeedges[edge_n1A2].route.gridsL;
+                free(treeedges[edge_n1A2].route.gridsX);
+                free(treeedges[edge_n1A2].route.gridsY);
+                free(treeedges[edge_n1A2].route.gridsL);
         }
 
         if (cnt_n1A2 > 1) {
