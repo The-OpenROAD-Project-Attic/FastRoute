@@ -72,11 +72,6 @@ FT::FT() {
         vCapacity = 0;
         hCapacity = 0;
         MD = 0;
-
-        for (int i = 0; i < numLayers; i++) {
-                vCapacity3D[i] = 0;
-                hCapacity3D[i] = 0;
-        }
 }
 
 FT::~FT() {
@@ -161,11 +156,79 @@ FT::~FT() {
         delete[] ycor;
         delete[] dcor;
         delete[] netEO;
+
+        for (int i = 0; i < yGrid; i++) {
+                delete[] HV[i];
+        }
+        delete[] HV;
+        
+        for (int i = 0; i < yGrid; i++) {
+                delete[] hyperV[i];
+        }
+        delete[] hyperV;
+        
+        for (int i = 0; i < yGrid; i++) {
+                delete[] hyperH[i];
+        }
+        delete[] hyperH;
+        
+        for (int i = 0; i < yGrid; i++) {
+                delete[] inRegion[i];
+        }
+        delete[] inRegion;
+        
+        for (int i = 0; i < yGrid; i++) {
+                delete[] corrEdge[i];
+        }
+        delete[] corrEdge;
+        
+        delete[] d13D;
+        delete[] d23D;
+        
+        delete[] d1;
+        delete[] d2;
+        
+        delete[] vCapacity3D;
+        delete[] hCapacity3D;
+        
+        delete[] MinWidth;
+        delete[] MinSpacing;
+        delete[] ViaSpacing;
+        
+        delete[] gridHs;
+        delete[] gridVs;
+        
+        for (int i = 0; i < numLayers; i++) {
+                delete[] layerGrid[i];
+        }
+        delete[] layerGrid;
+        
+        for (int i = 0; i < numLayers; i++) {
+                delete[] gridD[i];
+        }
+        delete[] gridD;
+        
+        for (int i = 0; i < numLayers; i++) {
+                delete[] viaLink[i];
+        }
+        delete[] viaLink;
+        
+        delete[] costHVH;
+        delete[] costVHV;
+        delete[] costH;
+        delete[] costV;
+        delete[] costLR;
+        delete[] costTB;
+
+        delete[] costHVHtest;
+        delete[] costVtest;
+        delete[] costTBtest;
 }
 
 void FT::setGridsAndLayers(int x, int y, int nLayers) {
         xGrid = x;
         yGrid = y;
+        std::cout << "Num layers: " << nLayers << "\n";
         numLayers = nLayers;
         numGrids = xGrid * yGrid;
         if (std::max(xGrid, yGrid) >= 1000) {
@@ -178,6 +241,12 @@ void FT::setGridsAndLayers(int x, int y, int nLayers) {
 
         vCapacity3D = new int[numLayers];
         hCapacity3D = new int[numLayers];
+
+        for (int i = 0; i < numLayers; i++) {
+                vCapacity3D[i] = 0;
+                hCapacity3D[i] = 0;
+        }
+
         MinWidth = new int[numLayers];
         MinSpacing = new int[numLayers];
         ViaSpacing = new int[numLayers];
@@ -1023,75 +1092,6 @@ int FT::run(std::vector<NET> &result) {
          * this function call for now.> */
         /* freeAllMemory(); */
         return (0);
-}
-
-void FT::deleteGlobalArrays() {
-        for (int i = 0; i < yGrid; i++) {
-                delete[] HV[i];
-        }
-        delete[] HV;
-        
-        for (int i = 0; i < yGrid; i++) {
-                delete[] hyperV[i];
-        }
-        delete[] hyperV;
-        
-        for (int i = 0; i < yGrid; i++) {
-                delete[] hyperH[i];
-        }
-        delete[] hyperH;
-        
-        for (int i = 0; i < yGrid; i++) {
-                delete[] inRegion[i];
-        }
-        delete[] inRegion;
-        
-        for (int i = 0; i < yGrid; i++) {
-                delete[] corrEdge[i];
-        }
-        delete[] corrEdge;
-        
-        delete[] d13D;
-        delete[] d23D;
-        
-        delete[] d1;
-        delete[] d2;
-        
-        delete[] vCapacity3D;
-        delete[] hCapacity3D;
-        
-        delete[] MinWidth;
-        delete[] MinSpacing;
-        delete[] ViaSpacing;
-        
-        delete[] gridHs;
-        delete[] gridVs;
-        
-        for (int i = 0; i < numLayers; i++) {
-                delete[] layerGrid[i];
-        }
-        delete[] layerGrid;
-        
-        for (int i = 0; i < numLayers; i++) {
-                delete[] gridD[i];
-        }
-        delete[] gridD;
-        
-        for (int i = 0; i < numLayers; i++) {
-                delete[] viaLink[i];
-        }
-        delete[] viaLink;
-        
-        delete[] costHVH;
-        delete[] costVHV;
-        delete[] costH;
-        delete[] costV;
-        delete[] costLR;
-        delete[] costTB;
-
-        delete[] costHVHtest;
-        delete[] costVtest;
-        delete[] costTBtest;
 }
 
 void FT::usePdRev(){
