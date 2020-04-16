@@ -71,9 +71,6 @@ class FT {
         std::map<std::string, std::vector<PIN>> allNets;
         int maxNetDegree;
 
-        std::map<std::string, std::vector<PIN>> allNets;
-        int maxNetDegree;
-
         void setGridsAndLayers(int x, int y, int nLayers);
         void addVCapacity(int verticalCapacity, int layer);
         void addHCapacity(int horizontalCapacity, int layer);
