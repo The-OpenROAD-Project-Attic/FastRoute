@@ -42,30 +42,34 @@
 
 namespace FastRoute {
 
-typedef struct {
+struct PIN {
         long x;
         long y;
         int layer;
-} PIN;
+};
 
-typedef struct {
+struct ROUTE {
         long initX;
         long initY;
         int initLayer;
         long finalX;
         long finalY;
         int finalLayer;
-} ROUTE;
+};
 
-typedef struct {
+struct NET {
         std::string name;
         int id;
         std::vector<ROUTE> route;
-} NET;
+};
 
 class FT {
        public:
-        FT() = default;
+        FT();
+        ~FT();
+
+        std::map<std::string, std::vector<PIN>> allNets;
+        int maxNetDegree;
 
         std::map<std::string, std::vector<PIN>> allNets;
         int maxNetDegree;
@@ -87,7 +91,6 @@ class FT {
         void initAuxVar();
         int run(std::vector<NET> &);
         std::vector<NET> getResults();
-        void deleteGlobalArrays();
 
         int getEdgeCapacity(long x1, long y1, int l1, long x2, long y2, int l2);
         std::map<std::string, std::vector<PIN>> getNets();

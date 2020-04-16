@@ -520,7 +520,7 @@ void newrouteZ_edge(int netID, int edgeID) {
                         }
                         //cost for Top&Bot boundary segs (form Z with V-seg)
                         grid = y2 * (xGrid - 1);
-                        for (j = x1; j <= x2; j++) {
+                        for (j = x1; j < x2; j++) {
                                 tmp = h_edges[grid + j].est_usage - hCapacity_lb + h_edges[grid + j].red;
                                 if (tmp > 0) {
                                         costTB[0] += tmp;
@@ -913,14 +913,12 @@ void newrouteZAll(int threshold) {
 void routeMonotonic(int netID, int edgeID, int threshold) {
         int i, j, cnt, x, xl, yl, xr, yr, n1, n2, x1, y1, x2, y2, grid, xGrid_1, ind_i, ind_j, ind_x;
         int vedge, hedge, segWidth, segHeight, curX, curY;
-        int *gridsX, *gridsY;
+        int *gridsX = new int[XRANGE + YRANGE];
+        int *gridsY = new int[XRANGE + YRANGE];
         float **cost, tmp;
         Bool **parent;  // remember the parent of a grid on the shortest path, TRUE - same x, FALSE - same y
         TreeEdge *treeedges, *treeedge;
         TreeNode *treenodes;
-        
-        gridsX = new int[2 * maxGrid];
-        gridsY = new int[2 * maxGrid];
 
         if (sttrees[netID].edges[edgeID].route.routelen > threshold)  // only route the non-degraded edges (len>0)
         {
@@ -954,11 +952,11 @@ void routeMonotonic(int netID, int edgeID, int threshold) {
                         }
 
                         // find the best monotonic path from (x1, y1) to (x2, y2)
-                        cost = (float **)malloc((segHeight + 1) * sizeof(float *));
-                        parent = (Bool **)malloc((segHeight + 1) * sizeof(Bool *));
+                        cost = new float*[segHeight+1];
+                        parent = new Bool*[segHeight+1];
                         for (i = 0; i <= segHeight; i++) {
-                                cost[i] = (float *)malloc((segWidth + 1) * sizeof(float));
-                                parent[i] = (Bool *)malloc((segWidth + 1) * sizeof(Bool));
+                                cost[i] = new float[segWidth+1];
+                                parent[i] = new Bool[segWidth+1];
                         }
 
                         xGrid_1 = xGrid - 1;  // tmp variable to save runtime
@@ -1104,15 +1102,15 @@ void routeMonotonic(int netID, int edgeID, int threshold) {
                         }
 
                         for (i = 0; i <= segHeight; i++) {
-                                free(cost[i]);
-                                free(parent[i]);
+                                delete[] cost[i];
+                                delete[] parent[i];
                         }
-                        free(cost);
-                        free(parent);
+                        delete[] cost;
+                        delete[] parent;
 
                 }  // if(x1!=x2 || y1!=y2)
         }          // non-degraded edge
-        
+
         delete[] gridsX;
         delete[] gridsY;
 }
@@ -1452,15 +1450,13 @@ void spiralRouteAll() {
 void routeLVEnew(int netID, int edgeID, int threshold, int enlarge) {
         int i, j, cnt, xmin, xmax, ymin, ymax, n1, n2, x1, y1, x2, y2, grid, xGrid_1, deg, yminorig, ymaxorig;
         int vedge, hedge, bestp1x, bestp1y;
-        int *gridsX, *gridsY;
+        int *gridsX = new int[XRANGE + YRANGE];
+        int *gridsY = new int[XRANGE + YRANGE];
         float tmp1, tmp2, tmp3, tmp4, tmp, best;
         Bool LH1, LH2, BL1, BL2;
         TreeEdge *treeedges, *treeedge;
         TreeNode *treenodes;
 
-        gridsX = new int[2 * maxGrid];
-        gridsY = new int[2 * maxGrid];
-        
         if (sttrees[netID].edges[edgeID].len > threshold)  // only route the non-degraded edges (len>0)
         {
                 treeedges = sttrees[netID].edges;
@@ -1511,18 +1507,18 @@ void routeLVEnew(int netID, int edgeID, int threshold, int enlarge) {
                         xGrid_1 = xGrid - 1;  // tmp variable to save runtime
 
                         for (j = ymin; j <= ymax; j++) {
-                                *(d1 + j*maxGrid + xmin) = 0;
+                                *(d1 + j*XRANGE + xmin) = 0;
                         }
                         // update other columns
                         for (i = xmin; i <= xmax; i++) {
-                                *(d1 + ymin*maxGrid + i) = 0;
+                                *(d2 + ymin*XRANGE + i) = 0;
                         }
 
                         for (j = ymin; j <= ymax; j++) {
                                 grid = j * xGrid_1 + xmin;
                                 for (i = xmin; i < xmax; i++) {
                                         tmp = h_costTable[h_edges[grid].red + h_edges[grid].usage];
-                                        *(d1 + j*maxGrid + (i+1)) = *(d1 + j*maxGrid + i) + tmp;
+                                        *(d1 + j*XRANGE + (i+1)) = *(d1 + j*XRANGE + i) + tmp;
                                         grid++;
                                 }
                                 // update the cost of a column of grids by v-edges
@@ -1533,7 +1529,7 @@ void routeLVEnew(int netID, int edgeID, int threshold, int enlarge) {
                                 grid = j * xGrid + xmin;
                                 for (i = xmin; i <= xmax; i++) {
                                         tmp = h_costTable[v_edges[grid].red + v_edges[grid].usage];
-                                        *(d2 + (j + 1)*maxGrid + i) = *(d2 + j*maxGrid + i) + tmp;
+                                        *(d2 + (j + 1)*XRANGE + i) = *(d2 + j*XRANGE + i) + tmp;
                                         grid++;
                                 }
                                 // update the cost of a column of grids by v-edges
@@ -1543,10 +1539,10 @@ void routeLVEnew(int netID, int edgeID, int threshold, int enlarge) {
 
                         for (j = ymin; j <= ymax; j++) {
                                 for (i = xmin; i <= xmax; i++) {
-                                        tmp1 = ADIFF(*(d2 + j*maxGrid + x1), *(d2 + y1*maxGrid + x1)) + ADIFF(*(d1 + j*maxGrid + i), *(d1 + j*maxGrid + x1));  // yfirst for point 1
-                                        tmp2 = ADIFF(*(d2 + j*maxGrid + i), *(d2 + y1*maxGrid + i)) + ADIFF(*(d1 + y1*maxGrid + i), *(d1 + y1*maxGrid + x1));
-                                        tmp3 = ADIFF(*(d2 + y2*maxGrid + i), *(d2 + j*maxGrid + i)) + ADIFF(*(d1 + y2*maxGrid + i), *(d1 + y2*maxGrid + x2));
-                                        tmp4 = ADIFF(*(d2 + y2*maxGrid + x2), *(d2 + j*maxGrid + x2)) + ADIFF(*(d1 + j*maxGrid + x2), *(d1 + j*maxGrid + i));  // xifrst for mid point
+                                        tmp1 = ADIFF(*(d2 + j*XRANGE + x1), *(d2 + y1*XRANGE + x1)) + ADIFF(*(d1 + j*XRANGE + i), *(d1 + j*XRANGE + x1));  // yfirst for point 1
+                                        tmp2 = ADIFF(*(d2 + j*XRANGE + i), *(d2 + y1*XRANGE + i)) + ADIFF(*(d1 + y1*XRANGE + i), *(d1 + y1*XRANGE + x1));
+                                        tmp3 = ADIFF(*(d2 + y2*XRANGE + i), *(d2 + j*XRANGE + i)) + ADIFF(*(d1 + y2*XRANGE + i), *(d1 + y2*XRANGE + x2));
+                                        tmp4 = ADIFF(*(d2 + y2*XRANGE + x2), *(d2 + j*XRANGE + x2)) + ADIFF(*(d1 + j*XRANGE + x2), *(d1 + j*XRANGE + i));  // xifrst for mid point
 
                                         tmp = tmp1 + tmp4;
                                         LH1 = FALSE;
@@ -1731,6 +1727,11 @@ void routeLVEnew(int netID, int edgeID, int threshold, int enlarge) {
                         cnt++;
 
                         treeedge->route.routelen = cnt - 1;
+                        if (treeedge->route.gridsX)
+                                free(treeedge->route.gridsX);
+                        if (treeedge->route.gridsY)
+                                free(treeedge->route.gridsY);
+                        
                         treeedge->route.gridsX = (short *)calloc(cnt, sizeof(short));
                         treeedge->route.gridsY = (short *)calloc(cnt, sizeof(short));
 
@@ -1741,7 +1742,7 @@ void routeLVEnew(int netID, int edgeID, int threshold, int enlarge) {
 
                 }  // if(x1!=x2 || y1!=y2)
         }          // non-degraded edge
-        
+
         delete[] gridsX;
         delete[] gridsY;
 }
@@ -1752,7 +1753,7 @@ void routeLVAll(int threshold, int expand) {
         if (verbose > 1)
             printf(" > ----%d threshold, %d expand\n", threshold, expand);
 
-        h_costTable = (float *)calloc(10 * hCapacity, sizeof(float));
+        h_costTable = new float[10*hCapacity];
 
         forange = 10 * hCapacity;
         for (i = 0; i < forange; i++) {
@@ -1765,7 +1766,7 @@ void routeLVAll(int threshold, int expand) {
                         routeLVEnew(netID, edgeID, threshold, expand);  // ripup previous route and do Monotonic routing
                 }
         }
-        free(h_costTable);
+        delete[] h_costTable;
         // printf("LV routing OK\n");
 }
 

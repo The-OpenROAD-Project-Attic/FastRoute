@@ -61,9 +61,9 @@ namespace FastRoute {
 class DBWrapper {
 public:        
         DBWrapper() = default;
-        DBWrapper(Netlist& netlist, Grid& grid) 
-                  : _netlist(&netlist),
-                  _grid(&grid) {
+        DBWrapper(Netlist *netlist, Grid *grid) 
+                  : _netlist(netlist),
+                  _grid(grid) {
         }
         
         void initGrid(int maxLayer);

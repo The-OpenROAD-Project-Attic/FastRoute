@@ -36,11 +36,14 @@
 
 namespace FastRoute {
 
-Heap* _heap = (Heap*)NULL;
-long _max_heap_size = 0;
-long _heap_size = 0;
+Heap* _heap;
+long _max_heap_size;
+long _heap_size;
 
 void allocate_heap(long n) {
+        _heap = (Heap*)NULL;
+        _max_heap_size = 0;
+        _heap_size = 0;
         if (_max_heap_size < n) {
                 _heap = (Heap*)realloc((void*)_heap, (size_t)(n + 1) * sizeof(Heap));
                 if (!_heap) {

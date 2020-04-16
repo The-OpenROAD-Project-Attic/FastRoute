@@ -83,8 +83,12 @@ extern void start_fastroute();
 
 extern void run_fastroute();
 
-extern void run();
+extern void reset_fastroute();
 
 extern void write_guides();
+
+extern void write_route();
+
+extern void write_est();
 
 }

@@ -68,7 +68,7 @@ void set_capacity_adjustment(float adjustment) {
         fastRouteKernel->setAdjustment(adjustment);
 }
 
-extern void add_layer_adjustment(int layer, float reductionPercentage) {
+void add_layer_adjustment(int layer, float reductionPercentage) {
         fastRouteKernel->addLayerAdjustment(layer, reductionPercentage);
 }
 
@@ -137,12 +137,20 @@ void run_fastroute() {
         fastRouteKernel->runFastRoute();
 }
 
-void run() {
-        fastRouteKernel->run();
+void reset_fastroute() {
+        fastRouteKernel->reset();
 }
 
 void write_guides() {
         fastRouteKernel->writeGuides();
+}
+
+void write_route() {
+        fastRouteKernel->writeRoute();
+}
+
+void write_est() {
+        fastRouteKernel->writeEst();
 }
 
 }

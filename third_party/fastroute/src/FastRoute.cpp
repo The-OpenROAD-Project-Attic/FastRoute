@@ -52,62 +52,204 @@
 #include "route.h"
 #include "maze3D.h"
 #include <iostream>
+#include <string>
 
 namespace FastRoute {
 
-int newnetID = 0;
-int segcount = 0;
+int newnetID;
+int segcount;
 int pinInd;
 int numAdjust;
-int vCapacity = 0;
-int hCapacity = 0;
-int MD = 0;
+int vCapacity;
+int hCapacity;
+int MD;
+
+FT::FT() {
+        newnetID = 0;
+        segcount = 0;
+        pinInd = 0;
+        numAdjust = 0;
+        vCapacity = 0;
+        hCapacity = 0;
+        MD = 0;
+}
+
+FT::~FT() {
+        int i, deg, numEdges, edgeID;
+        TreeEdge* treeedge;
+
+        for (i = 0; i < numNets; i++) {
+                delete[] nets[i]->pinX;
+                delete[] nets[i]->pinY;
+                delete[] nets[i]->pinL;
+                delete nets[i];
+        }
+
+        // for (i = 0; i < numNets; i++) {
+        //         delete nets[i];
+        // }
+
+        delete[] nets;
+
+        delete[] h_edges;
+        delete[] v_edges;
+
+        delete[] seglist;
+        delete[] seglistIndex;
+        delete[] seglistCnt;
+
+        delete[] gxs;
+        delete[] gys;
+        delete[] gs;
+
+        if (treeOrderPV != NULL) {
+                delete[] treeOrderPV;
+                treeOrderPV = NULL;
+        }
+
+        if (treeOrderCong != NULL) {
+                delete[] treeOrderCong;
+                treeOrderCong = NULL;
+        }
+
+        delete[] h_edges3D;
+        delete[] v_edges3D;
+
+        // for (i = 0; i < numValidNets; i++) {
+        //         if (trees[i].branch != NULL) {
+        //                 delete[] trees[i].branch;
+        //         }
+        // }
+        delete[] trees;
+
+        for (i = 0; i < numValidNets; i++) {
+                deg = sttrees[i].deg;
+                numEdges = 2 * deg - 3;
+                for (edgeID = 0; edgeID < numEdges; edgeID++) {
+                        treeedge = &(sttrees[i].edges[edgeID]);
+                        if (treeedge->len > 0) {
+                                delete[] treeedge->route.gridsX;
+                                delete[] treeedge->route.gridsY;
+                                delete[] treeedge->route.gridsL;
+                        }
+                }
+                delete[] sttrees[i].nodes;
+                delete[] sttrees[i].edges;
+        }
+        delete[] sttrees;
+
+        for (i = 0; i < yGrid; i++) {
+                delete[] parentX1[i];
+                delete[] parentY1[i];
+                delete[] parentX3[i];
+                delete[] parentY3[i];
+        }
+        delete[] parentX1;
+        delete[] parentY1;
+        delete[] parentX3;
+        delete[] parentY3;
+        delete[] pop_heap2;
+        delete[] heap1;
+        delete[] heap2;
+
+        delete[] xcor;
+        delete[] ycor;
+        delete[] dcor;
+        delete[] netEO;
+
+        for (int i = 0; i < yGrid; i++) {
+                delete[] HV[i];
+        }
+        delete[] HV;
+        
+        for (int i = 0; i < yGrid; i++) {
+                delete[] hyperV[i];
+        }
+        delete[] hyperV;
+        
+        for (int i = 0; i < yGrid; i++) {
+                delete[] hyperH[i];
+        }
+        delete[] hyperH;
+        
+        for (int i = 0; i < yGrid; i++) {
+                delete[] inRegion[i];
+        }
+        delete[] inRegion;
+        
+        for (int i = 0; i < yGrid; i++) {
+                delete[] corrEdge[i];
+        }
+        delete[] corrEdge;
+        
+        delete[] d13D;
+        delete[] d23D;
+        
+        delete[] d1;
+        delete[] d2;
+        
+        delete[] vCapacity3D;
+        delete[] hCapacity3D;
+        
+        delete[] MinWidth;
+        delete[] MinSpacing;
+        delete[] ViaSpacing;
+        
+        delete[] gridHs;
+        delete[] gridVs;
+        
+        for (int i = 0; i < numLayers; i++) {
+                delete[] layerGrid[i];
+        }
+        delete[] layerGrid;
+        
+        for (int i = 0; i < numLayers; i++) {
+                delete[] gridD[i];
+        }
+        delete[] gridD;
+        
+        for (int i = 0; i < numLayers; i++) {
+                delete[] viaLink[i];
+        }
+        delete[] viaLink;
+        
+        delete[] costHVH;
+        delete[] costVHV;
+        delete[] costH;
+        delete[] costV;
+        delete[] costLR;
+        delete[] costTB;
+
+        delete[] costHVHtest;
+        delete[] costVtest;
+        delete[] costTBtest;
+}
 
 void FT::setGridsAndLayers(int x, int y, int nLayers) {
         xGrid = x;
         yGrid = y;
-        maxGrid = std::max(x, y);
+        std::cout << "Num layers: " << nLayers << "\n";
         numLayers = nLayers;
         numGrids = xGrid * yGrid;
-        
-        HV = new Bool*[yGrid];
-        for (int i = 0; i < yGrid; i++) {
-                HV[i] = new Bool[xGrid];
+        if (std::max(xGrid, yGrid) >= 1000) {
+                XRANGE = std::max(xGrid, yGrid);
+                YRANGE = std::max(xGrid, yGrid);
+        } else {
+                XRANGE = 1000;
+                YRANGE = 1000;
         }
-        
-        hyperV = new Bool*[yGrid];
-        for (int i = 0; i < yGrid; i++) {
-                hyperV[i] = new Bool[xGrid];
-        }
-        
-        hyperH = new Bool*[yGrid];
-        for (int i = 0; i < yGrid; i++) {
-                hyperH[i] = new Bool[xGrid];
-        }
-        
-        inRegion = new Bool*[yGrid];
-        for (int i = 0; i < yGrid; i++) {
-                inRegion[i] = new Bool[xGrid];
-        }
-        
-        corrEdge = new int*[yGrid];
-        for (int i = 0; i < yGrid; i++) {
-                corrEdge[i] = new int[xGrid];
-        }
-        
-        d13D = new int[numLayers*yGrid*xGrid];
-        d23D = new short[numLayers*yGrid*xGrid];
-        
-        d1 = new float[maxGrid * maxGrid];
-        d2 = new float[maxGrid * maxGrid];
-        
+
         vCapacity3D = new int[numLayers];
         hCapacity3D = new int[numLayers];
-        
+
+        for (int i = 0; i < numLayers; i++) {
+                vCapacity3D[i] = 0;
+                hCapacity3D[i] = 0;
+        }
+
         MinWidth = new int[numLayers];
         MinSpacing = new int[numLayers];
         ViaSpacing = new int[numLayers];
-        
         gridHs = new int[numLayers];
         gridVs = new int[numLayers];
         
@@ -125,17 +267,48 @@ void FT::setGridsAndLayers(int x, int y, int nLayers) {
         for (int i = 0; i < numLayers; i++) {
                 viaLink[i] = new int[MAXLEN];
         }
-        
-        costHVH = new float[maxGrid];  // Horizontal first Z
-        costVHV = new float[maxGrid];  // Vertical first Z
-        costH = new float[maxGrid];    // Horizontal segment cost
-        costV = new float[maxGrid];    // Vertical segment cost
-        costLR = new float[maxGrid];   // Left and right boundary cost
-        costTB = new float[maxGrid];   // Top and bottom boundary cost
 
-        costHVHtest = new float[maxGrid];  // Vertical first Z
-        costVtest = new float[maxGrid];    // Vertical segment cost
-        costTBtest = new float[maxGrid];   // Top and bottom boundary cost
+        d13D = new int[numLayers*YRANGE*XRANGE];
+        d23D = new short[numLayers*YRANGE*XRANGE];
+
+        d1 = new float[YRANGE * XRANGE];
+        d2 = new float[YRANGE * XRANGE];
+
+        HV = new Bool*[YRANGE];
+        for (int i = 0; i < YRANGE; i++) {
+                HV[i] = new Bool[XRANGE];
+        }
+        
+        hyperV = new Bool*[YRANGE];
+        for (int i = 0; i < YRANGE; i++) {
+                hyperV[i] = new Bool[XRANGE];
+        }
+        
+        hyperH = new Bool*[YRANGE];
+        for (int i = 0; i < YRANGE; i++) {
+                hyperH[i] = new Bool[XRANGE];
+        }
+
+        corrEdge = new int*[YRANGE];
+        for (int i = 0; i < YRANGE; i++) {
+                corrEdge[i] = new int[XRANGE];
+        }
+
+        inRegion = new Bool*[YRANGE];
+        for (int i = 0; i < YRANGE; i++) {
+                inRegion[i] = new Bool[XRANGE];
+        }
+
+        costHVH = new float[XRANGE];  // Horizontal first Z
+        costVHV = new float[YRANGE];  // Vertical first Z
+        costH = new float[YRANGE];    // Horizontal segment cost
+        costV = new float[XRANGE];    // Vertical segment cost
+        costLR = new float[YRANGE];   // Left and right boundary cost
+        costTB = new float[XRANGE];   // Top and bottom boundary cost
+
+        costHVHtest = new float[YRANGE];  // Vertical first Z
+        costVtest = new float[XRANGE];    // Vertical segment cost
+        costTBtest = new float[XRANGE];   // Top and bottom boundary cost
 }
 
 void FT::addVCapacity(int verticalCapacity, int layer) {
@@ -162,6 +335,10 @@ void FT::addViaSpacing(int spacing, int layer) {
 
 void FT::setNumberNets(int nNets) {
         numNets = nNets;
+        nets = new Net*[numNets];
+        for (int i = 0; i < numNets; i++)
+                nets[i] = new Net;
+        seglistIndex = new int[numNets];
 }
 
 void FT::setLowerLeft(int x, int y) {
@@ -179,6 +356,7 @@ void FT::setLayerOrientation(int x) {
 }
 
 void FT::addNet(char *name, int netIdx, int nPins, int minWidth, PIN pins[], float alpha) {
+        // std::cout << "Adding net " << name << "\n";
         int TD;
         int i, j, k;
         int pinX, pinY, pinL, netID, numPins, minwidth;
@@ -189,13 +367,6 @@ void FT::addNet(char *name, int netIdx, int nPins, int minWidth, PIN pins[], flo
         int pinXarray[nPins];
         int pinYarray[nPins];
         int pinLarray[nPins];
-
-        if (nets == NULL) {
-                nets = (Net **)malloc(numNets * sizeof(Net *));
-                for (i = 0; i < numNets; i++)
-                        nets[i] = (Net *)malloc(sizeof(Net));
-                seglistIndex = (int *)malloc(numNets * sizeof(int));
-        }
 
         netID = netIdx;
         numPins = nPins;
@@ -238,13 +409,14 @@ void FT::addNet(char *name, int netIdx, int nPins, int minWidth, PIN pins[], flo
         {
                 MD = std::max(MD, pinInd);
                 TD += pinInd;
+                // std::cout << "Net name: " << nets[newnetID]->name << "; num pins: " << nets[newnetID]->numPins << "\n";
                 strcpy(nets[newnetID]->name, name);
                 nets[newnetID]->netIDorg = netID;
                 nets[newnetID]->numPins = numPins;
                 nets[newnetID]->deg = pinInd;
-                nets[newnetID]->pinX = (short *)malloc(pinInd * sizeof(short));
-                nets[newnetID]->pinY = (short *)malloc(pinInd * sizeof(short));
-                nets[newnetID]->pinL = (short *)malloc(pinInd * sizeof(short));
+                nets[newnetID]->pinX = new short[pinInd];
+                nets[newnetID]->pinY = new short[pinInd];
+                nets[newnetID]->pinL = new short[pinInd];
                 nets[newnetID]->alpha = alpha;
 
                 for (j = 0; j < pinInd; j++) {
@@ -280,11 +452,13 @@ void FT::initEdges() {
 
         // allocate memory and initialize for edges
 
-        h_edges = (Edge *)calloc(((xGrid - 1) * yGrid), sizeof(Edge));
-        v_edges = (Edge *)calloc((xGrid * (yGrid - 1)), sizeof(Edge));
+        h_edges = new Edge[((xGrid - 1) * yGrid)];
+        v_edges = new Edge[(xGrid * (yGrid - 1))];
 
-        v_edges3D = (Edge3D *)calloc((numLayers * xGrid * yGrid), sizeof(Edge3D));
-        h_edges3D = (Edge3D *)calloc((numLayers * xGrid * yGrid), sizeof(Edge3D));
+        init_usage();
+
+        v_edges3D = new Edge3D[(numLayers * xGrid * yGrid)];
+        h_edges3D = new Edge3D[(numLayers * xGrid * yGrid)];
 
         //2D edge innitialization
         TC = 0;
@@ -415,15 +589,15 @@ void FT::initAuxVar() {
         treeOrderCong = NULL;
         stopDEC = FALSE;
 
-        seglistCnt = (int *)malloc(numValidNets * sizeof(int));
-        seglist = (Segment *)malloc(segcount * sizeof(Segment));
-        trees = (Tree *)malloc(numValidNets * sizeof(Tree));
-        sttrees = (StTree *)malloc(numValidNets * sizeof(StTree));
-        gxs = (DTYPE **)malloc(numValidNets * sizeof(DTYPE *));
-        gys = (DTYPE **)malloc(numValidNets * sizeof(DTYPE *));
-        gs = (DTYPE **)malloc(numValidNets * sizeof(DTYPE *));
+        seglistCnt = new int[numValidNets];
+        seglist = new Segment[segcount];
+        trees = new Tree[numValidNets];
+        sttrees = new StTree[numValidNets];
+        gxs = new DTYPE*[numValidNets];
+        gys = new DTYPE*[numValidNets];
+        gs = new DTYPE*[numValidNets];
 
-        gridHV = xGrid * yGrid;
+        gridHV = XRANGE * YRANGE;
         gridH = (xGrid - 1) * yGrid;
         gridV = xGrid * (yGrid - 1);
         for (k = 0; k < numLayers; k++) {
@@ -433,23 +607,23 @@ void FT::initAuxVar() {
 
         MaxDegree = MD;
 
-        parentX1 = (short **)calloc(yGrid, sizeof(short *));
-        parentY1 = (short **)calloc(yGrid, sizeof(short *));
-        parentX3 = (short **)calloc(yGrid, sizeof(short *));
-        parentY3 = (short **)calloc(yGrid, sizeof(short *));
+        parentX1 = new short*[yGrid];
+        parentY1 = new short*[yGrid];
+        parentX3 = new short*[yGrid];
+        parentY3 = new short*[yGrid];
 
         for (i = 0; i < yGrid; i++) {
-                parentX1[i] = (short *)calloc(xGrid, sizeof(short));
-                parentY1[i] = (short *)calloc(xGrid, sizeof(short));
-                parentX3[i] = (short *)calloc(xGrid, sizeof(short));
-                parentY3[i] = (short *)calloc(xGrid, sizeof(short));
+                parentX1[i] = new short[xGrid];
+                parentY1[i] = new short[xGrid];
+                parentX3[i] = new short[xGrid];
+                parentY3[i] = new short[xGrid];
         }
 
-        pop_heap2 = (Bool *)calloc(yGrid * xGrid, sizeof(Bool));
+        pop_heap2 = new Bool[yGrid * XRANGE];
 
         // allocate memory for priority queue
-        heap1 = (float **)calloc((yGrid * xGrid), sizeof(float *));
-        heap2 = (float **)calloc((yGrid * xGrid), sizeof(float *));
+        heap1 = new float*[yGrid * xGrid];
+        heap2 = new float*[yGrid * xGrid];
 
         sttreesBK = NULL;
 }
@@ -511,7 +685,7 @@ int FT::run(std::vector<NET> &result) {
         char routingFile[STRINGLEN];
         char degreeFile[STRINGLEN];
         char optionS[STRINGLEN];
-        clock_t t1, t2, t3, t4;
+        clock_t t1 = 0, t2 = 0, t3 = 0, t4 = 0;
         float gen_brk_Time, P1_Time, P2_Time, P3_Time, maze_Time, totalTime, congestionmap_time;
         int iter, last_totalOverflow, diff_totalOverflow, enlarge, ripup_threshold;
         int i, j, past_overflow, cur_overflow;
@@ -528,10 +702,10 @@ int FT::run(std::vector<NET> &result) {
         // TODO: check this size
         int maxPin = maxNetDegree;
         maxPin = 2* maxPin;
-        xcor = (int*)calloc(maxPin, sizeof(*xcor));
-        ycor = (int*)calloc(maxPin, sizeof(*ycor));
-        dcor = (int*)calloc(maxPin, sizeof(*dcor));
-        netEO = (OrderNetEdge*)calloc(maxPin, sizeof(*netEO));
+        xcor = new int[maxPin];
+        ycor = new int[maxPin];
+        dcor = new int[maxPin];
+        netEO = new OrderNetEdge[maxPin];
 
 
         Bool input, WriteOut;
@@ -569,6 +743,8 @@ int FT::run(std::vector<NET> &result) {
         minofl = BIG_INT;
 
         // call FLUTE to generate RSMT and break the nets into segments (2-pin nets)
+
+        t1 = clock();
 
         VIA = 2;
         //viacost = VIA;
@@ -915,76 +1091,7 @@ int FT::run(std::vector<NET> &result) {
          * frees all memory after the application end (next line) we can omit
          * this function call for now.> */
         /* freeAllMemory(); */
-        return (1);
-}
-
-void FT::deleteGlobalArrays() {
-        for (int i = 0; i < yGrid; i++) {
-                delete[] HV[i];
-        }
-        delete[] HV;
-        
-        for (int i = 0; i < yGrid; i++) {
-                delete[] hyperV[i];
-        }
-        delete[] hyperV;
-        
-        for (int i = 0; i < yGrid; i++) {
-                delete[] hyperH[i];
-        }
-        delete[] hyperH;
-        
-        for (int i = 0; i < yGrid; i++) {
-                delete[] inRegion[i];
-        }
-        delete[] inRegion;
-        
-        for (int i = 0; i < yGrid; i++) {
-                delete[] corrEdge[i];
-        }
-        delete[] corrEdge;
-        
-        delete[] d13D;
-        delete[] d23D;
-        
-        delete[] d1;
-        delete[] d2;
-        
-        delete[] vCapacity3D;
-        delete[] hCapacity3D;
-        
-        delete[] MinWidth;
-        delete[] MinSpacing;
-        delete[] ViaSpacing;
-        
-        delete[] gridHs;
-        delete[] gridVs;
-        
-        for (int i = 0; i < numLayers; i++) {
-                delete[] layerGrid[i];
-        }
-        delete[] layerGrid;
-        
-        for (int i = 0; i < numLayers; i++) {
-                delete[] gridD[i];
-        }
-        delete[] gridD;
-        
-        for (int i = 0; i < numLayers; i++) {
-                delete[] viaLink[i];
-        }
-        delete[] viaLink;
-        
-        delete[] costHVH;
-        delete[] costVHV;
-        delete[] costH;
-        delete[] costV;
-        delete[] costLR;
-        delete[] costTB;
-
-        delete[] costHVHtest;
-        delete[] costVtest;
-        delete[] costTBtest;
+        return (0);
 }
 
 void FT::usePdRev(){

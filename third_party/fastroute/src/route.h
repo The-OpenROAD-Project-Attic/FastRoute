@@ -36,7 +36,7 @@ namespace FastRoute {
 
 #define SAMEX 0
 #define SAMEY 1
-    
+
 extern float *costHVH;  // Horizontal first Z
 extern float *costVHV;  // Vertical first Z
 extern float *costH;    // Horizontal segment cost
