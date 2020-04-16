@@ -127,13 +127,13 @@ void setupHeap3D(int netID, int edgeID, int *heapLen1, int *heapLen2, int region
         if (d == 2)  // 2-pin net
         {
                 //              printf("2pinnet l1 %d, l2 %d\n", l1, l2);
-                d13D[0][y1][x1] = 0;
+                *(d13D + 0*YRANGE*XRANGE + y1*XRANGE + x1) = 0;
                 directions3D[0][y1][x1] = ORIGIN;
-                heap13D[0] = &(d13D[0][y1][x1]);
+                heap13D[0] = &(*(d13D + 0*YRANGE*XRANGE + y1*XRANGE + x1));
                 *heapLen1 = 1;
-                d23D[0][y2][x2] = 0;
+                *(d23D + 0*YRANGE*XRANGE + y2*XRANGE + x2) = 0;
                 directions3D[0][y2][x2] = ORIGIN;
-                heap23D[0] = &(d23D[0][y2][x2]);
+                heap23D[0] = &(*(d23D + 0*YRANGE*XRANGE + y2*XRANGE + x2));
                 *heapLen2 = 1;
         } else  // net with more than 2 pins
         {
@@ -155,8 +155,8 @@ void setupHeap3D(int netID, int edgeID, int *heapLen1, int *heapLen2, int region
                         nt = treenodes[n1].stackAlias;
 
                         for (int l = treenodes[nt].botL; l <= treenodes[nt].topL; l++) {
-                                d13D[l][y1][x1] = 0;
-                                heap13D[heapcnt] = &(d13D[l][y1][x1]);
+                                *(d13D + l*YRANGE*XRANGE + y1*XRANGE + x1) = 0;
+                                heap13D[heapcnt] = &(*(d13D + l*YRANGE*XRANGE + y1*XRANGE + x1));
                                 directions3D[l][y1][x1] = ORIGIN;
                                 heapVisited[n1] = TRUE;
                                 heapcnt++;
@@ -172,9 +172,9 @@ void setupHeap3D(int netID, int edgeID, int *heapLen1, int *heapLen2, int region
 
                         // add n1 into heap13D
                         for (int l = treenodes[nt].botL; l <= treenodes[nt].topL; l++) {
-                                d13D[l][y1][x1] = 0;
+                                *(d13D + l*YRANGE*XRANGE + y1*XRANGE + x1) = 0;
                                 directions3D[l][y1][x1] = ORIGIN;
-                                heap13D[heapcnt] = &(d13D[l][y1][x1]);
+                                heap13D[heapcnt] = &(*(d13D + l*YRANGE*XRANGE + y1*XRANGE + x1));
                                 heapVisited[n1] = TRUE;
                                 heapcnt++;
                         }
@@ -206,9 +206,9 @@ void setupHeap3D(int netID, int edgeID, int *heapLen1, int *heapLen2, int region
                                                                                 nbrY = treenodes[nbr].y;
                                                                                 nt = treenodes[nbr].stackAlias;
                                                                                 for (int l = treenodes[nt].botL; l <= treenodes[nt].topL; l++) {
-                                                                                        d13D[l][nbrY][nbrX] = 0;
+                                                                                        *(d13D + l*YRANGE*XRANGE + nbrY*XRANGE + nbrX) = 0;
                                                                                         directions3D[l][nbrY][nbrX] = ORIGIN;
-                                                                                        heap13D[heapcnt] = &(d13D[l][nbrY][nbrX]);
+                                                                                        heap13D[heapcnt] = &(*(d13D + l*YRANGE*XRANGE + nbrY*XRANGE + nbrX));
                                                                                         heapcnt++;
                                                                                         corrEdge3D[l][nbrY][nbrX] = edge;
                                                                                 }
@@ -225,8 +225,8 @@ void setupHeap3D(int netID, int edgeID, int *heapLen1, int *heapLen2, int region
                                                                                         l_grid = route->gridsL[j];
 
                                                                                         if (inRegion[y_grid][x_grid]) {
-                                                                                                d13D[l_grid][y_grid][x_grid] = 0;
-                                                                                                heap13D[heapcnt] = &(d13D[l_grid][y_grid][x_grid]);
+                                                                                                *(d13D + l_grid*YRANGE*XRANGE + y_grid*XRANGE + x_grid) = 0;
+                                                                                                heap13D[heapcnt] = &(*(d13D + l_grid*YRANGE*XRANGE + y_grid*XRANGE + x_grid));
                                                                                                 directions3D[l_grid][y_grid][x_grid] = ORIGIN;
                                                                                                 heapcnt++;
                                                                                                 corrEdge3D[l_grid][y_grid][x_grid] = edge;
@@ -257,9 +257,9 @@ void setupHeap3D(int netID, int edgeID, int *heapLen1, int *heapLen2, int region
 
                         for (int l = treenodes[nt].botL; l <= treenodes[nt].topL; l++) {
                                 // just need to put n1 itself into heap13D
-                                d23D[l][y2][x2] = 0;
+                                *(d23D + l*YRANGE*XRANGE + y2*XRANGE + x2) = 0;
                                 directions3D[l][y2][x2] = ORIGIN;
-                                heap23D[heapcnt] = &(d23D[l][y2][x2]);
+                                heap23D[heapcnt] = &(*(d23D + l*YRANGE*XRANGE + y2*XRANGE + x2));
                                 heapVisited[n2] = TRUE;
                                 //*heapLen2 += 1;
                                 heapcnt++;
@@ -273,9 +273,9 @@ void setupHeap3D(int netID, int edgeID, int *heapLen1, int *heapLen2, int region
                         nt = treenodes[n2].stackAlias;
                         // add n2 into heap23D
                         for (int l = treenodes[nt].botL; l <= treenodes[nt].topL; l++) {
-                                d23D[l][y2][x2] = 0;
+                                *(d23D + l*YRANGE*XRANGE + y2*XRANGE + x2) = 0;
                                 directions3D[l][y2][x2] = ORIGIN;
-                                heap23D[heapcnt] = &(d23D[l][y2][x2]);
+                                heap23D[heapcnt] = &(*(d23D + l*YRANGE*XRANGE + y2*XRANGE + x2));
                                 heapcnt++;
                         }
                         heapVisited[n2] = TRUE;
@@ -310,9 +310,9 @@ void setupHeap3D(int netID, int edgeID, int *heapLen1, int *heapLen2, int region
                                                                                 for (int l = treenodes[nt].botL; l <= treenodes[nt].topL; l++) {
                                                                                         //nbrL = treenodes[nbr].l;
 
-                                                                                        d23D[l][nbrY][nbrX] = 0;
+                                                                                        *(d23D + l*YRANGE*XRANGE + nbrY*XRANGE + nbrX) = 0;
                                                                                         directions3D[l][nbrY][nbrX] = ORIGIN;
-                                                                                        heap23D[heapcnt] = &(d23D[l][nbrY][nbrX]);
+                                                                                        heap23D[heapcnt] = &(*(d23D + l*YRANGE*XRANGE + nbrY*XRANGE + nbrX));
                                                                                         heapcnt++;
                                                                                         corrEdge3D[l][nbrY][nbrX] = edge;
                                                                                 }
@@ -328,9 +328,9 @@ void setupHeap3D(int netID, int edgeID, int *heapLen1, int *heapLen2, int region
                                                                                         y_grid = route->gridsY[j];
                                                                                         l_grid = route->gridsL[j];
                                                                                         if (inRegion[y_grid][x_grid]) {
-                                                                                                d23D[l_grid][y_grid][x_grid] = 0;
+                                                                                                *(d23D + l_grid*YRANGE*XRANGE + y_grid*XRANGE + x_grid) = 0;
                                                                                                 directions3D[l_grid][y_grid][x_grid] = ORIGIN;
-                                                                                                heap23D[heapcnt] = &(d23D[l_grid][y_grid][x_grid]);
+                                                                                                heap23D[heapcnt] = &(*(d23D + l_grid*YRANGE*XRANGE + y_grid*XRANGE + x_grid));
                                                                                                 heapcnt++;
 
                                                                                                 corrEdge3D[l_grid][y_grid][x_grid] = edge;
@@ -892,8 +892,8 @@ void mazeRouteMSMDOrder3D(int expand, int ripupTHlb, int ripupTHub) {
                                         for (k = 0; k < numLayers; k++) {
                                                 for (i = regionY1; i <= regionY2; i++) {
                                                         for (j = regionX1; j <= regionX2; j++) {
-                                                                d13D[k][i][j] = BIG_INT;
-                                                                d23D[k][i][j] = 256;
+                                                                *(d13D + k*YRANGE*XRANGE + i*XRANGE + j) = BIG_INT;
+                                                                *(d23D + k*YRANGE*XRANGE + i*XRANGE + j) = 256;
                                                         }
                                                 }
                                         }
@@ -929,28 +929,28 @@ void mazeRouteMSMDOrder3D(int expand, int ripupTHlb, int ripupTHub) {
                                                         // left
                                                         if (curX > regionX1 && directions3D[curL][curY][curX] != EAST) {
                                                                 grid = gridHs[curL] + curY * (xGrid - 1) + curX - 1;
-                                                                tmp = d13D[curL][curY][curX] + 1;
+                                                                tmp = *(d13D + curL*YRANGE*XRANGE + curY*XRANGE + curX) + 1;
                                                                 if (h_edges3D[grid].usage < h_edges3D[grid].cap) {
                                                                         tmpX = curX - 1;  // the left neighbor
 
-                                                                        if (d13D[curL][curY][tmpX] >= BIG_INT)  // left neighbor not been put into heap13D
+                                                                        if (*(d13D + curL*YRANGE*XRANGE + curY*XRANGE + tmpX) >= BIG_INT)  // left neighbor not been put into heap13D
                                                                         {
-                                                                                d13D[curL][curY][tmpX] = tmp;
+                                                                                *(d13D + curL*YRANGE*XRANGE + curY*XRANGE + tmpX) = tmp;
                                                                                 pr3D[curL][curY][tmpX].l = curL;
                                                                                 pr3D[curL][curY][tmpX].x = curX;
                                                                                 pr3D[curL][curY][tmpX].y = curY;
                                                                                 directions3D[curL][curY][tmpX] = WEST;
-                                                                                heap13D[heapLen1] = &(d13D[curL][curY][tmpX]);
+                                                                                heap13D[heapLen1] = &(*(d13D + curL*YRANGE*XRANGE + curY*XRANGE + tmpX));
                                                                                 heapLen1++;
                                                                                 updateHeap3D(heap13D, heapLen1, heapLen1 - 1);
-                                                                        } else if (d13D[curL][curY][tmpX] > tmp)  // left neighbor been put into heap13D but needs update
+                                                                        } else if (*(d13D + curL*YRANGE*XRANGE + curY*XRANGE + tmpX) > tmp)  // left neighbor been put into heap13D but needs update
                                                                         {
-                                                                                d13D[curL][curY][tmpX] = tmp;
+                                                                                *(d13D + curL*YRANGE*XRANGE + curY*XRANGE + tmpX) = tmp;
                                                                                 pr3D[curL][curY][tmpX].l = curL;
                                                                                 pr3D[curL][curY][tmpX].x = curX;
                                                                                 pr3D[curL][curY][tmpX].y = curY;
                                                                                 directions3D[curL][curY][tmpX] = WEST;
-                                                                                dtmp = &(d13D[curL][curY][tmpX]);
+                                                                                dtmp = &(*(d13D + curL*YRANGE*XRANGE + curY*XRANGE + tmpX));
                                                                                 ind = 0;
                                                                                 while (heap13D[ind] != dtmp)
                                                                                         ind++;
@@ -962,28 +962,28 @@ void mazeRouteMSMDOrder3D(int expand, int ripupTHlb, int ripupTHub) {
                                                         if (Horizontal && curX < regionX2 && directions3D[curL][curY][curX] != WEST) {
                                                                 grid = gridHs[curL] + curY * (xGrid - 1) + curX;
 
-                                                                tmp = d13D[curL][curY][curX] + 1;
+                                                                tmp = *(d13D + curL*YRANGE*XRANGE + curY*XRANGE + curX) + 1;
                                                                 tmpX = curX + 1;  // the right neighbor
 
                                                                 if (h_edges3D[grid].usage < h_edges3D[grid].cap) {
-                                                                        if (d13D[curL][curY][tmpX] >= BIG_INT)  // right neighbor not been put into heap13D
+                                                                        if (*(d13D + curL*YRANGE*XRANGE + curY*XRANGE + tmpX) >= BIG_INT)  // right neighbor not been put into heap13D
                                                                         {
-                                                                                d13D[curL][curY][tmpX] = tmp;
+                                                                                *(d13D + curL*YRANGE*XRANGE + curY*XRANGE + tmpX) = tmp;
                                                                                 pr3D[curL][curY][tmpX].l = curL;
                                                                                 pr3D[curL][curY][tmpX].x = curX;
                                                                                 pr3D[curL][curY][tmpX].y = curY;
                                                                                 directions3D[curL][curY][tmpX] = EAST;
-                                                                                heap13D[heapLen1] = &(d13D[curL][curY][tmpX]);
+                                                                                heap13D[heapLen1] = &(*(d13D + curL*YRANGE*XRANGE + curY*XRANGE + tmpX));
                                                                                 heapLen1++;
                                                                                 updateHeap3D(heap13D, heapLen1, heapLen1 - 1);
-                                                                        } else if (d13D[curL][curY][tmpX] > tmp)  // right neighbor been put into heap13D but needs update
+                                                                        } else if (*(d13D + curL*YRANGE*XRANGE + curY*XRANGE + tmpX) > tmp)  // right neighbor been put into heap13D but needs update
                                                                         {
-                                                                                d13D[curL][curY][tmpX] = tmp;
+                                                                                *(d13D + curL*YRANGE*XRANGE + curY*XRANGE + tmpX) = tmp;
                                                                                 pr3D[curL][curY][tmpX].l = curL;
                                                                                 pr3D[curL][curY][tmpX].x = curX;
                                                                                 pr3D[curL][curY][tmpX].y = curY;
                                                                                 directions3D[curL][curY][tmpX] = EAST;
-                                                                                dtmp = &(d13D[curL][curY][tmpX]);
+                                                                                dtmp = &(*(d13D + curL*YRANGE*XRANGE + curY*XRANGE + tmpX));
                                                                                 ind = 0;
                                                                                 while (heap13D[ind] != dtmp)
                                                                                         ind++;
@@ -995,27 +995,27 @@ void mazeRouteMSMDOrder3D(int expand, int ripupTHlb, int ripupTHub) {
                                                         //bottom
                                                         if (!Horizontal && curY > regionY1 && directions3D[curL][curY][curX] != SOUTH) {
                                                                 grid = gridVs[curL] + (curY - 1) * xGrid + curX;
-                                                                tmp = d13D[curL][curY][curX] + 1;
+                                                                tmp = *(d13D + curL*YRANGE*XRANGE + curY*XRANGE + curX) + 1;
                                                                 tmpY = curY - 1;  // the bottom neighbor
                                                                 if (v_edges3D[grid].usage < v_edges3D[grid].cap) {
-                                                                        if (d13D[curL][tmpY][curX] >= BIG_INT)  // bottom neighbor not been put into heap13D
+                                                                        if (*(d13D + curL*YRANGE*XRANGE + tmpY*XRANGE + curX) >= BIG_INT)  // bottom neighbor not been put into heap13D
                                                                         {
-                                                                                d13D[curL][tmpY][curX] = tmp;
+                                                                                *(d13D + curL*YRANGE*XRANGE + tmpY*XRANGE + curX) = tmp;
                                                                                 pr3D[curL][tmpY][curX].l = curL;
                                                                                 pr3D[curL][tmpY][curX].x = curX;
                                                                                 pr3D[curL][tmpY][curX].y = curY;
                                                                                 directions3D[curL][tmpY][curX] = NORTH;
-                                                                                heap13D[heapLen1] = &(d13D[curL][tmpY][curX]);
+                                                                                heap13D[heapLen1] = &(*(d13D + curL*YRANGE*XRANGE + tmpY*XRANGE + curX));
                                                                                 heapLen1++;
                                                                                 updateHeap3D(heap13D, heapLen1, heapLen1 - 1);
-                                                                        } else if (d13D[curL][tmpY][curX] > tmp)  // bottom neighbor been put into heap13D but needs update
+                                                                        } else if (*(d13D + curL*YRANGE*XRANGE + tmpY*XRANGE + curX) > tmp)  // bottom neighbor been put into heap13D but needs update
                                                                         {
-                                                                                d13D[curL][tmpY][curX] = tmp;
+                                                                                *(d13D + curL*YRANGE*XRANGE + tmpY*XRANGE + curX) = tmp;
                                                                                 pr3D[curL][tmpY][curX].l = curL;
                                                                                 pr3D[curL][tmpY][curX].x = curX;
                                                                                 pr3D[curL][tmpY][curX].y = curY;
                                                                                 directions3D[curL][tmpY][curX] = NORTH;
-                                                                                dtmp = &(d13D[curL][tmpY][curX]);
+                                                                                dtmp = &(*(d13D + curL*YRANGE*XRANGE + tmpY*XRANGE + curX));
                                                                                 ind = 0;
                                                                                 while (heap13D[ind] != dtmp)
                                                                                         ind++;
@@ -1026,27 +1026,27 @@ void mazeRouteMSMDOrder3D(int expand, int ripupTHlb, int ripupTHub) {
                                                         //top
                                                         if (!Horizontal && curY < regionY2 && directions3D[curL][curY][curX] != NORTH) {
                                                                 grid = gridVs[curL] + curY * xGrid + curX;
-                                                                tmp = d13D[curL][curY][curX] + 1;
+                                                                tmp = *(d13D + curL*YRANGE*XRANGE + curY*XRANGE + curX) + 1;
                                                                 tmpY = curY + 1;  // the top neighbor
                                                                 if (v_edges3D[grid].usage < v_edges3D[grid].cap) {
-                                                                        if (d13D[curL][tmpY][curX] >= BIG_INT)  // top neighbor not been put into heap13D
+                                                                        if (*(d13D + curL*YRANGE*XRANGE + tmpY*XRANGE + curX) >= BIG_INT)  // top neighbor not been put into heap13D
                                                                         {
-                                                                                d13D[curL][tmpY][curX] = tmp;
+                                                                                *(d13D + curL*YRANGE*XRANGE + tmpY*XRANGE + curX) = tmp;
                                                                                 pr3D[curL][tmpY][curX].l = curL;
                                                                                 pr3D[curL][tmpY][curX].x = curX;
                                                                                 pr3D[curL][tmpY][curX].y = curY;
                                                                                 directions3D[curL][tmpY][curX] = SOUTH;
-                                                                                heap13D[heapLen1] = &(d13D[curL][tmpY][curX]);
+                                                                                heap13D[heapLen1] = &(*(d13D + curL*YRANGE*XRANGE + tmpY*XRANGE + curX));
                                                                                 heapLen1++;
                                                                                 updateHeap3D(heap13D, heapLen1, heapLen1 - 1);
-                                                                        } else if (d13D[curL][tmpY][curX] > tmp)  // top neighbor been put into heap13D but needs update
+                                                                        } else if (*(d13D + curL*YRANGE*XRANGE + tmpY*XRANGE + curX) > tmp)  // top neighbor been put into heap13D but needs update
                                                                         {
-                                                                                d13D[curL][tmpY][curX] = tmp;
+                                                                                *(d13D + curL*YRANGE*XRANGE + tmpY*XRANGE + curX) = tmp;
                                                                                 pr3D[curL][tmpY][curX].l = curL;
                                                                                 pr3D[curL][tmpY][curX].x = curX;
                                                                                 pr3D[curL][tmpY][curX].y = curY;
                                                                                 directions3D[curL][tmpY][curX] = SOUTH;
-                                                                                dtmp = &(d13D[curL][tmpY][curX]);
+                                                                                dtmp = &(*(d13D + curL*YRANGE*XRANGE + tmpY*XRANGE + curX));
                                                                                 ind = 0;
                                                                                 while (heap13D[ind] != dtmp)
                                                                                         ind++;
@@ -1058,28 +1058,28 @@ void mazeRouteMSMDOrder3D(int expand, int ripupTHlb, int ripupTHub) {
 
                                                 //down
                                                 if (curL > 0 && directions3D[curL][curY][curX] != UP) {
-                                                        tmp = d13D[curL][curY][curX] + viacost;
+                                                        tmp = *(d13D + curL*YRANGE*XRANGE + curY*XRANGE + curX) + viacost;
                                                         tmpL = curL - 1;  // the bottom neighbor
 
                                                         //printf("down, new value %f, old value %f\n",tmp,d13D[tmpL][curY][curX]);
-                                                        if (d13D[tmpL][curY][curX] >= BIG_INT)  // bottom neighbor not been put into heap13D
+                                                        if (*(d13D + tmpL*YRANGE*XRANGE + curY*XRANGE + curX) >= BIG_INT)  // bottom neighbor not been put into heap13D
                                                         {
-                                                                d13D[tmpL][curY][curX] = tmp;
+                                                                *(d13D + tmpL*YRANGE*XRANGE + curY*XRANGE + curX) = tmp;
                                                                 pr3D[tmpL][curY][curX].l = curL;
                                                                 pr3D[tmpL][curY][curX].x = curX;
                                                                 pr3D[tmpL][curY][curX].y = curY;
                                                                 directions3D[tmpL][curY][curX] = DOWN;
-                                                                heap13D[heapLen1] = &(d13D[tmpL][curY][curX]);
+                                                                heap13D[heapLen1] = &(*(d13D + tmpL*YRANGE*XRANGE + curY*XRANGE + curX));
                                                                 heapLen1++;
                                                                 updateHeap3D(heap13D, heapLen1, heapLen1 - 1);
-                                                        } else if (d13D[tmpL][curY][curX] > tmp)  // bottom neighbor been put into heap13D but needs update
+                                                        } else if (*(d13D + tmpL*YRANGE*XRANGE + curY*XRANGE + curX) > tmp)  // bottom neighbor been put into heap13D but needs update
                                                         {
-                                                                d13D[tmpL][curY][curX] = tmp;
+                                                                *(d13D + tmpL*YRANGE*XRANGE + curY*XRANGE + curX) = tmp;
                                                                 pr3D[tmpL][curY][curX].l = curL;
                                                                 pr3D[tmpL][curY][curX].x = curX;
                                                                 pr3D[tmpL][curY][curX].y = curY;
                                                                 directions3D[tmpL][curY][curX] = DOWN;
-                                                                dtmp = &(d13D[tmpL][curY][curX]);
+                                                                dtmp = &(*(d13D + tmpL*YRANGE*XRANGE + curY*XRANGE + curX));
                                                                 ind = 0;
                                                                 while (heap13D[ind] != dtmp)
                                                                         ind++;
@@ -1089,26 +1089,26 @@ void mazeRouteMSMDOrder3D(int expand, int ripupTHlb, int ripupTHub) {
 
                                                 //up
                                                 if (curL < numLayers - 1 && directions3D[curL][curY][curX] != DOWN) {
-                                                        tmp = d13D[curL][curY][curX] + viacost;
+                                                        tmp = *(d13D + curL*YRANGE*XRANGE + curY*XRANGE + curX) + viacost;
                                                         tmpL = curL + 1;                        // the bottom neighbor
-                                                        if (d13D[tmpL][curY][curX] >= BIG_INT)  // bottom neighbor not been put into heap13D
+                                                        if (*(d13D + tmpL*YRANGE*XRANGE + curY*XRANGE + curX) >= BIG_INT)  // bottom neighbor not been put into heap13D
                                                         {
-                                                                d13D[tmpL][curY][curX] = tmp;
+                                                                *(d13D + tmpL*YRANGE*XRANGE + curY*XRANGE + curX) = tmp;
                                                                 pr3D[tmpL][curY][curX].l = curL;
                                                                 pr3D[tmpL][curY][curX].x = curX;
                                                                 pr3D[tmpL][curY][curX].y = curY;
                                                                 directions3D[tmpL][curY][curX] = UP;
-                                                                heap13D[heapLen1] = &(d13D[tmpL][curY][curX]);
+                                                                heap13D[heapLen1] = &(*(d13D + tmpL*YRANGE*XRANGE + curY*XRANGE + curX));
                                                                 heapLen1++;
                                                                 updateHeap3D(heap13D, heapLen1, heapLen1 - 1);
-                                                        } else if (d13D[tmpL][curY][curX] > tmp)  // bottom neighbor been put into heap13D but needs update
+                                                        } else if (*(d13D + tmpL*YRANGE*XRANGE + curY*XRANGE + curX) > tmp)  // bottom neighbor been put into heap13D but needs update
                                                         {
-                                                                d13D[tmpL][curY][curX] = tmp;
+                                                                *(d13D + tmpL*YRANGE*XRANGE + curY*XRANGE + curX) = tmp;
                                                                 pr3D[tmpL][curY][curX].l = curL;
                                                                 pr3D[tmpL][curY][curX].x = curX;
                                                                 pr3D[tmpL][curY][curX].y = curY;
                                                                 directions3D[tmpL][curY][curX] = UP;
-                                                                dtmp = &(d13D[tmpL][curY][curX]);
+                                                                dtmp = &(*(d13D + tmpL*YRANGE*XRANGE + curY*XRANGE + curX));
                                                                 ind = 0;
                                                                 while (heap13D[ind] != dtmp)
                                                                         ind++;
@@ -1134,13 +1134,13 @@ void mazeRouteMSMDOrder3D(int expand, int ripupTHlb, int ripupTHub) {
                                         curY = crossY;
                                         curL = crossL;
 
-                                        if (d13D[curL][curY][curX] == 0) {
+                                        if (*(d13D + curL*YRANGE*XRANGE + curY*XRANGE + curX) == 0) {
                                                 recoverEdge(netID, edgeID);
                                                 break;
                                         }
                                         //printf("the initial value %f LYX [%d %d %d]\n",d13D[curL][curY][curX],curL, curY, curX);
 
-                                        while (d13D[curL][curY][curX] != 0)  // loop until reach subtree1
+                                        while (*(d13D + curL*YRANGE*XRANGE + curY*XRANGE + curX) != 0)  // loop until reach subtree1
                                         {
                                                 tmpL = pr3D[curL][curY][curX].l;
                                                 tmpX = pr3D[curL][curY][curX].x;

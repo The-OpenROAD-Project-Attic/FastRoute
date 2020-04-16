@@ -67,13 +67,13 @@ int MD;
 FT::FT() {
         newnetID = 0;
         segcount = 0;
-        pinInd;
-        numAdjust;
+        pinInd = 0;
+        numAdjust = 0;
         vCapacity = 0;
         hCapacity = 0;
         MD = 0;
 
-        for (int i = 0; i < MAXLAYER; i++) {
+        for (int i = 0; i < numLayers; i++) {
                 vCapacity3D[i] = 0;
                 hCapacity3D[i] = 0;
         }
@@ -168,6 +168,78 @@ void FT::setGridsAndLayers(int x, int y, int nLayers) {
         yGrid = y;
         numLayers = nLayers;
         numGrids = xGrid * yGrid;
+        if (std::max(xGrid, yGrid) >= 1000) {
+                XRANGE = std::max(xGrid, yGrid);
+                YRANGE = std::max(xGrid, yGrid);
+        } else {
+                XRANGE = 1000;
+                YRANGE = 1000;
+        }
+
+        vCapacity3D = new int[numLayers];
+        hCapacity3D = new int[numLayers];
+        MinWidth = new int[numLayers];
+        MinSpacing = new int[numLayers];
+        ViaSpacing = new int[numLayers];
+        gridHs = new int[numLayers];
+        gridVs = new int[numLayers];
+        
+        layerGrid = new int*[numLayers];
+        for (int i = 0; i < numLayers; i++) {
+                layerGrid[i] = new int[MAXLEN];
+        }
+        
+        gridD = new int*[numLayers];
+        for (int i = 0; i < numLayers; i++) {
+                gridD[i] = new int[MAXLEN];
+        }
+        
+        viaLink = new int*[numLayers];
+        for (int i = 0; i < numLayers; i++) {
+                viaLink[i] = new int[MAXLEN];
+        }
+
+        d13D = new int[numLayers*YRANGE*XRANGE];
+        d23D = new short[numLayers*YRANGE*XRANGE];
+
+        d1 = new float[YRANGE * XRANGE];
+        d2 = new float[YRANGE * XRANGE];
+
+        HV = new Bool*[YRANGE];
+        for (int i = 0; i < YRANGE; i++) {
+                HV[i] = new Bool[XRANGE];
+        }
+        
+        hyperV = new Bool*[YRANGE];
+        for (int i = 0; i < YRANGE; i++) {
+                hyperV[i] = new Bool[XRANGE];
+        }
+        
+        hyperH = new Bool*[YRANGE];
+        for (int i = 0; i < YRANGE; i++) {
+                hyperH[i] = new Bool[XRANGE];
+        }
+
+        corrEdge = new int*[YRANGE];
+        for (int i = 0; i < YRANGE; i++) {
+                corrEdge[i] = new int[XRANGE];
+        }
+
+        inRegion = new Bool*[YRANGE];
+        for (int i = 0; i < YRANGE; i++) {
+                inRegion[i] = new Bool[XRANGE];
+        }
+
+        costHVH = new float[XRANGE];  // Horizontal first Z
+        costVHV = new float[YRANGE];  // Vertical first Z
+        costH = new float[YRANGE];    // Horizontal segment cost
+        costV = new float[XRANGE];    // Vertical segment cost
+        costLR = new float[YRANGE];   // Left and right boundary cost
+        costTB = new float[XRANGE];   // Top and bottom boundary cost
+
+        costHVHtest = new float[YRANGE];  // Vertical first Z
+        costVtest = new float[XRANGE];    // Vertical segment cost
+        costTBtest = new float[XRANGE];   // Top and bottom boundary cost
 }
 
 void FT::addVCapacity(int verticalCapacity, int layer) {
@@ -954,72 +1026,72 @@ int FT::run(std::vector<NET> &result) {
 }
 
 void FT::deleteGlobalArrays() {
-        // for (int i = 0; i < yGrid; i++) {
-        //         delete[] HV[i];
-        // }
-        // delete[] HV;
+        for (int i = 0; i < yGrid; i++) {
+                delete[] HV[i];
+        }
+        delete[] HV;
         
-        // for (int i = 0; i < yGrid; i++) {
-        //         delete[] hyperV[i];
-        // }
-        // delete[] hyperV;
+        for (int i = 0; i < yGrid; i++) {
+                delete[] hyperV[i];
+        }
+        delete[] hyperV;
         
-        // for (int i = 0; i < yGrid; i++) {
-        //         delete[] hyperH[i];
-        // }
-        // delete[] hyperH;
+        for (int i = 0; i < yGrid; i++) {
+                delete[] hyperH[i];
+        }
+        delete[] hyperH;
         
-        // for (int i = 0; i < yGrid; i++) {
-        //         delete[] inRegion[i];
-        // }
-        // delete[] inRegion;
+        for (int i = 0; i < yGrid; i++) {
+                delete[] inRegion[i];
+        }
+        delete[] inRegion;
         
-        // for (int i = 0; i < yGrid; i++) {
-        //         delete[] corrEdge[i];
-        // }
-        // delete[] corrEdge;
+        for (int i = 0; i < yGrid; i++) {
+                delete[] corrEdge[i];
+        }
+        delete[] corrEdge;
         
-        // delete[] d13D;
-        // delete[] d23D;
+        delete[] d13D;
+        delete[] d23D;
         
-        // delete[] d1;
-        // delete[] d2;
+        delete[] d1;
+        delete[] d2;
         
-        // delete[] vCapacity3D;
-        // delete[] hCapacity3D;
+        delete[] vCapacity3D;
+        delete[] hCapacity3D;
         
-        // delete[] MinWidth;
-        // delete[] MinSpacing;
-        // delete[] ViaSpacing;
+        delete[] MinWidth;
+        delete[] MinSpacing;
+        delete[] ViaSpacing;
         
-        // delete[] gridHs;
-        // delete[] gridVs;
+        delete[] gridHs;
+        delete[] gridVs;
         
-        // for (int i = 0; i < numLayers; i++) {
-        //         delete[] layerGrid[i];
-        // }
-        // delete[] layerGrid;
+        for (int i = 0; i < numLayers; i++) {
+                delete[] layerGrid[i];
+        }
+        delete[] layerGrid;
         
-        // for (int i = 0; i < numLayers; i++) {
-        //         delete[] gridD[i];
-        // }
-        // delete[] gridD;
+        for (int i = 0; i < numLayers; i++) {
+                delete[] gridD[i];
+        }
+        delete[] gridD;
         
-        // for (int i = 0; i < numLayers; i++) {
-        //         delete[] viaLink[i];
-        // }
-        // delete[] viaLink;
+        for (int i = 0; i < numLayers; i++) {
+                delete[] viaLink[i];
+        }
+        delete[] viaLink;
         
-        // delete[] costHVH;
-        // delete[] costVHV;
-        // delete[] costH;
-        // delete[] costV;
-        // delete[] costLR;
-        // delete[] costTB;
+        delete[] costHVH;
+        delete[] costVHV;
+        delete[] costH;
+        delete[] costV;
+        delete[] costLR;
+        delete[] costTB;
 
-        // delete[] costHVHtest;
-        // delete[] costVtest;
-        // delete[] costTBtest;
+        delete[] costHVHtest;
+        delete[] costVtest;
+        delete[] costTBtest;
 }
 
 void FT::usePdRev(){

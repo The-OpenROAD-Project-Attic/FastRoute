@@ -37,6 +37,17 @@ namespace FastRoute {
 #define SAMEX 0
 #define SAMEY 1
 
+extern float *costHVH;  // Horizontal first Z
+extern float *costVHV;  // Vertical first Z
+extern float *costH;    // Horizontal segment cost
+extern float *costV;    // Vertical segment cost
+extern float *costLR;   // Left and right boundary cost
+extern float *costTB;   // Top and bottom boundary cost
+
+extern float *costHVHtest;  // Vertical first Z
+extern float *costVtest;    // Vertical segment cost
+extern float *costTBtest;   // Top and bottom boundary cost
+
 // old functions for segment list data structure
 extern void routeSegL(Segment *seg);
 extern void routeLAll(Bool firstTime);
