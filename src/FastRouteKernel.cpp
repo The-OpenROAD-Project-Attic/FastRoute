@@ -172,6 +172,13 @@ void FastRouteKernel::startFastRoute() {
         if (_pdRevForHighFanout != -1) {
                 _fastRoute->setAlpha(_alpha);
         }
+
+        std::set<int> transitionLayers = _dbWrapper.findTransitionLayers(_maxRoutingLayer);
+
+        for (std::set<int>::iterator it = transitionLayers.begin(); it != transitionLayers.end(); ++it) {
+                _layersToAdjust.push_back(*it);
+                _layersReductionPercentage.push_back(transitionLayerAdjust);
+        }
         
         _fastRoute->setVerbose(_verbose);
         _fastRoute->setOverflowIterations(_overflowIterations);
@@ -186,7 +193,6 @@ void FastRouteKernel::startFastRoute() {
         std::cout << " > ---- Clock net routing: " << _clockNetRouting << "\n";
         if (_gridOrigin->getX() != 0 && _gridOrigin->getY() != 0) {
             std::cout << " > ---- Grid origin: (" << _gridOrigin->getX() << ", " << _gridOrigin->getY() << ")\n";
-        }
         
         std::cout << " > Initializing grid...\n";
         initGrid();

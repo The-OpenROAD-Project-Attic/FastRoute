@@ -74,6 +74,7 @@ public:
         void initNetlist(bool routeNetsWithPad);
         void initObstacles();
         int computeMaxRoutingLayer();
+        std::set<int> findTransitionLayers(int maxRoutingLayer);
         
         void setDB(unsigned idx) { _db = odb::dbDatabase::getDatabase(idx); }
         void setSelectedMetal (int metal) { selectedMetal = metal; }
