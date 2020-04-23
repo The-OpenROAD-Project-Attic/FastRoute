@@ -337,7 +337,7 @@ void FastRouteKernel::initializeNets() {
         for (Net net : _netlist->getNets()) {
                 float netAlpha = _alpha;
 
-                if (net.getNumPins() == 1) {
+                if (net.getNumPins() <= 1) {
                         continue;
                 }
                 
