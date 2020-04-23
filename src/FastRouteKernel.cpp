@@ -347,7 +347,7 @@ void FastRouteKernel::initializeNets() {
 
                 if (net.getNumPins() >= std::numeric_limits<short>::max()) {
                         std::cout << "[ERROR] FastRoute cannot handle net " << net.getName() << " due to large number of pins\n";
-                        std::cout << "[ERROR] Net " << net.getName() << " has " << net.getNumPins() << "\n";
+                        std::cout << "[ERROR] Net " << net.getName() << " has " << net.getNumPins() << " pins\n";
                         std::exit(1);
                 }
                 
@@ -989,7 +989,7 @@ void FastRouteKernel::writeGuides() {
                         } else {
                                 if (abs(route.finalLayer - route.initLayer) > 1) {
                                         std::cout << " > [ERROR] Connection between"
-                                                     "non-adjacent layers";
+                                                     "non-adjacent layers in net " << netRoute.name << "\n";
                                         std::exit(1);
                                 } else {
                                         RoutingLayer phLayerI;
@@ -1368,9 +1368,9 @@ void FastRouteKernel::writeEst() {
         estFile.open(_outfile + ".est");
 
         if (!estFile.is_open()) {
-                std::cout << "Error in writeFile!" << std::endl;
+                std::cout << "[ERROR] In writeFile!" << std::endl;
                 estFile.close();
-                std::exit(0);
+                std::exit(1);
         }
 
         for (FastRoute::NET netRoute : *_result) {
@@ -1421,7 +1421,7 @@ void FastRouteKernel::mergeSegments(FastRoute::NET &net) {
         std::vector<ROUTE> segments = net.route;
         std::vector<ROUTE> finalSegments;
         if (segments.size() < 1) {
-                std::cout << " > [ERROR] Segments vector is empty!!!\n";
+                std::cout << " > [ERROR] Net " << net.name << " has segments vector empty\n";
                 std::exit(1);
         }
         
