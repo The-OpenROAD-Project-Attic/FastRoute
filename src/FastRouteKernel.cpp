@@ -344,6 +344,12 @@ void FastRouteKernel::initializeNets() {
                 if (_clockNetRouting && net.getSignalType() != "CLOCK") {
                         continue;
                 }
+
+                if (net.getNumPins() >= std::numeric_limits<short>::max()) {
+                        std::cout << "[ERROR] FastRoute cannot handle net " << net.getName() << " due to large number of pins\n";
+                        std::cout << "[ERROR] Net " << net.getName() << " has " << net.getNumPins() << "\n";
+                        std::exit(1);
+                }
                 
                 _netsDegree[net.getName()] = net.getNumPins();
                 
