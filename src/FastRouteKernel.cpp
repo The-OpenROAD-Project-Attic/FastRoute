@@ -1421,7 +1421,7 @@ void FastRouteKernel::mergeSegments(FastRoute::NET &net) {
         std::vector<ROUTE> segments = net.route;
         std::vector<ROUTE> finalSegments;
         if (segments.size() < 1) {
-                std::cout << " > [ERROR] Net " << net.name << " has segments vector empty\n";
+                std::cout << " > [ERROR] Net " << net.name << " has empty segments vector\n";
                 std::exit(1);
         }
         
