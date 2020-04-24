@@ -94,14 +94,31 @@ void FastRouteKernel::init() {
 }
 
 void FastRouteKernel::reset() {
-        delete _netlist;
-        delete _grid;
-        delete _dbWrapper;
-        delete _fastRoute;
-        delete _gridOrigin;
-        delete _routingLayers;
-        delete _allRoutingTracks;
-        delete _result;
+        if (_netlist)
+                delete _netlist;
+        if (_grid)
+                delete _grid;
+        if (_dbWrapper)
+                delete _dbWrapper;
+        if (_fastRoute)
+                delete _fastRoute;
+        if (_gridOrigin)
+                delete _gridOrigin;
+        if (_routingLayers)
+                delete _routingLayers;
+        if (_allRoutingTracks)
+                delete _allRoutingTracks;
+        if (_result)
+                delete _result;
+
+        _netlist = nullptr;
+        _grid = nullptr;
+        _dbWrapper = nullptr;
+        _fastRoute = nullptr;
+        _gridOrigin = nullptr;
+        _routingLayers = nullptr;
+        _allRoutingTracks = nullptr;
+        _result = nullptr;
 
         _vCapacities.clear();
         _hCapacities.clear();
@@ -120,14 +137,31 @@ void FastRouteKernel::reset() {
 }
 
 FastRouteKernel::~FastRouteKernel() {
-        delete _netlist;
-        delete _grid;
-        delete _dbWrapper;
-        delete _fastRoute;
-        delete _gridOrigin;
-        delete _routingLayers;
-        delete _allRoutingTracks;
-        delete _result;
+        if (_netlist)
+                delete _netlist;
+        if (_grid)
+                delete _grid;
+        if (_dbWrapper)
+                delete _dbWrapper;
+        if (_fastRoute)
+                delete _fastRoute;
+        if (_gridOrigin)
+                delete _gridOrigin;
+        if (_routingLayers)
+                delete _routingLayers;
+        if (_allRoutingTracks)
+                delete _allRoutingTracks;
+        if (_result)
+                delete _result;
+
+        _netlist = nullptr;
+        _grid = nullptr;
+        _dbWrapper = nullptr;
+        _fastRoute = nullptr;
+        _gridOrigin = nullptr;
+        _routingLayers = nullptr;
+        _allRoutingTracks = nullptr;
+        _result = nullptr;
 
         _vCapacities.clear();
         _hCapacities.clear();
