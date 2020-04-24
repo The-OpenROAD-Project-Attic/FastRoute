@@ -72,22 +72,23 @@ FT::FT() {
         vCapacity = 0;
         hCapacity = 0;
         MD = 0;
+        numNets = 0;
+        invalidNets = 0;
 }
 
 FT::~FT() {
         int i, deg, numEdges, edgeID;
         TreeEdge* treeedge;
 
-        for (i = 0; i < numNets; i++) {
+        for (i = 0; i < (numNets - invalidNets); i++) {
                 delete[] nets[i]->pinX;
                 delete[] nets[i]->pinY;
                 delete[] nets[i]->pinL;
-                delete nets[i];
         }
 
-        // for (i = 0; i < numNets; i++) {
-        //         delete nets[i];
-        // }
+        for (i = 0; i < numNets; i++) {
+                delete nets[i];
+        }
 
         delete[] nets;
 
@@ -115,11 +116,6 @@ FT::~FT() {
         delete[] h_edges3D;
         delete[] v_edges3D;
 
-        // for (i = 0; i < numValidNets; i++) {
-        //         if (trees[i].branch != NULL) {
-        //                 delete[] trees[i].branch;
-        //         }
-        // }
         delete[] trees;
 
         for (i = 0; i < numValidNets; i++) {
@@ -223,12 +219,20 @@ FT::~FT() {
         delete[] costHVHtest;
         delete[] costVtest;
         delete[] costTBtest;
+
+        newnetID = 0;
+        segcount = 0;
+        pinInd = 0;
+        numAdjust = 0;
+        vCapacity = 0;
+        hCapacity = 0;
+        MD = 0;
+        numNets = 0;
 }
 
 void FT::setGridsAndLayers(int x, int y, int nLayers) {
         xGrid = x;
         yGrid = y;
-        std::cout << "Num layers: " << nLayers << "\n";
         numLayers = nLayers;
         numGrids = xGrid * yGrid;
         if (std::max(xGrid, yGrid) >= 1000) {
@@ -427,7 +431,9 @@ void FT::addNet(char *name, int netIdx, int nPins, int minWidth, PIN pins[], flo
                 seglistIndex[newnetID] = segcount;
                 newnetID++;
                 segcount += 2 * pinInd - 3;  // at most (2*numPins-2) nodes, (2*numPins-3) nets for a net
-        }                                    // if
+        } else {
+                invalidNets++;
+        }
 }
 
 std::map<std::string, std::vector<PIN>> FT::getNets() {

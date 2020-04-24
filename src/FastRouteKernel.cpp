@@ -331,7 +331,27 @@ void FastRouteKernel::initializeNets() {
         std::cout << " > ----Checking pin placement... Done!\n";
         
         int idx = 0;
-        _fastRoute->setNumberNets(_netlist->getNetCount());
+        int validNets = 0;
+
+        for (Net net : _netlist->getNets()) {
+                float netAlpha = _alpha;
+
+                if (net.getNumPins() <= 1) {
+                        continue;
+                }
+                
+                if (_clockNetRouting && net.getSignalType() != "CLOCK") {
+                        continue;
+                }
+
+                if (net.getNumPins() >= std::numeric_limits<short>::max()) {
+                        continue;
+                }
+
+                validNets++;
+        }
+
+        _fastRoute->setNumberNets(validNets);
         _fastRoute->setMaxNetDegree(_netlist->getMaxNetDegree());
         
         for (Net net : _netlist->getNets()) {
@@ -346,9 +366,9 @@ void FastRouteKernel::initializeNets() {
                 }
 
                 if (net.getNumPins() >= std::numeric_limits<short>::max()) {
-                        std::cout << "[ERROR] FastRoute cannot handle net " << net.getName() << " due to large number of pins\n";
-                        std::cout << "[ERROR] Net " << net.getName() << " has " << net.getNumPins() << " pins\n";
-                        std::exit(1);
+                        std::cout << "[WARNING] FastRoute cannot handle net " << net.getName() << " due to large number of pins\n";
+                        std::cout << "[WARNING] Net " << net.getName() << " has " << net.getNumPins() << " pins\n";
+                        continue;
                 }
                 
                 _netsDegree[net.getName()] = net.getNumPins();
@@ -1421,7 +1441,7 @@ void FastRouteKernel::mergeSegments(FastRoute::NET &net) {
         std::vector<ROUTE> segments = net.route;
         std::vector<ROUTE> finalSegments;
         if (segments.size() < 1) {
-                std::cout << " > [ERROR] Net " << net.name << " has empty segments vector\n";
+                std::cout << " > [ERROR] Net " << net.name << " has segments vector empty\n";
                 std::exit(1);
         }
         
