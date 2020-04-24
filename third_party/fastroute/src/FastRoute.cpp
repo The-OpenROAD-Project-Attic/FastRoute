@@ -124,9 +124,9 @@ FT::~FT() {
                 for (edgeID = 0; edgeID < numEdges; edgeID++) {
                         treeedge = &(sttrees[i].edges[edgeID]);
                         if (treeedge->len > 0) {
-                                delete[] treeedge->route.gridsX;
-                                delete[] treeedge->route.gridsY;
-                                delete[] treeedge->route.gridsL;
+                                free(treeedge->route.gridsX);
+                                free(treeedge->route.gridsY);
+                                free(treeedge->route.gridsL);
                         }
                 }
                 delete[] sttrees[i].nodes;
