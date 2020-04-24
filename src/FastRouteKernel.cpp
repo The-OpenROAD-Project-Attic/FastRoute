@@ -155,9 +155,7 @@ void FastRouteKernel::startFastRoute() {
         }
 
         if (_maxRoutingLayer == -1) {
-                std::cout << " > Computing max routing layer...\n";
                 _maxRoutingLayer = _dbWrapper->computeMaxRoutingLayer();
-                std::cout << " > Computing max routing layer... Done!\n";
         }
         
         if (_maxRoutingLayer < _selectedMetal) {
@@ -185,65 +183,64 @@ void FastRouteKernel::startFastRoute() {
         _fastRoute->setPDRevForHighFanout(_pdRevForHighFanout);
         _fastRoute->setAllowOverflow(_allowOverflow);
         
-        std::cout << " > Params:\n";
-        std::cout << " > ---- Min routing layer: " << _minRoutingLayer << "\n";
-        std::cout << " > ---- Max routing layer: " << _maxRoutingLayer << "\n";
-        std::cout << " > ---- Global adjustment: " << _adjustment << "\n";
-        std::cout << " > ---- Unidirectional routing: " << _unidirectionalRoute << "\n";
-        std::cout << " > ---- Clock net routing: " << _clockNetRouting << "\n";
+        std::cout << "[PARAMS] Min routing layer: " << _minRoutingLayer << "\n";
+        std::cout << "[PARAMS] Max routing layer: " << _maxRoutingLayer << "\n";
+        std::cout << "[PARAMS] Global adjustment: " << _adjustment << "\n";
+        std::cout << "[PARAMS] Unidirectional routing: " << _unidirectionalRoute << "\n";
+        std::cout << "[PARAMS] Clock net routing: " << _clockNetRouting << "\n";
         if (_gridOrigin->getX() != 0 && _gridOrigin->getY() != 0) {
-            std::cout << " > ---- Grid origin: (" << _gridOrigin->getX() << ", " << _gridOrigin->getY() << ")\n";
+            std::cout << "[PARAMS] Grid origin: (" << _gridOrigin->getX() << ", " << _gridOrigin->getY() << ")\n";
         }
         
-        std::cout << " > Initializing grid...\n";
+        std::cout << "Initializing grid...\n";
         initGrid();
-        std::cout << " > Initializing grid... Done!\n";
+        std::cout << "Initializing grid... Done!\n";
         
-        std::cout << " > Initializing routing layers...\n";
+        std::cout << "Initializing routing layers...\n";
         initRoutingLayers();
-        std::cout << " > Initializing routing layers... Done!\n";
+        std::cout << "Initializing routing layers... Done!\n";
         
-        std::cout << " > Initializing routing tracks...\n";
+        std::cout << "Initializing routing tracks...\n";
         initRoutingTracks();
-        std::cout << " > Initializing routing tracks... Done!\n";
+        std::cout << "Initializing routing tracks... Done!\n";
             
-        std::cout << " > Setting capacities...\n";
+        std::cout << "Setting capacities...\n";
         setCapacities();
-        std::cout << " > Setting capacities... Done!\n";
+        std::cout << "Setting capacities... Done!\n";
         
-        std::cout << " > Setting spacings and widths...\n";
+        std::cout << "Setting spacings and widths...\n";
         setSpacingsAndMinWidths();
-        std::cout << " > Setting spacings and widths... Done!\n";
+        std::cout << "Setting spacings and widths... Done!\n";
         
-        std::cout << " > Initializing nets...\n";
+        std::cout << "Initializing nets...\n";
         initializeNets();
-        std::cout << " > Initializing nets... Done!\n";
+        std::cout << "Initializing nets... Done!\n";
         
-        std::cout << " > Adjusting grid...\n";
+        std::cout << "Adjusting grid...\n";
         computeGridAdjustments();
-        std::cout << " > Adjusting grid... Done!\n";
+        std::cout << "Adjusting grid... Done!\n";
         
-        std::cout << " > Computing track adjustments...\n";
+        std::cout << "Computing track adjustments...\n";
         computeTrackAdjustments();
-        std::cout << " > Computing track adjustments... Done!\n";
+        std::cout << "Computing track adjustments... Done!\n";
 
-        std::cout << " > Computing obstacles adjustments...\n";
+        std::cout << "Computing obstacles adjustments...\n";
         computeObstaclesAdjustments();
-        std::cout << " > Computing obstacles adjustments... Done!\n";
+        std::cout << "Computing obstacles adjustments... Done!\n";
                 
-        std::cout << " > Computing user defined adjustments...\n";
+        std::cout << "Computing user defined adjustments...\n";
         computeUserGlobalAdjustments();
-        std::cout << " > Computing user defined adjustments... Done!\n";
+        std::cout << "Computing user defined adjustments... Done!\n";
         
-        std::cout << " > Computing user defined layers adjustments...\n";
+        std::cout << "Computing user defined layers adjustments...\n";
         computeUserLayerAdjustments();
-        std::cout << " > Computing user defined layers adjustments... Done!\n";
+        std::cout << "Computing user defined layers adjustments... Done!\n";
         
         for (int i = 0; i < regionsReductionPercentage.size(); i++) {
                 if (regionsLayer[i] < 1)
                         break;
                 
-                std::cout << " > Adjusting specific region in layer " << regionsLayer[i] << "...\n";
+                std::cout << "Adjusting specific region in layer " << regionsLayer[i] << "...\n";
                 Coordinate lowerLeft = Coordinate(regionsMinX[i], regionsMinY[i]);
                 Coordinate upperRight = Coordinate(regionsMaxX[i], regionsMaxY[i]);
                 computeRegionAdjustments(lowerLeft, upperRight, regionsLayer[i], regionsReductionPercentage[i]);
@@ -252,21 +249,20 @@ void FastRouteKernel::startFastRoute() {
         _fastRoute->initAuxVar();
         std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
         
-        std::cout << " > Elapsed time: " << (std::chrono::duration_cast<std::chrono::microseconds>(end - begin).count()) /1000000.0 << "\n";
+        std::cout << "[INFO] Elapsed time: " << (std::chrono::duration_cast<std::chrono::microseconds>(end - begin).count()) /1000000.0 << "\n";
 }
 
 void FastRouteKernel::runFastRoute() {
         std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
         
-        std::cout << " > Running FastRoute...\n";
+        std::cout << "Running FastRoute...\n\n";
         _fastRoute->run(*_result);
-        std::cout << " > Running FastRoute... Done!\n";
+        std::cout << "Running FastRoute... Done!\n";
         
         computeWirelength();
         
         std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
-        std::cout << " > ---- Elapsed time: " << (std::chrono::duration_cast<std::chrono::microseconds>(end - begin).count()) /1000000.0 << "\n";
-        std::cout << " > \n";
+        std::cout << "[INFO] Elapsed time: " << (std::chrono::duration_cast<std::chrono::microseconds>(end - begin).count()) /1000000.0 << "\n";
 }
 
 void FastRouteKernel::initGrid() {        
@@ -326,9 +322,9 @@ void FastRouteKernel::setSpacingsAndMinWidths() {
 void FastRouteKernel::initializeNets() {
         _dbWrapper->initNetlist(_routeNetsWithPad);
         
-        std::cout << " > ----Checking pin placement...\n";
+        std::cout << "Checking pin placement...\n";
         checkPinPlacement();
-        std::cout << " > ----Checking pin placement... Done!\n";
+        std::cout << "Checking pin placement... Done!\n";
         
         int idx = 0;
         int validNets = 0;
@@ -801,7 +797,7 @@ void FastRouteKernel::computeObstaclesAdjustments() {
                 
                 bool direction = routingLayer.getPreferredDirection();
                 
-                std::cout << " > ----Processing " << layerObstacles.size() << 
+                std::cout << "[INFO] Processing " << layerObstacles.size() << 
                              " obstacles in layer " << layer << "\n";
                 
                 int trackSpace = _grid->getMinWidths()[layer-1];
@@ -958,18 +954,18 @@ void FastRouteKernel::setRouteNetsWithPad(bool routeNetsWithPad) {
 }
 
 void FastRouteKernel::writeGuides() {
-        std::cout << " > Writing guides...\n";
+        std::cout << "Writing guides...\n";
         std::ofstream guideFile;
         guideFile.open(_outfile);
         if (!guideFile.is_open()) {
-                std::cout << " > [ERROR] Guides file could not be open!" << std::endl;
+                std::cout << "[ERROR] Guides file could not be open!" << std::endl;
                 guideFile.close();
                 std::exit(1);
         }
         RoutingLayer phLayerF;
         addRemainingGuides(*_result);
         
-        std::cout << " > Num routed nets: " << _result->size() << "\n";
+        std::cout << "[INFO] Num routed nets: " << _result->size() << "\n";
         int finalLayer;
         for (FastRoute::NET netRoute : *_result) {
                 mergeSegments(netRoute);
@@ -993,8 +989,8 @@ void FastRouteKernel::writeGuides() {
                         if (route.initLayer == route.finalLayer) {
                                 if (route.initLayer < _minRoutingLayer && 
                                     route.initX != route.finalX && route.initY != route.finalY) {
-                                        std::cout << " > [ERROR] Routing with guides in blocked metal\n"
-                                                " > ---- Net: " << netRoute.name << "\n";
+                                        std::cout << "[ERROR] Routing with guides in blocked metal\n"
+                                                "[ERROR] Net: " << netRoute.name << "\n";
                                         std::exit(1);
                                 }
                                 Box box;
@@ -1008,7 +1004,7 @@ void FastRouteKernel::writeGuides() {
                                 finalLayer = route.finalLayer;
                         } else {
                                 if (abs(route.finalLayer - route.initLayer) > 1) {
-                                        std::cout << " > [ERROR] Connection between"
+                                        std::cout << "[ERROR] Connection between"
                                                      "non-adjacent layers in net " << netRoute.name << "\n";
                                         std::exit(1);
                                 } else {
@@ -1054,7 +1050,7 @@ void FastRouteKernel::writeGuides() {
         }
 
         guideFile.close();
-        std::cout << " > Writing guides... Done!\n";
+        std::cout << "Writing guides... Done!\n";
 }
 
 void FastRouteKernel::printGrid() {
@@ -1121,7 +1117,7 @@ void FastRouteKernel::addRemainingGuides(std::vector<FastRoute::NET> &globalRout
                                 if (p > 0){
                                         if (pins[p].x != pins[p-1].x ||
                                                 pins[p].y != pins[p-1].y){
-                                                std::cout << " > [ERROR] Net " << netRoute.name << " not properly covered.";
+                                                std::cout << "[ERROR] Net " << netRoute.name << " not properly covered.";
                                                 exit(-1);
                                         }
                                 }
@@ -1186,7 +1182,7 @@ void FastRouteKernel::addRemainingGuides(std::vector<FastRoute::NET> &globalRout
 void FastRouteKernel::mergeBox(std::vector<Box>& guideBox) {
         std::vector<Box> finalBox;
         if (guideBox.size() < 1) {
-                std::cout << " > [ERROR] Guides vector is empty!!!\n";
+                std::cout << "[ERROR] Guides vector is empty!!!\n";
                 std::exit(1);
         }
         finalBox.push_back(guideBox[0]);
@@ -1287,13 +1283,13 @@ void FastRouteKernel::checkPinPlacement() {
 }
 
 void FastRouteKernel::writeRoute() {
-        std::cout << " > Writing route file...\n";
+        std::cout << "Writing route file...\n";
         
         std::ofstream routeFile;
         routeFile.open("input.route");
         
         if (!routeFile.is_open()) {
-                std::cout << "Error in writeRoute!" << std::endl;
+                std::cout << "[ERROR] Cannot open file to write route" << "\n";
                 routeFile.close();
                 std::exit(0);
         }
@@ -1379,16 +1375,16 @@ void FastRouteKernel::writeRoute() {
         
         routeFile.close();
         
-        std::cout << " > Writing route file... Done!\n";
+        std::cout << "Writing route file... Done!\n";
 }
 
 void FastRouteKernel::writeEst() {
-        std::cout << " > Writing est file...\n";
+        std::cout << "Writing est file...\n";
         std::ofstream estFile;
         estFile.open(_outfile + ".est");
 
         if (!estFile.is_open()) {
-                std::cout << "[ERROR] In writeFile!" << std::endl;
+                std::cout << "[ERROR] Cannot open file to write est" << "\n";
                 estFile.close();
                 std::exit(1);
         }
@@ -1417,7 +1413,7 @@ void FastRouteKernel::writeEst() {
 
         estFile.close();
         
-        std::cout << " > Writing est file... Done!\n";
+        std::cout << "Writing est file... Done!\n";
 }
 
 void FastRouteKernel::computeWirelength() {
@@ -1433,15 +1429,14 @@ void FastRouteKernel::computeWirelength() {
                         }
                 }
         }
-        std::cout << " > Final report:\n";
-        std::cout << std::fixed << " > ---- Total wirelength: " << (float)totalWirelength/_grid->getDatabaseUnit() << " um\n";
+        std::cout << std::fixed << "[INFO] Total wirelength: " << (float)totalWirelength/_grid->getDatabaseUnit() << " um\n";
 }
 
 void FastRouteKernel::mergeSegments(FastRoute::NET &net) {
         std::vector<ROUTE> segments = net.route;
         std::vector<ROUTE> finalSegments;
         if (segments.size() < 1) {
-                std::cout << " > [ERROR] Net " << net.name << " has segments vector empty\n";
+                std::cout << "[ERROR] Net " << net.name << " has segments vector empty\n";
                 std::exit(1);
         }
         

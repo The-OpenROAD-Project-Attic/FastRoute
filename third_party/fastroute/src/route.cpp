@@ -1751,7 +1751,7 @@ void routeLVAll(int threshold, int expand) {
         int netID, edgeID, numEdges, i, forange;
 
         if (verbose > 1)
-            printf(" > ----%d threshold, %d expand\n", threshold, expand);
+            printf("[INFO] %d threshold, %d expand\n", threshold, expand);
 
         h_costTable = new float[10*hCapacity];
 

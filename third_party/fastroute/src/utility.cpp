@@ -410,9 +410,9 @@ void fillVIA() {
         }
         
         if (verbose > 1) {
-                printf(" > ----via related to pin nodes %d\n", numVIAT1);
-                printf(" > ----via related stiner nodes %d\n", numVIAT2);
-                printf(" > --via filling finished\n");
+                printf("[INFO] Via related to pin nodes %d\n", numVIAT1);
+                printf("[INFO] Via related stiner nodes %d\n", numVIAT2);
+                printf("Via filling finished\n");
         }
 }
 
@@ -952,11 +952,8 @@ void newLA() {
                 }
         }
 
-        if (verbose > 1)
-            printf(" > \n > ----node processing\n");
         newLayerAssignmentV4();
-        if (verbose > 1)
-            printf(" > ----layer assignment\n");
+
         ConvertToFull3DType2();
 }
 
@@ -1277,7 +1274,7 @@ void checkUsage() {
                                                                 redsus = TRUE;
                                                                 i = 0;
                                                                 j = 0;
-                                                                printf("redundant edge component discovered\n");
+                                                                // printf("redundant edge component discovered\n");
                                                         }
                                                 }
                                         }
@@ -1286,7 +1283,7 @@ void checkUsage() {
                 }
         }
         if (verbose > 1) {
-                printf(" > ----usage checked\n");
+                printf("Usage checked\n");
         }
 }
 

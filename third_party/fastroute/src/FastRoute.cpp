@@ -529,8 +529,8 @@ void FT::addAdjustment(long x1, long y1, int l1, long x2, long y2, int l2, int r
 
                 if (((int)cap - reducedCap) < 0) {
                         if (isReduce) {
-                                std::cout << "Warning: underflow in reduce\n";
-                                std::cout << "cap, reducedCap: " << cap << ", " << reducedCap << "\n";
+                                std::cout << "[WARNING] Underflow in reduce\n";
+                                std::cout << "[WARNING] cap, reducedCap: " << cap << ", " << reducedCap << "\n";
                         }
                         reduce = 0;
                 } else {
@@ -551,8 +551,8 @@ void FT::addAdjustment(long x1, long y1, int l1, long x2, long y2, int l2, int r
 
                 if (((int)cap - reducedCap) < 0) {
                         if (isReduce) {
-                                std::cout << "Warning: underflow in reduce\n";
-                                std::cout << "cap, reducedCap: " << cap << ", " << reducedCap << "\n";
+                                std::cout << "[WARNING] Underflow in reduce\n";
+                                std::cout << "[WARNING] cap, reducedCap: " << cap << ", " << reducedCap << "\n";
                         }
                         reduce = 0;
                 } else {
@@ -757,18 +757,18 @@ int FT::run(std::vector<NET> &result) {
         viacost = 0;
         gen_brk_RSMT(FALSE, FALSE, FALSE, FALSE, noADJ);
         if (verbose > 1)
-                printf(" > --first L\n");
+                printf("First L Route\n");
         routeLAll(TRUE);
         gen_brk_RSMT(TRUE, TRUE, TRUE, FALSE, noADJ);
         getOverflow2D(&maxOverflow);
         if (verbose > 1)
-                printf(" > --second L\n");
+                printf("Second L Route\n");
         newrouteLAll(FALSE, TRUE);
         getOverflow2D(&maxOverflow);
         spiralRouteAll();
         newrouteZAll(10);
         if (verbose > 1)
-                printf(" > --first Z\n");
+                printf("First Z Route\n");
         past_cong = getOverflow2D(&maxOverflow);
 
         convertToMazeroute();
@@ -793,7 +793,7 @@ int FT::run(std::vector<NET> &result) {
                 LOGIS_COF = std::max<float>(2.0 / (1 + log(maxOverflow)), LOGIS_COF);
                 LOGIS_COF = 2.0 / (1 + log(maxOverflow));
                 if (verbose > 1)
-                        printf(" > --LV routing round %d, enlarge %d \n", i, enlarge);
+                        printf("[INFO] LV routing round %d, enlarge %d \n", i, enlarge);
                 routeLVAll(newTH, enlarge);
 
                 past_cong = getOverflow2Dmaze(&maxOverflow, &tUsage);
@@ -824,7 +824,7 @@ int FT::run(std::vector<NET> &result) {
 
         InitLastUsage(upType);
         if (totalOverflow > 0) {
-                printf(" > --Running extra iterations to remove overflow...\n");
+                printf("Running extra iterations to remove overflow...\n");
         }
         
         while (totalOverflow > 0 && i <= overflowIterations) {
@@ -903,7 +903,7 @@ int FT::run(std::vector<NET> &result) {
                         L = 0;
                 }
 
-                printf(" > ----iteration %d, enlarge %d, costheight %d, threshold %d via cost %d \n > ----log_coef %f, healingTrigger %d cost_step %d L %d cost_type %d updatetype %d\n", i, enlarge, costheight, mazeedge_Threshold, VIA, LOGIS_COF, healingTrigger, cost_step, L, cost_type, upType);
+                printf("[INFO] iteration %d, enlarge %d, costheight %d, threshold %d via cost %d \n[INFO] log_coef %f, healingTrigger %d cost_step %d L %d cost_type %d updatetype %d\n", i, enlarge, costheight, mazeedge_Threshold, VIA, LOGIS_COF, healingTrigger, cost_step, L, cost_type, upType);
                 mazeRouteMSMD(i, enlarge, costheight, ripup_threshold, mazeedge_Threshold, !(i % 3), cost_type);
                 last_cong = past_cong;
                 past_cong = getOverflow2Dmaze(&maxOverflow, &tUsage);
@@ -926,7 +926,7 @@ int FT::run(std::vector<NET> &result) {
 
                 if (maxOverflow < 150) {
                         if (i == 20 && past_cong > 200) {
-                                printf(" > ----Extra Run for hard benchmark\n");
+                                printf("Extra Run for hard benchmark\n");
                                 L = 0;
                                 upType = 3;
                                 stopDEC = TRUE;
@@ -1029,29 +1029,29 @@ int FT::run(std::vector<NET> &result) {
         checkUsage();
 
         if (verbose > 1)
-            printf(" > --maze routing finished\n");
+            printf("Maze routing finished\n");
 
         t4 = clock();
         maze_Time = (float)(t4 - t3) / CLOCKS_PER_SEC;
         
         if (verbose > 1) {
-            printf(" > --P3 runtime: %f sec\n", maze_Time);
+            printf("[INFO] P3 runtime: %f sec\n", maze_Time);
 
-            printf(" > --Final 2D results: \n");
+            printf("[INFO] Final 2D results: \n");
         }
         getOverflow2Dmaze(&maxOverflow, &tUsage);
 
         if (verbose > 1)
-                printf(" > \n > --Layer Assignment Begins\n");
+                printf("Layer Assignment Begins\n");
         newLA();
         if (verbose > 1)
-                printf(" > --layer assignment finished\n");
+                printf("Layer assignment finished\n");
 
         t2 = clock();
         gen_brk_Time = (float)(t2 - t1) / CLOCKS_PER_SEC;
         
         if (verbose > 1)
-            printf(" > --2D + Layer Assignment Runtime: %f sec\n", gen_brk_Time);
+            printf("[INFO] 2D + Layer Assignment Runtime: %f sec\n", gen_brk_Time);
 
         costheight = 3;
         viacost = 1;
@@ -1066,7 +1066,7 @@ int FT::run(std::vector<NET> &result) {
 
         if (goingLV && past_cong == 0) {
                 if (verbose > 1)
-                    printf(" > --Post Processing Begins \n");
+                    printf("Post Processing Begins \n");
                 mazeRouteMSMDOrder3D(enlarge, 0, ripupTH3D);
 
                 //	mazeRouteMSMDOrder3D(enlarge, 0, 10 );
@@ -1074,7 +1074,7 @@ int FT::run(std::vector<NET> &result) {
                         mazeRouteMSMDOrder3D(enlarge, 0, 12);
                 }
                 if (verbose > 1)
-                        printf(" > --Post Processsing finished, starting via filling\n");
+                        printf("Post Processsing finished\n Starting via filling\n");
         }
 
         fillVIA();
@@ -1084,14 +1084,13 @@ int FT::run(std::vector<NET> &result) {
 
         t4 = clock();
         maze_Time = (float)(t4 - t1) / CLOCKS_PER_SEC;
-        printf(" > --Final usage          : %d\n", finallength);
-        printf(" > --Final number of vias : %d\n", numVia);
-        printf(" > --Final usage 3D       : %d\n", (finallength + 3 * numVia));
+        printf("[INFO] Final usage          : %d\n", finallength);
+        printf("[INFO] Final number of vias : %d\n", numVia);
+        printf("[INFO] Final usage 3D       : %d\n", (finallength + 3 * numVia));
 
-        std::cout << " > --Getting results...\n";
+        std::cout << "Getting results...\n";
         result = getResults();
-        std::cout << " > --Getting results... Done!\n";
-        std::cout << " > \n";
+        std::cout << "Getting results... Done!\n\n";
 
         /* TODO:  <11-07-19, this function leads to a segfault, but as the OS
          * frees all memory after the application end (next line) we can omit
