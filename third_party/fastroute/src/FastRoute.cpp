@@ -81,42 +81,81 @@ FT::~FT() {
         TreeEdge* treeedge;
 
         for (i = 0; i < (numNets - invalidNets); i++) {
-                delete[] nets[i]->pinX;
-                delete[] nets[i]->pinY;
-                delete[] nets[i]->pinL;
+                if (nets[i]->pinX)
+                        delete[] nets[i]->pinX;
+                nets[i]->pinX = nullptr;
+
+                if (nets[i]->pinY)
+                        delete[] nets[i]->pinY;
+                nets[i]->pinY = nullptr;
+
+                if (nets[i]->pinL)
+                        delete[] nets[i]->pinL;
+                nets[i]->pinL = nullptr;
         }
 
         for (i = 0; i < numNets; i++) {
-                delete nets[i];
+                if (nets[i])
+                        delete nets[i];
+                nets[i] = nullptr;
         }
 
-        delete[] nets;
+        if (nets)
+                delete[] nets;
 
-        delete[] h_edges;
-        delete[] v_edges;
+        nets = nullptr;
 
-        delete[] seglist;
-        delete[] seglistIndex;
-        delete[] seglistCnt;
+        if (h_edges)
+                delete[] h_edges;
+        h_edges = nullptr;
 
-        delete[] gxs;
-        delete[] gys;
-        delete[] gs;
+        if (v_edges)
+                delete[] v_edges;
+        v_edges = nullptr;
 
-        if (treeOrderPV != NULL) {
+        if (seglist)
+                delete[] seglist;
+        seglist = nullptr;
+
+        if (seglistIndex)
+                delete[] seglistIndex;
+        seglistIndex = nullptr;
+
+        if (seglistCnt)
+                delete[] seglistCnt;
+        seglistCnt = nullptr;
+
+        if (gxs)
+                delete[] gxs;
+        gxs = nullptr;
+
+        if (gys)
+                delete[] gys;
+        gys = nullptr;
+
+        if (gs)
+                delete[] gs;
+        gs = nullptr;
+
+        if (treeOrderPV)
                 delete[] treeOrderPV;
-                treeOrderPV = NULL;
-        }
+        treeOrderPV = nullptr;
 
-        if (treeOrderCong != NULL) {
+        if (treeOrderCong)
                 delete[] treeOrderCong;
-                treeOrderCong = NULL;
-        }
+        treeOrderCong = nullptr;
 
-        delete[] h_edges3D;
-        delete[] v_edges3D;
+        if (h_edges3D)
+                delete[] h_edges3D;
+        h_edges3D = nullptr;
 
-        delete[] trees;
+        if (v_edges3D)
+                delete[] v_edges3D;
+        v_edges3D = nullptr;
+
+        if (trees)
+                delete[] trees;
+        trees = nullptr;
 
         for (i = 0; i < numValidNets; i++) {
                 deg = sttrees[i].deg;
@@ -124,101 +163,233 @@ FT::~FT() {
                 for (edgeID = 0; edgeID < numEdges; edgeID++) {
                         treeedge = &(sttrees[i].edges[edgeID]);
                         if (treeedge->len > 0) {
-                                free(treeedge->route.gridsX);
-                                free(treeedge->route.gridsY);
-                                free(treeedge->route.gridsL);
+                                if (treeedge->route.gridsX)
+                                        free(treeedge->route.gridsX);
+                                if (treeedge->route.gridsY)
+                                        free(treeedge->route.gridsY);
+                                if (treeedge->route.gridsL)
+                                        free(treeedge->route.gridsL);
+                                treeedge->route.gridsX = nullptr;
+                                treeedge->route.gridsY = nullptr;
+                                treeedge->route.gridsL = nullptr;
                         }
                 }
-                delete[] sttrees[i].nodes;
-                delete[] sttrees[i].edges;
+
+                if (sttrees[i].nodes)
+                        delete[] sttrees[i].nodes;
+                sttrees[i].nodes = nullptr;
+
+                if (sttrees[i].edges)
+                        delete[] sttrees[i].edges;
+                sttrees[i].edges = nullptr;
         }
-        delete[] sttrees;
+
+        if (sttrees)
+                delete[] sttrees;
+        sttrees = nullptr;
 
         for (i = 0; i < yGrid; i++) {
-                delete[] parentX1[i];
-                delete[] parentY1[i];
-                delete[] parentX3[i];
-                delete[] parentY3[i];
-        }
-        delete[] parentX1;
-        delete[] parentY1;
-        delete[] parentX3;
-        delete[] parentY3;
-        delete[] pop_heap2;
-        delete[] heap1;
-        delete[] heap2;
+                if (parentX1[i])
+                        delete[] parentX1[i];
+                if (parentY1[i])
+                        delete[] parentY1[i];
+                if (parentX3[i])
+                        delete[] parentX3[i];
+                if (parentY3[i])
+                        delete[] parentY3[i];
 
-        delete[] xcor;
-        delete[] ycor;
-        delete[] dcor;
-        delete[] netEO;
+                parentX1[i] = nullptr;
+                parentY1[i] = nullptr;
+                parentX3[i] = nullptr;
+                parentY3[i] = nullptr;
+        }
 
-        for (int i = 0; i < yGrid; i++) {
-                delete[] HV[i];
+        if (parentX1)
+                delete[] parentX1;
+        if (parentY1)
+                delete[] parentY1;
+        if (parentX3)
+                delete[] parentX3;
+        if (parentY3)
+                delete[] parentY3;
+        if (pop_heap2)
+                delete[] pop_heap2;
+        if (heap1)
+                delete[] heap1;
+        if (heap2)
+                delete[] heap2;
+
+        parentX1 = nullptr;
+        parentY1 = nullptr;
+        parentX3 = nullptr;
+        parentY3 = nullptr;
+        pop_heap2 = nullptr;
+        heap1 = nullptr;
+        heap2 = nullptr;
+
+        if (xcor)
+                delete[] xcor;
+        if (ycor)
+                delete[] ycor;
+        if (dcor)
+                delete[] dcor;
+        if (netEO)
+                delete[] netEO;
+
+        xcor = nullptr;
+        ycor = nullptr;
+        dcor = nullptr;
+        netEO = nullptr;
+
+        for (int i = 0; i < YRANGE; i++) {
+                if (HV[i])
+                        delete[] HV[i];
+                HV[i] = nullptr;
         }
-        delete[] HV;
+
+        if (HV)
+                delete[] HV;
+        HV = nullptr;
         
-        for (int i = 0; i < yGrid; i++) {
-                delete[] hyperV[i];
+        for (int i = 0; i < YRANGE; i++) {
+                if (hyperV[i])
+                        delete[] hyperV[i];
+                hyperV[i] = nullptr;
         }
-        delete[] hyperV;
+
+        if (hyperV)
+                delete[] hyperV;
+        hyperV = nullptr;
         
-        for (int i = 0; i < yGrid; i++) {
-                delete[] hyperH[i];
+        for (int i = 0; i < XRANGE; i++) {
+                if (hyperH[i])
+                        delete[] hyperH[i];
+                hyperH[i] = nullptr;
         }
-        delete[] hyperH;
+
+        if (hyperH)
+                delete[] hyperH;
+         hyperH = nullptr;
         
-        for (int i = 0; i < yGrid; i++) {
-                delete[] inRegion[i];
+        for (int i = 0; i < YRANGE; i++) {
+                if (inRegion[i])
+                        delete[] inRegion[i];
+                inRegion[i] = nullptr;
         }
-        delete[] inRegion;
+
+        if (inRegion)
+                delete[] inRegion;
+        inRegion = nullptr;
         
-        for (int i = 0; i < yGrid; i++) {
-                delete[] corrEdge[i];
+        for (int i = 0; i < YRANGE; i++) {
+                if (corrEdge[i])
+                        delete[] corrEdge[i];
+                corrEdge[i] = nullptr;
         }
-        delete[] corrEdge;
+
+        if (corrEdge)
+                delete[] corrEdge;
+        corrEdge = nullptr;
         
-        delete[] d13D;
-        delete[] d23D;
+        if (d13D)
+                delete[] d13D;
+        if (d23D)
+                delete[] d23D;
+        if (d1)
+                delete[] d1;
+        if (d2)
+                delete[] d2;
+
+        d13D = nullptr;
+        d23D = nullptr;
+        d1 = nullptr;
+        d2 = nullptr;
         
-        delete[] d1;
-        delete[] d2;
+        if (vCapacity3D)
+                delete[] vCapacity3D;
+        if (hCapacity3D)
+                delete[] hCapacity3D;
+
+        vCapacity3D = nullptr;
+        hCapacity3D = nullptr;
         
-        delete[] vCapacity3D;
-        delete[] hCapacity3D;
+        if (MinWidth)
+                delete[] MinWidth;
+        if (MinSpacing)
+                delete[] MinSpacing;
+        if (ViaSpacing)
+                delete[] ViaSpacing;
+
+        MinWidth = nullptr;
+        MinSpacing = nullptr;
+        ViaSpacing = nullptr;
         
-        delete[] MinWidth;
-        delete[] MinSpacing;
-        delete[] ViaSpacing;
-        
-        delete[] gridHs;
-        delete[] gridVs;
+        if (gridHs)
+                delete[] gridHs;
+        if (gridVs)
+                delete[] gridVs;
+
+        gridHs = nullptr;
+        gridVs = nullptr;
         
         for (int i = 0; i < numLayers; i++) {
-                delete[] layerGrid[i];
+                if (layerGrid[i])
+                        delete[] layerGrid[i];
+                layerGrid[i] = nullptr;
         }
-        delete[] layerGrid;
-        
-        for (int i = 0; i < numLayers; i++) {
-                delete[] gridD[i];
-        }
-        delete[] gridD;
-        
-        for (int i = 0; i < numLayers; i++) {
-                delete[] viaLink[i];
-        }
-        delete[] viaLink;
-        
-        delete[] costHVH;
-        delete[] costVHV;
-        delete[] costH;
-        delete[] costV;
-        delete[] costLR;
-        delete[] costTB;
 
-        delete[] costHVHtest;
-        delete[] costVtest;
-        delete[] costTBtest;
+        if (layerGrid)
+                delete[] layerGrid;
+        layerGrid = nullptr;
+        
+        for (int i = 0; i < numLayers; i++) {
+                if (gridD[i])
+                        delete[] gridD[i];
+                gridD[i] = nullptr;
+        }
+
+        if (gridD)
+                delete[] gridD;
+        gridD = nullptr;
+        
+        for (int i = 0; i < numLayers; i++) {
+                if (viaLink[i])
+                        delete[] viaLink[i];
+                viaLink[i] = nullptr;
+        }
+
+        if (viaLink)
+                delete[] viaLink;
+        viaLink = nullptr;
+        
+        if (costHVH)
+                delete[] costHVH;
+        if (costVHV)
+                delete[] costVHV;
+        if (costH)
+                delete[] costH;
+        if (costV)
+                delete[] costV;
+        if (costLR)
+                delete[] costLR;
+        if (costTB)
+                delete[] costTB;
+        if (costHVHtest)
+                delete[] costHVHtest;
+        if (costVtest)
+                delete[] costVtest;
+        if (costTBtest)
+                delete[] costTBtest;
+
+        costHVH = nullptr;
+        costVHV = nullptr;
+        costH = nullptr;
+        costV = nullptr;
+        costLR = nullptr;
+        costTB = nullptr;
+        costHVHtest = nullptr;
+        costVtest = nullptr;
+        costTBtest = nullptr;
 
         newnetID = 0;
         segcount = 0;

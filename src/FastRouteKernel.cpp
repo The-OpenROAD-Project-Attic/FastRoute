@@ -162,19 +162,6 @@ FastRouteKernel::~FastRouteKernel() {
         _routingLayers = nullptr;
         _allRoutingTracks = nullptr;
         _result = nullptr;
-
-        _vCapacities.clear();
-        _hCapacities.clear();
-        _netsDegree.clear();
-        _layersToAdjust.clear();
-        _layersReductionPercentage.clear();
-        regionsMinX.clear();
-        regionsMinY.clear();
-        regionsMaxX.clear();
-        regionsMaxY.clear();
-        regionsLayer.clear();
-        regionsReductionPercentage.clear();
-        _netsAlpha.clear();
 }
 
 void FastRouteKernel::startFastRoute() {
