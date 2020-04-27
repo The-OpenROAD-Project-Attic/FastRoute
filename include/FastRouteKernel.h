@@ -180,8 +180,8 @@ public:
         void runFastRoute();
         
         // temporary for congestion drive replace
-        void writeRoute();
-        void writeEst();
+        void writeRoute(std::string routeFile);
+        void writeEst(std::string estFileName);
 };
 
 }

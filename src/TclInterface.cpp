@@ -149,12 +149,4 @@ void write_guides() {
         fastRouteKernel->writeGuides();
 }
 
-void write_route() {
-        fastRouteKernel->writeRoute();
-}
-
-void write_est() {
-        fastRouteKernel->writeEst();
-}
-
 }

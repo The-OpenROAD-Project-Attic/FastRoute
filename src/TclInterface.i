@@ -89,8 +89,4 @@ extern void reset_fastroute();
 
 extern void write_guides();
 
-extern void write_route();
-
-extern void write_est();
-
 }

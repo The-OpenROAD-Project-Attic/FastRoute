@@ -1310,11 +1310,11 @@ void FastRouteKernel::checkPinPlacement() {
         }
 }
 
-void FastRouteKernel::writeRoute() {
+void FastRouteKernel::writeRoute(std::string routeFileName) {
         std::cout << "Writing route file...\n";
         
         std::ofstream routeFile;
-        routeFile.open("input.route");
+        routeFile.open(routeFileName + ".route");
         
         if (!routeFile.is_open()) {
                 std::cout << "[ERROR] Cannot open file to write route" << "\n";
@@ -1406,10 +1406,10 @@ void FastRouteKernel::writeRoute() {
         std::cout << "Writing route file... Done!\n";
 }
 
-void FastRouteKernel::writeEst() {
+void FastRouteKernel::writeEst(std::string estFileName) {
         std::cout << "Writing est file...\n";
         std::ofstream estFile;
-        estFile.open(_outfile + ".est");
+        estFile.open(estFileName + ".est");
 
         if (!estFile.is_open()) {
                 std::cout << "[ERROR] Cannot open file to write est" << "\n";

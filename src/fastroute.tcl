@@ -46,8 +46,6 @@ sta::define_cmd_args "fastroute" {[-output_file out_file] \
                                            [-clock_net_routing] \
                                            [-alpha alpha] \
                                            [-verbose verbose] \
-                                           [-write_route] \
-                                           [-write_est] \
                                            [-overflow_iterations iterations] \
                                            [-grid_origin origin] \
                                            [-pdrev_for_high_fanout fanout] \
@@ -62,8 +60,7 @@ proc fastroute { args } {
           -tile_size -alpha -verbose -layers_adjustments \
           -regions_adjustments -nets_alphas_priorities -overflow_iterations \
           -grid_origin -pdrev_for_high_fanout -seed} \
-    flags {-unidirectional_routing -clock_net_routing -allow_overflow -route_nets_with_pad \
-           -write_route -write_est} \
+    flags {-unidirectional_routing -clock_net_routing -allow_overflow -route_nets_with_pad } \
 
   if { [info exists keys(-output_file)] } {
     set out_file $keys(-output_file)
@@ -222,12 +219,4 @@ proc fastroute { args } {
   FastRoute::start_fastroute
   FastRoute::run_fastroute
   FastRoute::write_guides
-
-  if { [info exists flags(-write_route)] } {
-    FastRoute::write_route
-  }
-  
-  if { [info exists flags(-write_est)] } {
-    FastRoute::write_est
-  }
 }

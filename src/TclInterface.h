@@ -72,10 +72,6 @@ void run_fastroute();
 void reset_fastroute();
 void write_guides();
 
-//Temporary for congestion drive RePlAce
-void write_route();
-void write_est();
-
 }
 #endif
 
