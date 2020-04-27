@@ -94,6 +94,7 @@ private:
         std::vector<int> _vCapacities;
         std::vector<int> _hCapacities;
         std::map<std::string, int> _netsDegree;
+        unsigned _seed;
 
         // Layer adjustment variables
         std::vector<int> _layersToAdjust;
@@ -159,6 +160,7 @@ public:
         void setOutputFile(const std::string& outfile);
         void setPitchesInTile(const int pitchesInTile);
         void setDbId(unsigned idx);
+        void setSeed(unsigned seed);
         unsigned getDbId();
         void addLayerAdjustment(int layer, float reductionPercentage);
         void addRegionAdjustment(int minX, int minY, int maxX, int maxY, int layer, float reductionPercentage);

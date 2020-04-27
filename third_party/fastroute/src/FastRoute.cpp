@@ -1074,7 +1074,9 @@ int FT::run(std::vector<NET> &result) {
                         L = 0;
                 }
 
-                printf("[INFO] iteration %d, enlarge %d, costheight %d, threshold %d via cost %d \n[INFO] log_coef %f, healingTrigger %d cost_step %d L %d cost_type %d updatetype %d\n", i, enlarge, costheight, mazeedge_Threshold, VIA, LOGIS_COF, healingTrigger, cost_step, L, cost_type, upType);
+                printf("[INFO] iteration %d, enlarge %d, costheight %d, threshold %d via cost %d \n"
+                        "[INFO] log_coef %f, healingTrigger %d cost_step %d L %d cost_type %d updatetype %d\n",
+                        i, enlarge, costheight, mazeedge_Threshold, VIA, LOGIS_COF, healingTrigger, cost_step, L, cost_type, upType);
                 mazeRouteMSMD(i, enlarge, costheight, ripup_threshold, mazeedge_Threshold, !(i % 3), cost_type);
                 last_cong = past_cong;
                 past_cong = getOverflow2Dmaze(&maxOverflow, &tUsage);

@@ -86,6 +86,7 @@ void FastRouteKernel::init() {
         _pdRevForHighFanout = -1;
         _allowOverflow = 0;
         _routeNetsWithPad = 0;
+        _seed = 0;
         
         // Clock net routing variables
         _pdRev = 0;
@@ -349,6 +350,8 @@ void FastRouteKernel::initializeNets() {
         
         int idx = 0;
         int validNets = 0;
+
+        _netlist->randomizeNetsOrder(_seed);
 
         for (Net net : _netlist->getNets()) {
                 float netAlpha = _alpha;
@@ -924,6 +927,10 @@ void FastRouteKernel::setPitchesInTile(const int pitchesInTile) {
 
 void FastRouteKernel::setDbId(unsigned idx) {
         _dbId = idx;
+}
+
+void FastRouteKernel::setSeed(unsigned seed) {
+        _seed = seed;
 }
 
 unsigned FastRouteKernel::getDbId() {

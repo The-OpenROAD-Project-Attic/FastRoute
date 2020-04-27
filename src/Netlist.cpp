@@ -87,4 +87,9 @@ std::vector<Pin> Netlist::getAllPorts() {
         return ports;
 }
 
+void Netlist::randomizeNetsOrder(unsigned seed) {
+        if (seed != 0)
+                std::shuffle(_nets.begin(), _nets.end(), std::default_random_engine(seed));
+}
+
 }

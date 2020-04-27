@@ -43,6 +43,7 @@
 #include <functional>
 #include <limits>
 #include <iostream>
+#include <random>
 
 #include "Coordinate.h"
 #include "Box.h"
@@ -70,6 +71,8 @@ public:
         int getMaxNetDegree();
         
         std::vector<Pin> getAllPorts();
+
+        void randomizeNetsOrder(unsigned seed);
 };
 
 }
