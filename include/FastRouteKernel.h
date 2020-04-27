@@ -145,6 +145,46 @@ private:
         void checkPinPlacement();
 
 public:
+        struct EST_ {
+                std::string netName;
+                int netId;
+                int numSegments;
+                std::vector<long> initX;
+                std::vector<long> initY;
+                std::vector<int> initLayer;
+                std::vector<long> finalX;
+                std::vector<long> finalY;
+                std::vector<int> finalLayer;
+        };
+
+        struct ADJUSTMENT_ {
+                int firstX;
+                int firstY;
+                int firstLayer;
+                int finalX;
+                int finalY;
+                int finalLayer;
+                int edgeCapacity;
+        };
+
+        struct ROUTE_ {
+                int gridCountX;
+                int gridCountY;
+                int numLayers;
+                std::vector<int> verticalEdgesCapacities;
+                std::vector<int> horizontalEdgesCapacities;
+                std::vector<int> minWireWidths;
+                std::vector<int> minWireSpacings;
+                std::vector<int> viaSpacings;
+                long gridOriginX;
+                long gridOriginY;
+                long tileWidth;
+                long tileHeight;
+                int blockPorosity;
+                int numAdjustments;
+                std::vector<ADJUSTMENT_> adjustments;
+        };
+
         FastRouteKernel();
         ~FastRouteKernel();
         void init();
@@ -180,6 +220,9 @@ public:
         void runFastRoute();
         
         // temporary for congestion drive replace
+        ROUTE_ getRoute();
+        std::vector<EST_> getEst();
+
         void writeRoute(std::string routeFile);
         void writeEst(std::string estFileName);
 };

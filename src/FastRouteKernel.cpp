@@ -1310,6 +1310,105 @@ void FastRouteKernel::checkPinPlacement() {
         }
 }
 
+FastRouteKernel::ROUTE_ FastRouteKernel::getRoute() {
+        ROUTE_ route;
+
+        int xGrids = _grid->getXGrids();
+        int yGrids = _grid->getYGrids();
+        
+        for (int layer = 1; layer <= _grid->getNumLayers(); layer++) {
+                for (int y = 1; y < yGrids; y++) {
+                        for (int x = 1; x < xGrids; x++) {
+                                int edgeCap = _fastRoute->getEdgeCapacity(x - 1, y - 1, layer, x, y - 1, layer);
+                                if (edgeCap != _grid->getHorizontalEdgesCapacities()[layer - 1]) {
+                                    _numAdjusts++;
+                                }
+                        }
+                }
+                
+                for (int x = 1; x < xGrids; x++) {
+                        for (int y = 1; y < yGrids; y++) {
+                                int edgeCap = _fastRoute->getEdgeCapacity(x - 1, y - 1, layer, x - 1, y, layer);
+                                if (edgeCap != _grid->getVerticalEdgesCapacities()[layer - 1]) {
+                                        _numAdjusts++;
+                                }
+                        }
+                }
+        }
+        
+        route.gridCountX = _grid->getXGrids();
+        route.gridCountY = _grid->getYGrids();
+        route.numLayers = _grid->getNumLayers();
+
+        for (int vCap : _grid->getVerticalEdgesCapacities()) {
+                route.verticalEdgesCapacities.push_back(vCap);
+        }
+        
+        for (int hCap : _grid->getHorizontalEdgesCapacities()) {
+                route.horizontalEdgesCapacities.push_back(hCap);
+        }
+        
+        for (int i = 0; i <  _grid->getMinWidths().size(); i++) {
+                route.minWireWidths.push_back(1);
+        }
+        
+        for (int spacing : _grid->getSpacings()) {
+                route.minWireSpacings.push_back(spacing);
+        }
+        
+        for (int i = 0; i < _grid->getNumLayers(); i++) {
+                route.viaSpacings.push_back(1);
+        }
+        
+        route.gridOriginX = _grid->getLowerLeftX();
+        route.gridOriginY = _grid->getLowerLeftY();
+        route.tileWidth = _grid->getTileWidth();
+        route.tileHeight = _grid->getTileHeight();
+        route.blockPorosity = 0;
+        route.numAdjustments = _numAdjusts;
+        
+        for (int layer = 1; layer <= _grid->getNumLayers(); layer++) {
+                for (int y = 1; y < yGrids; y++) {
+                        for (int x = 1; x < xGrids; x++) {
+                                int edgeCap = _fastRoute->getEdgeCapacity(x - 1, y - 1, layer, x, y - 1, layer);
+                                if (edgeCap != _grid->getHorizontalEdgesCapacities()[layer - 1]) {
+                                        ADJUSTMENT_ adj;
+                                        adj.firstX = x - 1;
+                                        adj.firstY = y - 1;
+                                        adj.firstLayer = layer;
+                                        adj.finalX = x;
+                                        adj.finalY = y - 1;
+                                        adj.finalLayer = layer;
+                                        adj.edgeCapacity = edgeCap;
+
+                                        route.adjustments.push_back(adj);
+                                }
+                        }
+                }
+                
+                for (int x = 1; x < xGrids; x++) {
+                        for (int y = 1; y < yGrids; y++) {
+                                int edgeCap = _fastRoute->getEdgeCapacity(x - 1, y - 1, layer, x - 1, y, layer);
+                                if (edgeCap != _grid->getVerticalEdgesCapacities()[layer - 1]) {
+                                        ADJUSTMENT_ adj;
+                                        adj.firstX = x - 1;
+                                        adj.firstY = y - 1;
+                                        adj.firstLayer = layer;
+                                        adj.finalX = x - 1;
+                                        adj.finalY = y;
+                                        adj.finalLayer = layer;
+                                        adj.edgeCapacity = edgeCap;
+
+                                        route.adjustments.push_back(adj);
+
+                                }
+                        }
+                }
+        }
+
+        return route;
+}
+
 void FastRouteKernel::writeRoute(std::string routeFileName) {
         std::cout << "Writing route file...\n";
         
@@ -1404,6 +1503,45 @@ void FastRouteKernel::writeRoute(std::string routeFileName) {
         routeFile.close();
         
         std::cout << "Writing route file... Done!\n";
+}
+
+std::vector<FastRouteKernel::EST_> FastRouteKernel::getEst() {
+        std::vector<EST_> netsEst;
+
+        for (FastRoute::NET netRoute : *_result) {
+                EST_ netEst;
+                int validTiles = 0;
+                for (FastRoute::ROUTE route : netRoute.route) {
+                        if (route.initX == route.finalX && route.initY == route.finalY &&
+                            route.initLayer == route.finalLayer) {
+                            continue;
+                        }
+                        validTiles++;
+                }
+
+                if (validTiles == 0) {
+                        netEst.netName = netRoute.name;
+                        netEst.netId = netRoute.id;
+                        netEst.numSegments = validTiles;
+                        continue;
+                }
+
+                netEst.netName = netRoute.name;
+                netEst.netId = netRoute.id;
+                netEst.numSegments = netRoute.route.size();
+                for (FastRoute::ROUTE route : netRoute.route) {
+                        netEst.initX.push_back(route.initX);
+                        netEst.initY.push_back(route.initY);
+                        netEst.initLayer.push_back(route.initLayer);
+                        netEst.finalX.push_back(route.finalX);
+                        netEst.finalY.push_back(route.finalY);
+                        netEst.finalLayer.push_back(route.finalLayer);
+                }
+
+                netsEst.push_back(netEst);
+        }
+
+        return netsEst;
 }
 
 void FastRouteKernel::writeEst(std::string estFileName) {
