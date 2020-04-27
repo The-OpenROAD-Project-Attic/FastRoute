@@ -39,7 +39,7 @@ sta::define_cmd_args "fastroute" {[-output_file out_file] \
                                            [-min_routing_layer min_layer] \
                                            [-max_routing_layer max_layer] \
                                            [-unidirectional_routing] \
-                                           [-pitches_in_tile pitches] \
+                                           [-tile_size tile_size] \
                                            [-layers_adjustments layers_adjustments] \
                                            [-regions_adjustments regions_adjustments] \
                                            [-nets_alphas_priorities nets_alphas] \
@@ -59,7 +59,7 @@ sta::define_cmd_args "fastroute" {[-output_file out_file] \
 proc fastroute { args } {
   sta::parse_key_args "fastroute" args \
     keys {-output_file -capacity_adjustment -min_routing_layer -max_routing_layer \
-          -pitches_in_tile -alpha -verbose -layers_adjustments \
+          -tile_size -alpha -verbose -layers_adjustments \
           -regions_adjustments -nets_alphas_priorities -overflow_iterations \
           -grid_origin -pdrev_for_high_fanout -seed} \
     flags {-unidirectional_routing -clock_net_routing -allow_overflow -route_nets_with_pad \
@@ -95,9 +95,9 @@ proc fastroute { args } {
     FastRoute::set_max_layer -1
   }
 
-  if { [info exists keys(-pitches_in_tile)] } {
-    set pitches $keys(-pitches_in_tile)
-    FastRoute::set_pitches_in_tile $pitches
+  if { [info exists keys(-tile_size)] } {
+    set tile_size $keys(-tile_size)
+    FastRoute::set_tile_size $tile_size
   }
 
   if { [info exists keys(-layers_adjustments)] } {

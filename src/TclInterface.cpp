@@ -60,8 +60,8 @@ void set_output_file(const char * file) {
         fastRouteKernel->setOutputFile(file);
 }
 
-void set_pitches_in_tile(int numPitches) {
-        fastRouteKernel->setPitchesInTile(numPitches);
+void set_tile_size(int tileSize) {
+        fastRouteKernel->setPitchesInTile(tileSize);
 }
 
 void set_capacity_adjustment(float adjustment) {
