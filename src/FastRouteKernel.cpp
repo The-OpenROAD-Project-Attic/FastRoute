@@ -667,6 +667,9 @@ void FastRouteKernel::computeUserGlobalAdjustments() {
 
         for (int layer = 1; layer <= _grid->getNumLayers(); layer++) {
                 if (_hCapacities[layer - 1] != 0) {
+                        int newCap = _grid->getHorizontalEdgesCapacities()[layer - 1] * (1 - _adjustment);
+                        _grid->updateHorizontalEdgesCapacities(layer-1, newCap);
+
                         for (int y = 1; y < yGrids; y++) {
                                 for (int x = 1; x < xGrids; x++) {
                                         int edgeCap = _fastRoute->getEdgeCapacity(x - 1, y - 1, layer, x, y - 1, layer);
@@ -677,6 +680,9 @@ void FastRouteKernel::computeUserGlobalAdjustments() {
                 }
 
                 if (_vCapacities[layer - 1] != 0) {
+                        int newCap = _grid->getVerticalEdgesCapacities()[layer - 1] * (1 - _adjustment);
+                        _grid->updateVerticalEdgesCapacities(layer-1, newCap);
+                        
                         for (int x = 1; x < xGrids; x++) {
                                 for (int y = 1; y < yGrids; y++) {
                                         int edgeCap = _fastRoute->getEdgeCapacity(x - 1, y - 1, layer, x - 1, y, layer);
@@ -709,6 +715,9 @@ void FastRouteKernel::computeUserLayerAdjustments() {
                 int layer = _layersToAdjust[idx];
                 float adjustment = _layersReductionPercentage[idx];
                 if (_hCapacities[layer - 1] != 0) {
+                        int newCap = _grid->getHorizontalEdgesCapacities()[layer - 1] * (1 - _adjustment);
+                        _grid->updateHorizontalEdgesCapacities(layer-1, newCap);
+
                         for (int y = 1; y < yGrids; y++) {
                                 for (int x = 1; x < xGrids; x++) {
                                         int edgeCap = _fastRoute->getEdgeCapacity(x - 1, y - 1, layer, x, y - 1, layer);
@@ -719,6 +728,9 @@ void FastRouteKernel::computeUserLayerAdjustments() {
                 }
 
                 if (_vCapacities[layer - 1] != 0) {
+                    int newCap = _grid->getVerticalEdgesCapacities()[layer - 1] * (1 - _adjustment);
+                        _grid->updateVerticalEdgesCapacities(layer-1, newCap);
+
                         for (int x = 1; x < xGrids; x++) {
                                 for (int y = 1; y < yGrids; y++) {
                                         int edgeCap = _fastRoute->getEdgeCapacity(x - 1, y - 1, layer, x - 1, y, layer);
