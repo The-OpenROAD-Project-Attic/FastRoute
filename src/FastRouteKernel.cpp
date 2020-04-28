@@ -682,7 +682,7 @@ void FastRouteKernel::computeUserGlobalAdjustments() {
                 if (_vCapacities[layer - 1] != 0) {
                         int newCap = _grid->getVerticalEdgesCapacities()[layer - 1] * (1 - _adjustment);
                         _grid->updateVerticalEdgesCapacities(layer-1, newCap);
-                        
+
                         for (int x = 1; x < xGrids; x++) {
                                 for (int y = 1; y < yGrids; y++) {
                                         int edgeCap = _fastRoute->getEdgeCapacity(x - 1, y - 1, layer, x - 1, y, layer);
@@ -1421,102 +1421,6 @@ FastRouteKernel::ROUTE_ FastRouteKernel::getRoute() {
         return route;
 }
 
-void FastRouteKernel::writeRoute(std::string routeFileName) {
-        std::cout << "Writing route file...\n";
-        
-        std::ofstream routeFile;
-        routeFile.open(routeFileName + ".route");
-        
-        if (!routeFile.is_open()) {
-                std::cout << "[ERROR] Cannot open file to write route" << "\n";
-                routeFile.close();
-                std::exit(0);
-        }
-        
-        int xGrids = _grid->getXGrids();
-        int yGrids = _grid->getYGrids();
-        
-        for (int layer = 1; layer <= _grid->getNumLayers(); layer++) {
-                for (int y = 1; y < yGrids; y++) {
-                        for (int x = 1; x < xGrids; x++) {
-                                int edgeCap = _fastRoute->getEdgeCapacity(x - 1, y - 1, layer, x, y - 1, layer);
-                                if (edgeCap != _grid->getHorizontalEdgesCapacities()[layer - 1]) {
-                                    _numAdjusts++;
-                                }
-                        }
-                }
-                
-                for (int x = 1; x < xGrids; x++) {
-                        for (int y = 1; y < yGrids; y++) {
-                                int edgeCap = _fastRoute->getEdgeCapacity(x - 1, y - 1, layer, x - 1, y, layer);
-                                if (edgeCap != _grid->getVerticalEdgesCapacities()[layer - 1]) {
-                                        _numAdjusts++;
-                                }
-                        }
-                }
-        }
-        
-        routeFile << "Grid                : " << _grid->getXGrids() << " " << _grid->getYGrids() << " " << _grid->getNumLayers() << "\n";
-        routeFile << "VerticalCapacity    :";
-        for (int vCap : _grid->getVerticalEdgesCapacities()) {
-                routeFile << " " << vCap;
-        }
-        routeFile << "\n";
-        
-        routeFile << "HorizontalCapacity  :";
-        for (int hCap : _grid->getHorizontalEdgesCapacities()) {
-                routeFile << " " << hCap;
-        }
-        routeFile << "\n";
-        
-        routeFile << "MinWireWidth        :";
-        for (int i = 0; i <  _grid->getMinWidths().size(); i++) {
-                routeFile << " " << 1;
-        }
-        routeFile << "\n";
-        
-        routeFile << "MinWireSpacing      :";
-        for (int spacing : _grid->getSpacings()) {
-                routeFile << " " << spacing;
-        }
-        routeFile << "\n";
-        
-        routeFile << "ViaSpacing          :";
-        for (int i = 0; i < _grid->getNumLayers(); i++) {
-                routeFile << " " << 1;
-        }
-        routeFile << "\n";
-        
-        routeFile << "GridOrigin          : " << _grid->getLowerLeftX() << " " << _grid->getLowerLeftY() << "\n";
-        routeFile << "TileSize            : " << _grid->getTileWidth() << " " << _grid->getTileHeight() << "\n";
-        routeFile << "BlockagePorosity    : 0\n";
-        routeFile << "NumEdgeCapacityAdjustments : " << _numAdjusts << "\n";
-        
-        for (int layer = 1; layer <= _grid->getNumLayers(); layer++) {
-                for (int y = 1; y < yGrids; y++) {
-                        for (int x = 1; x < xGrids; x++) {
-                                int edgeCap = _fastRoute->getEdgeCapacity(x - 1, y - 1, layer, x, y - 1, layer);
-                                if (edgeCap != _grid->getHorizontalEdgesCapacities()[layer - 1]) {
-                                        routeFile << x - 1 << " " << y - 1 << " " << layer << " " << x << " " << y - 1 << " " << layer << " " << edgeCap << "\n";
-                                }
-                        }
-                }
-                
-                for (int x = 1; x < xGrids; x++) {
-                        for (int y = 1; y < yGrids; y++) {
-                                int edgeCap = _fastRoute->getEdgeCapacity(x - 1, y - 1, layer, x - 1, y, layer);
-                                if (edgeCap != _grid->getVerticalEdgesCapacities()[layer - 1]) {
-                                        routeFile << x - 1 << " " << y - 1 << " " << layer << " " << x - 1 << " " << y << " " << layer << " " << edgeCap << "\n";
-                                }
-                        }
-                }
-        }
-        
-        routeFile.close();
-        
-        std::cout << "Writing route file... Done!\n";
-}
-
 std::vector<FastRouteKernel::EST_> FastRouteKernel::getEst() {
         std::vector<EST_> netsEst;
 
@@ -1554,44 +1458,6 @@ std::vector<FastRouteKernel::EST_> FastRouteKernel::getEst() {
         }
 
         return netsEst;
-}
-
-void FastRouteKernel::writeEst(std::string estFileName) {
-        std::cout << "Writing est file...\n";
-        std::ofstream estFile;
-        estFile.open(estFileName + ".est");
-
-        if (!estFile.is_open()) {
-                std::cout << "[ERROR] Cannot open file to write est" << "\n";
-                estFile.close();
-                std::exit(1);
-        }
-
-        for (FastRoute::NET netRoute : *_result) {
-                int validTiles = 0;
-                for (FastRoute::ROUTE route : netRoute.route) {
-                        if (route.initX == route.finalX && route.initY == route.finalY &&
-                            route.initLayer == route.finalLayer) {
-                            continue;
-                        }
-                        validTiles++;
-                }
-
-                if (validTiles == 0) {
-                        estFile << netRoute.name << " " << netRoute.id << " " << validTiles << "\n";
-                        estFile << "!\n";
-                        continue;
-                }
-                estFile << netRoute.name << " " << netRoute.id << " " << netRoute.route.size() << "\n";
-                for (FastRoute::ROUTE route : netRoute.route) {
-                        estFile << "(" << route.initX << "," << route.initY << "," << route.initLayer << ")-(" << route.finalX << "," << route.finalY << "," << route.finalLayer << ")\n";
-                }
-                estFile << "!\n";
-        }
-
-        estFile.close();
-        
-        std::cout << "Writing est file... Done!\n";
 }
 
 void FastRouteKernel::computeWirelength() {

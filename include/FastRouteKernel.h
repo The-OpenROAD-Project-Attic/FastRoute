@@ -222,9 +222,6 @@ public:
         // temporary for congestion drive replace
         ROUTE_ getRoute();
         std::vector<EST_> getEst();
-
-        void writeRoute(std::string routeFile);
-        void writeEst(std::string estFileName);
 };
 
 }
