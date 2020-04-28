@@ -39,7 +39,9 @@
 namespace FastRoute {
 
 // Global variables
-int xGrid, yGrid, maxGrid, numGrids, numNets, *vCapacity3D, *hCapacity3D;
+int XRANGE, YRANGE;
+int xGrid, yGrid, numGrids, numNets, invalidNets;
+int *vCapacity3D, *hCapacity3D;
 float vCapacity_lb, hCapacity_lb, vCapacity_ub, hCapacity_ub;
 int MaxDegree;
 int *MinWidth, *MinSpacing, *ViaSpacing;
@@ -65,7 +67,6 @@ bool allowOverflow;
 Bool **HV;
 Bool **hyperV;
 Bool **hyperH;
-
 int **corrEdge;
 int SLOPE;
 
@@ -86,7 +87,6 @@ char benchFile[STRINGLEN];
 Segment* seglist;
 int* seglistIndex;  // the index for the segments for each net
 int* seglistCnt;    // the number of segements for each net
-int* segOrder;      // the order of segments for routing
 Tree* trees;        // the tree topologies
 StTree* sttrees;    // the Steiner trees
 DTYPE** gxs;        // the copy of xs for nets, used for second FLUTE
@@ -114,7 +114,8 @@ parent3D*** pr3D;
 int mazeedge_Threshold;
 Bool **inRegion;
 
-int gridHV, gridH, gridV, *gridHs, *gridVs;
+int gridHV, gridH, gridV;
+int *gridHs, *gridVs;
 
 int** heap13D;
 short** heap23D;
@@ -139,59 +140,5 @@ void init_usage() {
                 h_edges[i].usage = 0;
         for (i = 0; i < (yGrid - 1) * xGrid; i++)
                 v_edges[i].usage = 0;
-}
-
-void freeAllMemory() {
-        int i, deg, numEdges, edgeID;
-        TreeEdge* treeedge;
-
-        for (i = 0; i < numValidNets; i++) {
-                free(nets[i]->pinX);
-                free(nets[i]->pinY);
-                free(nets[i]->pinL);
-                free(nets[i]);
-        }
-        free(seglistIndex);
-        free(seglistCnt);
-        free(seglist);
-        free(h_edges);
-        free(v_edges);
-        free(h_edges3D);
-        free(v_edges3D);
-        free(segOrder);
-
-        for (i = 0; i < numValidNets; i++)
-                free(trees[i].branch);
-        free(trees);
-
-        for (i = 0; i < numValidNets; i++) {
-                deg = sttrees[i].deg;
-                numEdges = 2 * deg - 3;
-                for (edgeID = 0; edgeID < numEdges; edgeID++) {
-                        treeedge = &(sttrees[i].edges[edgeID]);
-                        if (treeedge->len > 0) {
-                                free(treeedge->route.gridsX);
-                                free(treeedge->route.gridsY);
-                                free(treeedge->route.gridsL);
-                        }
-                }
-                free(sttrees[i].nodes);
-                free(sttrees[i].edges);
-        }
-        free(sttrees);
-
-        for (i = 0; i < yGrid; i++) {
-                free(parentX1[i]);
-                free(parentY1[i]);
-                free(parentX3[i]);
-                free(parentY3[i]);
-        }
-        free(parentX1);
-        free(parentY1);
-        free(parentX3);
-        free(parentY3);
-        free(pop_heap2);
-        free(heap1);
-        free(heap2);
 }
 }  // namespace FastRoute

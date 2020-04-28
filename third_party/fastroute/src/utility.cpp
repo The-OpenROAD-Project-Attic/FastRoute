@@ -288,10 +288,10 @@ void netpinOrderInc() {
         }
 
         if (treeOrderPV != NULL) {
-                free(treeOrderPV);
+                delete[] treeOrderPV;
         }
 
-        treeOrderPV = (OrderNetPin *)malloc(numValidNets * sizeof(OrderNetPin));
+        treeOrderPV = new OrderNetPin[numValidNets];
 
         for (j = 0; j < numValidNets; j++) {
                 xmin = BIG_INT;
@@ -410,9 +410,9 @@ void fillVIA() {
         }
         
         if (verbose > 1) {
-                printf(" > ----via related to pin nodes %d\n", numVIAT1);
-                printf(" > ----via related stiner nodes %d\n", numVIAT2);
-                printf(" > --via filling finished\n");
+                printf("[INFO] Via related to pin nodes %d\n", numVIAT1);
+                printf("[INFO] Via related stiner nodes %d\n", numVIAT2);
+                printf("Via filling finished\n");
         }
 }
 
@@ -755,7 +755,7 @@ void newLayerAssignmentV4() {
                         treeedge = &(treeedges[edgeID]);
                         if (treeedge->len > 0) {
                                 routeLen = treeedge->route.routelen;
-                                treeedge->route.gridsL = (short *)calloc((routeLen + 1), sizeof(short));
+                                treeedge->route.gridsL = (short *)calloc(routeLen+1, sizeof(short));
                                 treeedge->assigned = FALSE;
                         }
                 }
@@ -952,11 +952,8 @@ void newLA() {
                 }
         }
 
-        if (verbose > 1)
-            printf(" > \n > ----node processing\n");
         newLayerAssignmentV4();
-        if (verbose > 1)
-            printf(" > ----layer assignment\n");
+
         ConvertToFull3DType2();
 }
 
@@ -1129,10 +1126,10 @@ void StNetOrder() {
         numTreeedges = 0;
 
         if (treeOrderCong != NULL) {
-                free(treeOrderCong);
+                delete[] treeOrderCong;
         }
 
-        treeOrderCong = (OrderTree *)malloc(numValidNets * sizeof(OrderTree));
+        treeOrderCong = new OrderTree[numValidNets];
 
         i = 0;
         for (j = 0; j < numValidNets; j++) {
@@ -1146,13 +1143,13 @@ void StNetOrder() {
 
                         gridsX = treeedge->route.gridsX;
                         gridsY = treeedge->route.gridsY;
-                        for (i = 0; i <= treeedge->route.routelen; i++) {
-                                if (gridsX[i] == gridsX[i + 1])  // a vertical edge
+                        for (i = 0; i < treeedge->route.routelen; i++) {
+                                if (gridsX[i] == gridsX[i + 1]) // a vertical edge
                                 {
                                         min_y = std::min(gridsY[i], gridsY[i + 1]);
                                         grid = min_y * xGrid + gridsX[i];
                                         treeOrderCong[j].xmin += std::max(0, v_edges[grid].usage - v_edges[grid].cap);
-                                } else  ///if(gridsY[i]==gridsY[i+1])// a horizontal edge
+                                } else // a horizontal edge
                                 {
                                         min_x = std::min(gridsX[i], gridsX[i + 1]);
                                         grid = gridsY[i] * (xGrid - 1) + min_x;
@@ -1277,7 +1274,7 @@ void checkUsage() {
                                                                 redsus = TRUE;
                                                                 i = 0;
                                                                 j = 0;
-                                                                printf("redundant edge component discovered\n");
+                                                                // printf("redundant edge component discovered\n");
                                                         }
                                                 }
                                         }
@@ -1286,7 +1283,7 @@ void checkUsage() {
                 }
         }
         if (verbose > 1) {
-                printf(" > ----usage checked\n");
+                printf("Usage checked\n");
         }
 }
 
@@ -1495,23 +1492,23 @@ void copyRS(void) {
                         numEdges = 2 * sttreesBK[netID].deg - 3;
                         for (edgeID = 0; edgeID < numEdges; edgeID++) {
                                 if (sttreesBK[netID].edges[edgeID].len > 0) {
-                                        free(sttreesBK[netID].edges[edgeID].route.gridsX);
-                                        free(sttreesBK[netID].edges[edgeID].route.gridsY);
+                                        delete[] sttreesBK[netID].edges[edgeID].route.gridsX;
+                                        delete[] sttreesBK[netID].edges[edgeID].route.gridsY;
                                 }
                         }
-                        free(sttreesBK[netID].nodes);
-                        free(sttreesBK[netID].edges);
+                        delete[] sttreesBK[netID].nodes;
+                        delete[] sttreesBK[netID].edges;
                 }
-                free(sttreesBK);
+                delete[] sttreesBK;
         }
 
-        sttreesBK = (StTree *)malloc(numValidNets * sizeof(StTree));
+        sttreesBK = new StTree[numValidNets];
 
         for (netID = 0; netID < numValidNets; netID++) {
                 numNodes = 2 * sttrees[netID].deg - 2;
                 numEdges = 2 * sttrees[netID].deg - 3;
 
-                sttreesBK[netID].nodes = (TreeNode *)malloc(numNodes * sizeof(TreeNode));
+                sttreesBK[netID].nodes = new TreeNode[numNodes];
 
                 for (i = 0; i < numNodes; i++) {
                         sttreesBK[netID].nodes[i].x = sttrees[netID].nodes[i].x;
@@ -1523,7 +1520,7 @@ void copyRS(void) {
                 }
                 sttreesBK[netID].deg = sttrees[netID].deg;
 
-                sttreesBK[netID].edges = (TreeEdge *)malloc(numEdges * sizeof(TreeEdge));
+                sttreesBK[netID].edges = new TreeEdge[numEdges];
 
                 for (edgeID = 0; edgeID < numEdges; edgeID++) {
                         sttreesBK[netID].edges[edgeID].len = sttrees[netID].edges[edgeID].len;
@@ -1533,8 +1530,8 @@ void copyRS(void) {
                         if (sttrees[netID].edges[edgeID].len > 0)  // only route the non-degraded edges (len>0)
                         {
                                 sttreesBK[netID].edges[edgeID].route.routelen = sttrees[netID].edges[edgeID].route.routelen;
-                                sttreesBK[netID].edges[edgeID].route.gridsX = (short *)calloc((sttrees[netID].edges[edgeID].route.routelen + 1), sizeof(short));
-                                sttreesBK[netID].edges[edgeID].route.gridsY = (short *)calloc((sttrees[netID].edges[edgeID].route.routelen + 1), sizeof(short));
+                                sttreesBK[netID].edges[edgeID].route.gridsX = new short[(sttrees[netID].edges[edgeID].route.routelen + 1)];
+                                sttreesBK[netID].edges[edgeID].route.gridsY = new short[(sttrees[netID].edges[edgeID].route.routelen + 1)];
 
                                 for (i = 0; i <= sttrees[netID].edges[edgeID].route.routelen; i++) {
                                         sttreesBK[netID].edges[edgeID].route.gridsX[i] = sttrees[netID].edges[edgeID].route.gridsX[i];
@@ -1556,22 +1553,22 @@ void copyBR(void) {
                         numEdges = 2 * sttrees[netID].deg - 3;
                         for (edgeID = 0; edgeID < numEdges; edgeID++) {
                                 if (sttrees[netID].edges[edgeID].len > 0) {
-                                        free(sttrees[netID].edges[edgeID].route.gridsX);
-                                        free(sttrees[netID].edges[edgeID].route.gridsY);
+                                        delete[] sttrees[netID].edges[edgeID].route.gridsX;
+                                        delete[] sttrees[netID].edges[edgeID].route.gridsY;
                                 }
                         }
-                        free(sttrees[netID].nodes);
-                        free(sttrees[netID].edges);
+                        delete[] sttrees[netID].nodes;
+                        delete[] sttrees[netID].edges;
                 }
-                free(sttrees);
+                delete[] sttrees;
 
-                sttrees = (StTree *)malloc(numValidNets * sizeof(StTree));
+                sttrees = new StTree[numValidNets];
 
                 for (netID = 0; netID < numValidNets; netID++) {
                         numNodes = 2 * sttreesBK[netID].deg - 2;
                         numEdges = 2 * sttreesBK[netID].deg - 3;
 
-                        sttrees[netID].nodes = (TreeNode *)malloc(numNodes * sizeof(TreeNode));
+                        sttrees[netID].nodes = new TreeNode[numNodes];
 
                         for (i = 0; i < numNodes; i++) {
                                 sttrees[netID].nodes[i].x = sttreesBK[netID].nodes[i].x;
@@ -1582,7 +1579,7 @@ void copyBR(void) {
                                 }
                         }
 
-                        sttrees[netID].edges = (TreeEdge *)malloc(numEdges * sizeof(TreeEdge));
+                        sttrees[netID].edges = new TreeEdge[numEdges];
 
                         sttrees[netID].deg = sttreesBK[netID].deg;
 
@@ -1598,8 +1595,8 @@ void copyBR(void) {
                                 {
                                         sttrees[netID].edges[edgeID].route.type = MAZEROUTE;
                                         sttrees[netID].edges[edgeID].route.routelen = sttreesBK[netID].edges[edgeID].route.routelen;
-                                        sttrees[netID].edges[edgeID].route.gridsX = (short *)calloc((sttreesBK[netID].edges[edgeID].route.routelen + 1), sizeof(short));
-                                        sttrees[netID].edges[edgeID].route.gridsY = (short *)calloc((sttreesBK[netID].edges[edgeID].route.routelen + 1), sizeof(short));
+                                        sttrees[netID].edges[edgeID].route.gridsX = new short[(sttreesBK[netID].edges[edgeID].route.routelen + 1)];
+                                        sttrees[netID].edges[edgeID].route.gridsY = new short[(sttreesBK[netID].edges[edgeID].route.routelen + 1)];
 
                                         for (i = 0; i <= sttreesBK[netID].edges[edgeID].route.routelen; i++) {
                                                 sttrees[netID].edges[edgeID].route.gridsX[i] = sttreesBK[netID].edges[edgeID].route.gridsX[i];
@@ -1653,14 +1650,14 @@ void freeRR(void) {
                         numEdges = 2 * sttreesBK[netID].deg - 3;
                         for (edgeID = 0; edgeID < numEdges; edgeID++) {
                                 if (sttreesBK[netID].edges[edgeID].len > 0) {
-                                        free(sttreesBK[netID].edges[edgeID].route.gridsX);
-                                        free(sttreesBK[netID].edges[edgeID].route.gridsY);
+                                        delete[] sttreesBK[netID].edges[edgeID].route.gridsX;
+                                        delete[] sttreesBK[netID].edges[edgeID].route.gridsY;
                                 }
                         }
-                        free(sttreesBK[netID].nodes);
-                        free(sttreesBK[netID].edges);
+                        delete[] sttreesBK[netID].nodes;
+                        delete[] sttreesBK[netID].edges;
                 }
-                free(sttreesBK);
+                delete[] sttreesBK;
         }
 }
 
@@ -1669,7 +1666,7 @@ Tree fluteToTree(Flute::Tree fluteTree){
         tree.deg = fluteTree.deg;
         tree.totalDeg = 2*fluteTree.deg -2;
         tree.length = (DTYPE) fluteTree.length;
-        tree.branch = (Branch *)malloc(tree.totalDeg * sizeof(Branch));
+        tree.branch = new Branch[tree.totalDeg];
         for (int i=0; i < tree.totalDeg; i++){
                 tree.branch[i].x = (DTYPE) fluteTree.branch[i].x;
                 tree.branch[i].y = (DTYPE) fluteTree.branch[i].y;
@@ -1682,7 +1679,7 @@ Flute::Tree treeToFlute(Tree tree){
         Flute::Tree fluteTree;
         fluteTree.deg = tree.deg;
         fluteTree.length = (Flute::DTYPE) fluteTree.length;
-        fluteTree.branch = (Flute::Branch *)malloc(tree.totalDeg * sizeof(Flute::Branch));
+        fluteTree.branch = new Flute::Branch[tree.totalDeg];
         for (int i=0; i < tree.totalDeg; i++){
                 fluteTree.branch[i].x = (Flute::DTYPE) tree.branch[i].x;
                 fluteTree.branch[i].y = (Flute::DTYPE) tree.branch[i].y;
@@ -1696,7 +1693,7 @@ Tree pdToTree(PD::Tree pdTree){
         tree.deg = pdTree.deg;
         tree.totalDeg = 2*pdTree.deg -2;
         tree.length = (DTYPE) pdTree.length;
-        tree.branch = (Branch *)malloc(tree.totalDeg * sizeof(Branch));
+        tree.branch = new Branch[tree.totalDeg];
         for (int i=0; i < tree.totalDeg; i++){
                 tree.branch[i].x = (DTYPE) pdTree.branch[i].x;
                 tree.branch[i].y = (DTYPE) pdTree.branch[i].y;

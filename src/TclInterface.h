@@ -47,7 +47,7 @@ void help();
 void set_output_file(const char * file);
 
 // Parms interface
-void set_pitches_in_tile(int numPitches);
+void set_tile_size(int tileSize);
 void set_capacity_adjustment(float adjustment);
 void add_layer_adjustment(int layer, float reductionPercentage);
 void add_region_adjustment(int minX, int minY, int maxX, int maxY, int layer, float reductionPercentage);
@@ -66,12 +66,13 @@ void set_grid_origin(long x, long y);
 void set_pdrev_for_high_fanout(int pdRevForHighFanout);
 void set_allow_overflow(bool allowOverflow);
 void set_route_nets_with_pad(bool routePad);
+void set_seed(unsigned seed);
 
 // Run
 void start_fastroute();
 void estimate_rc();
 void run_fastroute();
-void run();
+void reset_fastroute();
 void write_guides();
 
 }

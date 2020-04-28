@@ -45,7 +45,7 @@ extern void help();
 
 extern void set_output_file(const char * file);
 
-extern void set_pitches_in_tile(int numPitches);
+extern void set_tile_size(int tileSize);
 
 extern void set_capacity_adjustment(float adjustment);
 
@@ -85,11 +85,13 @@ extern void set_route_nets_with_pad(bool routePad);
 
 extern void estimate_rc();
 
+extern void set_seed(unsigned seed);
+
 extern void start_fastroute();
 
 extern void run_fastroute();
 
-extern void run();
+extern void reset_fastroute();
 
 extern void write_guides();
 

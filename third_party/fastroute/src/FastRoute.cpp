@@ -52,62 +52,379 @@
 #include "route.h"
 #include "maze3D.h"
 #include <iostream>
+#include <string>
 
 namespace FastRoute {
 
-int newnetID = 0;
-int segcount = 0;
+int newnetID;
+int segcount;
 int pinInd;
 int numAdjust;
-int vCapacity = 0;
-int hCapacity = 0;
-int MD = 0;
+int vCapacity;
+int hCapacity;
+int MD;
+
+FT::FT() {
+        newnetID = 0;
+        segcount = 0;
+        pinInd = 0;
+        numAdjust = 0;
+        vCapacity = 0;
+        hCapacity = 0;
+        MD = 0;
+        numNets = 0;
+        invalidNets = 0;
+}
+
+FT::~FT() {
+        int i, deg, numEdges, edgeID;
+        TreeEdge* treeedge;
+
+        for (i = 0; i < (numNets - invalidNets); i++) {
+                if (nets[i]->pinX)
+                        delete[] nets[i]->pinX;
+                nets[i]->pinX = nullptr;
+
+                if (nets[i]->pinY)
+                        delete[] nets[i]->pinY;
+                nets[i]->pinY = nullptr;
+
+                if (nets[i]->pinL)
+                        delete[] nets[i]->pinL;
+                nets[i]->pinL = nullptr;
+        }
+
+        for (i = 0; i < numNets; i++) {
+                if (nets[i])
+                        delete nets[i];
+                nets[i] = nullptr;
+        }
+
+        if (nets)
+                delete[] nets;
+
+        nets = nullptr;
+
+        if (h_edges)
+                delete[] h_edges;
+        h_edges = nullptr;
+
+        if (v_edges)
+                delete[] v_edges;
+        v_edges = nullptr;
+
+        if (seglist)
+                delete[] seglist;
+        seglist = nullptr;
+
+        if (seglistIndex)
+                delete[] seglistIndex;
+        seglistIndex = nullptr;
+
+        if (seglistCnt)
+                delete[] seglistCnt;
+        seglistCnt = nullptr;
+
+        if (gxs)
+                delete[] gxs;
+        gxs = nullptr;
+
+        if (gys)
+                delete[] gys;
+        gys = nullptr;
+
+        if (gs)
+                delete[] gs;
+        gs = nullptr;
+
+        if (treeOrderPV)
+                delete[] treeOrderPV;
+        treeOrderPV = nullptr;
+
+        if (treeOrderCong)
+                delete[] treeOrderCong;
+        treeOrderCong = nullptr;
+
+        if (h_edges3D)
+                delete[] h_edges3D;
+        h_edges3D = nullptr;
+
+        if (v_edges3D)
+                delete[] v_edges3D;
+        v_edges3D = nullptr;
+
+        if (trees)
+                delete[] trees;
+        trees = nullptr;
+
+        for (i = 0; i < numValidNets; i++) {
+                deg = sttrees[i].deg;
+                numEdges = 2 * deg - 3;
+                for (edgeID = 0; edgeID < numEdges; edgeID++) {
+                        treeedge = &(sttrees[i].edges[edgeID]);
+                        if (treeedge->len > 0) {
+                                if (treeedge->route.gridsX)
+                                        free(treeedge->route.gridsX);
+                                if (treeedge->route.gridsY)
+                                        free(treeedge->route.gridsY);
+                                if (treeedge->route.gridsL)
+                                        free(treeedge->route.gridsL);
+                                treeedge->route.gridsX = nullptr;
+                                treeedge->route.gridsY = nullptr;
+                                treeedge->route.gridsL = nullptr;
+                        }
+                }
+
+                if (sttrees[i].nodes)
+                        delete[] sttrees[i].nodes;
+                sttrees[i].nodes = nullptr;
+
+                if (sttrees[i].edges)
+                        delete[] sttrees[i].edges;
+                sttrees[i].edges = nullptr;
+        }
+
+        if (sttrees)
+                delete[] sttrees;
+        sttrees = nullptr;
+
+        for (i = 0; i < yGrid; i++) {
+                if (parentX1[i])
+                        delete[] parentX1[i];
+                if (parentY1[i])
+                        delete[] parentY1[i];
+                if (parentX3[i])
+                        delete[] parentX3[i];
+                if (parentY3[i])
+                        delete[] parentY3[i];
+
+                parentX1[i] = nullptr;
+                parentY1[i] = nullptr;
+                parentX3[i] = nullptr;
+                parentY3[i] = nullptr;
+        }
+
+        if (parentX1)
+                delete[] parentX1;
+        if (parentY1)
+                delete[] parentY1;
+        if (parentX3)
+                delete[] parentX3;
+        if (parentY3)
+                delete[] parentY3;
+        if (pop_heap2)
+                delete[] pop_heap2;
+        if (heap1)
+                delete[] heap1;
+        if (heap2)
+                delete[] heap2;
+
+        parentX1 = nullptr;
+        parentY1 = nullptr;
+        parentX3 = nullptr;
+        parentY3 = nullptr;
+        pop_heap2 = nullptr;
+        heap1 = nullptr;
+        heap2 = nullptr;
+
+        if (xcor)
+                delete[] xcor;
+        if (ycor)
+                delete[] ycor;
+        if (dcor)
+                delete[] dcor;
+        if (netEO)
+                delete[] netEO;
+
+        xcor = nullptr;
+        ycor = nullptr;
+        dcor = nullptr;
+        netEO = nullptr;
+
+        for (int i = 0; i < YRANGE; i++) {
+                if (HV[i])
+                        delete[] HV[i];
+                HV[i] = nullptr;
+        }
+
+        if (HV)
+                delete[] HV;
+        HV = nullptr;
+        
+        for (int i = 0; i < YRANGE; i++) {
+                if (hyperV[i])
+                        delete[] hyperV[i];
+                hyperV[i] = nullptr;
+        }
+
+        if (hyperV)
+                delete[] hyperV;
+        hyperV = nullptr;
+        
+        for (int i = 0; i < XRANGE; i++) {
+                if (hyperH[i])
+                        delete[] hyperH[i];
+                hyperH[i] = nullptr;
+        }
+
+        if (hyperH)
+                delete[] hyperH;
+         hyperH = nullptr;
+        
+        for (int i = 0; i < YRANGE; i++) {
+                if (inRegion[i])
+                        delete[] inRegion[i];
+                inRegion[i] = nullptr;
+        }
+
+        if (inRegion)
+                delete[] inRegion;
+        inRegion = nullptr;
+        
+        for (int i = 0; i < YRANGE; i++) {
+                if (corrEdge[i])
+                        delete[] corrEdge[i];
+                corrEdge[i] = nullptr;
+        }
+
+        if (corrEdge)
+                delete[] corrEdge;
+        corrEdge = nullptr;
+        
+        if (d13D)
+                delete[] d13D;
+        if (d23D)
+                delete[] d23D;
+        if (d1)
+                delete[] d1;
+        if (d2)
+                delete[] d2;
+
+        d13D = nullptr;
+        d23D = nullptr;
+        d1 = nullptr;
+        d2 = nullptr;
+        
+        if (vCapacity3D)
+                delete[] vCapacity3D;
+        if (hCapacity3D)
+                delete[] hCapacity3D;
+
+        vCapacity3D = nullptr;
+        hCapacity3D = nullptr;
+        
+        if (MinWidth)
+                delete[] MinWidth;
+        if (MinSpacing)
+                delete[] MinSpacing;
+        if (ViaSpacing)
+                delete[] ViaSpacing;
+
+        MinWidth = nullptr;
+        MinSpacing = nullptr;
+        ViaSpacing = nullptr;
+        
+        if (gridHs)
+                delete[] gridHs;
+        if (gridVs)
+                delete[] gridVs;
+
+        gridHs = nullptr;
+        gridVs = nullptr;
+        
+        for (int i = 0; i < numLayers; i++) {
+                if (layerGrid[i])
+                        delete[] layerGrid[i];
+                layerGrid[i] = nullptr;
+        }
+
+        if (layerGrid)
+                delete[] layerGrid;
+        layerGrid = nullptr;
+        
+        for (int i = 0; i < numLayers; i++) {
+                if (gridD[i])
+                        delete[] gridD[i];
+                gridD[i] = nullptr;
+        }
+
+        if (gridD)
+                delete[] gridD;
+        gridD = nullptr;
+        
+        for (int i = 0; i < numLayers; i++) {
+                if (viaLink[i])
+                        delete[] viaLink[i];
+                viaLink[i] = nullptr;
+        }
+
+        if (viaLink)
+                delete[] viaLink;
+        viaLink = nullptr;
+        
+        if (costHVH)
+                delete[] costHVH;
+        if (costVHV)
+                delete[] costVHV;
+        if (costH)
+                delete[] costH;
+        if (costV)
+                delete[] costV;
+        if (costLR)
+                delete[] costLR;
+        if (costTB)
+                delete[] costTB;
+        if (costHVHtest)
+                delete[] costHVHtest;
+        if (costVtest)
+                delete[] costVtest;
+        if (costTBtest)
+                delete[] costTBtest;
+
+        costHVH = nullptr;
+        costVHV = nullptr;
+        costH = nullptr;
+        costV = nullptr;
+        costLR = nullptr;
+        costTB = nullptr;
+        costHVHtest = nullptr;
+        costVtest = nullptr;
+        costTBtest = nullptr;
+
+        newnetID = 0;
+        segcount = 0;
+        pinInd = 0;
+        numAdjust = 0;
+        vCapacity = 0;
+        hCapacity = 0;
+        MD = 0;
+        numNets = 0;
+}
 
 void FT::setGridsAndLayers(int x, int y, int nLayers) {
         xGrid = x;
         yGrid = y;
-        maxGrid = std::max(x, y);
         numLayers = nLayers;
         numGrids = xGrid * yGrid;
-        
-        HV = new Bool*[yGrid];
-        for (int i = 0; i < yGrid; i++) {
-                HV[i] = new Bool[xGrid];
+        if (std::max(xGrid, yGrid) >= 1000) {
+                XRANGE = std::max(xGrid, yGrid);
+                YRANGE = std::max(xGrid, yGrid);
+        } else {
+                XRANGE = 1000;
+                YRANGE = 1000;
         }
-        
-        hyperV = new Bool*[yGrid];
-        for (int i = 0; i < yGrid; i++) {
-                hyperV[i] = new Bool[xGrid];
-        }
-        
-        hyperH = new Bool*[yGrid];
-        for (int i = 0; i < yGrid; i++) {
-                hyperH[i] = new Bool[xGrid];
-        }
-        
-        inRegion = new Bool*[yGrid];
-        for (int i = 0; i < yGrid; i++) {
-                inRegion[i] = new Bool[xGrid];
-        }
-        
-        corrEdge = new int*[yGrid];
-        for (int i = 0; i < yGrid; i++) {
-                corrEdge[i] = new int[xGrid];
-        }
-        
-        d13D = new int[numLayers*yGrid*xGrid];
-        d23D = new short[numLayers*yGrid*xGrid];
-        
-        d1 = new float[maxGrid * maxGrid];
-        d2 = new float[maxGrid * maxGrid];
-        
+
         vCapacity3D = new int[numLayers];
         hCapacity3D = new int[numLayers];
-        
+
+        for (int i = 0; i < numLayers; i++) {
+                vCapacity3D[i] = 0;
+                hCapacity3D[i] = 0;
+        }
+
         MinWidth = new int[numLayers];
         MinSpacing = new int[numLayers];
         ViaSpacing = new int[numLayers];
-        
         gridHs = new int[numLayers];
         gridVs = new int[numLayers];
         
@@ -125,17 +442,48 @@ void FT::setGridsAndLayers(int x, int y, int nLayers) {
         for (int i = 0; i < numLayers; i++) {
                 viaLink[i] = new int[MAXLEN];
         }
-        
-        costHVH = new float[maxGrid];  // Horizontal first Z
-        costVHV = new float[maxGrid];  // Vertical first Z
-        costH = new float[maxGrid];    // Horizontal segment cost
-        costV = new float[maxGrid];    // Vertical segment cost
-        costLR = new float[maxGrid];   // Left and right boundary cost
-        costTB = new float[maxGrid];   // Top and bottom boundary cost
 
-        costHVHtest = new float[maxGrid];  // Vertical first Z
-        costVtest = new float[maxGrid];    // Vertical segment cost
-        costTBtest = new float[maxGrid];   // Top and bottom boundary cost
+        d13D = new int[numLayers*YRANGE*XRANGE];
+        d23D = new short[numLayers*YRANGE*XRANGE];
+
+        d1 = new float[YRANGE * XRANGE];
+        d2 = new float[YRANGE * XRANGE];
+
+        HV = new Bool*[YRANGE];
+        for (int i = 0; i < YRANGE; i++) {
+                HV[i] = new Bool[XRANGE];
+        }
+        
+        hyperV = new Bool*[YRANGE];
+        for (int i = 0; i < YRANGE; i++) {
+                hyperV[i] = new Bool[XRANGE];
+        }
+        
+        hyperH = new Bool*[YRANGE];
+        for (int i = 0; i < YRANGE; i++) {
+                hyperH[i] = new Bool[XRANGE];
+        }
+
+        corrEdge = new int*[YRANGE];
+        for (int i = 0; i < YRANGE; i++) {
+                corrEdge[i] = new int[XRANGE];
+        }
+
+        inRegion = new Bool*[YRANGE];
+        for (int i = 0; i < YRANGE; i++) {
+                inRegion[i] = new Bool[XRANGE];
+        }
+
+        costHVH = new float[XRANGE];  // Horizontal first Z
+        costVHV = new float[YRANGE];  // Vertical first Z
+        costH = new float[YRANGE];    // Horizontal segment cost
+        costV = new float[XRANGE];    // Vertical segment cost
+        costLR = new float[YRANGE];   // Left and right boundary cost
+        costTB = new float[XRANGE];   // Top and bottom boundary cost
+
+        costHVHtest = new float[YRANGE];  // Vertical first Z
+        costVtest = new float[XRANGE];    // Vertical segment cost
+        costTBtest = new float[XRANGE];   // Top and bottom boundary cost
 }
 
 void FT::addVCapacity(int verticalCapacity, int layer) {
@@ -162,6 +510,10 @@ void FT::addViaSpacing(int spacing, int layer) {
 
 void FT::setNumberNets(int nNets) {
         numNets = nNets;
+        nets = new Net*[numNets];
+        for (int i = 0; i < numNets; i++)
+                nets[i] = new Net;
+        seglistIndex = new int[numNets];
 }
 
 void FT::setLowerLeft(int x, int y) {
@@ -179,6 +531,7 @@ void FT::setLayerOrientation(int x) {
 }
 
 void FT::addNet(char *name, int netIdx, int nPins, int minWidth, PIN pins[], float alpha) {
+        // std::cout << "Adding net " << name << "\n";
         int TD;
         int i, j, k;
         int pinX, pinY, pinL, netID, numPins, minwidth;
@@ -189,13 +542,6 @@ void FT::addNet(char *name, int netIdx, int nPins, int minWidth, PIN pins[], flo
         int pinXarray[nPins];
         int pinYarray[nPins];
         int pinLarray[nPins];
-
-        if (nets == NULL) {
-                nets = (Net **)malloc(numNets * sizeof(Net *));
-                for (i = 0; i < numNets; i++)
-                        nets[i] = (Net *)malloc(sizeof(Net));
-                seglistIndex = (int *)malloc(numNets * sizeof(int));
-        }
 
         netID = netIdx;
         numPins = nPins;
@@ -238,13 +584,14 @@ void FT::addNet(char *name, int netIdx, int nPins, int minWidth, PIN pins[], flo
         {
                 MD = std::max(MD, pinInd);
                 TD += pinInd;
+                // std::cout << "Net name: " << nets[newnetID]->name << "; num pins: " << nets[newnetID]->numPins << "\n";
                 strcpy(nets[newnetID]->name, name);
                 nets[newnetID]->netIDorg = netID;
                 nets[newnetID]->numPins = numPins;
                 nets[newnetID]->deg = pinInd;
-                nets[newnetID]->pinX = (short *)malloc(pinInd * sizeof(short));
-                nets[newnetID]->pinY = (short *)malloc(pinInd * sizeof(short));
-                nets[newnetID]->pinL = (short *)malloc(pinInd * sizeof(short));
+                nets[newnetID]->pinX = new short[pinInd];
+                nets[newnetID]->pinY = new short[pinInd];
+                nets[newnetID]->pinL = new short[pinInd];
                 nets[newnetID]->alpha = alpha;
 
                 for (j = 0; j < pinInd; j++) {
@@ -255,7 +602,9 @@ void FT::addNet(char *name, int netIdx, int nPins, int minWidth, PIN pins[], flo
                 seglistIndex[newnetID] = segcount;
                 newnetID++;
                 segcount += 2 * pinInd - 3;  // at most (2*numPins-2) nodes, (2*numPins-3) nets for a net
-        }                                    // if
+        } else {
+                invalidNets++;
+        }
 }
 
 std::map<std::string, std::vector<PIN>> FT::getNets() {
@@ -280,11 +629,13 @@ void FT::initEdges() {
 
         // allocate memory and initialize for edges
 
-        h_edges = (Edge *)calloc(((xGrid - 1) * yGrid), sizeof(Edge));
-        v_edges = (Edge *)calloc((xGrid * (yGrid - 1)), sizeof(Edge));
+        h_edges = new Edge[((xGrid - 1) * yGrid)];
+        v_edges = new Edge[(xGrid * (yGrid - 1))];
 
-        v_edges3D = (Edge3D *)calloc((numLayers * xGrid * yGrid), sizeof(Edge3D));
-        h_edges3D = (Edge3D *)calloc((numLayers * xGrid * yGrid), sizeof(Edge3D));
+        init_usage();
+
+        v_edges3D = new Edge3D[(numLayers * xGrid * yGrid)];
+        h_edges3D = new Edge3D[(numLayers * xGrid * yGrid)];
 
         //2D edge innitialization
         TC = 0;
@@ -349,8 +700,8 @@ void FT::addAdjustment(long x1, long y1, int l1, long x2, long y2, int l2, int r
 
                 if (((int)cap - reducedCap) < 0) {
                         if (isReduce) {
-                                std::cout << "Warning: underflow in reduce\n";
-                                std::cout << "cap, reducedCap: " << cap << ", " << reducedCap << "\n";
+                                std::cout << "[WARNING] Underflow in reduce\n";
+                                std::cout << "[WARNING] cap, reducedCap: " << cap << ", " << reducedCap << "\n";
                         }
                         reduce = 0;
                 } else {
@@ -371,8 +722,8 @@ void FT::addAdjustment(long x1, long y1, int l1, long x2, long y2, int l2, int r
 
                 if (((int)cap - reducedCap) < 0) {
                         if (isReduce) {
-                                std::cout << "Warning: underflow in reduce\n";
-                                std::cout << "cap, reducedCap: " << cap << ", " << reducedCap << "\n";
+                                std::cout << "[WARNING] Underflow in reduce\n";
+                                std::cout << "[WARNING] cap, reducedCap: " << cap << ", " << reducedCap << "\n";
                         }
                         reduce = 0;
                 } else {
@@ -431,15 +782,15 @@ void FT::initAuxVar() {
         treeOrderCong = NULL;
         stopDEC = FALSE;
 
-        seglistCnt = (int *)malloc(numValidNets * sizeof(int));
-        seglist = (Segment *)malloc(segcount * sizeof(Segment));
-        trees = (Tree *)malloc(numValidNets * sizeof(Tree));
-        sttrees = (StTree *)malloc(numValidNets * sizeof(StTree));
-        gxs = (DTYPE **)malloc(numValidNets * sizeof(DTYPE *));
-        gys = (DTYPE **)malloc(numValidNets * sizeof(DTYPE *));
-        gs = (DTYPE **)malloc(numValidNets * sizeof(DTYPE *));
+        seglistCnt = new int[numValidNets];
+        seglist = new Segment[segcount];
+        trees = new Tree[numValidNets];
+        sttrees = new StTree[numValidNets];
+        gxs = new DTYPE*[numValidNets];
+        gys = new DTYPE*[numValidNets];
+        gs = new DTYPE*[numValidNets];
 
-        gridHV = xGrid * yGrid;
+        gridHV = XRANGE * YRANGE;
         gridH = (xGrid - 1) * yGrid;
         gridV = xGrid * (yGrid - 1);
         for (k = 0; k < numLayers; k++) {
@@ -449,23 +800,23 @@ void FT::initAuxVar() {
 
         MaxDegree = MD;
 
-        parentX1 = (short **)calloc(yGrid, sizeof(short *));
-        parentY1 = (short **)calloc(yGrid, sizeof(short *));
-        parentX3 = (short **)calloc(yGrid, sizeof(short *));
-        parentY3 = (short **)calloc(yGrid, sizeof(short *));
+        parentX1 = new short*[yGrid];
+        parentY1 = new short*[yGrid];
+        parentX3 = new short*[yGrid];
+        parentY3 = new short*[yGrid];
 
         for (i = 0; i < yGrid; i++) {
-                parentX1[i] = (short *)calloc(xGrid, sizeof(short));
-                parentY1[i] = (short *)calloc(xGrid, sizeof(short));
-                parentX3[i] = (short *)calloc(xGrid, sizeof(short));
-                parentY3[i] = (short *)calloc(xGrid, sizeof(short));
+                parentX1[i] = new short[xGrid];
+                parentY1[i] = new short[xGrid];
+                parentX3[i] = new short[xGrid];
+                parentY3[i] = new short[xGrid];
         }
 
-        pop_heap2 = (Bool *)calloc(yGrid * xGrid, sizeof(Bool));
+        pop_heap2 = new Bool[yGrid * XRANGE];
 
         // allocate memory for priority queue
-        heap1 = (float **)calloc((yGrid * xGrid), sizeof(float *));
-        heap2 = (float **)calloc((yGrid * xGrid), sizeof(float *));
+        heap1 = new float*[yGrid * xGrid];
+        heap2 = new float*[yGrid * xGrid];
 
         sttreesBK = NULL;
 }
@@ -527,7 +878,7 @@ int FT::run(std::vector<NET> &result) {
         char routingFile[STRINGLEN];
         char degreeFile[STRINGLEN];
         char optionS[STRINGLEN];
-        clock_t t1, t2, t3, t4;
+        clock_t t1 = 0, t2 = 0, t3 = 0, t4 = 0;
         float gen_brk_Time, P1_Time, P2_Time, P3_Time, maze_Time, totalTime, congestionmap_time;
         int iter, last_totalOverflow, diff_totalOverflow, enlarge, ripup_threshold;
         int i, j, past_overflow, cur_overflow;
@@ -544,10 +895,10 @@ int FT::run(std::vector<NET> &result) {
         // TODO: check this size
         int maxPin = maxNetDegree;
         maxPin = 2* maxPin;
-        xcor = (int*)calloc(maxPin, sizeof(*xcor));
-        ycor = (int*)calloc(maxPin, sizeof(*ycor));
-        dcor = (int*)calloc(maxPin, sizeof(*dcor));
-        netEO = (OrderNetEdge*)calloc(maxPin, sizeof(*netEO));
+        xcor = new int[maxPin];
+        ycor = new int[maxPin];
+        dcor = new int[maxPin];
+        netEO = new OrderNetEdge[maxPin];
 
 
         Bool input, WriteOut;
@@ -586,23 +937,25 @@ int FT::run(std::vector<NET> &result) {
 
         // call FLUTE to generate RSMT and break the nets into segments (2-pin nets)
 
+        t1 = clock();
+
         VIA = 2;
         //viacost = VIA;
         viacost = 0;
         gen_brk_RSMT(FALSE, FALSE, FALSE, FALSE, noADJ);
         if (verbose > 1)
-                printf(" > --first L\n");
+                printf("First L Route\n");
         routeLAll(TRUE);
         gen_brk_RSMT(TRUE, TRUE, TRUE, FALSE, noADJ);
         getOverflow2D(&maxOverflow);
         if (verbose > 1)
-                printf(" > --second L\n");
+                printf("Second L Route\n");
         newrouteLAll(FALSE, TRUE);
         getOverflow2D(&maxOverflow);
         spiralRouteAll();
         newrouteZAll(10);
         if (verbose > 1)
-                printf(" > --first Z\n");
+                printf("First Z Route\n");
         past_cong = getOverflow2D(&maxOverflow);
 
         convertToMazeroute();
@@ -627,7 +980,7 @@ int FT::run(std::vector<NET> &result) {
                 LOGIS_COF = std::max<float>(2.0 / (1 + log(maxOverflow)), LOGIS_COF);
                 LOGIS_COF = 2.0 / (1 + log(maxOverflow));
                 if (verbose > 1)
-                        printf(" > --LV routing round %d, enlarge %d \n", i, enlarge);
+                        printf("[INFO] LV routing round %d, enlarge %d \n", i, enlarge);
                 routeLVAll(newTH, enlarge);
 
                 past_cong = getOverflow2Dmaze(&maxOverflow, &tUsage);
@@ -658,7 +1011,7 @@ int FT::run(std::vector<NET> &result) {
 
         InitLastUsage(upType);
         if (totalOverflow > 0) {
-                printf(" > --Running extra iterations to remove overflow...\n");
+                printf("Running extra iterations to remove overflow...\n");
         }
         
         while (totalOverflow > 0 && i <= overflowIterations) {
@@ -737,7 +1090,9 @@ int FT::run(std::vector<NET> &result) {
                         L = 0;
                 }
 
-                printf(" > ----iteration %d, enlarge %d, costheight %d, threshold %d via cost %d \n > ----log_coef %f, healingTrigger %d cost_step %d L %d cost_type %d updatetype %d\n", i, enlarge, costheight, mazeedge_Threshold, VIA, LOGIS_COF, healingTrigger, cost_step, L, cost_type, upType);
+                printf("[INFO] iteration %d, enlarge %d, costheight %d, threshold %d via cost %d \n"
+                        "[INFO] log_coef %f, healingTrigger %d cost_step %d L %d cost_type %d updatetype %d\n",
+                        i, enlarge, costheight, mazeedge_Threshold, VIA, LOGIS_COF, healingTrigger, cost_step, L, cost_type, upType);
                 mazeRouteMSMD(i, enlarge, costheight, ripup_threshold, mazeedge_Threshold, !(i % 3), cost_type);
                 last_cong = past_cong;
                 past_cong = getOverflow2Dmaze(&maxOverflow, &tUsage);
@@ -760,7 +1115,7 @@ int FT::run(std::vector<NET> &result) {
 
                 if (maxOverflow < 150) {
                         if (i == 20 && past_cong > 200) {
-                                printf(" > ----Extra Run for hard benchmark\n");
+                                printf("Extra Run for hard benchmark\n");
                                 L = 0;
                                 upType = 3;
                                 stopDEC = TRUE;
@@ -863,29 +1218,29 @@ int FT::run(std::vector<NET> &result) {
         checkUsage();
 
         if (verbose > 1)
-            printf(" > --maze routing finished\n");
+            printf("Maze routing finished\n");
 
         t4 = clock();
         maze_Time = (float)(t4 - t3) / CLOCKS_PER_SEC;
         
         if (verbose > 1) {
-            printf(" > --P3 runtime: %f sec\n", maze_Time);
+            printf("[INFO] P3 runtime: %f sec\n", maze_Time);
 
-            printf(" > --Final 2D results: \n");
+            printf("[INFO] Final 2D results: \n");
         }
         getOverflow2Dmaze(&maxOverflow, &tUsage);
 
         if (verbose > 1)
-                printf(" > \n > --Layer Assignment Begins\n");
+                printf("Layer Assignment Begins\n");
         newLA();
         if (verbose > 1)
-                printf(" > --layer assignment finished\n");
+                printf("Layer assignment finished\n");
 
         t2 = clock();
         gen_brk_Time = (float)(t2 - t1) / CLOCKS_PER_SEC;
         
         if (verbose > 1)
-            printf(" > --2D + Layer Assignment Runtime: %f sec\n", gen_brk_Time);
+            printf("[INFO] 2D + Layer Assignment Runtime: %f sec\n", gen_brk_Time);
 
         costheight = 3;
         viacost = 1;
@@ -900,7 +1255,7 @@ int FT::run(std::vector<NET> &result) {
 
         if (goingLV && past_cong == 0) {
                 if (verbose > 1)
-                    printf(" > --Post Processing Begins \n");
+                    printf("Post Processing Begins \n");
                 mazeRouteMSMDOrder3D(enlarge, 0, ripupTH3D);
 
                 //	mazeRouteMSMDOrder3D(enlarge, 0, 10 );
@@ -908,7 +1263,7 @@ int FT::run(std::vector<NET> &result) {
                         mazeRouteMSMDOrder3D(enlarge, 0, 12);
                 }
                 if (verbose > 1)
-                        printf(" > --Post Processsing finished, starting via filling\n");
+                        printf("Post Processsing finished\n Starting via filling\n");
         }
 
         fillVIA();
@@ -918,89 +1273,19 @@ int FT::run(std::vector<NET> &result) {
 
         t4 = clock();
         maze_Time = (float)(t4 - t1) / CLOCKS_PER_SEC;
-        printf(" > --Final usage          : %d\n", finallength);
-        printf(" > --Final number of vias : %d\n", numVia);
-        printf(" > --Final usage 3D       : %d\n", (finallength + 3 * numVia));
+        printf("[INFO] Final usage          : %d\n", finallength);
+        printf("[INFO] Final number of vias : %d\n", numVia);
+        printf("[INFO] Final usage 3D       : %d\n", (finallength + 3 * numVia));
 
-        std::cout << " > --Getting results...\n";
+        std::cout << "Getting results...\n";
         result = getResults();
-        std::cout << " > --Getting results... Done!\n";
-        std::cout << " > \n";
+        std::cout << "Getting results... Done!\n\n";
 
         /* TODO:  <11-07-19, this function leads to a segfault, but as the OS
          * frees all memory after the application end (next line) we can omit
          * this function call for now.> */
         /* freeAllMemory(); */
-        return (1);
-}
-
-void FT::deleteGlobalArrays() {
-        for (int i = 0; i < yGrid; i++) {
-                delete[] HV[i];
-        }
-        delete[] HV;
-        
-        for (int i = 0; i < yGrid; i++) {
-                delete[] hyperV[i];
-        }
-        delete[] hyperV;
-        
-        for (int i = 0; i < yGrid; i++) {
-                delete[] hyperH[i];
-        }
-        delete[] hyperH;
-        
-        for (int i = 0; i < yGrid; i++) {
-                delete[] inRegion[i];
-        }
-        delete[] inRegion;
-        
-        for (int i = 0; i < yGrid; i++) {
-                delete[] corrEdge[i];
-        }
-        delete[] corrEdge;
-        
-        delete[] d13D;
-        delete[] d23D;
-        
-        delete[] d1;
-        delete[] d2;
-        
-        delete[] vCapacity3D;
-        delete[] hCapacity3D;
-        
-        delete[] MinWidth;
-        delete[] MinSpacing;
-        delete[] ViaSpacing;
-        
-        delete[] gridHs;
-        delete[] gridVs;
-        
-        for (int i = 0; i < numLayers; i++) {
-                delete[] layerGrid[i];
-        }
-        delete[] layerGrid;
-        
-        for (int i = 0; i < numLayers; i++) {
-                delete[] gridD[i];
-        }
-        delete[] gridD;
-        
-        for (int i = 0; i < numLayers; i++) {
-                delete[] viaLink[i];
-        }
-        delete[] viaLink;
-        
-        delete[] costHVH;
-        delete[] costVHV;
-        delete[] costH;
-        delete[] costV;
-        delete[] costLR;
-        delete[] costTB;
-
-        delete[] costHVHtest;
-        delete[] costVtest;
-        delete[] costTBtest;
+        return (0);
 }
 
 void FT::usePdRev(){

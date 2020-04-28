@@ -41,7 +41,9 @@
 namespace FastRoute {
 
 // global variables
-extern int xGrid, yGrid, maxGrid, numGrids, numNets, vCapacity, hCapacity, *vCapacity3D, *hCapacity3D;
+extern int XRANGE, YRANGE;
+extern int xGrid, yGrid, numGrids, numNets, invalidNets, vCapacity, hCapacity;
+extern int *vCapacity3D, *hCapacity3D;
 extern float vCapacity_lb, hCapacity_lb, vCapacity_ub, hCapacity_ub;
 extern int layerOrientation;
 extern bool pdRev;
@@ -90,7 +92,6 @@ extern char benchFile[STRINGLEN];
 extern Segment *seglist;
 extern int *seglistIndex;  // the index for the segments for each net
 extern int *seglistCnt;    // the number of segements for each net
-extern int *segOrder;      // the order of segments for routing
 
 extern Tree *trees;      // the tree topologies
 extern StTree *sttrees;  // the Steiner trees
@@ -120,7 +121,8 @@ extern parent3D ***pr3D;
 extern int mazeedge_Threshold;
 extern Bool **inRegion;
 
-extern int gridHV, gridH, gridV, *gridHs, *gridVs;
+extern int gridHV, gridH, gridV;
+extern int *gridHs, *gridVs;
 
 extern int **heap13D;
 extern short **heap23D;
