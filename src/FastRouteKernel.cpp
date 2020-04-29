@@ -715,7 +715,7 @@ void FastRouteKernel::computeUserLayerAdjustments() {
                 int layer = _layersToAdjust[idx];
                 float adjustment = _layersReductionPercentage[idx];
                 if (_hCapacities[layer - 1] != 0) {
-                        int newCap = _grid->getHorizontalEdgesCapacities()[layer - 1] * (1 - _adjustment);
+                        int newCap = _grid->getHorizontalEdgesCapacities()[layer - 1] * (1 - adjustment);
                         _grid->updateHorizontalEdgesCapacities(layer-1, newCap);
 
                         for (int y = 1; y < yGrids; y++) {
@@ -728,7 +728,7 @@ void FastRouteKernel::computeUserLayerAdjustments() {
                 }
 
                 if (_vCapacities[layer - 1] != 0) {
-                    int newCap = _grid->getVerticalEdgesCapacities()[layer - 1] * (1 - _adjustment);
+                    int newCap = _grid->getVerticalEdgesCapacities()[layer - 1] * (1 - adjustment);
                         _grid->updateVerticalEdgesCapacities(layer-1, newCap);
 
                         for (int x = 1; x < xGrids; x++) {
