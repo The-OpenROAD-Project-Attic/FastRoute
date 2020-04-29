@@ -189,6 +189,7 @@ public:
         ~FastRouteKernel();
         void init();
         void reset();
+        void resetResources();
         
         void setAdjustment(const float adjustment);
         void setMinRoutingLayer(const int minLayer);

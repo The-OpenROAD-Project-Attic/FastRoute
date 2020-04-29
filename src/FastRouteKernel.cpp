@@ -94,6 +94,58 @@ void FastRouteKernel::init() {
         _verbose = 0;
 }
 
+void FastRouteKernel::resetResources() {
+        if (_netlist)
+                delete _netlist;
+        if (_grid)
+                delete _grid;
+        if (_dbWrapper)
+                delete _dbWrapper;
+        if (_fastRoute)
+                delete _fastRoute;
+        if (_gridOrigin)
+                delete _gridOrigin;
+        if (_routingLayers)
+                delete _routingLayers;
+        if (_allRoutingTracks)
+                delete _allRoutingTracks;
+        if (_result)
+                delete _result;
+
+        _netlist = nullptr;
+        _grid = nullptr;
+        _dbWrapper = nullptr;
+        _fastRoute = nullptr;
+        _gridOrigin = nullptr;
+        _routingLayers = nullptr;
+        _allRoutingTracks = nullptr;
+        _result = nullptr;
+
+        _vCapacities.clear();
+        _hCapacities.clear();
+        _netsDegree.clear();
+        _layersToAdjust.clear();
+        _layersReductionPercentage.clear();
+        regionsMinX.clear();
+        regionsMinY.clear();
+        regionsMaxX.clear();
+        regionsMaxY.clear();
+        regionsLayer.clear();
+        regionsReductionPercentage.clear();
+        _netsAlpha.clear();
+
+        _netlist = new Netlist;
+        _grid = new Grid;
+        _dbWrapper = new DBWrapper;
+        _fastRoute = new FT;
+        _gridOrigin = new Coordinate(0, 0);
+        _routingLayers = new std::vector<RoutingLayer>;
+        _allRoutingTracks = new std::vector<RoutingTracks>;
+        _result = new std::vector<FastRoute::NET>;
+
+        *_dbWrapper = DBWrapper(_netlist, _grid);
+}
+
 void FastRouteKernel::reset() {
         if (_netlist)
                 delete _netlist;
