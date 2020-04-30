@@ -92,13 +92,6 @@ void FastRouteKernel::init() {
         _pdRev = 0;
         _alpha = 0;
         _verbose = 0;
-
-        std::set<int> transitionLayers = _dbWrapper->findTransitionLayers(_maxRoutingLayer);
-
-        for (std::set<int>::iterator it = transitionLayers.begin(); it != transitionLayers.end(); ++it) {
-                _layersToAdjust.push_back(*it);
-                _layersReductionPercentage.push_back(transitionLayerAdjust);
-        }
 }
 
 void FastRouteKernel::resetResources() {
@@ -241,6 +234,15 @@ void FastRouteKernel::startFastRoute() {
 
         if (_pdRevForHighFanout != -1) {
                 _fastRoute->setAlpha(_alpha);
+        }
+
+        if (_layersToAdjust.size() == 0) {
+                std::set<int> transitionLayers = _dbWrapper->findTransitionLayers(_maxRoutingLayer);
+
+                for (std::set<int>::iterator it = transitionLayers.begin(); it != transitionLayers.end(); ++it) {
+                        _layersToAdjust.push_back(*it);
+                        _layersReductionPercentage.push_back(transitionLayerAdjust);
+                }
         }
         
         _fastRoute->setVerbose(_verbose);
