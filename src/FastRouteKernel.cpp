@@ -317,6 +317,8 @@ void FastRouteKernel::startFastRoute() {
         std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
         
         std::cout << "[INFO] Elapsed time: " << (std::chrono::duration_cast<std::chrono::microseconds>(end - begin).count()) /1000000.0 << "\n";
+
+        getRoute();
 }
 
 void FastRouteKernel::runFastRoute() {
@@ -375,6 +377,14 @@ void FastRouteKernel::setCapacities() {
                         _hCapacities.push_back(_grid->getHorizontalEdgesCapacities()[l-1]);
                         _vCapacities.push_back(_grid->getVerticalEdgesCapacities()[l-1]);
                 }
+        }
+
+        for (int l = 1; l <= _grid->getNumLayers(); l++) {
+                int newCapH = _grid->getHorizontalEdgesCapacities()[l - 1] * 100;
+                _grid->updateHorizontalEdgesCapacities(l-1, newCapH);
+
+                int newCapV = _grid->getVerticalEdgesCapacities()[l - 1] * 100;
+                _grid->updateVerticalEdgesCapacities(l-1, newCapV);
         }
 }
 
@@ -712,7 +722,7 @@ void FastRouteKernel::computeUserGlobalAdjustments() {
 
         for (int layer = 1; layer <= _grid->getNumLayers(); layer++) {
                 if (_hCapacities[layer - 1] != 0) {
-                        int newCap = (_grid->getHorizontalEdgesCapacities()[layer - 1]*100) * (1 - _adjustment);
+                        int newCap = _grid->getHorizontalEdgesCapacities()[layer - 1] * (1 - _adjustment);
                         _grid->updateHorizontalEdgesCapacities(layer-1, newCap);
 
                         for (int y = 1; y < yGrids; y++) {
@@ -725,7 +735,7 @@ void FastRouteKernel::computeUserGlobalAdjustments() {
                 }
 
                 if (_vCapacities[layer - 1] != 0) {
-                        int newCap = (_grid->getVerticalEdgesCapacities()[layer - 1]*100) * (1 - _adjustment);
+                        int newCap = _grid->getVerticalEdgesCapacities()[layer - 1] * (1 - _adjustment);
                         _grid->updateVerticalEdgesCapacities(layer-1, newCap);
 
                         for (int x = 1; x < xGrids; x++) {
@@ -760,7 +770,7 @@ void FastRouteKernel::computeUserLayerAdjustments() {
                 int layer = _layersToAdjust[idx];
                 float adjustment = _layersReductionPercentage[idx];
                 if (_hCapacities[layer - 1] != 0) {
-                        int newCap = (_grid->getHorizontalEdgesCapacities()[layer - 1]*100) * (1 - adjustment);
+                        int newCap = _grid->getHorizontalEdgesCapacities()[layer - 1] * (1 - adjustment);
                         _grid->updateHorizontalEdgesCapacities(layer-1, newCap);
 
                         for (int y = 1; y < yGrids; y++) {
@@ -773,7 +783,7 @@ void FastRouteKernel::computeUserLayerAdjustments() {
                 }
 
                 if (_vCapacities[layer - 1] != 0) {
-                    int newCap = (_grid->getVerticalEdgesCapacities()[layer - 1]*100) * (1 - adjustment);
+                    int newCap = _grid->getVerticalEdgesCapacities()[layer - 1] * (1 - adjustment);
                         _grid->updateVerticalEdgesCapacities(layer-1, newCap);
 
                         for (int x = 1; x < xGrids; x++) {
@@ -1397,12 +1407,18 @@ FastRouteKernel::ROUTE_ FastRouteKernel::getRoute() {
         route.gridCountY = _grid->getYGrids();
         route.numLayers = _grid->getNumLayers();
 
+        int cnt = 0;
         for (int vCap : _grid->getVerticalEdgesCapacities()) {
+                std::cout << "V cap " << cnt << ": " << vCap << "\n";
                 route.verticalEdgesCapacities.push_back(vCap);
+                cnt++;
         }
         
+        cnt = 0;
         for (int hCap : _grid->getHorizontalEdgesCapacities()) {
+                std::cout << "H cap " << cnt << ": " << hCap << "\n";
                 route.horizontalEdgesCapacities.push_back(hCap);
+                cnt++;
         }
         
         for (int i = 0; i <  _grid->getMinWidths().size(); i++) {
