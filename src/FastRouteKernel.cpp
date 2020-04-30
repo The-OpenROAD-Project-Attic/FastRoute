@@ -92,6 +92,13 @@ void FastRouteKernel::init() {
         _pdRev = 0;
         _alpha = 0;
         _verbose = 0;
+
+        std::set<int> transitionLayers = _dbWrapper->findTransitionLayers(_maxRoutingLayer);
+
+        for (std::set<int>::iterator it = transitionLayers.begin(); it != transitionLayers.end(); ++it) {
+                _layersToAdjust.push_back(*it);
+                _layersReductionPercentage.push_back(transitionLayerAdjust);
+        }
 }
 
 void FastRouteKernel::resetResources() {
@@ -124,15 +131,6 @@ void FastRouteKernel::resetResources() {
         _vCapacities.clear();
         _hCapacities.clear();
         _netsDegree.clear();
-        _layersToAdjust.clear();
-        _layersReductionPercentage.clear();
-        regionsMinX.clear();
-        regionsMinY.clear();
-        regionsMaxX.clear();
-        regionsMaxY.clear();
-        regionsLayer.clear();
-        regionsReductionPercentage.clear();
-        _netsAlpha.clear();
 
         _netlist = new Netlist;
         _grid = new Grid;
@@ -243,13 +241,6 @@ void FastRouteKernel::startFastRoute() {
 
         if (_pdRevForHighFanout != -1) {
                 _fastRoute->setAlpha(_alpha);
-        }
-
-        std::set<int> transitionLayers = _dbWrapper->findTransitionLayers(_maxRoutingLayer);
-
-        for (std::set<int>::iterator it = transitionLayers.begin(); it != transitionLayers.end(); ++it) {
-                _layersToAdjust.push_back(*it);
-                _layersReductionPercentage.push_back(transitionLayerAdjust);
         }
         
         _fastRoute->setVerbose(_verbose);
