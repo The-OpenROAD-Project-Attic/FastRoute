@@ -443,7 +443,8 @@ void FastRouteKernel::initializeNets() {
                 for (Pin pin : net.getPins()) {
                         Coordinate pinPosition;
                         int topLayer = pin.getTopLayer();
-                        
+                        RoutingLayer layer = getRoutingLayerByIndex(topLayer);
+
                         std::vector<Box> pinBoxes = pin.getBoxes()[topLayer];
                         std::vector<Coordinate> pinPositionsOnGrid;
                         Coordinate posOnGrid;
@@ -470,10 +471,13 @@ void FastRouteKernel::initializeNets() {
                                 posOnGrid = _grid->getPositionOnGrid(trackPos);
 
                                 if (!(posOnGrid == pinPosition)) {
-                                        std::cout << "Processing net " << net.getName() << "\n";
-                                        std::cout << "Old pin pos on grid: (" << pinPosition.getX() << ", " << pinPosition.getY() << ")\n";
-                                        std::cout << "New pin pos on grid: (" << posOnGrid.getX() << ", " << posOnGrid.getY() << ")\n\n";
-                                        pinPosition = posOnGrid;
+                                        if ((layer.getPreferredDirection() == RoutingLayer::HORIZONTAL && posOnGrid.getY() != pinPosition.getY()) ||
+                                             layer.getPreferredDirection() == RoutingLayer::VERTICAL && posOnGrid.getX() != pinPosition.getX()) {
+                                                std::cout << "Processing net " << net.getName() << ", pin " << pin.getName() << "\n";
+                                                std::cout << "Old pin pos on grid: (" << pinPosition.getX() << ", " << pinPosition.getY() << ")\n";
+                                                std::cout << "New pin pos on grid: (" << posOnGrid.getX() << ", " << posOnGrid.getY() << ")\n\n";
+                                                pinPosition = posOnGrid;
+                                        }
                                 }
                         }
                         
@@ -1651,6 +1655,10 @@ bool FastRouteKernel::pinOverlapsWithSingleTrack(Pin pin, Coordinate &trackPosit
                         DBU nearestTrack = std::floor((float)(max - tracks.getLocation())/tracks.getSpace()) * tracks.getSpace() + tracks.getLocation();
                         DBU nearestTrack2 = std::floor((float)(max - tracks.getLocation())/tracks.getSpace() - 1) * tracks.getSpace() + tracks.getLocation();
 
+                        if ((nearestTrack >= min && nearestTrack <= max) && (nearestTrack2 >= min && nearestTrack2 <= max)) {
+                                return false;
+                        }
+
                         if (nearestTrack >= min && nearestTrack <= max) {
                                 trackPosition = Coordinate(middle.getX(), nearestTrack);
                                 return true;
@@ -1669,6 +1677,10 @@ bool FastRouteKernel::pinOverlapsWithSingleTrack(Pin pin, Coordinate &trackPosit
                         DBU nearestTrack = std::floor((float)(max - tracks.getLocation())/tracks.getSpace()) * tracks.getSpace() + tracks.getLocation();
                         DBU nearestTrack2 = std::floor((float)(max - tracks.getLocation())/tracks.getSpace() - 1) * tracks.getSpace() + tracks.getLocation();
                         
+                        if ((nearestTrack >= min && nearestTrack <= max) && (nearestTrack2 >= min && nearestTrack2 <= max)) {
+                                return false;
+                        }
+
                         if (nearestTrack >= min && nearestTrack <= max) {
                                 trackPosition = Coordinate(nearestTrack, middle.getY());
                                 return true;
