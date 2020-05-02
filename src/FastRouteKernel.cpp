@@ -67,7 +67,7 @@ void FastRouteKernel::init() {
         _grid = new Grid;
         _dbWrapper = new DBWrapper;
         _fastRoute = new FT;
-        _gridOrigin = new Coordinate(0, 0);
+        _gridOrigin = new Coordinate(-1, -1);
         _routingLayers = new std::vector<RoutingLayer>;
         _allRoutingTracks = new std::vector<RoutingTracks>;
         _result = new std::vector<FastRoute::NET>;
@@ -129,7 +129,7 @@ void FastRouteKernel::resetResources() {
         _grid = new Grid;
         _dbWrapper = new DBWrapper;
         _fastRoute = new FT;
-        _gridOrigin = new Coordinate(0, 0);
+        _gridOrigin = new Coordinate(-1, -1);
         _routingLayers = new std::vector<RoutingLayer>;
         _allRoutingTracks = new std::vector<RoutingTracks>;
         _result = new std::vector<FastRoute::NET>;
@@ -255,9 +255,7 @@ void FastRouteKernel::startFastRoute() {
         std::cout << "[PARAMS] Global adjustment: " << _adjustment << "\n";
         std::cout << "[PARAMS] Unidirectional routing: " << _unidirectionalRoute << "\n";
         std::cout << "[PARAMS] Clock net routing: " << _clockNetRouting << "\n";
-        if (_gridOrigin->getX() != 0 && _gridOrigin->getY() != 0) {
-            std::cout << "[PARAMS] Grid origin: (" << _gridOrigin->getX() << ", " << _gridOrigin->getY() << ")\n";
-        }
+        std::cout << "[PARAMS] Grid origin: (" << _gridOrigin->getX() << ", " << _gridOrigin->getY() << ")\n";
         
         std::cout << "Initializing grid...\n";
         initGrid();
@@ -317,8 +315,6 @@ void FastRouteKernel::startFastRoute() {
         std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
         
         std::cout << "[INFO] Elapsed time: " << (std::chrono::duration_cast<std::chrono::microseconds>(end - begin).count()) /1000000.0 << "\n";
-
-        getRoute();
 }
 
 void FastRouteKernel::runFastRoute() {

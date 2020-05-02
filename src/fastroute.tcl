@@ -177,7 +177,7 @@ proc fastroute { args } {
 
     FastRoute::set_grid_origin $origin_x $origin_y
   } else {
-    FastRoute::set_grid_origin 0 0
+    FastRoute::set_grid_origin -1 -1
   }
 
   if { [info exists keys(-pdrev_for_high_fanout)] } {
