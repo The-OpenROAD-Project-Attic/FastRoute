@@ -333,11 +333,6 @@ void FastRouteKernel::runFastRoute() {
 void FastRouteKernel::initGrid() {        
         _dbWrapper->initGrid(_maxRoutingLayer);
         
-        if (_gridOrigin->getX() != 0 && _gridOrigin->getY() != 0) {
-                _grid->setLowerLeftX(_gridOrigin->getX());
-                _grid->setLowerLeftY(_gridOrigin->getY());
-        }
-        
         _dbWrapper->computeCapacities(_maxRoutingLayer);
         _dbWrapper->computeSpacingsAndMinWidth(_maxRoutingLayer);
         _dbWrapper->initObstacles();
@@ -1055,6 +1050,9 @@ void FastRouteKernel::writeGuides() {
         }
         RoutingLayer phLayerF;
         addRemainingGuides(*_result);
+
+        int offsetX = _gridOrigin->getX();
+        int offsetY = _gridOrigin->getY();
         
         std::cout << "[INFO] Num routed nets: " << _result->size() << "\n";
         int finalLayer;
@@ -1068,10 +1066,10 @@ void FastRouteKernel::writeGuides() {
                        if (route.initLayer != finalLayer && finalLayer != -1) {
                                 mergeBox(guideBox);
                                 for (Box guide : guideBox){
-                                        guideFile << guide.getLowerBound().getX() << " "
-                                                  << guide.getLowerBound().getY() << " "
-                                                  << guide.getUpperBound().getX() << " "
-                                                  << guide.getUpperBound().getY() << " "
+                                        guideFile << guide.getLowerBound().getX() + offsetX << " "
+                                                  << guide.getLowerBound().getY() + offsetY << " "
+                                                  << guide.getUpperBound().getX() + offsetX << " "
+                                                  << guide.getUpperBound().getY() + offsetY << " "
                                                   << phLayerF.getName() << "\n";
                                 }
                                 guideBox.clear();
@@ -1116,10 +1114,10 @@ void FastRouteKernel::writeGuides() {
                                         guideBox.push_back(box);
                                         mergeBox(guideBox);
                                         for (Box guide : guideBox){
-                                                 guideFile << guide.getLowerBound().getX() << " "
-                                                           << guide.getLowerBound().getY() << " "
-                                                           << guide.getUpperBound().getX() << " "
-                                                           << guide.getUpperBound().getY() << " "
+                                                 guideFile << guide.getLowerBound().getX() + offsetX << " "
+                                                           << guide.getLowerBound().getY() + offsetY << " "
+                                                           << guide.getUpperBound().getX() + offsetX << " "
+                                                           << guide.getUpperBound().getY() + offsetY << " "
                                                            << phLayerI.getName() << "\n";
                                         }
                                         guideBox.clear();
@@ -1131,10 +1129,10 @@ void FastRouteKernel::writeGuides() {
                 }
                 mergeBox(guideBox);
                 for (Box guide : guideBox){
-                         guideFile << guide.getLowerBound().getX() << " "
-                                   << guide.getLowerBound().getY() << " "
-                                   << guide.getUpperBound().getX() << " "
-                                   << guide.getUpperBound().getY() << " "
+                         guideFile << guide.getLowerBound().getX() + offsetX << " "
+                                   << guide.getLowerBound().getY() + offsetY << " "
+                                   << guide.getUpperBound().getX() + offsetX << " "
+                                   << guide.getUpperBound().getY() + offsetY << " "
                                    << phLayerF.getName() << "\n";
                 }
                 guideFile << ")\n";
