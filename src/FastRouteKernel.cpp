@@ -447,6 +447,7 @@ void FastRouteKernel::initializeNets() {
                         std::vector<Box> pinBoxes = pin.getBoxes()[topLayer];
                         std::vector<Coordinate> pinPositionsOnGrid;
                         Coordinate posOnGrid;
+                        Coordinate trackPos;
                                 
                         for (Box pinBox : pinBoxes) {
                                 posOnGrid = _grid->getPositionOnGrid(pinBox.getMiddle());
@@ -462,6 +463,17 @@ void FastRouteKernel::initializeNets() {
                                 if (equals > votes) {
                                         pinPosition = pos;
                                         votes = equals;
+                                }
+                        }
+
+                        if (pinOverlapsWithSingleTrack(pin, trackPos)) {
+                                posOnGrid = _grid->getPositionOnGrid(trackPos);
+
+                                if (!(posOnGrid == pinPosition)) {
+                                        std::cout << "Processing net " << net.getName() << "\n";
+                                        std::cout << "Old pin pos on grid: (" << pinPosition.getX() << ", " << pinPosition.getY() << ")\n";
+                                        std::cout << "New pin pos on grid: (" << posOnGrid.getX() << ", " << posOnGrid.getY() << ")\n\n";
+                                        pinPosition = posOnGrid;
                                 }
                         }
                         
@@ -1601,5 +1613,99 @@ bool FastRouteKernel::segmentsOverlaps(ROUTE seg0, ROUTE seg1, ROUTE &newSeg) {
 
 	return false;
 }
+
+bool FastRouteKernel::pinOverlapsWithSingleTrack(Pin pin, Coordinate &trackPosition) {
+        DBU minX = std::numeric_limits<DBU>::max();
+        DBU minY = std::numeric_limits<DBU>::max();
+        DBU maxX = std::numeric_limits<DBU>::min();
+        DBU maxY = std::numeric_limits<DBU>::min();
+
+        DBU min, max;
+
+        int topLayer = pin.getTopLayer();
+        std::vector<Box> pinBoxes = pin.getBoxes()[topLayer];
+
+        RoutingLayer layer = getRoutingLayerByIndex(topLayer);
+        RoutingTracks tracks = getRoutingTracksByIndex(topLayer);
+
+        for (Box pinBox : pinBoxes) {
+                if (pinBox.getLowerBound().getX() <= minX)
+                        minX = pinBox.getLowerBound().getX();
+
+                if (pinBox.getLowerBound().getY() <= minY)
+                        minY = pinBox.getLowerBound().getY();
+
+                if (pinBox.getUpperBound().getX() >= maxX)
+                        maxX = pinBox.getUpperBound().getX();
+
+                if (pinBox.getUpperBound().getY() >= maxY)
+                        maxY = pinBox.getUpperBound().getY();
+        }
+
+        Coordinate middle = Coordinate((minX + (maxX - minX)/ 2.0) , (minY + (maxY - minY)/ 2.0));
+        if (layer.getPreferredDirection() == RoutingLayer::HORIZONTAL) {
+                min = minY;
+                max = maxY;
+
+                if ((float)(max - min)/tracks.getSpace() <= 3) {
+                        DBU nearestTrack = std::floor((float)(max - tracks.getLocation())/tracks.getSpace()) * tracks.getSpace() + tracks.getLocation();
+                        DBU nearestTrack2 = std::floor((float)(max - tracks.getLocation())/tracks.getSpace() - 1) * tracks.getSpace() + tracks.getLocation();
+
+                        if (nearestTrack >= min && nearestTrack <= max) {
+                                trackPosition = Coordinate(middle.getX(), nearestTrack);
+                                return true;
+                        } else if (nearestTrack2 >= min && nearestTrack2 <= max) {
+                                trackPosition = Coordinate(middle.getX(), nearestTrack2);
+                                return true;
+                        } else {
+                                return false;
+                        }
+                }
+        } else {
+                min = minX;
+                max = maxX;
+
+                if ((float)(max - min)/tracks.getSpace() <= 3) {
+                        DBU nearestTrack = std::floor((float)(max - tracks.getLocation())/tracks.getSpace()) * tracks.getSpace() + tracks.getLocation();
+                        DBU nearestTrack2 = std::floor((float)(max - tracks.getLocation())/tracks.getSpace() - 1) * tracks.getSpace() + tracks.getLocation();
+                        
+                        if (nearestTrack >= min && nearestTrack <= max) {
+                                trackPosition = Coordinate(nearestTrack, middle.getY());
+                                return true;
+                        } else if (nearestTrack2 >= min && nearestTrack2 <= max) {
+                                trackPosition = Coordinate(nearestTrack2, middle.getY());
+                                return true;
+                        } else {
+                                return false;
+                        }
+                }
+        }
+
+        return false;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 }
