@@ -473,9 +473,6 @@ void FastRouteKernel::initializeNets() {
                                 if (!(posOnGrid == pinPosition)) {
                                         if ((layer.getPreferredDirection() == RoutingLayer::HORIZONTAL && posOnGrid.getY() != pinPosition.getY()) ||
                                              layer.getPreferredDirection() == RoutingLayer::VERTICAL && posOnGrid.getX() != pinPosition.getX()) {
-                                                std::cout << "Processing net " << net.getName() << ", pin " << pin.getName() << "\n";
-                                                std::cout << "Old pin pos on grid: (" << pinPosition.getX() << ", " << pinPosition.getY() << ")\n";
-                                                std::cout << "New pin pos on grid: (" << posOnGrid.getX() << ", " << posOnGrid.getY() << ")\n\n";
                                                 pinPosition = posOnGrid;
                                         }
                                 }
