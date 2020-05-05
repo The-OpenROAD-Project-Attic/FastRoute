@@ -806,8 +806,6 @@ std::set<int> DBWrapper::findTransitionLayers(int maxRoutingLayer) {
                 }
         }
 
-        std::cout << "#Transition layers: " << transitionLayers.size() << "\n";
-
         return transitionLayers;
 }
 

@@ -134,6 +134,9 @@ public:
         
         void addHorizontalCapacity(int value, int layer) { _horizontalEdgesCapacities[layer] = value; }
         void addVerticalCapacity(int value, int layer) { _verticalEdgesCapacities[layer] = value; }
+
+        void updateHorizontalEdgesCapacities(int layer, int reduction) { _horizontalEdgesCapacities[layer] = reduction; };
+        void updateVerticalEdgesCapacities(int layer, int reduction) { _verticalEdgesCapacities[layer] = reduction; };
         
         std::map<int, std::vector<Box>> getAllObstacles() const { return _obstacles; }
         void addObstacle(int layer, Box obstacle) { _obstacles[layer].push_back(obstacle); }

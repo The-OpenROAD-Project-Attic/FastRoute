@@ -55,6 +55,7 @@ class Box;
 class Coordinate;
 class DBWrapper;
 class Grid;
+class Pin;
 class Netlist;
 class RoutingTracks;
 class RoutingLayer;
@@ -150,6 +151,7 @@ private:
         Box globalRoutingToBox(const FastRoute::ROUTE &route);
         bool segmentsOverlaps(ROUTE seg0, ROUTE seg1, ROUTE &newSeg);
         void mergeSegments(FastRoute::NET &net);
+        bool pinOverlapsWithSingleTrack(Pin pin, Coordinate &trackPosition);
         
         // check functions
         void checkPinPlacement();
@@ -199,6 +201,7 @@ public:
         ~FastRouteKernel();
         void init();
         void reset();
+        void resetResources();
         
         void setAdjustment(const float adjustment);
         void setMinRoutingLayer(const int minLayer);
@@ -233,8 +236,6 @@ public:
         // temporary for congestion drive replace
         ROUTE_ getRoute();
         std::vector<EST_> getEst();
-        void writeRoute(std::string routeFile);
-        void writeEst(std::string estFileName);
 
         // antenna avoider functions
         void setMaxLength (float maxLength);
