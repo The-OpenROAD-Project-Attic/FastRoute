@@ -549,7 +549,7 @@ void DBWrapper::initObstacles() {
                 odb::dbTransform transform(currInst->getOrient(), origin);
                 
                 odb::dbSet<odb::dbBox> obstructions = master->getObstructions();
-                if (master->getType() == odb::dbMasterType::BLOCK) {
+                if (master->isBlock()) {
                         macrosCnt++;
                         isMacro = true;
                 }
