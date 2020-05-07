@@ -91,8 +91,6 @@ void FastRouteKernel::init() {
         _allowOverflow = 0;
         _routeNetsWithPad = 0;
         _seed = 0;
-        _maxLength = -1;
-        _maxRoutingLength = -1;
         
         // Clock net routing variables
         _pdRev = 0;
@@ -319,14 +317,9 @@ void FastRouteKernel::startFastRoute() {
                 computeRegionAdjustments(lowerLeft, upperRight, regionsLayer[i], regionsReductionPercentage[i]);
         }
 
-        if (_maxLength != -1) {
-                _maxRoutingLength = _maxLength * _grid->getDatabaseUnit();
-                for (int i = 1; i <= _maxRoutingLayer; i++) {
-                        if (_layersMaxLength.find(i) == _layersMaxLength.end()) {
-                                _layersMaxRoutingLength[i] = _maxRoutingLength;
-                        } else {
-                                _layersMaxRoutingLength[i] = _layersMaxLength[i] * _grid->getDatabaseUnit();
-                        }
+        for (int i = 1; i <= _maxRoutingLayer; i++) {
+                if (_layersMaxLength.find(i) != _layersMaxLength.end()) {
+                        _layersMaxRoutingLength[i] = _layersMaxLength[i] * _grid->getDatabaseUnit();
                 }
         }
 
@@ -344,7 +337,7 @@ void FastRouteKernel::runFastRoute() {
         std::cout << "Running FastRoute... Done!\n";
         
         std::cout << "Fixing long segments...\n";
-        if (_maxRoutingLength == -1) {
+        if (_layersMaxRoutingLength.empty()) {
                 std::cout << "[WARNING] Max routing length not defined. Skipping...\n";
         } else {
                 fixLongSegments();
@@ -1083,10 +1076,6 @@ void FastRouteKernel::setRouteNetsWithPad(bool routeNetsWithPad) {
         _routeNetsWithPad = routeNetsWithPad;
 }
 
-void FastRouteKernel::setMaxLength (float maxLength) {
-        _maxLength = maxLength;
-}
-
 void FastRouteKernel::addLayerMaxLength (int layer, float length) {
         _layersMaxLength[layer] = length;
 }
@@ -1102,7 +1091,7 @@ void FastRouteKernel::writeGuides() {
         }
         RoutingLayer phLayerF;
         
-        if (_maxLength == -1 && _layersMaxLength.empty()) {
+        if (_layersMaxLength.empty()) {
                 std::cout << "[INFO] Adding remaining guides\n";
                 addRemainingGuides(*_result);
         }
@@ -1811,75 +1800,96 @@ void FastRouteKernel::fixLongSegments() {
         int fixedSegs = 0;
         int possibleViols = 0;
 
+        int layerFixedSegs = 0;
+        int layerPossibleViols = 0;
+
         addRemainingGuides(*_result);
-        for (FastRoute::NET &netRoute : *_result) {
-                mergeSegments(netRoute);
+        for (int l = 1; l <= _maxRoutingLayer; l++) {
+                if (_layersMaxRoutingLength[l] <= 0)
+                        continue;
+
+                std::cout << "Fixing long segments in layer " << l << "\n";
+                for (FastRoute::NET &netRoute : *_result) {
+                        mergeSegments(netRoute);
                         bool possibleViolation = false;
                         for (ROUTE seg : netRoute.route) {
-                                    long segLen = std::abs(seg.finalX - seg.initX)
-                                    + std::abs(seg.finalY - seg.initY);
+                                long segLen = std::abs(seg.finalX - seg.initX)
+                                        + std::abs(seg.finalY - seg.initY);
 
-                                    if (segLen >= _layersMaxRoutingLength[seg.finalLayer]) {
-                                                possibleViolation = true;
-                                possibleViols++;
-                                    }
+                                if (seg.initLayer != l || seg.finalLayer != l) {
+                                        continue;
+                                }
+
+                                if (segLen >= _layersMaxRoutingLength[seg.finalLayer]) {
+                                        possibleViolation = true;
+                                        possibleViols++;
+                                        layerPossibleViols++;
+                                }
                         }
 
                         if (!possibleViolation)
                                 continue;
 
-                SteinerTree sTree;
-                Net net = _netlist->getNetByName(netRoute.name);
-                std::vector<Pin> pins = net.getPins();
-                std::vector<ROUTE> route = netRoute.route;
-                sTree = createSteinerTree(route, pins);
+                        SteinerTree sTree;
+                        Net net = _netlist->getNetByName(netRoute.name);
+                        std::vector<Pin> pins = net.getPins();
+                        std::vector<ROUTE> route = netRoute.route;
+                        sTree = createSteinerTree(route, pins);
                         if (checkSteinerTree(sTree) != true) {
-                                       // std::cout << "Invalid Steiner tree for net " << netRoute.name << "\n";
-                                    continue;        
+                                // std::cout << "Invalid Steiner tree for net " << netRoute.name << "\n";
+                                continue;        
                         }
-         
-                    std::vector<Segment> segsToFix;
-                        
+                 
+                        std::vector<Segment> segsToFix;
+                                
                         std::vector<Node> sinks = sTree.getSinks();
                         for (Node sink : sinks) {
-                                    std::vector<Segment> segments = sTree.getNodeSegments(sink);
-                                    Segment seg = segments[0];
-                                    while (seg.getParent() != -1) {
-                                            int index = seg.getParent();
-                                            long segLen = std::abs(seg.getLastNode().getPosition().getX() - seg.getFirstNode().getPosition().getX())
-                                                            + std::abs(seg.getLastNode().getPosition().getY() - seg.getFirstNode().getPosition().getY());
+                                std::vector<Segment> segments = sTree.getNodeSegments(sink);
+                                Segment seg = segments[0];
+                                while (seg.getParent() != -1) {
+                                        int index = seg.getParent();
+                                        long segLen = std::abs(seg.getLastNode().getPosition().getX() - seg.getFirstNode().getPosition().getX())
+                                                + std::abs(seg.getLastNode().getPosition().getY() - seg.getFirstNode().getPosition().getY());
 
-                                            if (segLen >= _layersMaxRoutingLength[seg.getFirstNode().getLayer()]) {
-                                                        segsToFix.push_back(seg);
-                                            }
-                                            seg = sTree.getSegmentByIndex(index);
+                                        if (segLen >= _layersMaxRoutingLength[seg.getFirstNode().getLayer()] && seg.getFirstNode().getLayer() == l) {
+                                                segsToFix.push_back(seg);
+                                        }
+                                        seg = sTree.getSegmentByIndex(index);
                                 }
                         }
-         
-                ROUTE segment;
-                for (Segment s : segsToFix) {
-                                    int cnt = 0;
-                                    for (ROUTE seg : netRoute.route) {
-                                    if (s.getLastNode().getPosition().getX() == seg.finalX && s.getLastNode().getPosition().getY() == seg.finalY &&
-                                                    s.getFirstNode().getPosition().getX() == seg.initX && s.getFirstNode().getPosition().getY() == seg.initY &&
-                                                    s.getFirstNode().getLayer() == seg.initLayer && s.getLastNode().getLayer() == seg.finalLayer) {
-                                        segment = seg;
-                                                            std::vector<ROUTE> newSegs;
-                                                            bool success = breakSegment(segment, _layersMaxRoutingLength[seg.finalLayer], newSegs);
-                                                            if (!success) {
-                                                                       continue;
-                                                            }
-                                            netRoute.route.erase(netRoute.route.begin() + cnt);
-                                            netRoute.route.insert(netRoute.route.begin() + cnt, newSegs.begin(), newSegs.end());
-                                               fixedSegs++;
+                 
+                        ROUTE segment;
+                        for (Segment s : segsToFix) {
+                                int cnt = 0;
+                                for (ROUTE seg : netRoute.route) {
+                                        if (s.getLastNode().getPosition().getX() == seg.finalX && s.getLastNode().getPosition().getY() == seg.finalY &&
+                                            s.getFirstNode().getPosition().getX() == seg.initX && s.getFirstNode().getPosition().getY() == seg.initY &&
+                                            s.getFirstNode().getLayer() == seg.initLayer && s.getLastNode().getLayer() == seg.finalLayer) {
+                                                segment = seg;
+                                                std::vector<ROUTE> newSegs;
+                                                bool success = breakSegment(segment, _layersMaxRoutingLength[seg.finalLayer], newSegs);
+                                                if (!success) {
+                                                        continue;
+                                                }
+                                                netRoute.route.erase(netRoute.route.begin() + cnt);
+                                                netRoute.route.insert(netRoute.route.begin() + cnt, newSegs.begin(), newSegs.end());
+                                                fixedSegs++;
+                                                layerFixedSegs++;
+                                        }
+                                        cnt++;
                                 }
-                                cnt++;
                         }
-                        }
+                }
+
+                std::cout << "[INFO] #Possible violations: " << layerPossibleViols << "\n";
+                std::cout << "[INFO] #Modified segments: " << layerFixedSegs << "\n";
+
+                layerPossibleViols = 0;
+                layerFixedSegs = 0;
         }
         
-        std::cout << " > ----#Possible violations: " << possibleViols << "\n";
-        std::cout << " > ----#Modified segments: " << fixedSegs << "\n";
+        std::cout << "[INFO] #Total possible violations: " << possibleViols << "\n";
+        std::cout << "[INFO] #Total modified segments: " << fixedSegs << "\n";
 }
 
 SteinerTree FastRouteKernel::createSteinerTree(std::vector<ROUTE> route, std::vector<Pin> pins) {

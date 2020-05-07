@@ -123,9 +123,7 @@ private:
         int _numAdjusts = 0;
 
         // antenna avoider variables
-        float _maxLength;
         std::map<int, float> _layersMaxLength;
-        long _maxRoutingLength;
         std::map<int, long> _layersMaxRoutingLength;
         
         // main functions
