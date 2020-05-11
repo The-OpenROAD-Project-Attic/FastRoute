@@ -235,15 +235,6 @@ void FastRouteKernel::startFastRoute() {
         if (_pdRevForHighFanout != -1) {
                 _fastRoute->setAlpha(_alpha);
         }
-
-        if (_layersToAdjust.size() == 0) {
-                std::set<int> transitionLayers = _dbWrapper->findTransitionLayers(_maxRoutingLayer);
-
-                for (std::set<int>::iterator it = transitionLayers.begin(); it != transitionLayers.end(); ++it) {
-                        _layersToAdjust.push_back(*it);
-                        _layersReductionPercentage.push_back(transitionLayerAdjust);
-                }
-        }
         
         _fastRoute->setVerbose(_verbose);
         _fastRoute->setOverflowIterations(_overflowIterations);
@@ -260,6 +251,16 @@ void FastRouteKernel::startFastRoute() {
         std::cout << "Initializing grid...\n";
         initGrid();
         std::cout << "Initializing grid... Done!\n";
+
+        std::cout << "Searching for transition layers...\n";
+        std::set<int> transitionLayers = _dbWrapper->findTransitionLayers(_maxRoutingLayer);
+
+        std::cout << "[INFO] Found " << transitionLayers.size() << " transition layers\n";
+        for (std::set<int>::iterator it = transitionLayers.begin(); it != transitionLayers.end(); ++it) {
+                _layersToAdjust.push_back(*it);
+                _layersReductionPercentage.push_back(transitionLayerAdjust);
+        }
+        std::cout << "Searching for transition layers... Done!\n";
         
         std::cout << "Initializing routing layers...\n";
         initRoutingLayers();
@@ -773,6 +774,7 @@ void FastRouteKernel::computeUserLayerAdjustments() {
         for (int idx = 0; idx < _layersToAdjust.size(); idx++) {
                 int layer = _layersToAdjust[idx];
                 float adjustment = _layersReductionPercentage[idx];
+                std::cout << "[INFO] Reducing resources of layer " << layer << " in " << adjustment*100 << "%\n";
                 if (_hCapacities[layer - 1] != 0) {
                         int newCap = _grid->getHorizontalEdgesCapacities()[layer - 1] * (1 - adjustment);
                         _grid->updateHorizontalEdgesCapacities(layer-1, newCap);

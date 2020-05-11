@@ -66,7 +66,7 @@ proc fastroute { args } {
     set out_file $keys(-output_file)
     FastRoute::set_output_file $out_file
   } else {
-    puts "WARNING: Default output guide name: out.guide"
+    puts "\[WARNING\] Default output guide name: out.guide"
     FastRoute::set_output_file "out.guide"
   }
 
@@ -103,7 +103,6 @@ proc fastroute { args } {
       set layer [lindex $layer_adjustment 0]
       set reductionPercentage [lindex $layer_adjustment 1]
 
-      puts "Adjust layer $layer in [expr $reductionPercentage * 100]%"
       FastRoute::add_layer_adjustment $layer $reductionPercentage
     }
   }
@@ -129,7 +128,7 @@ proc fastroute { args } {
     foreach net_alpha $nets_alphas {
       set net_name [lindex $net_alpha 0]
       set alpha [lindex $net_alpha 1]
-      puts "Alpha $alpha for net $net_name"
+
       FastRoute::set_alpha_for_net $net_name $alpha
     }
   }
