@@ -113,7 +113,7 @@ void DBWrapper::initGrid(int maxLayer) {
                      genericVector, genericVector, genericMap, tech->getLefUnits());
 }
 
-void DBWrapper::initRoutingLayers(std::vector<RoutingLayer>& routingLayers, int maxLayer) {
+void DBWrapper::initRoutingLayers(std::vector<RoutingLayer>& routingLayers) {
         odb::dbTech* tech = _db->getTech();
         
         if (!tech) {
@@ -122,9 +122,6 @@ void DBWrapper::initRoutingLayers(std::vector<RoutingLayer>& routingLayers, int 
         }
         
         for (int l = 1; l <= tech->getRoutingLayerCount(); l++) {
-                if (l > maxLayer && maxLayer > -1) {
-                        break;
-                }
                 odb::dbTechLayer* techLayer = tech->findRoutingLayer(l);
                 int index = l;
                 std::string name = techLayer->getConstName();
@@ -542,6 +539,16 @@ void DBWrapper::initObstacles() {
 
                 odb::dbInst* currInst = *instIter;
                 odb::dbMaster* master = currInst->getMaster();
+
+                if (master->getType() == odb::dbMasterType::PAD ||
+                     master->getType() == odb::dbMasterType::PAD_INPUT ||
+                     master->getType() == odb::dbMasterType::PAD_OUTPUT ||
+                     master->getType() == odb::dbMasterType::PAD_INOUT ||
+                     master->getType() == odb::dbMasterType::PAD_POWER ||
+                     master->getType() == odb::dbMasterType::PAD_SPACER ||
+                     master->getType() == odb::dbMasterType::PAD_AREAIO) {
+                        continue;
+                }
                 
                 currInst->getOrigin(pX, pY);
                 odb::Point origin = odb::Point(pX, pY);

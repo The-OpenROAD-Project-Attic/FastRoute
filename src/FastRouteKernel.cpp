@@ -344,7 +344,7 @@ void FastRouteKernel::initGrid() {
 }
 
 void FastRouteKernel::initRoutingLayers() {
-        _dbWrapper->initRoutingLayers(*_routingLayers, _maxRoutingLayer);
+        _dbWrapper->initRoutingLayers(*_routingLayers);
         
         RoutingLayer routingLayer = getRoutingLayerByIndex(1);
         _fastRoute->setLayerOrientation(routingLayer.getPreferredDirection());
