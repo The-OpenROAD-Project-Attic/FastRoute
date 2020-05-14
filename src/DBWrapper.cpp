@@ -337,7 +337,7 @@ void DBWrapper::initNetlist(bool routeNetsWithPad) {
                 odb::dbNet* currNet = *nIter;
                 if (currNet->getSigType().getValue() == odb::dbSigType::POWER ||
                     currNet->getSigType().getValue() == odb::dbSigType::GROUND ||
-                    currNet->getSWires().size() > 0) {
+                    currNet->isSpecial() || currNet->getSWires().size() > 0) {
                         continue;
                 }
                 std::string netName = currNet->getConstName();
