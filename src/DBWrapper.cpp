@@ -357,14 +357,7 @@ void DBWrapper::initNetlist(bool routeNetsWithPad) {
                         odb::dbMTerm* mTerm = currITerm->getMTerm();
                         odb::dbMaster* master = mTerm->getMaster();
                         
-                        if ((master->getType() == odb::dbMasterType::PAD ||
-                            master->getType() == odb::dbMasterType::PAD_INPUT ||
-                            master->getType() == odb::dbMasterType::PAD_OUTPUT ||
-                            master->getType() == odb::dbMasterType::PAD_INOUT ||
-                            master->getType() == odb::dbMasterType::PAD_POWER ||
-                            master->getType() == odb::dbMasterType::PAD_SPACER ||
-                            master->getType() == odb::dbMasterType::PAD_AREAIO) &&
-                            !routeNetsWithPad) {
+                        if (master->getType().isPad() && !routeNetsWithPad) {
                                 padFound = true;
                                 break;
                         }
@@ -540,13 +533,7 @@ void DBWrapper::initObstacles() {
                 odb::dbInst* currInst = *instIter;
                 odb::dbMaster* master = currInst->getMaster();
 
-                if (master->getType() == odb::dbMasterType::PAD ||
-                     master->getType() == odb::dbMasterType::PAD_INPUT ||
-                     master->getType() == odb::dbMasterType::PAD_OUTPUT ||
-                     master->getType() == odb::dbMasterType::PAD_INOUT ||
-                     master->getType() == odb::dbMasterType::PAD_POWER ||
-                     master->getType() == odb::dbMasterType::PAD_SPACER ||
-                     master->getType() == odb::dbMasterType::PAD_AREAIO) {
+                if (master->getType().isPad()) {
                         continue;
                 }
                 
