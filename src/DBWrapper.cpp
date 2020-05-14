@@ -113,7 +113,7 @@ void DBWrapper::initGrid(int maxLayer) {
                      genericVector, genericVector, genericMap, tech->getLefUnits());
 }
 
-void DBWrapper::initRoutingLayers(std::vector<RoutingLayer>& routingLayers, int maxLayer) {
+void DBWrapper::initRoutingLayers(std::vector<RoutingLayer>& routingLayers) {
         odb::dbTech* tech = _db->getTech();
         
         if (!tech) {
@@ -122,9 +122,6 @@ void DBWrapper::initRoutingLayers(std::vector<RoutingLayer>& routingLayers, int 
         }
         
         for (int l = 1; l <= tech->getRoutingLayerCount(); l++) {
-                if (l > maxLayer && maxLayer > -1) {
-                        break;
-                }
                 odb::dbTechLayer* techLayer = tech->findRoutingLayer(l);
                 int index = l;
                 std::string name = techLayer->getConstName();
@@ -340,7 +337,7 @@ void DBWrapper::initNetlist(bool routeNetsWithPad) {
                 odb::dbNet* currNet = *nIter;
                 if (currNet->getSigType().getValue() == odb::dbSigType::POWER ||
                     currNet->getSigType().getValue() == odb::dbSigType::GROUND ||
-                    currNet->getSWires().size() > 0) {
+                    currNet->isSpecial() || currNet->getSWires().size() > 0) {
                         continue;
                 }
                 std::string netName = currNet->getConstName();
@@ -361,14 +358,7 @@ void DBWrapper::initNetlist(bool routeNetsWithPad) {
                         odb::dbMTerm* mTerm = currITerm->getMTerm();
                         odb::dbMaster* master = mTerm->getMaster();
                         
-                        if ((master->getType() == odb::dbMasterType::PAD ||
-                            master->getType() == odb::dbMasterType::PAD_INPUT ||
-                            master->getType() == odb::dbMasterType::PAD_OUTPUT ||
-                            master->getType() == odb::dbMasterType::PAD_INOUT ||
-                            master->getType() == odb::dbMasterType::PAD_POWER ||
-                            master->getType() == odb::dbMasterType::PAD_SPACER ||
-                            master->getType() == odb::dbMasterType::PAD_AREAIO) &&
-                            !routeNetsWithPad) {
+                        if (master->getType().isPad() && !routeNetsWithPad) {
                                 padFound = true;
                                 break;
                         }
@@ -556,6 +546,10 @@ void DBWrapper::initObstacles() {
 
                 odb::dbInst* currInst = *instIter;
                 odb::dbMaster* master = currInst->getMaster();
+
+                if (master->getType().isPad()) {
+                        continue;
+                }
                 
                 currInst->getOrigin(pX, pY);
                 odb::Point origin = odb::Point(pX, pY);
@@ -563,7 +557,7 @@ void DBWrapper::initObstacles() {
                 odb::dbTransform transform(currInst->getOrient(), origin);
                 
                 odb::dbSet<odb::dbBox> obstructions = master->getObstructions();
-                if (master->getType() == odb::dbMasterType::BLOCK) {
+                if (master->isBlock()) {
                         macrosCnt++;
                         isMacro = true;
                 }
