@@ -71,7 +71,7 @@ public:
         void initRoutingTracks(std::vector<RoutingTracks>& allRoutingTracks, int maxLayer);
         void computeCapacities(int maxLayer);
         void computeSpacingsAndMinWidth(int maxLayer);
-        void initNetlist(bool routeNetsWithPad);
+        void initNetlist();
         void initObstacles();
         int computeMaxRoutingLayer();
         std::set<int> findTransitionLayers(int maxRoutingLayer);

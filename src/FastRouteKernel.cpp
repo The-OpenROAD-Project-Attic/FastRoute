@@ -85,7 +85,6 @@ void FastRouteKernel::init() {
         _overflowIterations = 500;
         _pdRevForHighFanout = -1;
         _allowOverflow = 0;
-        _routeNetsWithPad = 0;
         _seed = 0;
         
         // Clock net routing variables
@@ -389,7 +388,7 @@ void FastRouteKernel::setSpacingsAndMinWidths() {
 }
 
 void FastRouteKernel::initializeNets() {
-        _dbWrapper->initNetlist(_routeNetsWithPad);
+        _dbWrapper->initNetlist();
         
         std::cout << "Checking pin placement...\n";
         checkPinPlacement();
@@ -1048,10 +1047,6 @@ void FastRouteKernel::setPDRevForHighFanout(int pdRevForHighFanout) {
 
 void FastRouteKernel::setAllowOverflow(bool allowOverflow) {
         _allowOverflow = allowOverflow;
-}
-
-void FastRouteKernel::setRouteNetsWithPad(bool routeNetsWithPad) {
-        _routeNetsWithPad = routeNetsWithPad;
 }
 
 void FastRouteKernel::writeGuides() {

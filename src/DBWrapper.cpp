@@ -311,7 +311,7 @@ void DBWrapper::computeSpacingsAndMinWidth(int maxLayer) {
         }
 }
 
-void DBWrapper::initNetlist(bool routeNetsWithPad) {
+void DBWrapper::initNetlist() {
         Box dieArea(_grid->getLowerLeftX(), _grid->getLowerLeftY(),
                     _grid->getUpperRightX(), _grid->getUpperRightY(), -1);
         
@@ -331,7 +331,7 @@ void DBWrapper::initNetlist(bool routeNetsWithPad) {
         odb::dbSet<odb::dbNet>::iterator nIter;
         
         for (nIter = nets.begin(); nIter != nets.end(); ++nIter) {
-                bool padFound = false;
+                bool ignoreNet = false;
                 std::vector<Pin> netPins;
                 
                 odb::dbNet* currNet = *nIter;
@@ -357,8 +357,9 @@ void DBWrapper::initNetlist(bool routeNetsWithPad) {
                         odb::dbMTerm* mTerm = currITerm->getMTerm();
                         odb::dbMaster* master = mTerm->getMaster();
                         
-                        if (master->getType().isPad() && !routeNetsWithPad) {
-                                padFound = true;
+                        if (master->getType() == odb::dbMasterType::COVER || 
+                            master->getType() == odb::dbMasterType::COVER_BUMP) {
+                                ignoreNet = true;
                                 break;
                         }
                         
@@ -418,7 +419,7 @@ void DBWrapper::initNetlist(bool routeNetsWithPad) {
                         }
                 }
                 
-                if (padFound) {
+                if (ignoreNet) {
                         continue;
                 }
                 

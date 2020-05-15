@@ -77,8 +77,6 @@ extern void set_pdrev_for_high_fanout(int pdRevForHighFanout);
 
 extern void set_allow_overflow(bool allowOverflow);
 
-extern void set_route_nets_with_pad(bool routePad);
-
 extern void set_seed(unsigned seed);
 
 extern void start_fastroute();
