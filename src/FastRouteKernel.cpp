@@ -473,7 +473,7 @@ void FastRouteKernel::initializeNets() {
 
                                 if (!(posOnGrid == pinPosition)) {
                                         if ((layer.getPreferredDirection() == RoutingLayer::HORIZONTAL && posOnGrid.getY() != pinPosition.getY()) ||
-                                             layer.getPreferredDirection() == RoutingLayer::VERTICAL && posOnGrid.getX() != pinPosition.getX()) {
+                                             (layer.getPreferredDirection() == RoutingLayer::VERTICAL && posOnGrid.getX() != pinPosition.getX())) {
                                                 pinPosition = posOnGrid;
                                         }
                                 }
@@ -1694,29 +1694,5 @@ bool FastRouteKernel::pinOverlapsWithSingleTrack(Pin pin, Coordinate &trackPosit
 
         return false;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 }
