@@ -331,7 +331,6 @@ void DBWrapper::initNetlist() {
         odb::dbSet<odb::dbNet>::iterator nIter;
         
         for (nIter = nets.begin(); nIter != nets.end(); ++nIter) {
-                bool ignoreNet = false;
                 std::vector<Pin> netPins;
                 
                 odb::dbNet* currNet = *nIter;
@@ -359,8 +358,7 @@ void DBWrapper::initNetlist() {
                         
                         if (master->getType() == odb::dbMasterType::COVER || 
                             master->getType() == odb::dbMasterType::COVER_BUMP) {
-                                ignoreNet = true;
-                                break;
+                                std::cout << "[WARNING] Net connected with instance of class COVER added for routing\n";
                         }
                         
                         std::string instName = currITerm->getInst()->getConstName();
@@ -417,10 +415,6 @@ void DBWrapper::initNetlist() {
                                 Pin pin = Pin(pinName, pinPos, pinLayers, pinBoxes, netName, false);
                                 netPins.push_back(pin);
                         }
-                }
-                
-                if (ignoreNet) {
-                        continue;
                 }
                 
                 // Iterate through all I/O pins
