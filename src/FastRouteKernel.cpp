@@ -313,8 +313,9 @@ void FastRouteKernel::startFastRoute() {
 
         _fastRoute->initAuxVar();
         std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
-        
-        std::cout << "[INFO] Elapsed time: " << (std::chrono::duration_cast<std::chrono::microseconds>(end - begin).count()) /1000000.0 << "\n";
+ 
+        if (_verbose > 0)       
+                std::cout << "[INFO] Elapsed time: " << (std::chrono::duration_cast<std::chrono::microseconds>(end - begin).count()) /1000000.0 << "\n";
 }
 
 void FastRouteKernel::runFastRoute() {
@@ -327,7 +328,8 @@ void FastRouteKernel::runFastRoute() {
         computeWirelength();
         
         std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
-        std::cout << "[INFO] Elapsed time: " << (std::chrono::duration_cast<std::chrono::microseconds>(end - begin).count()) /1000000.0 << "\n";
+        if (_verbose > 0)
+                std::cout << "[INFO] Elapsed time: " << (std::chrono::duration_cast<std::chrono::microseconds>(end - begin).count()) /1000000.0 << "\n";
 }
 
 void FastRouteKernel::initGrid() {        
