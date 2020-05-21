@@ -1252,14 +1252,20 @@ void FastRouteKernel::addRemainingGuides(std::vector<FastRoute::NET> &globalRout
                                                         if (segments[i].initX == segments[i].finalX &&
                                                             segments[i].initY == segments[i].finalY) {
                                                                 segments.erase(segments.begin()+i);
-                                                                i = 0;
-                                                        } else {
-                                                                if (i == 0)
-                                                                        coverSegs.clear();
-                                                                coverSegs.push_back(segments[i]);
+								i = 0;
                                                         }
                                                 }
                                         }
+
+					for (int i = 0; i < segments.size(); i++) {
+						if ((pin.x == segments[i].initX && pin.y == segments[i].initY) ||
+						    (pin.x == segments[i].finalX && pin.y == segments[i].finalY)) {
+							if (!(segments[i].initX == segments[i].finalX &&
+							    segments[i].initY == segments[i].finalY)) {
+    								coverSegs.push_back(segments[i]);
+							}
+						}
+					}
 
                                         int closestLayer = -1;
                                         int minorDiff = std::numeric_limits<int>::max();
