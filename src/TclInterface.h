@@ -70,6 +70,7 @@ void start_fastroute();
 void run_fastroute();
 void reset_fastroute();
 void write_guides();
+void report_congestion(char * congest_file);
 
 }
 #endif

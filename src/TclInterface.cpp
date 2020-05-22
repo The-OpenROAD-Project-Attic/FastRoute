@@ -145,4 +145,8 @@ void write_guides() {
         fastRouteKernel->writeGuides();
 }
 
+void report_congestion(char * congest_file) {
+        fastRouteKernel->setReportCongestion(congest_file);
+}
+
 }

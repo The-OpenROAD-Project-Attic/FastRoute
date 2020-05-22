@@ -86,6 +86,7 @@ void FastRouteKernel::init() {
         _pdRevForHighFanout = -1;
         _allowOverflow = 0;
         _seed = 0;
+        _reportCongest = false;
         
         // Clock net routing variables
         _pdRev = 0;
@@ -326,6 +327,11 @@ void FastRouteKernel::runFastRoute() {
         std::cout << "Running FastRoute... Done!\n";
         
         computeWirelength();
+
+        if (_reportCongest) {
+                _fastRoute->writeCongestionReport2D(_congestFile+"2D.log");
+                _fastRoute->writeCongestionReport3D(_congestFile+"3D.log");
+        }
         
         std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
         if (_verbose > 0)
@@ -1049,6 +1055,12 @@ void FastRouteKernel::setPDRevForHighFanout(int pdRevForHighFanout) {
 
 void FastRouteKernel::setAllowOverflow(bool allowOverflow) {
         _allowOverflow = allowOverflow;
+}
+
+void FastRouteKernel::setReportCongestion(char * congestFile) {
+        _reportCongest = true;
+        std::string cgtFile(congestFile);
+        _congestFile = cgtFile;
 }
 
 void FastRouteKernel::writeGuides() {

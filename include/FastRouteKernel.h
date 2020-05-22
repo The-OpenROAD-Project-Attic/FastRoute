@@ -79,6 +79,7 @@ private:
 
         // Flow variables
         std::string _outfile;
+        std::string _congestFile;
         float _adjustment;
         int _minRoutingLayer;
         int _maxRoutingLayer;
@@ -91,6 +92,7 @@ private:
         int _overflowIterations;
         int _pdRevForHighFanout;
         bool _allowOverflow;
+        bool _reportCongest;
         std::vector<int> _vCapacities;
         std::vector<int> _hCapacities;
         std::map<std::string, int> _netsDegree;
@@ -212,6 +214,7 @@ public:
         void setGridOrigin(long x, long y);
         void setPDRevForHighFanout(int pdRevForHighFanout);
         void setAllowOverflow(bool allowOverflow);
+        void setReportCongestion(char * congestFile);
         void printGrid();
         void printHeader();
         
@@ -220,7 +223,7 @@ public:
         void startFastRoute();
         void runFastRoute();
         
-        // temporary for congestion drive replace
+        // congestion drive replace functions
         ROUTE_ getRoute();
         std::vector<EST_> getEst();
 };

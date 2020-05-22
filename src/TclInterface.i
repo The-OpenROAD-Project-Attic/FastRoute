@@ -87,4 +87,6 @@ extern void reset_fastroute();
 
 extern void write_guides();
 
+extern void report_congestion(char * congest_file);
+
 }

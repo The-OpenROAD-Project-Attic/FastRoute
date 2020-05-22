@@ -53,6 +53,8 @@
 #include "maze3D.h"
 #include <iostream>
 #include <string>
+#include <utility>
+#include <fstream>
 
 namespace FastRoute {
 
@@ -855,6 +857,101 @@ std::vector<NET> FT::getResults() {
         }
 
         return netsOut;
+}
+
+void FT::writeCongestionReport2D(std::string fileName) {
+        long xReal, yReal;
+        int grid, j, k, i;
+        std::ofstream congestFile;
+        congestFile.open(fileName);
+        
+        if (!congestFile.is_open()) {
+                std::cout << "[ERROR] Congestion report file could not be open!" << std::endl;
+                congestFile.close();
+                std::exit(1);
+        }
+        congestFile << "FastRoute congestion report\n\n";
+
+        congestFile << "Area    Vertical Capacity/Usage    Horizontal Capacity/Usage\n";
+        congestFile << "---------------------------------------------\n";
+
+        for (i = 0; i < yGrid; i++) {
+                for (j = 0; j < xGrid - 1; j++) {
+                        gridH = i * (xGrid - 1) + j;
+                        gridV = i * xGrid + j;
+
+                        unsigned short capH = h_edges[gridH].cap;
+                        unsigned short usageH = h_edges[gridH].usage;
+
+                        unsigned short capV = v_edges[gridV].cap;
+                        unsigned short usageV = v_edges[gridV].usage;
+
+                        xReal = wTile * (j + 0.5) + xcorner;
+                        yReal = hTile * (i + 0.5) + ycorner;
+
+                        long llX = xReal - (wTile / 2);
+                        long llY = yReal - (hTile / 2);
+
+                        long urX = xReal + (wTile / 2);
+                        long urY = yReal + (hTile / 2);
+
+                        congestFile << "(" << llX << ", " << llY << ") "
+                                    << "(" << urX << ", " << urY << ")"
+                                    << "    V: " << capV << "/" << usageV
+                                    << "    H: " << capH << "/" << usageH << "\n";
+                }
+        }
+
+        congestFile.close();
+}
+
+void FT::writeCongestionReport3D(std::string fileName) {
+        long xReal, yReal;
+        int grid, j, k, i;
+        std::ofstream congestFile;
+        congestFile.open(fileName);
+        
+        if (!congestFile.is_open()) {
+                std::cout << "[ERROR] Congestion report file could not be open!" << std::endl;
+                congestFile.close();
+                std::exit(1);
+        }
+        congestFile << "FastRoute congestion report\n\n";
+
+        congestFile << "Area    Vertical Capacity/Usage    Horizontal Capacity/Usage\n";
+        congestFile << "---------------------------------------------\n";
+
+        for (k = 0; k < numLayers; k++) {
+                congestFile << "Layer " << k + 1 << "\n";
+                for (i = 0; i < yGrid; i++) {
+                        for (j = 0; j < xGrid - 1; j++) {
+                                gridH = i * (xGrid - 1) + j + k * (xGrid - 1) * yGrid;
+                                gridV = i * xGrid + j + k * xGrid * (yGrid - 1);
+
+                                unsigned short capH = h_edges3D[gridH].cap;
+                                unsigned short usageH = h_edges3D[gridH].usage;
+
+                                unsigned short capV = v_edges3D[gridV].cap;
+                                unsigned short usageV = v_edges3D[gridV].usage;
+
+                                xReal = wTile * (j + 0.5) + xcorner;
+                                yReal = hTile * (i + 0.5) + ycorner;
+
+                                long llX = xReal - (wTile / 2);
+                                long llY = yReal - (hTile / 2);
+
+                                long urX = xReal + (wTile / 2);
+                                long urY = yReal + (hTile / 2);
+
+                                congestFile << "(" << llX << ", " << llY << ") "
+                                            << "(" << urX << ", " << urY << ")"
+                                            << "    V: " << capV << "/" << usageV
+                                            << "    H: " << capH << "/" << usageH << "\n";
+                        }
+                }
+        }
+
+        congestFile.close();
 }
 
 int FT::run(std::vector<NET> &result) {
