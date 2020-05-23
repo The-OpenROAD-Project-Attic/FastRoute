@@ -1256,10 +1256,24 @@ void FastRouteKernel::addRemainingGuides(std::vector<FastRoute::NET> &globalRout
                                         std::vector<FastRoute::ROUTE> &segments = netRoute.route;
                                         std::vector<FastRoute::ROUTE> coverSegs;
 
+                                        int wireViaLayer = std::numeric_limits<int>::max();
+                                        for (int i = 0; i < segments.size(); i++) {
+                                                if ((pin.x == segments[i].initX && pin.y == segments[i].initY) ||
+                                                    (pin.x == segments[i].finalX && pin.y == segments[i].finalY)) {
+                                                        if (!(segments[i].initX == segments[i].finalX &&
+                                                            segments[i].initY == segments[i].finalY)) {
+                                                                coverSegs.push_back(segments[i]);
+                                                                if (segments[i].initLayer < wireViaLayer) {
+                                                                        wireViaLayer = segments[i].initLayer;
+                                                                }
+                                                        }
+                                                }
+                                        }
+
                                         for (int i = 0; i < segments.size(); i++) {
                                                 if ((pin.x == segments[i].initX && pin.y == segments[i].initY) || 
                                                     (pin.x == segments[i].finalX && pin.y == segments[i].finalY)) {
-                                                        // remove all vias to this pin (all of them are wrong)
+                                                        // remove all vias to this pin that doesn't connects two wires
                                                         // store the segmeents that covers the pin
                                                         if (segments[i].initX == segments[i].finalX &&
                                                             segments[i].initY == segments[i].finalY) {
@@ -1268,16 +1282,6 @@ void FastRouteKernel::addRemainingGuides(std::vector<FastRoute::NET> &globalRout
                                                         }
                                                 }
                                         }
-
-					for (int i = 0; i < segments.size(); i++) {
-						if ((pin.x == segments[i].initX && pin.y == segments[i].initY) ||
-						    (pin.x == segments[i].finalX && pin.y == segments[i].finalY)) {
-							if (!(segments[i].initX == segments[i].finalX &&
-							    segments[i].initY == segments[i].finalY)) {
-    								coverSegs.push_back(segments[i]);
-							}
-						}
-					}
 
                                         int closestLayer = -1;
                                         int minorDiff = std::numeric_limits<int>::max();
