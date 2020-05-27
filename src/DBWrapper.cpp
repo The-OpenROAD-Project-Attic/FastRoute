@@ -739,36 +739,29 @@ std::set<int> DBWrapper::findTransitionLayers(int maxRoutingLayer) {
                 odb::dbTechVia* currVia = *vIter;
                 odb::dbSet<odb::dbBox> viaBoxes = currVia->getBoxes();
 
-                int bottomWidth = -1;
-                int topWidth = -1;
-                int cutWidth = -1;
+                int bottomSize = -1;
+
+                int tmpLen;
 
                 odb::dbTechLayer *bottomLayer;
-                odb::dbTechLayer *topLayer;
-                odb::dbTechLayer *cutLayer;
 
                 odb::dbSet<odb::dbBox>::iterator boxIter;
                 for (boxIter = viaBoxes.begin(); boxIter != viaBoxes.end(); boxIter++) {
                         odb::dbBox* currBox = *boxIter;
                         odb::dbTechLayer* layer = currBox->getTechLayer();
 
+                        if (layer->getDirection().getValue() == odb::dbTechLayerDir::HORIZONTAL) {
+                                tmpLen = currBox->yMax() - currBox->yMin();
+                        } else if (layer->getDirection().getValue() == odb::dbTechLayerDir::VERTICAL) {
+                                tmpLen = currBox->xMax() - currBox->xMin();
+                        } else {
+                              continue;  
+                        }
+
                         if (layer->getConstName() == currVia->getBottomLayer()->getConstName()) {
                                 bottomLayer = layer;
-                                int tmpWidth = currBox->xMax() - currBox->xMin();
-                                if (tmpWidth >= bottomWidth) {
-                                        bottomWidth = tmpWidth;
-                                }
-                        } else if (layer->getConstName() == currVia->getTopLayer()->getConstName()) {
-                                topLayer = layer;
-                                int tmpWidth = currBox->xMax() - currBox->xMin();
-                                if (tmpWidth >= topWidth) {
-                                        topWidth = tmpWidth;
-                                }
-                        } else {
-                                cutLayer = layer;
-                                int tmpWidth = currBox->xMax() - currBox->xMin();
-                                if (tmpWidth >= cutWidth) {
-                                        bottomWidth = tmpWidth;
+                                if (tmpLen >= bottomSize) {
+                                        bottomSize = tmpLen;
                                 }
                         }
                 }
@@ -776,7 +769,7 @@ std::set<int> DBWrapper::findTransitionLayers(int maxRoutingLayer) {
                 if (bottomLayer->getRoutingLevel() >= maxRoutingLayer || bottomLayer->getRoutingLevel() <= 4)
                         continue;
 
-                if (bottomWidth > bottomLayer->getWidth()) {
+                if (bottomSize > bottomLayer->getWidth()) {
                         transitionLayers.insert(bottomLayer->getRoutingLevel());
                 }
         }
