@@ -311,7 +311,7 @@ void DBWrapper::computeSpacingsAndMinWidth(int maxLayer) {
         }
 }
 
-void DBWrapper::initNetlist(bool routeNetsWithPad) {
+void DBWrapper::initNetlist() {
         Box dieArea(_grid->getLowerLeftX(), _grid->getLowerLeftY(),
                     _grid->getUpperRightX(), _grid->getUpperRightY(), -1);
         
@@ -331,7 +331,6 @@ void DBWrapper::initNetlist(bool routeNetsWithPad) {
         odb::dbSet<odb::dbNet>::iterator nIter;
         
         for (nIter = nets.begin(); nIter != nets.end(); ++nIter) {
-                bool padFound = false;
                 std::vector<Pin> netPins;
                 
                 odb::dbNet* currNet = *nIter;
@@ -358,9 +357,9 @@ void DBWrapper::initNetlist(bool routeNetsWithPad) {
                         odb::dbMTerm* mTerm = currITerm->getMTerm();
                         odb::dbMaster* master = mTerm->getMaster();
                         
-                        if (master->getType().isPad() && !routeNetsWithPad) {
-                                padFound = true;
-                                break;
+                        if (master->getType() == odb::dbMasterType::COVER || 
+                            master->getType() == odb::dbMasterType::COVER_BUMP) {
+                                std::cout << "[WARNING] Net connected with instance of class COVER added for routing\n";
                         }
                         
                         std::string instName = currITerm->getInst()->getConstName();
@@ -423,10 +422,6 @@ void DBWrapper::initNetlist(bool routeNetsWithPad) {
                                 Pin pin = Pin(pinName, pinPos, pinLayers, pinBoxes, netName, false, type);
                                 netPins.push_back(pin);
                         }
-                }
-                
-                if (padFound) {
-                        continue;
                 }
                 
                 // Iterate through all I/O pins

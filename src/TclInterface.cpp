@@ -129,10 +129,6 @@ void set_allow_overflow(bool allowOverflow) {
         fastRouteKernel->setAllowOverflow(allowOverflow);
 }
 
-void set_route_nets_with_pad(bool routePad) {
-        fastRouteKernel->setRouteNetsWithPad(routePad);
-}
-
 void set_seed(unsigned seed) {
         fastRouteKernel->setSeed(seed);
 }
@@ -155,6 +151,10 @@ void reset_fastroute() {
 
 void write_guides() {
         fastRouteKernel->writeGuides();
+}
+
+void report_congestion(char * congest_file) {
+        fastRouteKernel->setReportCongestion(congest_file);
 }
 
 }

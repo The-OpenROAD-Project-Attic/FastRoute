@@ -37,6 +37,6 @@
 read_lef "input.lef"
 read_def "input.def"
 
-fastroute
+fastroute -verbose 1
 
 exit
