@@ -405,6 +405,9 @@ void FastRouteKernel::initializeNets() {
         int idx = 0;
         int validNets = 0;
 
+        int minDegree = std::numeric_limits<int>::max();
+        int maxDegree = std::numeric_limits<int>::min();
+
         _netlist->randomizeNetsOrder(_seed);
 
         for (Net net : _netlist->getNets()) {
@@ -433,6 +436,14 @@ void FastRouteKernel::initializeNets() {
 
                 if (net.getNumPins() <= 1) {
                         continue;
+                }
+
+                if (net.getNumPins() < minDegree) {
+                        minDegree = net.getNumPins();
+                }
+
+                if (net.getNumPins() > maxDegree) {
+                        maxDegree = net.getNumPins();
                 }
                 
                 if (_clockNetRouting && net.getSignalType() != "CLOCK") {
@@ -510,6 +521,9 @@ void FastRouteKernel::initializeNets() {
                 _fastRoute->addNet(netName, idx, pins.size(), 1, grPins, netAlpha);
                 idx++;
         }
+
+        std::cout << "[INFO] Minimum degree: " << minDegree << "\n";
+        std::cout << "[INFO] Maximum degree: " << maxDegree << "\n";
 
         _fastRoute->initEdges();
 }
@@ -916,7 +930,7 @@ void FastRouteKernel::computeObstaclesAdjustments() {
                         Grid::TILE &firstTile = blockedTiles.first;
                         Grid::TILE &lastTile = blockedTiles.second;
                         
-                        if (lastTile._x == _grid->getXGrids() - 1 || 
+                        if (lastTile._x == _grid->getXGrids() || 
                             lastTile._y == _grid->getYGrids())
                                 continue;
                         
