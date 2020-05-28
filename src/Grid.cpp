@@ -113,20 +113,20 @@ int Grid::computeTileReduce(const Box &obs, const Box &tile, int trackSpace, boo
         if (direction == RoutingLayer::VERTICAL) {
                 if (obs.getLowerBound().getX() >= tile.getLowerBound().getX() &&
                     obs.getUpperBound().getX() <= tile.getUpperBound().getX()) {
-                        reduce = floor(std::abs(obs.getUpperBound().getX() - obs.getLowerBound().getX()) / trackSpace);
+                        reduce = ceil(std::abs(obs.getUpperBound().getX() - obs.getLowerBound().getX()) / trackSpace);
                 } else if (first) {
-                        reduce = floor(std::abs(tile.getUpperBound().getX() - obs.getLowerBound().getX()) / trackSpace);
+                        reduce = ceil(std::abs(tile.getUpperBound().getX() - obs.getLowerBound().getX()) / trackSpace);
                 } else {
-                        reduce = floor(std::abs(obs.getUpperBound().getX() - tile.getLowerBound().getX()) / trackSpace);
+                        reduce = ceil(std::abs(obs.getUpperBound().getX() - tile.getLowerBound().getX()) / trackSpace);
                 }
         } else {
                 if (obs.getLowerBound().getY() >= tile.getLowerBound().getY() &&
                     obs.getUpperBound().getY() <= tile.getUpperBound().getY()) {
-                        reduce = floor(std::abs(obs.getUpperBound().getY() - obs.getLowerBound().getY()) / trackSpace);
+                        reduce = ceil(std::abs(obs.getUpperBound().getY() - obs.getLowerBound().getY()) / trackSpace);
                 } else if (first) {
-                        reduce = floor(std::abs(tile.getUpperBound().getY() - obs.getLowerBound().getY()) / trackSpace);
+                        reduce = ceil(std::abs(tile.getUpperBound().getY() - obs.getLowerBound().getY()) / trackSpace);
                 } else {
-                        reduce = floor(std::abs(obs.getUpperBound().getY() - tile.getLowerBound().getY()) / trackSpace);
+                        reduce = ceil(std::abs(obs.getUpperBound().getY() - tile.getLowerBound().getY()) / trackSpace);
                 }
         }
 

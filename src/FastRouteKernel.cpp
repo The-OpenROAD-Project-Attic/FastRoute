@@ -930,10 +930,6 @@ void FastRouteKernel::computeObstaclesAdjustments() {
                         Grid::TILE &firstTile = blockedTiles.first;
                         Grid::TILE &lastTile = blockedTiles.second;
                         
-                        if (lastTile._x == _grid->getXGrids() || 
-                            lastTile._y == _grid->getYGrids())
-                                continue;
-                        
                         int firstTileReduce = _grid->computeTileReduce(obs, firstTileBox, trackSpace, true, direction);
 
                         int lastTileReduce = _grid->computeTileReduce(obs, lastTileBox, trackSpace, false, direction);
