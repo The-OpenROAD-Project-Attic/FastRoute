@@ -916,7 +916,7 @@ void FastRouteKernel::computeObstaclesAdjustments() {
                         Grid::TILE &firstTile = blockedTiles.first;
                         Grid::TILE &lastTile = blockedTiles.second;
                         
-                        if (lastTile._x == _grid->getXGrids() - 1 || 
+                        if (lastTile._x == _grid->getXGrids() || 
                             lastTile._y == _grid->getYGrids())
                                 continue;
                         
