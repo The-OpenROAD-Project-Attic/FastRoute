@@ -691,6 +691,7 @@ void FT::setNumAdjustments(int nAdjustments) {
 void FT::addAdjustment(long x1, long y1, int l1, long x2, long y2, int l2, int reducedCap, bool isReduce) {
         int grid, k;
         int reduce, cap;
+        int increase;
         reducedCap = reducedCap;
 
         k = l1 - 1;
@@ -712,7 +713,13 @@ void FT::addAdjustment(long x1, long y1, int l1, long x2, long y2, int l2, int r
 
                 h_edges3D[grid].cap = reducedCap;
                 h_edges3D[grid].red = reduce;
+                
                 grid = y1 * (xGrid - 1) + x1;
+                if (!isReduce) {
+                        increase = reducedCap - cap;
+                        h_edges[grid].cap += increase;
+                }
+
                 h_edges[grid].cap -= reduce;
                 h_edges[grid].red += reduce;
 
@@ -734,7 +741,13 @@ void FT::addAdjustment(long x1, long y1, int l1, long x2, long y2, int l2, int r
 
                 v_edges3D[grid].cap = reducedCap;
                 v_edges3D[grid].red = reduce;
+
                 grid = y1 * xGrid + x1;
+                if (!isReduce) {
+                        increase = reducedCap - cap;
+                        h_edges[grid].cap += increase;
+                }
+                
                 v_edges[grid].cap -= reduce;
                 v_edges[grid].red += reduce;
         }
