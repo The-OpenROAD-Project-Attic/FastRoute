@@ -251,16 +251,6 @@ void FastRouteKernel::startFastRoute() {
         std::cout << "Initializing grid...\n";
         initGrid();
         std::cout << "Initializing grid... Done!\n";
-
-        std::cout << "Searching for transition layers...\n";
-        std::set<int> transitionLayers = _dbWrapper->findTransitionLayers(_maxRoutingLayer);
-
-        std::cout << "[INFO] Found " << transitionLayers.size() << " transition layers\n";
-        for (std::set<int>::iterator it = transitionLayers.begin(); it != transitionLayers.end(); ++it) {
-                _layersToAdjust.push_back(*it);
-                _layersReductionPercentage.push_back(transitionLayerAdjust);
-        }
-        std::cout << "Searching for transition layers... Done!\n";
         
         std::cout << "Initializing routing layers...\n";
         initRoutingLayers();
