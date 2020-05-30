@@ -63,21 +63,21 @@ private:
         
 public:
         Pin() = default;
-        Pin(const std::string& name, Coordinate position,
-            const std::vector<int> layers,
+        Pin(const std::string& name, const Coordinate& position,
+            const std::vector<int>& layers,
             const std::map<int, std::vector<Box>>& boxesPerLayer,
             const std::string& netName, bool isPort)
             : _name(name), _position(position), _layers(layers),
             _boxesPerLayer(boxesPerLayer), _netName(netName),
             _isPort(isPort) { sortLayers(); }
         
-        std::string getName() const { return _name; }
-        Coordinate getPosition() const { return _position; }
-        std::vector<int> getLayers() const { return _layers; }
+        const std::string& getName() const { return _name; }
+        const Coordinate& getPosition() const { return _position; }
+        const std::vector<int>& getLayers() const { return _layers; }
         int getNumLayers() const { return _layers.size(); }
         int getTopLayer() const { return _layers.back(); }
-        std::map<int, std::vector<Box>> getBoxes() const { return _boxesPerLayer; }
-        std::string getNetName() const { return _netName; }
+        const std::map<int, std::vector<Box>>& getBoxes() const { return _boxesPerLayer; }
+        const std::string& getNetName() const { return _netName; }
         bool isPort() const { return _isPort; }
 };
 

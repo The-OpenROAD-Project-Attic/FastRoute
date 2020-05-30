@@ -61,7 +61,7 @@ public:
         Netlist()
             : _netCount(0) {};
         
-        std::vector<Net> getNets() const { return _nets; }
+        const std::vector<Net>& getNets() const { return _nets; }
         int getNetCount() const { return _netCount; }
         Net getNetByName(std::string name);
         

@@ -534,11 +534,8 @@ void FT::setLayerOrientation(int x) {
 
 void FT::addNet(char *name, int netIdx, int nPins, int minWidth, PIN pins[], float alpha) {
         // std::cout << "Adding net " << name << "\n";
-        int TD;
-        int i, j, k;
-        int pinX, pinY, pinL, netID, numPins, minwidth;
+        int pinX, pinY, pinL, netID, numPins;
         long pinX_in, pinY_in;
-        Bool remove;
 
         // TODO: check this size
         int pinXarray[nPins];
@@ -547,29 +544,22 @@ void FT::addNet(char *name, int netIdx, int nPins, int minWidth, PIN pins[], flo
 
         netID = netIdx;
         numPins = nPins;
-        minwidth = minWidth;
 
-        std::string netName(name);
-        std::vector<PIN> netPins;
-        for (int p = 0; p < numPins; p++) {
-                netPins.push_back(pins[p]);
-        }
-
-        allNets[netName] = netPins;
+        allNets[name] = std::vector<PIN>(&pins[0], &pins[numPins]);
 
         // TODO: check this, there was an if pinInd < 2000
         pinInd = 0;
-        for (j = 0; j < numPins; j++) {
+        for (int j = 0; j < numPins; j++) {
                 pinX_in = pins[j].x;
                 pinY_in = pins[j].y;
                 pinL = pins[j].layer;
                 pinX = (int)((pinX_in - xcorner) / wTile);
                 pinY = (int)((pinY_in - ycorner) / hTile);
                 if (!(pinX < 0 || pinX >= xGrid || pinY < -1 || pinY >= yGrid || pinL > numLayers || pinL <= 0)) {
-                        remove = FALSE;
-                        for (k = 0; k < pinInd; k++) {
+                        bool remove = false;
+                        for (int k = 0; k < pinInd; k++) {
                                 if (pinX == pinXarray[k] && pinY == pinYarray[k] && pinL == pinLarray[k]) {
-                                        remove = TRUE;
+                                        remove = true;
                                         break;
                                 }
                         }
@@ -585,7 +575,6 @@ void FT::addNet(char *name, int netIdx, int nPins, int minWidth, PIN pins[], flo
         if (pinInd > 1)  // valid net
         {
                 MD = std::max(MD, pinInd);
-                TD += pinInd;
                 // std::cout << "Net name: " << nets[newnetID]->name << "; num pins: " << nets[newnetID]->numPins << "\n";
                 strcpy(nets[newnetID]->name, name);
                 nets[newnetID]->netIDorg = netID;
@@ -596,7 +585,7 @@ void FT::addNet(char *name, int netIdx, int nPins, int minWidth, PIN pins[], flo
                 nets[newnetID]->pinL = new short[pinInd];
                 nets[newnetID]->alpha = alpha;
 
-                for (j = 0; j < pinInd; j++) {
+                for (int j = 0; j < pinInd; j++) {
                         nets[newnetID]->pinX[j] = pinXarray[j];
                         nets[newnetID]->pinY[j] = pinYarray[j];
                         nets[newnetID]->pinL[j] = pinLarray[j];

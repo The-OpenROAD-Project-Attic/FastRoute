@@ -77,11 +77,11 @@ public:
              const long tileWidth, const long tileHeight,
              const int xGrids, const int yGrids,
              const bool perfectRegularX, const bool perfectRegularY,
-             const int numLayers, const std::vector<int> spacings,
-             const std::vector<int> minWidths,
-             const std::vector<int> horizontalCapacities,
-             const std::vector<int> verticalCapacities,
-             const std::map<int, std::vector<Box>> obstacles, int databaseUnit)
+             const int numLayers, const std::vector<int>& spacings,
+             const std::vector<int>& minWidths,
+             const std::vector<int>& horizontalCapacities,
+             const std::vector<int>& verticalCapacities,
+             const std::map<int, std::vector<Box>>& obstacles, int databaseUnit)
             : _lowerLeftX(lowerLeftX), _lowerLeftY(lowerLeftY),
               _upperRightX(upperRightX), _upperRightY(upperRightY),
               _tileWidth(tileWidth), _tileHeight(tileHeight),
@@ -121,16 +121,16 @@ public:
         void setPitchesInTile(const int pitchesInTile) { _pitchesInTile = pitchesInTile; }
         int getPitchesInTile() const { return _pitchesInTile; }
         
-        std::vector<int> getSpacings() const { return _spacings; }
-        std::vector<int> getMinWidths() const { return _minWidths; }
+        const std::vector<int>& getSpacings() const { return _spacings; }
+        const std::vector<int>& getMinWidths() const { return _minWidths; }
         
         int getDatabaseUnit() const { return _databaseUnit; }
         
         void addSpacing(int value, int layer) { _spacings[layer] = value; }
         void addMinWidth(int value, int layer) { _minWidths[layer] = value; }
         
-        std::vector<int> getHorizontalEdgesCapacities() { return _horizontalEdgesCapacities; };
-        std::vector<int> getVerticalEdgesCapacities() { return _verticalEdgesCapacities; };
+        const std::vector<int>& getHorizontalEdgesCapacities() { return _horizontalEdgesCapacities; };
+        const std::vector<int>& getVerticalEdgesCapacities() { return _verticalEdgesCapacities; };
         
         void addHorizontalCapacity(int value, int layer) { _horizontalEdgesCapacities[layer] = value; }
         void addVerticalCapacity(int value, int layer) { _verticalEdgesCapacities[layer] = value; }
@@ -138,7 +138,7 @@ public:
         void updateHorizontalEdgesCapacities(int layer, int reduction) { _horizontalEdgesCapacities[layer] = reduction; };
         void updateVerticalEdgesCapacities(int layer, int reduction) { _verticalEdgesCapacities[layer] = reduction; };
         
-        std::map<int, std::vector<Box>> getAllObstacles() const { return _obstacles; }
+        const std::map<int, std::vector<Box>>& getAllObstacles() const { return _obstacles; }
         void addObstacle(int layer, Box obstacle) { _obstacles[layer].push_back(obstacle); }
         
         Coordinate getPositionOnGrid(const Coordinate& position);

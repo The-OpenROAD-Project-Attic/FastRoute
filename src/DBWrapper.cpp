@@ -91,19 +91,6 @@ void DBWrapper::initGrid(int maxLayer) {
         if ((yGrids * tileHeight) == upperRightY)
                 perfectRegularY = true;
         
-        bool metal1Orientation = 0;
-        
-        odb::dbTechLayer* layer1 = tech->findRoutingLayer(1);
-        
-        if (layer1->getDirection().getValue() == odb::dbTechLayerDir::HORIZONTAL) {
-                metal1Orientation = RoutingLayer::HORIZONTAL;
-        } else if (layer1->getDirection().getValue() == odb::dbTechLayerDir::VERTICAL) {
-                metal1Orientation = RoutingLayer::VERTICAL;
-        } else {
-                std::cout << "[ERROR] Layer 1 does not have valid direction! Exiting...\n";
-                std::exit(1);
-        }
-        
         std::vector<int> genericVector(numLayers);
         std::map<int, std::vector<Box>> genericMap;
         
@@ -340,12 +327,9 @@ void DBWrapper::initNetlist() {
                 std::exit(1);
         }
         
-        odb::dbSet<odb::dbNet>::iterator nIter;
-        
-        for (nIter = nets.begin(); nIter != nets.end(); ++nIter) {
+        for (odb::dbNet* currNet : nets) {
                 std::vector<Pin> netPins;
                 
-                odb::dbNet* currNet = *nIter;
                 if (currNet->getSigType().getValue() == odb::dbSigType::POWER ||
                     currNet->getSigType().getValue() == odb::dbSigType::GROUND ||
                     currNet->isSpecial() || currNet->getSWires().size() > 0) {
@@ -354,12 +338,7 @@ void DBWrapper::initNetlist() {
                 std::string netName = currNet->getConstName();
                 std::string signalType = currNet->getSigType().getString();
                 
-                // Iterate through all instance pins
-                odb::dbSet<odb::dbITerm> iTerms = currNet->getITerms();
-                odb::dbSet<odb::dbITerm>::iterator iIter;
-                
-                for (iIter = iTerms.begin(); iIter != iTerms.end(); iIter++) {
-                        odb::dbITerm* currITerm = *iIter;
+                for (odb::dbITerm* currITerm : currNet->getITerms()) {
                         int pX, pY;
                         std::string pinName;
                         std::vector<int> pinLayers;
@@ -377,26 +356,18 @@ void DBWrapper::initNetlist() {
                         pinName = mTerm->getConstName();
                         pinName = instName + ":" + pinName;
                         
-                        odb::dbSet<odb::dbMPin> mTermPins = mTerm->getMPins();
-                        odb::dbSet<odb::dbMPin>::iterator pinIter;
-                        
                         odb::dbInst* inst = currITerm->getInst();
                         inst->getOrigin(pX, pY);
                         odb::Point origin = odb::Point(pX, pY);
                         odb::dbTransform transform(inst->getOrient(), origin);
                         
-                        for (pinIter = mTermPins.begin(); pinIter != mTermPins.end(); pinIter++) {
+                        for (odb::dbMPin* currMTermPin : mTerm->getMPins()) {
                                 Coordinate lowerBound;
                                 Coordinate upperBound;
                                 Box pinBox;
                                 int pinLayer;
                                 
-                                odb::dbMPin* currMTermPin = *pinIter;
-                                odb::dbSet<odb::dbBox> geometries = currMTermPin->getGeometry();
-                                odb::dbSet<odb::dbBox>::iterator geomIter;
-                                
-                                for (geomIter = geometries.begin(); geomIter != geometries.end(); geomIter++) {
-                                        odb::dbBox* box = *geomIter;
+                                for (odb::dbBox* box : currMTermPin->getGeometry()) {
                                         odb::Rect rect;
                                         box->getBox(rect);
                                         transform.apply(rect);
@@ -418,9 +389,8 @@ void DBWrapper::initNetlist() {
                                         pinBoxes[pinLayer].push_back(pinBox);
                                 }
                                 
-                                for(std::map<int, std::vector<Box>>::iterator it = pinBoxes.begin();
-                                    it != pinBoxes.end(); ++it) {
-                                        pinLayers.push_back(it->first);
+                                for (auto& layer_boxes : pinBoxes) {
+                                        pinLayers.push_back(layer_boxes.first);
                                 }
                                 
                                 Coordinate pinPos = Coordinate(pX, pY);
@@ -429,13 +399,8 @@ void DBWrapper::initNetlist() {
                         }
                 }
                 
-                // Iterate through all I/O pins
-                odb::dbSet<odb::dbBTerm> bTerms = currNet->getBTerms();
-                odb::dbSet<odb::dbBTerm>::iterator bIter;
-                
-                for (bIter = bTerms.begin(); bIter != bTerms.end(); bIter++) {
+                for (odb::dbBTerm* currBTerm : currNet->getBTerms()) {
                         int posX, posY;
-                        odb::dbBTerm* currBTerm = *bIter;
                         std::string pinName;
                         
                         currBTerm->getFirstPinLocation(posX, posY);
@@ -444,16 +409,13 @@ void DBWrapper::initNetlist() {
                         std::map<int, std::vector<Box>> pinBoxes;
                                                 
                         pinName = currBTerm->getConstName();
-                        odb::dbSet<odb::dbBPin> bTermPins = currBTerm->getBPins();
-                        odb::dbSet<odb::dbBPin>::iterator pinIter;
                         
-                        for (pinIter = bTermPins.begin(); pinIter != bTermPins.end(); pinIter++) {
+                        for (odb::dbBPin* currBTermPin : currBTerm->getBPins()) {
                                 Coordinate lowerBound;
                                 Coordinate upperBound;
                                 Box pinBox;
                                 int pinLayer;
                                 
-                                odb::dbBPin* currBTermPin = *pinIter;
                                 odb::dbBox* currBTermBox = currBTermPin->getBox();
                                 odb::dbTechLayer* techLayer = currBTermBox->getTechLayer();
                                 if (techLayer->getType().getValue() != odb::dbTechLayerType::ROUTING) {
@@ -472,9 +434,8 @@ void DBWrapper::initNetlist() {
                                 pinBoxes[pinLayer].push_back(pinBox);
                         }
                         
-                        for(std::map<int, std::vector<Box>>::iterator it = pinBoxes.begin();
-                            it != pinBoxes.end(); ++it) {
-                                pinLayers.push_back(it->first);
+                        for (auto& layer_boxes : pinBoxes) {
+                                pinLayers.push_back(layer_boxes.first);
                         }
                         
                         Coordinate pinPos = Coordinate(posX, posY);
@@ -502,13 +463,9 @@ void DBWrapper::initObstacles() {
                 std::exit(1);
         }
 
-        odb::dbSet<odb::dbObstruction> obstructions = block->getObstructions();
-        
-        odb::dbSet<odb::dbObstruction>::iterator obstructIter;
         int obstructionsCnt = 0;
 
-        for (obstructIter = obstructions.begin(); obstructIter != obstructions.end(); obstructIter++) {
-                odb::dbObstruction* currObstruct = *obstructIter;
+        for (odb::dbObstruction* currObstruct : block->getObstructions()) {
                 odb::dbBox* obstructBox = currObstruct->getBBox();
                 
                 int layer = obstructBox->getTechLayer()->getRoutingLevel();
@@ -526,18 +483,11 @@ void DBWrapper::initObstacles() {
         std::cout << "[INFO] #DB Obstructions: " << obstructionsCnt << "\n";
 
         // Get instance obstructions
-        odb::dbSet<odb::dbInst> insts;
-        insts = block->getInsts();
-        
-        odb::dbSet<odb::dbInst>::iterator instIter;
-        
         int macrosCnt = 0;
         int obstaclesCnt = 0;
-        for (instIter = insts.begin(); instIter != insts.end(); instIter++) {
+        for (odb::dbInst* currInst : block->getInsts()) {
                 int pX, pY;
-                bool isMacro = false;
 
-                odb::dbInst* currInst = *instIter;
                 odb::dbMaster* master = currInst->getMaster();
 
                 if (master->getType().isPad()) {
@@ -549,15 +499,11 @@ void DBWrapper::initObstacles() {
                 
                 odb::dbTransform transform(currInst->getOrient(), origin);
                 
-                odb::dbSet<odb::dbBox> obstructions = master->getObstructions();
                 if (master->isBlock()) {
                         macrosCnt++;
-                        isMacro = true;
                 }
-                odb::dbSet<odb::dbBox>::iterator boxIter;
                 
-                for (boxIter = obstructions.begin(); boxIter != obstructions.end(); boxIter++) {
-                        odb::dbBox* currBox = *boxIter;
+                for (odb::dbBox* currBox : master->getObstructions()) {
                         int layer = currBox->getTechLayer()->getRoutingLevel();
                         
                         odb::Rect rect;
@@ -574,30 +520,14 @@ void DBWrapper::initObstacles() {
                         obstaclesCnt++;
                 }
 
-                // if (isMacro) { // Get cut layer obstacles
-                //         ;
-                // }
-
-                odb::dbSet<odb::dbMTerm> mTerms = master->getMTerms();
-                odb::dbSet<odb::dbMTerm>::iterator termIter;
-
-                for (termIter = mTerms.begin(); termIter != mTerms.end(); termIter++) {
-                        odb::dbMTerm* mTerm = *termIter;
-                        odb::dbSet<odb::dbMPin> mTermPins = mTerm->getMPins();
-                        odb::dbSet<odb::dbMPin>::iterator pinIter;
-
-                        for (pinIter = mTermPins.begin(); pinIter != mTermPins.end(); pinIter++) {
+                for (odb::dbMTerm* mTerm : master->getMTerms()) {
+                        for (odb::dbMPin* currMTermPin : mTerm->getMPins()) {
                                 Coordinate lowerBound;
                                 Coordinate upperBound;
                                 Box pinBox;
                                 int pinLayer;
 
-                                odb::dbMPin* currMTermPin = *pinIter;
-                                odb::dbSet<odb::dbBox> geometries = currMTermPin->getGeometry();
-                                odb::dbSet<odb::dbBox>::iterator geomIter;
-
-                                for (geomIter = geometries.begin(); geomIter != geometries.end(); geomIter++) {
-                                        odb::dbBox* box = *geomIter;
+                                for (odb::dbBox* box : currMTermPin->getGeometry()) {
                                         odb::Rect rect;
                                         box->getBox(rect);
                                         transform.apply(rect);
@@ -633,11 +563,7 @@ void DBWrapper::initObstacles() {
                 std::exit(1);
         }
         
-        odb::dbSet<odb::dbNet>::iterator nIter;
-        
-        for (nIter = nets.begin(); nIter != nets.end(); ++nIter) {
-                odb::dbNet* currNet = *nIter;
-                
+        for (odb::dbNet* currNet : nets) {
                 uint wireCnt = 0, viaCnt = 0;
                 currNet->getWireCount(wireCnt, viaCnt);
                 if (wireCnt < 1)
@@ -645,15 +571,8 @@ void DBWrapper::initObstacles() {
                 
                 if (currNet->getSigType() == odb::dbSigType::POWER ||
                     currNet->getSigType() == odb::dbSigType::GROUND) {
-                        odb::dbSet<odb::dbSWire> swires = currNet->getSWires();
-                        
-                        odb::dbSet<odb::dbSWire>::iterator itr;
-                        for (itr = swires.begin(); itr != swires.end(); ++itr) {
-                                odb::dbSWire* swire = *itr;
-                                odb::dbSet<odb::dbSBox> wires = swire->getWires();
-                                odb::dbSet<odb::dbSBox>::iterator box_itr;
-                                for (box_itr = wires.begin(); box_itr != wires.end(); ++box_itr) {
-                                        odb::dbSBox* s = *box_itr;
+                        for (odb::dbSWire* swire : currNet->getSWires()) {
+                                for (odb::dbSBox* s : swire->getWires()) {
                                         if (s->isVia()) {
                                                 continue;
                                         } else {
@@ -745,12 +664,9 @@ std::set<int> DBWrapper::findTransitionLayers(int maxRoutingLayer) {
                 std::exit(1);
         }
         
-        odb::dbSet<odb::dbTechVia>::iterator vIter;
-
         std::vector<odb::dbTechVia*> defaultVias;
 
-        for (vIter = vias.begin(); vIter != vias.end(); ++vIter) {
-                odb::dbTechVia* currVia = *vIter;
+        for (odb::dbTechVia* currVia : vias) {
                 odb::dbStringProperty* prop = odb::dbStringProperty::find(currVia, "OR_DEFAULT");
                 
                 if (prop == NULL) {
@@ -763,8 +679,7 @@ std::set<int> DBWrapper::findTransitionLayers(int maxRoutingLayer) {
 
         if (defaultVias.size() == 0) {
                 std::cout << "[WARNING]No OR_DEFAULT vias defined\n";
-                for (vIter = vias.begin(); vIter != vias.end(); ++vIter) {
-                        odb::dbTechVia* currVia = *vIter;
+                for (odb::dbTechVia* currVia : vias) {
                         defaultVias.push_back(currVia);
                 }
         }

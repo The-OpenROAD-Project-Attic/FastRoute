@@ -58,9 +58,7 @@ Coordinate Grid::getPositionOnGrid(const Coordinate& position) {
         DBU centerX = (gCellId_X * _tileWidth) + (_tileWidth / 2) + _lowerLeftX;
         DBU centerY = (gCellId_Y * _tileHeight) + (_tileHeight / 2) + _lowerLeftY;
 
-        Coordinate posOnGrid = Coordinate(centerX, centerY);
-        
-        return posOnGrid;
+        return Coordinate(centerX, centerY);
 }
 
 std::pair<Grid::TILE, Grid::TILE> Grid::getBlockedTiles(const Box& obstacle, Box& firstTileBds,
