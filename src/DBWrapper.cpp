@@ -203,7 +203,7 @@ void DBWrapper::initRoutingTracks(std::vector<RoutingTracks>& allRoutingTracks, 
         }
 }
 
-void DBWrapper::computeCapacities(int maxLayer) {
+void DBWrapper::computeCapacities(int maxLayer, std::map<int, float> layerPitches) {
         int trackSpacing;
         int hCapacity, vCapacity;
         int trackStepX, trackStepY;
@@ -243,12 +243,24 @@ void DBWrapper::computeCapacities(int maxLayer) {
                 
                 if (techLayer->getDirection().getValue() == odb::dbTechLayerDir::HORIZONTAL) {
                         trackSpacing = trackStepY;
+
+                        if (layerPitches.find(l) != layerPitches.end()) {
+                                int layerPitch = (int)(tech->getLefUnits()*layerPitches[l]);
+                                trackSpacing = std::max(layerPitch, trackStepY);
+                        }
+
                         hCapacity = std::floor((float)_grid->getTileWidth() / trackSpacing);
                         
                         _grid->addHorizontalCapacity(hCapacity, l-1);
                         _grid->addVerticalCapacity(0, l-1);
                 } else if (techLayer->getDirection().getValue() == odb::dbTechLayerDir::VERTICAL) {
                         trackSpacing = trackStepX;
+
+                        if (layerPitches.find(l) != layerPitches.end()) {
+                                int layerPitch = (int)(tech->getLefUnits()*layerPitches[l]);
+                                trackSpacing = std::max(layerPitch, trackStepX);
+                        }
+
                         vCapacity = std::floor((float)_grid->getTileWidth() / trackSpacing);
                         
                         _grid->addHorizontalCapacity(0, l-1);

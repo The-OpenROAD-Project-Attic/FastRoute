@@ -331,7 +331,7 @@ void FastRouteKernel::runFastRoute() {
 void FastRouteKernel::initGrid() {        
         _dbWrapper->initGrid(_maxRoutingLayer);
         
-        _dbWrapper->computeCapacities(_maxRoutingLayer);
+        _dbWrapper->computeCapacities(_maxRoutingLayer, _layerPitches);
         _dbWrapper->computeSpacingsAndMinWidth(_maxRoutingLayer);
         _dbWrapper->initObstacles();
         

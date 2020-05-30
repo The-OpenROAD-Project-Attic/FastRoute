@@ -69,7 +69,7 @@ public:
         void initGrid(int maxLayer);
         void initRoutingLayers(std::vector<RoutingLayer>& routingLayers);
         void initRoutingTracks(std::vector<RoutingTracks>& allRoutingTracks, int maxLayer);
-        void computeCapacities(int maxLayer);
+        void computeCapacities(int maxLayer, std::map<int, float> layerPitches);
         void computeSpacingsAndMinWidth(int maxLayer);
         void initNetlist();
         void initObstacles();
