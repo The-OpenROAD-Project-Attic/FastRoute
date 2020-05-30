@@ -130,7 +130,7 @@ private:
         void computeTrackAdjustments();
         void computeUserGlobalAdjustments();
         void computeUserLayerAdjustments();
-        void computeRegionAdjustments(Coordinate lowerBound, Coordinate upperBound, int layer, float reductionPercentage);
+        void computeRegionAdjustments(const Coordinate& lowerBound, const Coordinate& upperBound, int layer, float reductionPercentage);
         void computeObstaclesAdjustments();
         void computeWirelength();
         
@@ -140,9 +140,9 @@ private:
         void addRemainingGuides(std::vector<FastRoute::NET> &globalRoute);
         void mergeBox(std::vector<Box>& guideBox);
         Box globalRoutingToBox(const FastRoute::ROUTE &route);
-        bool segmentsOverlaps(ROUTE seg0, ROUTE seg1, ROUTE &newSeg);
+        bool segmentsOverlaps(const ROUTE& seg0, const ROUTE& seg1, ROUTE &newSeg);
         void mergeSegments(FastRoute::NET &net);
-        bool pinOverlapsWithSingleTrack(Pin pin, Coordinate &trackPosition);
+        bool pinOverlapsWithSingleTrack(const Pin& pin, Coordinate &trackPosition);
         
         // check functions
         void checkPinPlacement();

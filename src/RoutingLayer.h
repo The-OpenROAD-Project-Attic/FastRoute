@@ -58,7 +58,7 @@ private:
         
 public:
         RoutingLayer() = default;
-        RoutingLayer(const int index, const std::string name,
+        RoutingLayer(const int index, const std::string& name,
                      const bool preferredDirection)
             : _index(index), _name(name),
               _preferredDirection(preferredDirection) {}
@@ -67,7 +67,7 @@ public:
         const static bool VERTICAL = 1;
         
         int getIndex() const { return _index; }
-        std::string getName() const { return _name; }
+        const std::string& getName() const { return _name; }
         bool getPreferredDirection() const { return _preferredDirection; }
 };
 

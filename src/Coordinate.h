@@ -60,7 +60,7 @@ public:
         void setY(const DBU y) { _y = y; }
         DBU getX() const { return _x; }
         DBU getY() const { return _y; }
-        DBU dst(Coordinate);
+        DBU dst(const Coordinate& a);
 };
 
 }
