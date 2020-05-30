@@ -795,7 +795,7 @@ void FastRouteKernel::computeUserLayerAdjustments() {
         for (int idx = 0; idx < _layersToAdjust.size(); idx++) {
                 int layer = _layersToAdjust[idx];
                 float adjustment = _layersReductionPercentage[idx];
-                std::cout << "[INFO] Reducing resources of layer " << layer << " in " << adjustment*100 << "%\n";
+                std::cout << "[INFO] Reducing resources of layer " << layer << " by " << adjustment*100 << "%\n";
                 if (_hCapacities[layer - 1] != 0) {
                         int newCap = _grid->getHorizontalEdgesCapacities()[layer - 1] * (1 - adjustment);
                         _grid->updateHorizontalEdgesCapacities(layer-1, newCap);
