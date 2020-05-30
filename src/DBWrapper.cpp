@@ -127,7 +127,7 @@ void DBWrapper::initRoutingLayers(std::vector<RoutingLayer>& routingLayers) {
         }
 }
 
-void DBWrapper::initRoutingTracks(std::vector<RoutingTracks>& allRoutingTracks, int maxLayer) {
+void DBWrapper::initRoutingTracks(std::vector<RoutingTracks>& allRoutingTracks, int maxLayer, std::map<int, float> layerPitches) {
         odb::dbTech* tech = _db->getTech();
         if (!tech) {
                 std::cout << "[ERROR] obd::dbTech not initialized! Exiting...\n";
@@ -170,11 +170,19 @@ void DBWrapper::initRoutingTracks(std::vector<RoutingTracks>& allRoutingTracks, 
 
                 if (techayer->getDirection().getValue() == odb::dbTechLayerDir::HORIZONTAL) {
                         spacing = trackStepY;
+                        if (layerPitches.find(layer) != layerPitches.end()) {
+                                int layerPitch = (int)(tech->getLefUnits()*layerPitches[layer]);
+                                spacing = std::max(layerPitch, trackStepY);
+                        }
                         location = initTrackY;
                         numTracks = numTracksY;
                         orientation = RoutingLayer::HORIZONTAL;
                 } else if (techayer->getDirection().getValue() == odb::dbTechLayerDir::VERTICAL) {
                         spacing = trackStepX;
+                        if (layerPitches.find(layer) != layerPitches.end()) {
+                                int layerPitch = (int)(tech->getLefUnits()*layerPitches[layer]);
+                                spacing = std::max(layerPitch, trackStepX);
+                        }
                         location = initTrackX;
                         numTracks = numTracksX;
                         orientation = RoutingLayer::VERTICAL;

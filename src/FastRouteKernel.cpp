@@ -348,7 +348,7 @@ void FastRouteKernel::initRoutingLayers() {
 }
 
 void FastRouteKernel::initRoutingTracks() {
-        _dbWrapper->initRoutingTracks(*_allRoutingTracks, _maxRoutingLayer);
+        _dbWrapper->initRoutingTracks(*_allRoutingTracks, _maxRoutingLayer, _layerPitches);
 }
 
 void FastRouteKernel::setCapacities() {
