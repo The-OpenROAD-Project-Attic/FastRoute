@@ -247,6 +247,14 @@ void FastRouteKernel::startFastRoute() {
         std::cout << "[PARAMS] Unidirectional routing: " << _unidirectionalRoute << "\n";
         std::cout << "[PARAMS] Clock net routing: " << _clockNetRouting << "\n";
         std::cout << "[PARAMS] Grid origin: (" << _gridOrigin->getX() << ", " << _gridOrigin->getY() << ")\n";
+        if (!_layerPitches.empty()) {
+                std::cout << "[PARAMS] Layers pitches: \n";
+                std::map<int, float>::iterator it;
+                for (it = _layerPitches.begin(); it != _layerPitches.end(); it++) {
+                        std::cout << "Layer " << it->first << " pitch: " << it->second << "\n";
+                }
+        }
+        std::cout << "\n";
         
         std::cout << "Initializing grid...\n";
         initGrid();
