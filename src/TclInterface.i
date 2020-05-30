@@ -79,6 +79,8 @@ extern void set_allow_overflow(bool allowOverflow);
 
 extern void set_seed(unsigned seed);
 
+extern void set_layer_pitch(int layer, float pitch);
+
 extern void start_fastroute();
 
 extern void run_fastroute();

@@ -64,6 +64,7 @@ void set_grid_origin(long x, long y);
 void set_pdrev_for_high_fanout(int pdRevForHighFanout);
 void set_allow_overflow(bool allowOverflow);
 void set_seed(unsigned seed);
+void set_layer_pitch(int layer, float pitch);
 
 // Run
 void start_fastroute();

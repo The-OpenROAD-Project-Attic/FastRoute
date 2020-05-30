@@ -129,6 +129,10 @@ void set_seed(unsigned seed) {
         fastRouteKernel->setSeed(seed);
 }
 
+void set_layer_pitch(int layer, float pitch) {
+        fastRouteKernel->setLayerPitch(layer, pitch);
+}
+
 void start_fastroute() {
         fastRouteKernel->startFastRoute();
 }

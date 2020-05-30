@@ -52,6 +52,7 @@ sta::define_cmd_args "fastroute" {[-output_file out_file] \
                                            [-allow_overflow] \
                                            [-seed seed] \
                                            [-report_congestion congest_file] \
+                                           [-layers_pitches layers_pitches] \
 }
 
 proc fastroute { args } {
@@ -59,7 +60,7 @@ proc fastroute { args } {
     keys {-output_file -capacity_adjustment -min_routing_layer -max_routing_layer \
           -tile_size -alpha -verbose -layers_adjustments \
           -regions_adjustments -nets_alphas_priorities -overflow_iterations \
-          -grid_origin -pdrev_for_high_fanout -seed -report_congestion} \
+          -grid_origin -pdrev_for_high_fanout -seed -report_congestion -layers_pitches} \
     flags {-unidirectional_routing -clock_net_routing -allow_overflow} \
 
   if { [info exists keys(-output_file)] } {
@@ -203,6 +204,16 @@ proc fastroute { args } {
   if { [info exists keys(-report_congestion)] } {
     set congest_file $keys(-report_congestion)
     FastRoute::report_congestion $congest_file
+  }
+
+  if { [info exists keys(-layers_pitches)] } {
+    set layers_pitches $keys(-layers_pitches)
+    foreach layer_pitch $layers_pitches {
+      set layer [lindex $layer_pitch 0]
+      set pitch [lindex $layer_pitch 1]
+
+      FastRoute::set_layer_pitch $layer $pitch
+    }
   }
 
   for {set layer 1} {$layer <= $max_layer} {set layer [expr $layer+1]} {

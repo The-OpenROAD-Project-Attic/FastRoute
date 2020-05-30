@@ -1032,6 +1032,10 @@ void FastRouteKernel::addRegionAdjustment(int minX, int minY, int maxX, int maxY
         regionsReductionPercentage.push_back(reductionPercentage);
 }
 
+void FastRouteKernel::setLayerPitch(int layer, float pitch) {
+        _layerPitches[layer] = pitch;
+}
+
 void FastRouteKernel::addAlphaForNet(char * netName, float alpha) {
         std::string name(netName);
         _netsAlpha[name] = alpha;

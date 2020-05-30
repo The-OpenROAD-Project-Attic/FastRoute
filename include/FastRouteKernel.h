@@ -110,6 +110,9 @@ private:
         std::vector<int> regionsLayer;
         std::vector<float> regionsReductionPercentage;
 
+        // Pitches variables
+        std::map<int, float> _layerPitches;
+
         // Clock net routing variables
         bool _pdRev;
         float _alpha;
@@ -208,6 +211,7 @@ public:
         unsigned getDbId();
         void addLayerAdjustment(int layer, float reductionPercentage);
         void addRegionAdjustment(int minX, int minY, int maxX, int maxY, int layer, float reductionPercentage);
+        void setLayerPitch(int layer, float pitch);
         void addAlphaForNet(char * netName, float alpha);
         void setVerbose(const int v);
         void setOverflowIterations(int iterations);
