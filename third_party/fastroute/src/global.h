@@ -40,13 +40,9 @@ namespace FastRoute {
 #define FALSE 0
 #define MAXLONG 0x7fffffffL
 
-struct point {
+struct Point {
         long x, y;
 };
-
-typedef struct point Point;
-
-typedef long nn_array[8];
 
 }  // namespace FastRoute
 #endif /* __GLOBAL_H__ */
