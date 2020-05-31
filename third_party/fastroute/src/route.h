@@ -19,37 +19,40 @@
 //
 // THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
 // AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
-// IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-// DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
-// FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
-// DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
-// SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
-// CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
-// OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
-// USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+// IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+// ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+// LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+// CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+// SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+// INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+// CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+// ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+// POSSIBILITY OF SUCH DAMAGE.
 ////////////////////////////////////////////////////////////////////////////////
 
 #ifndef __ROUTE_H__
 #define __ROUTE_H__
+
+#include "DataType.h"
 
 namespace FastRoute {
 
 #define SAMEX 0
 #define SAMEY 1
 
-extern float *costHVH;  // Horizontal first Z
-extern float *costVHV;  // Vertical first Z
-extern float *costH;    // Horizontal segment cost
-extern float *costV;    // Vertical segment cost
-extern float *costLR;   // Left and right boundary cost
-extern float *costTB;   // Top and bottom boundary cost
+extern float* costHVH;  // Horizontal first Z
+extern float* costVHV;  // Vertical first Z
+extern float* costH;    // Horizontal segment cost
+extern float* costV;    // Vertical segment cost
+extern float* costLR;   // Left and right boundary cost
+extern float* costTB;   // Top and bottom boundary cost
 
-extern float *costHVHtest;  // Vertical first Z
-extern float *costVtest;    // Vertical segment cost
-extern float *costTBtest;   // Top and bottom boundary cost
+extern float* costHVHtest;  // Vertical first Z
+extern float* costVtest;    // Vertical segment cost
+extern float* costTBtest;   // Top and bottom boundary cost
 
 // old functions for segment list data structure
-extern void routeSegL(Segment *seg);
+extern void routeSegL(Segment* seg);
 extern void routeLAll(Bool firstTime);
 // new functions for tree data structure
 extern void newrouteL(int netID, RouteType ripuptype, Bool viaGuided);
