@@ -814,22 +814,16 @@ void gen_brk_RSMT(Bool congestionDriven,
   int   x1, y1, x2, y2;
   int   segPos, segcnt;
   Tree  rsmt;
-  int   wl, wl1, numShift = 0, cnt1, cnt2, cnt3;
-  float coeffV, coefMax, coefMin;
-
-  coefMax = 0;
-  coefMin = BIG_INT;
+  int   wl, wl1, numShift = 0;
+  float coeffV;
 
   TreeEdge *treeedges, *treeedge;
   TreeNode* treenodes;
 
-  int  totalnon = 0;
   Bool cong;
 
   wl = wl1    = 0;
   totalNumSeg = 0;
-
-  cnt1 = cnt2 = cnt3 = 0;
 
   for (i = 0; i < numValidNets; i++) {
     coeffV    = 1.36;
@@ -965,9 +959,6 @@ void gen_brk_RSMT(Bool congestionDriven,
     printf("[INFO] WIRELEN : %d, WIRELEN1 : %d\n", wl, wl1);
     printf("[INFO] NumSeg  : %d\n", totalNumSeg);
     printf("[INFO] NumShift: %d\n", numShift);
-    printf("[INFO] totalnon %d\n", totalnon);
-    printf("[INFO] Max %f, Min %f\n", coefMax, coefMin);
-    printf("[INFO] cnt1 %d, cnt2 %d, cnt3 %d\n\n", cnt1, cnt2, cnt3);
   }
 }
 
