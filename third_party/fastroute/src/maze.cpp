@@ -510,12 +510,12 @@ void setupHeap(int  netID,
 
   if (d == 2)  // 2-pin net
   {
-    *(d1 + y1 * XRANGE + x1) = 0;
-    heap1[0]                 = &(*(d1 + y1 * XRANGE + x1));
-    *heapLen1                = 1;
-    *(d2 + y2 * XRANGE + x2) = 0;
-    heap2[0]                 = &(*(d2 + y2 * XRANGE + x2));
-    *heapLen2                = 1;
+    d1[y1][x1] = 0;
+    heap1[0]   = &d1[y1][x1];
+    *heapLen1  = 1;
+    d2[y2][x2] = 0;
+    heap2[0]   = &d2[y2][x2];
+    *heapLen2  = 1;
   } else  // net with more than 2 pins
   {
     numNodes = 2 * d - 2;
@@ -531,19 +531,19 @@ void setupHeap(int  netID,
     if (n1 < d)  // n1 is a Pin node
     {
       // just need to put n1 itself into heap1
-      *(d1 + y1 * XRANGE + x1) = 0;
-      heap1[0]                 = &(*(d1 + y1 * XRANGE + x1));
-      visited[n1]              = TRUE;
-      *heapLen1                = 1;
+      d1[y1][x1]  = 0;
+      heap1[0]    = &d1[y1][x1];
+      visited[n1] = TRUE;
+      *heapLen1   = 1;
     } else  // n1 is a Steiner node
     {
       heapcnt   = 0;
       queuehead = queuetail = 0;
 
       // add n1 into heap1
-      *(d1 + y1 * XRANGE + x1) = 0;
-      heap1[0]                 = &(*(d1 + y1 * XRANGE + x1));
-      visited[n1]              = TRUE;
+      d1[y1][x1]  = 0;
+      heap1[0]    = &d1[y1][x1];
+      visited[n1] = TRUE;
       heapcnt++;
 
       // add n1 into the queue
@@ -569,10 +569,10 @@ void setupHeap(int  netID,
                 {
                   // put nbr into heap1 if in enlarged region
                   if (inRegion[treenodes[nbr].y][treenodes[nbr].x]) {
-                    nbrX                         = treenodes[nbr].x;
-                    nbrY                         = treenodes[nbr].y;
-                    *(d1 + nbrY * XRANGE + nbrX) = 0;
-                    heap1[heapcnt] = &(*(d1 + nbrY * XRANGE + nbrX));
+                    nbrX           = treenodes[nbr].x;
+                    nbrY           = treenodes[nbr].y;
+                    d1[nbrY][nbrX] = 0;
+                    heap1[heapcnt] = &d1[nbrY][nbrX];
                     heapcnt++;
                     corrEdge[nbrY][nbrX] = edge;
                   }
@@ -588,8 +588,8 @@ void setupHeap(int  netID,
                       y_grid = route->gridsY[j];
 
                       if (inRegion[y_grid][x_grid]) {
-                        *(d1 + y_grid * XRANGE + x_grid) = 0;
-                        heap1[heapcnt] = &(*(d1 + y_grid * XRANGE + x_grid));
+                        d1[y_grid][x_grid] = 0;
+                        heap1[heapcnt]     = &d1[y_grid][x_grid];
                         heapcnt++;
                         corrEdge[y_grid][x_grid] = edge;
                       }
@@ -617,19 +617,19 @@ void setupHeap(int  netID,
     if (n2 < d)  // n2 is a Pin node
     {
       // just need to put n1 itself into heap1
-      *(d2 + y2 * XRANGE + x2) = 0;
-      heap2[0]                 = &(*(d2 + y2 * XRANGE + x2));
-      visited[n2]              = TRUE;
-      *heapLen2                = 1;
+      d2[y2][x2]  = 0;
+      heap2[0]    = &d2[y2][x2];
+      visited[n2] = TRUE;
+      *heapLen2   = 1;
     } else  // n2 is a Steiner node
     {
       heapcnt   = 0;
       queuehead = queuetail = 0;
 
       // add n2 into heap2
-      *(d2 + y2 * XRANGE + x2) = 0;
-      heap2[0]                 = &(*(d2 + y2 * XRANGE + x2));
-      visited[n2]              = TRUE;
+      d2[y2][x2]  = 0;
+      heap2[0]    = &d2[y2][x2];
+      visited[n2] = TRUE;
       heapcnt++;
 
       // add n2 into the queue
@@ -656,10 +656,10 @@ void setupHeap(int  netID,
                 {
                   // put nbr into heap2
                   if (inRegion[treenodes[nbr].y][treenodes[nbr].x]) {
-                    nbrX                         = treenodes[nbr].x;
-                    nbrY                         = treenodes[nbr].y;
-                    *(d2 + nbrY * XRANGE + nbrX) = 0;
-                    heap2[heapcnt] = &(*(d2 + nbrY * XRANGE + nbrX));
+                    nbrX           = treenodes[nbr].x;
+                    nbrY           = treenodes[nbr].y;
+                    d2[nbrY][nbrX] = 0;
+                    heap2[heapcnt] = &d2[nbrY][nbrX];
                     heapcnt++;
                     corrEdge[nbrY][nbrX] = edge;
                   }
@@ -674,8 +674,8 @@ void setupHeap(int  netID,
                       x_grid = route->gridsX[j];
                       y_grid = route->gridsY[j];
                       if (inRegion[y_grid][x_grid]) {
-                        *(d2 + y_grid * XRANGE + x_grid) = 0;
-                        heap2[heapcnt] = &(*(d2 + y_grid * XRANGE + x_grid));
+                        d2[y_grid][x_grid] = 0;
+                        heap2[heapcnt]     = &d2[y_grid][x_grid];
                         heapcnt++;
                         corrEdge[y_grid][x_grid] = edge;
                       }
@@ -1246,10 +1246,10 @@ void mazeRouteMSMD(int   iter,
           // initialize d1[][] and d2[][] as BIG_INT
           for (i = regionY1; i <= regionY2; i++) {
             for (j = regionX1; j <= regionX2; j++) {
-              *(d1 + i * XRANGE + j) = BIG_INT;
-              *(d2 + i * XRANGE + j) = BIG_INT;
-              hyperH[i][j]           = FALSE;
-              hyperV[i][j]           = FALSE;
+              d1[i][j]     = BIG_INT;
+              d2[i][j]     = BIG_INT;
+              hyperH[i][j] = FALSE;
+              hyperV[i][j] = FALSE;
             }
           }
 
@@ -1265,9 +1265,9 @@ void mazeRouteMSMD(int   iter,
                     regionY2);
 
           // while loop to find shortest path
-          ind1 = (heap1[0] - (float*) d1);
+          ind1 = (heap1[0] - &d1[0][0]);
           for (i = 0; i < heapLen2; i++)
-            pop_heap2[(heap2[i] - (float*) d2)] = TRUE;
+            pop_heap2[(heap2[i] - &d2[0][0])] = TRUE;
 
           while (pop_heap2[ind1]
                  == FALSE)  // stop until the grid position been popped out from
@@ -1277,7 +1277,7 @@ void mazeRouteMSMD(int   iter,
             // source subtree
             curX = ind1 % XRANGE;
             curY = ind1 / XRANGE;
-            if (*(d1 + curY * XRANGE + curX) != 0) {
+            if (d1[curY][curX] != 0) {
               if (HV[curY][curX]) {
                 preX = parentX1[curY][curX];
                 preY = parentY1[curY][curX];
@@ -1296,48 +1296,47 @@ void mazeRouteMSMD(int   iter,
             // left
             if (curX > regionX1) {
               grid = curY * (xGrid - 1) + curX - 1;
-              if ((preY == curY) || (*(d1 + curY * XRANGE + curX) == 0)) {
-                tmp = *(d1 + curY * XRANGE + curX)
+              if ((preY == curY) || (d1[curY][curX] == 0)) {
+                tmp = d1[curY][curX]
                       + h_costTable[h_edges[grid].usage + h_edges[grid].red
                                     + L * h_edges[grid].last_usage];
               } else {
                 if (curX < regionX2 - 1) {
                   tmp_grid = curY * (xGrid - 1) + curX;
-                  tmp_cost = *(d1 + curY * XRANGE + (curX + 1))
+                  tmp_cost = d1[curY][curX + 1]
                              + h_costTable[h_edges[tmp_grid].usage
                                            + h_edges[tmp_grid].red
                                            + L * h_edges[tmp_grid].last_usage];
 
-                  if (tmp_cost < *(d1 + curY * XRANGE + curX) + VIA) {
+                  if (tmp_cost < d1[curY][curX] + VIA) {
                     hyperH[curY][curX] = TRUE;
                   }
                 }
-                tmp = *(d1 + curY * XRANGE + curX) + VIA
+                tmp = d1[curY][curX] + VIA
                       + h_costTable[h_edges[grid].usage + h_edges[grid].red
                                     + L * h_edges[grid].last_usage];
               }
               tmpX = curX - 1;  // the left neighbor
 
-              if (*(d1 + curY * XRANGE + tmpX)
+              if (d1[curY][tmpX]
                   >= BIG_INT)  // left neighbor not been put into heap1
               {
-                *(d1 + curY * XRANGE + tmpX) = tmp;
-                parentX3[curY][tmpX]         = curX;
-                parentY3[curY][tmpX]         = curY;
-                HV[curY][tmpX]               = FALSE;
-                heap1[heapLen1]              = &(*(d1 + curY * XRANGE + tmpX));
+                d1[curY][tmpX]       = tmp;
+                parentX3[curY][tmpX] = curX;
+                parentY3[curY][tmpX] = curY;
+                HV[curY][tmpX]       = FALSE;
+                heap1[heapLen1]      = &d1[curY][tmpX];
                 heapLen1++;
                 updateHeap(heap1, heapLen1, heapLen1 - 1);
-              } else if (*(d1 + curY * XRANGE + tmpX)
-                         > tmp)  // left neighbor been put into heap1 but needs
-                                 // update
+              } else if (d1[curY][tmpX] > tmp)  // left neighbor been put into
+                                                // heap1 but needs update
               {
-                *(d1 + curY * XRANGE + tmpX) = tmp;
-                parentX3[curY][tmpX]         = curX;
-                parentY3[curY][tmpX]         = curY;
-                HV[curY][tmpX]               = FALSE;
-                dtmp                         = &(*(d1 + curY * XRANGE + tmpX));
-                ind                          = 0;
+                d1[curY][tmpX]       = tmp;
+                parentX3[curY][tmpX] = curX;
+                parentY3[curY][tmpX] = curY;
+                HV[curY][tmpX]       = FALSE;
+                dtmp                 = &d1[curY][tmpX];
+                ind                  = 0;
                 while (heap1[ind] != dtmp)
                   ind++;
                 updateHeap(heap1, heapLen1, ind);
@@ -1346,48 +1345,47 @@ void mazeRouteMSMD(int   iter,
             // right
             if (curX < regionX2) {
               grid = curY * (xGrid - 1) + curX;
-              if ((preY == curY) || (*(d1 + curY * XRANGE + curX) == 0)) {
-                tmp = *(d1 + curY * XRANGE + curX)
+              if ((preY == curY) || (d1[curY][curX] == 0)) {
+                tmp = d1[curY][curX]
                       + h_costTable[h_edges[grid].usage + h_edges[grid].red
                                     + L * h_edges[grid].last_usage];
               } else {
                 if (curX > regionX1 + 1) {
                   tmp_grid = curY * (xGrid - 1) + curX - 1;
-                  tmp_cost = *(d1 + curY * XRANGE + (curX - 1))
+                  tmp_cost = d1[curY][curX - 1]
                              + h_costTable[h_edges[tmp_grid].usage
                                            + h_edges[tmp_grid].red
                                            + L * h_edges[tmp_grid].last_usage];
 
-                  if (tmp_cost < *(d1 + curY * XRANGE + curX) + VIA) {
+                  if (tmp_cost < d1[curY][curX] + VIA) {
                     hyperH[curY][curX] = TRUE;
                   }
                 }
-                tmp = *(d1 + curY * XRANGE + curX) + VIA
+                tmp = d1[curY][curX] + VIA
                       + h_costTable[h_edges[grid].usage + h_edges[grid].red
                                     + L * h_edges[grid].last_usage];
               }
               tmpX = curX + 1;  // the right neighbor
 
-              if (*(d1 + curY * XRANGE + tmpX)
+              if (d1[curY][tmpX]
                   >= BIG_INT)  // right neighbor not been put into heap1
               {
-                *(d1 + curY * XRANGE + tmpX) = tmp;
-                parentX3[curY][tmpX]         = curX;
-                parentY3[curY][tmpX]         = curY;
-                HV[curY][tmpX]               = FALSE;
-                heap1[heapLen1]              = &(*(d1 + curY * XRANGE + tmpX));
+                d1[curY][tmpX]       = tmp;
+                parentX3[curY][tmpX] = curX;
+                parentY3[curY][tmpX] = curY;
+                HV[curY][tmpX]       = FALSE;
+                heap1[heapLen1]      = &d1[curY][tmpX];
                 heapLen1++;
                 updateHeap(heap1, heapLen1, heapLen1 - 1);
-              } else if (*(d1 + curY * XRANGE + tmpX)
-                         > tmp)  // right neighbor been put into heap1 but needs
-                                 // update
+              } else if (d1[curY][tmpX] > tmp)  // right neighbor been put into
+                                                // heap1 but needs update
               {
-                *(d1 + curY * XRANGE + tmpX) = tmp;
-                parentX3[curY][tmpX]         = curX;
-                parentY3[curY][tmpX]         = curY;
-                HV[curY][tmpX]               = FALSE;
-                dtmp                         = &(*(d1 + curY * XRANGE + tmpX));
-                ind                          = 0;
+                d1[curY][tmpX]       = tmp;
+                parentX3[curY][tmpX] = curX;
+                parentY3[curY][tmpX] = curY;
+                HV[curY][tmpX]       = FALSE;
+                dtmp                 = &d1[curY][tmpX];
+                ind                  = 0;
                 while (heap1[ind] != dtmp)
                   ind++;
                 updateHeap(heap1, heapLen1, ind);
@@ -1397,47 +1395,46 @@ void mazeRouteMSMD(int   iter,
             if (curY > regionY1) {
               grid = (curY - 1) * xGrid + curX;
 
-              if ((preX == curX) || (*(d1 + curY * XRANGE + curX) == 0)) {
-                tmp = *(d1 + curY * XRANGE + curX)
+              if ((preX == curX) || (d1[curY][curX] == 0)) {
+                tmp = d1[curY][curX]
                       + v_costTable[v_edges[grid].usage + v_edges[grid].red
                                     + L * v_edges[grid].last_usage];
               } else {
                 if (curY < regionY2 - 1) {
                   tmp_grid = curY * xGrid + curX;
-                  tmp_cost = *(d1 + (curY + 1) * XRANGE + curX)
+                  tmp_cost = d1[curY + 1][curX]
                              + v_costTable[v_edges[tmp_grid].usage
                                            + v_edges[tmp_grid].red
                                            + L * v_edges[tmp_grid].last_usage];
 
-                  if (tmp_cost < *(d1 + curY * XRANGE + curX) + VIA) {
+                  if (tmp_cost < d1[curY][curX] + VIA) {
                     hyperV[curY][curX] = TRUE;
                   }
                 }
-                tmp = *(d1 + curY * XRANGE + curX) + VIA
+                tmp = d1[curY][curX] + VIA
                       + v_costTable[v_edges[grid].usage + v_edges[grid].red
                                     + L * v_edges[grid].last_usage];
               }
               tmpY = curY - 1;  // the bottom neighbor
-              if (*(d1 + tmpY * XRANGE + curX)
+              if (d1[tmpY][curX]
                   >= BIG_INT)  // bottom neighbor not been put into heap1
               {
-                *(d1 + tmpY * XRANGE + curX) = tmp;
-                parentX1[tmpY][curX]         = curX;
-                parentY1[tmpY][curX]         = curY;
-                HV[tmpY][curX]               = TRUE;
-                heap1[heapLen1]              = &(*(d1 + tmpY * XRANGE + curX));
+                d1[tmpY][curX]       = tmp;
+                parentX1[tmpY][curX] = curX;
+                parentY1[tmpY][curX] = curY;
+                HV[tmpY][curX]       = TRUE;
+                heap1[heapLen1]      = &d1[tmpY][curX];
                 heapLen1++;
                 updateHeap(heap1, heapLen1, heapLen1 - 1);
-              } else if (*(d1 + tmpY * XRANGE + curX)
-                         > tmp)  // bottom neighbor been put into heap1 but
-                                 // needs update
+              } else if (d1[tmpY][curX] > tmp)  // bottom neighbor been put into
+                                                // heap1 but needs update
               {
-                *(d1 + tmpY * XRANGE + curX) = tmp;
-                parentX1[tmpY][curX]         = curX;
-                parentY1[tmpY][curX]         = curY;
-                HV[tmpY][curX]               = TRUE;
-                dtmp                         = &(*(d1 + tmpY * XRANGE + curX));
-                ind                          = 0;
+                d1[tmpY][curX]       = tmp;
+                parentX1[tmpY][curX] = curX;
+                parentY1[tmpY][curX] = curY;
+                HV[tmpY][curX]       = TRUE;
+                dtmp                 = &d1[tmpY][curX];
+                ind                  = 0;
                 while (heap1[ind] != dtmp)
                   ind++;
                 updateHeap(heap1, heapLen1, ind);
@@ -1447,47 +1444,46 @@ void mazeRouteMSMD(int   iter,
             if (curY < regionY2) {
               grid = curY * xGrid + curX;
 
-              if ((preX == curX) || (*(d1 + curY * XRANGE + curX) == 0)) {
-                tmp = *(d1 + curY * XRANGE + curX)
+              if ((preX == curX) || (d1[curY][curX] == 0)) {
+                tmp = d1[curY][curX]
                       + v_costTable[v_edges[grid].usage + v_edges[grid].red
                                     + L * v_edges[grid].last_usage];
               } else {
                 if (curY > regionY1 + 1) {
                   tmp_grid = (curY - 1) * xGrid + curX;
-                  tmp_cost = *(d1 + (curY - 1) * XRANGE + curX)
+                  tmp_cost = d1[curY - 1][curX]
                              + v_costTable[v_edges[tmp_grid].usage
                                            + v_edges[tmp_grid].red
                                            + L * v_edges[tmp_grid].last_usage];
 
-                  if (tmp_cost < *(d1 + curY * XRANGE + curX) + VIA) {
+                  if (tmp_cost < d1[curY][curX] + VIA) {
                     hyperV[curY][curX] = TRUE;
                   }
                 }
-                tmp = *(d1 + curY * XRANGE + curX) + VIA
+                tmp = d1[curY][curX] + VIA
                       + v_costTable[v_edges[grid].usage + v_edges[grid].red
                                     + L * v_edges[grid].last_usage];
               }
               tmpY = curY + 1;  // the top neighbor
-              if (*(d1 + tmpY * XRANGE + curX)
+              if (d1[tmpY][curX]
                   >= BIG_INT)  // top neighbor not been put into heap1
               {
-                *(d1 + tmpY * XRANGE + curX) = tmp;
-                parentX1[tmpY][curX]         = curX;
-                parentY1[tmpY][curX]         = curY;
-                HV[tmpY][curX]               = TRUE;
-                heap1[heapLen1]              = &(*(d1 + tmpY * XRANGE + curX));
+                d1[tmpY][curX]       = tmp;
+                parentX1[tmpY][curX] = curX;
+                parentY1[tmpY][curX] = curY;
+                HV[tmpY][curX]       = TRUE;
+                heap1[heapLen1]      = &d1[tmpY][curX];
                 heapLen1++;
                 updateHeap(heap1, heapLen1, heapLen1 - 1);
-              } else if (*(d1 + tmpY * XRANGE + curX)
-                         > tmp)  // top neighbor been put into heap1 but needs
-                                 // update
+              } else if (d1[tmpY][curX] > tmp)  // top neighbor been put into
+                                                // heap1 but needs update
               {
-                *(d1 + tmpY * XRANGE + curX) = tmp;
-                parentX1[tmpY][curX]         = curX;
-                parentY1[tmpY][curX]         = curY;
-                HV[tmpY][curX]               = TRUE;
-                dtmp                         = &(*(d1 + tmpY * XRANGE + curX));
-                ind                          = 0;
+                d1[tmpY][curX]       = tmp;
+                parentX1[tmpY][curX] = curX;
+                parentY1[tmpY][curX] = curY;
+                HV[tmpY][curX]       = TRUE;
+                dtmp                 = &d1[tmpY][curX];
+                ind                  = 0;
                 while (heap1[ind] != dtmp)
                   ind++;
                 updateHeap(heap1, heapLen1, ind);
@@ -1495,12 +1491,12 @@ void mazeRouteMSMD(int   iter,
             }
 
             // update ind1 for next loop
-            ind1 = (heap1[0] - (float*) d1);
+            ind1 = (heap1[0] - &d1[0][0]);
 
           }  // while loop
 
           for (i = 0; i < heapLen2; i++)
-            pop_heap2[(heap2[i] - (float*) d2)] = FALSE;
+            pop_heap2[(heap2[i] - &d2[0][0])] = FALSE;
 
           crossX = ind1 % XRANGE;
           crossY = ind1 / XRANGE;
@@ -1508,8 +1504,7 @@ void mazeRouteMSMD(int   iter,
           cnt  = 0;
           curX = crossX;
           curY = crossY;
-          while (*(d1 + curY * XRANGE + curX)
-                 != 0)  // loop until reach subtree1
+          while (d1[curY][curX] != 0)  // loop until reach subtree1
           {
             hypered = FALSE;
             if (cnt != 0) {

@@ -1016,11 +1016,11 @@ void routeMonotonic(int netID, int edgeID, int threshold)
         cost[0][0] = 0;
         grid       = yl * xGrid;
         for (j = 0; j < segHeight; j++) {
-          cost[j + 1][0] = cost[j][0]
-                           + std::max<float>(0,
-                                             v_edges[grid + xl].red
-                                                 + v_edges[grid + xl].est_usage
-                                                 - vCapacity_lb);
+          cost[j + 1][0]
+              = cost[j][0]
+                + std::max(0.0f,
+                           v_edges[grid + xl].red + v_edges[grid + xl].est_usage
+                               - vCapacity_lb);
           parent[j + 1][0] = SAMEX;
           grid += xGrid;
         }
@@ -1030,10 +1030,9 @@ void routeMonotonic(int netID, int edgeID, int threshold)
           // update the cost of a column of grids by h-edges
           grid = yl * xGrid_1;
           for (j = 0; j <= segHeight; j++) {
-            tmp              = std::max<float>(0,
-                                  h_edges[grid + x].red
-                                      + h_edges[grid + x].est_usage
-                                      - hCapacity_lb);
+            tmp              = std::max(0.0f,
+                           h_edges[grid + x].red + h_edges[grid + x].est_usage
+                               - hCapacity_lb);
             cost[j][i + 1]   = cost[j][i] + tmp;
             parent[j][i + 1] = SAMEY;
             grid += xGrid - 1;
@@ -1045,10 +1044,10 @@ void routeMonotonic(int netID, int edgeID, int threshold)
           for (j = 0; j < segHeight; j++) {
             ind_j = j + 1;
             tmp   = cost[j][ind_i]
-                  + std::max<float>(0,
-                                    v_edges[grid + ind_x].red
-                                        + v_edges[grid + ind_x].est_usage
-                                        - vCapacity_lb);
+                  + std::max(0.0f,
+                             v_edges[grid + ind_x].red
+                                 + v_edges[grid + ind_x].est_usage
+                                 - vCapacity_lb);
             if (cost[ind_j][ind_i] > tmp) {
               cost[ind_j][ind_i]   = tmp;
               parent[ind_j][ind_i] = SAMEX;
@@ -1091,11 +1090,11 @@ void routeMonotonic(int netID, int edgeID, int threshold)
         cost[segHeight][0] = 0;
         grid               = (yl - 1) * xGrid;
         for (j = segHeight - 1; j >= 0; j--) {
-          cost[j][0] = cost[j + 1][0]
-                       + std::max<float>(0,
-                                         v_edges[grid + xl].red
-                                             + v_edges[grid + xl].est_usage
-                                             - vCapacity_lb);
+          cost[j][0]
+              = cost[j + 1][0]
+                + std::max(0.0f,
+                           v_edges[grid + xl].red + v_edges[grid + xl].est_usage
+                               - vCapacity_lb);
           parent[j][0] = SAMEX;
           grid -= xGrid;
         }
@@ -1106,10 +1105,9 @@ void routeMonotonic(int netID, int edgeID, int threshold)
           grid  = yl * (xGrid - 1);
           ind_i = i + 1;
           for (j = segHeight; j >= 0; j--) {
-            tmp              = std::max<float>(0,
-                                  h_edges[grid + x].red
-                                      + h_edges[grid + x].est_usage
-                                      - hCapacity_lb);
+            tmp              = std::max(0.0f,
+                           h_edges[grid + x].red + h_edges[grid + x].est_usage
+                               - hCapacity_lb);
             cost[j][ind_i]   = cost[j][i] + tmp;
             parent[j][ind_i] = SAMEY;
             grid -= xGrid - 1;
@@ -1119,10 +1117,10 @@ void routeMonotonic(int netID, int edgeID, int threshold)
           ind_x = x + 1;
           for (j = segHeight - 1; j >= 0; j--) {
             tmp = cost[j + 1][ind_i]
-                  + std::max<float>(0,
-                                    v_edges[grid + ind_x].red
-                                        + v_edges[grid + ind_x].est_usage
-                                        - vCapacity_lb);
+                  + std::max(0.0f,
+                             v_edges[grid + ind_x].red
+                                 + v_edges[grid + ind_x].est_usage
+                                 - vCapacity_lb);
             if (cost[j][ind_i] > tmp) {
               cost[j][ind_i]   = tmp;
               parent[j][ind_i] = SAMEX;
@@ -1598,18 +1596,18 @@ void routeLVEnew(int netID, int edgeID, int threshold, int enlarge)
       xGrid_1 = xGrid - 1;  // tmp variable to save runtime
 
       for (j = ymin; j <= ymax; j++) {
-        *(d1 + j * XRANGE + xmin) = 0;
+        d1[j][xmin] = 0;
       }
       // update other columns
       for (i = xmin; i <= xmax; i++) {
-        *(d2 + ymin * XRANGE + i) = 0;
+        d2[ymin][i] = 0;
       }
 
       for (j = ymin; j <= ymax; j++) {
         grid = j * xGrid_1 + xmin;
         for (i = xmin; i < xmax; i++) {
-          tmp = h_costTable[h_edges[grid].red + h_edges[grid].usage];
-          *(d1 + j * XRANGE + (i + 1)) = *(d1 + j * XRANGE + i) + tmp;
+          tmp          = h_costTable[h_edges[grid].red + h_edges[grid].usage];
+          d1[j][i + 1] = d1[j][i] + tmp;
           grid++;
         }
         // update the cost of a column of grids by v-edges
@@ -1619,8 +1617,8 @@ void routeLVEnew(int netID, int edgeID, int threshold, int enlarge)
         // update the cost of a column of grids by h-edges
         grid = j * xGrid + xmin;
         for (i = xmin; i <= xmax; i++) {
-          tmp = h_costTable[v_edges[grid].red + v_edges[grid].usage];
-          *(d2 + (j + 1) * XRANGE + i) = *(d2 + j * XRANGE + i) + tmp;
+          tmp          = h_costTable[v_edges[grid].red + v_edges[grid].usage];
+          d2[j + 1][i] = d2[j][i] + tmp;
           grid++;
         }
         // update the cost of a column of grids by v-edges
@@ -1630,16 +1628,12 @@ void routeLVEnew(int netID, int edgeID, int threshold, int enlarge)
 
       for (j = ymin; j <= ymax; j++) {
         for (i = xmin; i <= xmax; i++) {
-          tmp1 = ADIFF(*(d2 + j * XRANGE + x1), *(d2 + y1 * XRANGE + x1))
-                 + ADIFF(*(d1 + j * XRANGE + i),
-                         *(d1 + j * XRANGE + x1));  // yfirst for point 1
-          tmp2 = ADIFF(*(d2 + j * XRANGE + i), *(d2 + y1 * XRANGE + i))
-                 + ADIFF(*(d1 + y1 * XRANGE + i), *(d1 + y1 * XRANGE + x1));
-          tmp3 = ADIFF(*(d2 + y2 * XRANGE + i), *(d2 + j * XRANGE + i))
-                 + ADIFF(*(d1 + y2 * XRANGE + i), *(d1 + y2 * XRANGE + x2));
-          tmp4 = ADIFF(*(d2 + y2 * XRANGE + x2), *(d2 + j * XRANGE + x2))
-                 + ADIFF(*(d1 + j * XRANGE + x2),
-                         *(d1 + j * XRANGE + i));  // xifrst for mid point
+          tmp1 = ADIFF(d2[j][x1], d2[y1][x1])
+                 + ADIFF(d1[j][i], d1[j][x1]);  // yfirst for point 1
+          tmp2 = ADIFF(d2[j][i], d2[y1][i]) + ADIFF(d1[y1][i], d1[y1][x1]);
+          tmp3 = ADIFF(d2[y2][i], d2[j][i]) + ADIFF(d1[y2][i], d1[y2][x2]);
+          tmp4 = ADIFF(d2[y2][x2], d2[j][x2])
+                 + ADIFF(d1[j][x2], d1[j][i]);  // xifrst for mid point
 
           tmp = tmp1 + tmp4;
           LH1 = FALSE;

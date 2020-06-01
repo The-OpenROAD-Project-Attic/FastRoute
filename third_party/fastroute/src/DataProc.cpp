@@ -55,17 +55,17 @@ int numLayers;
 int totalNumSeg;    // total # segments
 int totalOverflow;  // total # overflow
 int mazeThreshold;  // the wirelen threshold to do maze routing
-Net**  nets;
-Edge * h_edges, *v_edges;
-float* d1;
-float* d2;
-int    layerOrientation;
-bool   pdRev;
-float  alpha;
-int    verbose;
-int    overflowIterations;
-int    pdRevForHighFanout;
-bool   allowOverflow;
+Net**                 nets;
+Edge *                h_edges, *v_edges;
+multi_array<float, 2> d1;
+multi_array<float, 2> d2;
+int                   layerOrientation;
+bool                  pdRev;
+float                 alpha;
+int                   verbose;
+int                   overflowIterations;
+int                   pdRevForHighFanout;
+bool                  allowOverflow;
 
 Bool** HV;
 Bool** hyperV;
@@ -107,8 +107,8 @@ int** layerGrid;
 int** gridD;
 int** viaLink;
 
-int*   d13D;
-short* d23D;
+multi_array<int, 3>   d13D;
+multi_array<short, 3> d23D;
 
 dirctionT*** directions3D;
 int***       corrEdge3D;

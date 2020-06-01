@@ -298,19 +298,10 @@ FT::~FT()
     delete[] corrEdge;
   corrEdge = nullptr;
 
-  if (d13D)
-    delete[] d13D;
-  if (d23D)
-    delete[] d23D;
-  if (d1)
-    delete[] d1;
-  if (d2)
-    delete[] d2;
-
-  d13D = nullptr;
-  d23D = nullptr;
-  d1   = nullptr;
-  d2   = nullptr;
+  d13D.resize(boost::extents[0][0][0]);
+  d23D.resize(boost::extents[0][0][0]);
+  d1.resize(boost::extents[0][0]);
+  d2.resize(boost::extents[0][0]);
 
   if (vCapacity3D)
     delete[] vCapacity3D;
@@ -451,11 +442,11 @@ void FT::setGridsAndLayers(int x, int y, int nLayers)
     viaLink[i] = new int[MAXLEN];
   }
 
-  d13D = new int[numLayers * YRANGE * XRANGE];
-  d23D = new short[numLayers * YRANGE * XRANGE];
+  d13D.resize(boost::extents[numLayers][YRANGE][XRANGE]);
+  d23D.resize(boost::extents[numLayers][YRANGE][XRANGE]);
 
-  d1 = new float[YRANGE * XRANGE];
-  d2 = new float[YRANGE * XRANGE];
+  d1.resize(boost::extents[YRANGE][XRANGE]);
+  d2.resize(boost::extents[YRANGE][XRANGE]);
 
   HV = new Bool*[YRANGE];
   for (int i = 0; i < YRANGE; i++) {

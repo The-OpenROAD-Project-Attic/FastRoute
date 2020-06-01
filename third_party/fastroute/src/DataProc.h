@@ -34,6 +34,7 @@
 #define __DATAPROC_H__
 
 #include "DataType.h"
+#include "boost/multi_array.hpp"
 
 #define BUFFERSIZE 800
 #define STRINGLEN 100
@@ -42,6 +43,8 @@
 #define MAXLEN 20000
 
 namespace FastRoute {
+
+using boost::multi_array;
 
 // global variables
 extern int   XRANGE, YRANGE;
@@ -70,8 +73,8 @@ extern int   mazeThreshold;  // the wirelen threshold to do maze routing
 extern Net** nets;
 extern Edge *h_edges, *v_edges;
 
-extern float* d1;
-extern float* d2;
+extern multi_array<float, 2> d1;
+extern multi_array<float, 2> d2;
 
 extern Bool** HV;
 extern Bool** hyperV;
@@ -116,8 +119,8 @@ extern int** layerGrid;
 extern int** gridD;
 extern int** viaLink;
 
-extern int*   d13D;
-extern short* d23D;
+extern multi_array<int, 3>   d13D;
+extern multi_array<short, 3> d23D;
 
 extern dirctionT*** directions3D;
 extern int***       corrEdge3D;
