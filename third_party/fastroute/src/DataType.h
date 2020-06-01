@@ -74,14 +74,12 @@ typedef struct
 typedef struct
 {
   char  name[200];  // net name
-  int   netIDorg;   // orginal net ID in the input file
   short numPins;    // number of pins in the net
   short deg;  // net degree (number of MazePoints connecting by the net, pins in
               // same MazePoints count only 1)
-  short* pinX;  // array of X coordinates of pins
-  short* pinY;  // array of Y coordinates of pins
-  short* pinL;  // array of L coordinates of pins
-  short  minwidth;
+  short* pinX;   // array of X coordinates of pins
+  short* pinY;   // array of Y coordinates of pins
+  short* pinL;   // array of L coordinates of pins
   float  alpha;  // alpha for pdrev when routing clock nets
 } Net;           // A Net is a set of connected MazePoints
 
@@ -100,7 +98,6 @@ typedef struct
   unsigned short cap;    // the capacity of the edge
   unsigned short usage;  // the usage of the edge
   unsigned short red;
-
 } Edge3D;
 
 typedef struct
@@ -119,7 +116,6 @@ typedef struct
   int   lID;
   int   eID[6];
   int   stackAlias;
-
 } TreeNode;
 
 #define NOROUTE 0

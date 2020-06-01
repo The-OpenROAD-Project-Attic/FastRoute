@@ -84,10 +84,7 @@ FT::FT()
 
 FT::~FT()
 {
-  int       i, deg, numEdges, edgeID;
-  TreeEdge* treeedge;
-
-  for (i = 0; i < (numNets - invalidNets); i++) {
+  for (int i = 0; i < (numNets - invalidNets); i++) {
     if (nets[i]->pinX)
       delete[] nets[i]->pinX;
     nets[i]->pinX = nullptr;
@@ -101,7 +98,7 @@ FT::~FT()
     nets[i]->pinL = nullptr;
   }
 
-  for (i = 0; i < numNets; i++) {
+  for (int i = 0; i < numNets; i++) {
     if (nets[i])
       delete nets[i];
     nets[i] = nullptr;
@@ -164,11 +161,11 @@ FT::~FT()
     delete[] trees;
   trees = nullptr;
 
-  for (i = 0; i < numValidNets; i++) {
-    deg      = sttrees[i].deg;
-    numEdges = 2 * deg - 3;
-    for (edgeID = 0; edgeID < numEdges; edgeID++) {
-      treeedge = &(sttrees[i].edges[edgeID]);
+  for (int i = 0; i < numValidNets; i++) {
+    int deg      = sttrees[i].deg;
+    int numEdges = 2 * deg - 3;
+    for (int edgeID = 0; edgeID < numEdges; edgeID++) {
+      TreeEdge* treeedge = &(sttrees[i].edges[edgeID]);
       if (treeedge->len > 0) {
         if (treeedge->route.gridsX)
           free(treeedge->route.gridsX);
@@ -195,7 +192,7 @@ FT::~FT()
     delete[] sttrees;
   sttrees = nullptr;
 
-  for (i = 0; i < yGrid; i++) {
+  for (int i = 0; i < yGrid; i++) {
     if (parentX1[i])
       delete[] parentX1[i];
     if (parentY1[i])
@@ -546,27 +543,22 @@ void FT::addNet(char* name,
                 float alpha)
 {
   // std::cout << "Adding net " << name << "\n";
-  int  pinX, pinY, pinL, netID, numPins;
-  long pinX_in, pinY_in;
 
   // TODO: check this size
   int pinXarray[nPins];
   int pinYarray[nPins];
   int pinLarray[nPins];
 
-  netID   = netIdx;
-  numPins = nPins;
-
-  allNets[name] = std::vector<PIN>(&pins[0], &pins[numPins]);
+  allNets[name] = std::vector<PIN>(&pins[0], &pins[nPins]);
 
   // TODO: check this, there was an if pinInd < 2000
   pinInd = 0;
-  for (int j = 0; j < numPins; j++) {
-    pinX_in = pins[j].x;
-    pinY_in = pins[j].y;
-    pinL    = pins[j].layer;
-    pinX    = (int) ((pinX_in - xcorner) / wTile);
-    pinY    = (int) ((pinY_in - ycorner) / hTile);
+  for (int j = 0; j < nPins; j++) {
+    long pinX_in = pins[j].x;
+    long pinY_in = pins[j].y;
+    int  pinL    = pins[j].layer;
+    int  pinX    = (int) ((pinX_in - xcorner) / wTile);
+    int  pinY    = (int) ((pinY_in - ycorner) / hTile);
     if (!(pinX < 0 || pinX >= xGrid || pinY < -1 || pinY >= yGrid
           || pinL > numLayers || pinL <= 0)) {
       bool remove = false;
@@ -590,15 +582,14 @@ void FT::addNet(char* name,
   {
     MD = std::max(MD, pinInd);
     // std::cout << "Net name: " << nets[newnetID]->name << "; num pins: " <<
-    // nets[newnetID]->numPins << "\n";
+    // nets[newnetID]->nPins << "\n";
     strcpy(nets[newnetID]->name, name);
-    nets[newnetID]->netIDorg = netID;
-    nets[newnetID]->numPins  = numPins;
-    nets[newnetID]->deg      = pinInd;
-    nets[newnetID]->pinX     = new short[pinInd];
-    nets[newnetID]->pinY     = new short[pinInd];
-    nets[newnetID]->pinL     = new short[pinInd];
-    nets[newnetID]->alpha    = alpha;
+    nets[newnetID]->numPins = nPins;
+    nets[newnetID]->deg     = pinInd;
+    nets[newnetID]->pinX    = new short[pinInd];
+    nets[newnetID]->pinY    = new short[pinInd];
+    nets[newnetID]->pinL    = new short[pinInd];
+    nets[newnetID]->alpha   = alpha;
 
     for (int j = 0; j < pinInd; j++) {
       nets[newnetID]->pinX[j] = pinXarray[j];
@@ -607,9 +598,8 @@ void FT::addNet(char* name,
     }
     seglistIndex[newnetID] = segcount;
     newnetID++;
-    segcount
-        += 2 * pinInd
-           - 3;  // at most (2*numPins-2) nodes, (2*numPins-3) nets for a net
+    // at most (2*nPins-2) nodes -> (2*nPins-3) segs for a net
+    segcount += 2 * pinInd - 3;
   } else {
     invalidNets++;
   }
@@ -622,10 +612,8 @@ std::map<std::string, std::vector<PIN>> FT::getNets()
 
 void FT::initEdges()
 {
-  LB = 0.9;
-  UB = 1.3;
-  int grid, j, k, i;
-  int TC;
+  LB           = 0.9;
+  UB           = 1.3;
   vCapacity_lb = LB * vCapacity;
   hCapacity_lb = LB * hCapacity;
   vCapacity_ub = UB * vCapacity;
@@ -647,11 +635,11 @@ void FT::initEdges()
   v_edges3D = new Edge3D[(numLayers * xGrid * yGrid)];
   h_edges3D = new Edge3D[(numLayers * xGrid * yGrid)];
 
-  // 2D edge innitialization
-  TC = 0;
-  for (i = 0; i < yGrid; i++) {
-    for (j = 0; j < xGrid - 1; j++) {
-      grid              = i * (xGrid - 1) + j;
+  // 2D edge initialization
+  int TC = 0;
+  for (int i = 0; i < yGrid; i++) {
+    for (int j = 0; j < xGrid - 1; j++) {
+      int grid          = i * (xGrid - 1) + j;
       h_edges[grid].cap = hCapacity;
       TC += hCapacity;
       h_edges[grid].usage      = 0;
@@ -660,9 +648,9 @@ void FT::initEdges()
       h_edges[grid].last_usage = 0;
     }
   }
-  for (i = 0; i < yGrid - 1; i++) {
-    for (j = 0; j < xGrid; j++) {
-      grid              = i * xGrid + j;
+  for (int i = 0; i < yGrid - 1; i++) {
+    for (int j = 0; j < xGrid; j++) {
+      int grid          = i * xGrid + j;
       v_edges[grid].cap = vCapacity;
       TC += vCapacity;
       v_edges[grid].usage      = 0;
@@ -672,18 +660,19 @@ void FT::initEdges()
     }
   }
 
-  for (k = 0; k < numLayers; k++) {
-    for (i = 0; i < yGrid; i++) {
-      for (j = 0; j < xGrid - 1; j++) {
-        grid                  = i * (xGrid - 1) + j + k * (xGrid - 1) * yGrid;
+  // 3D edge initialization
+  for (int k = 0; k < numLayers; k++) {
+    for (int i = 0; i < yGrid; i++) {
+      for (int j = 0; j < xGrid - 1; j++) {
+        int grid              = i * (xGrid - 1) + j + k * (xGrid - 1) * yGrid;
         h_edges3D[grid].cap   = hCapacity3D[k];
         h_edges3D[grid].usage = 0;
         h_edges3D[grid].red   = 0;
       }
     }
-    for (i = 0; i < yGrid - 1; i++) {
-      for (j = 0; j < xGrid; j++) {
-        grid                  = i * xGrid + j + k * xGrid * (yGrid - 1);
+    for (int i = 0; i < yGrid - 1; i++) {
+      for (int j = 0; j < xGrid; j++) {
+        int grid              = i * xGrid + j + k * xGrid * (yGrid - 1);
         v_edges3D[grid].cap   = vCapacity3D[k];
         v_edges3D[grid].usage = 0;
         v_edges3D[grid].red   = 0;
@@ -706,17 +695,13 @@ void FT::addAdjustment(long x1,
                        int  reducedCap,
                        bool isReduce)
 {
-  int grid, k;
-  int reduce, cap;
-  int increase;
-  reducedCap = reducedCap;
-
-  k = l1 - 1;
+  const int k = l1 - 1;
 
   if (y1 == y2)  // horizontal edge
   {
-    grid = y1 * (xGrid - 1) + x1 + k * (xGrid - 1) * yGrid;
-    cap  = h_edges3D[grid].cap;
+    int grid = y1 * (xGrid - 1) + x1 + k * (xGrid - 1) * yGrid;
+    int cap  = h_edges3D[grid].cap;
+    int reduce;
 
     if (((int) cap - reducedCap) < 0) {
       if (isReduce) {
@@ -734,7 +719,7 @@ void FT::addAdjustment(long x1,
 
     grid = y1 * (xGrid - 1) + x1;
     if (!isReduce) {
-      increase = reducedCap - cap;
+      int increase = reducedCap - cap;
       h_edges[grid].cap += increase;
     }
 
@@ -743,9 +728,9 @@ void FT::addAdjustment(long x1,
 
   } else if (x1 == x2)  // vertical edge
   {
-    grid   = y1 * xGrid + x1 + k * xGrid * (yGrid - 1);
-    cap    = v_edges3D[grid].cap;
-    reduce = cap - reducedCap;
+    int grid = y1 * xGrid + x1 + k * xGrid * (yGrid - 1);
+    int cap  = v_edges3D[grid].cap;
+    int reduce;
 
     if (((int) cap - reducedCap) < 0) {
       if (isReduce) {
@@ -763,7 +748,7 @@ void FT::addAdjustment(long x1,
 
     grid = y1 * xGrid + x1;
     if (!isReduce) {
-      increase = reducedCap - cap;
+      int increase = reducedCap - cap;
       h_edges[grid].cap += increase;
     }
 
@@ -774,19 +759,18 @@ void FT::addAdjustment(long x1,
 
 int FT::getEdgeCapacity(long x1, long y1, int l1, long x2, long y2, int l2)
 {
-  int grid, k;
   int cap;
 
-  k = l1 - 1;
+  const int k = l1 - 1;
 
   if (y1 == y2)  // horizontal edge
   {
-    grid = y1 * (xGrid - 1) + x1 + k * (xGrid - 1) * yGrid;
-    cap  = h_edges3D[grid].cap;
+    int grid = y1 * (xGrid - 1) + x1 + k * (xGrid - 1) * yGrid;
+    cap      = h_edges3D[grid].cap;
   } else if (x1 == x2)  // vertical edge
   {
-    grid = y1 * xGrid + x1 + k * xGrid * (yGrid - 1);
-    cap  = v_edges3D[grid].cap;
+    int grid = y1 * xGrid + x1 + k * xGrid * (yGrid - 1);
+    cap      = v_edges3D[grid].cap;
   }
 
   return cap;
@@ -799,7 +783,6 @@ void FT::setMaxNetDegree(int deg)
 
 void FT::initAuxVar()
 {
-  int k, i;
   treeOrderCong = NULL;
   stopDEC       = FALSE;
 
@@ -814,7 +797,7 @@ void FT::initAuxVar()
   gridHV = XRANGE * YRANGE;
   gridH  = (xGrid - 1) * yGrid;
   gridV  = xGrid * (yGrid - 1);
-  for (k = 0; k < numLayers; k++) {
+  for (int k = 0; k < numLayers; k++) {
     gridHs[k] = k * gridH;
     gridVs[k] = k * gridV;
   }
@@ -826,7 +809,7 @@ void FT::initAuxVar()
   parentX3 = new short*[yGrid];
   parentY3 = new short*[yGrid];
 
-  for (i = 0; i < yGrid; i++) {
+  for (int i = 0; i < yGrid; i++) {
     parentX1[i] = new short[xGrid];
     parentY1[i] = new short[xGrid];
     parentX3[i] = new short[xGrid];
@@ -844,37 +827,29 @@ void FT::initAuxVar()
 
 std::vector<NET> FT::getResults()
 {
-  short *gridsX, *gridsY, *gridsL;
-  int netID, d, i, k, edgeID, nodeID, deg, lastX, lastY, lastL, xreal, yreal, l,
-      routeLen;
-  TreeEdge *       treeedges, *treeedge;
-  TreeNode*        nodes;
-  TreeEdge         edge;
   std::vector<NET> netsOut;
-  netsOut.clear();
-  for (netID = 0; netID < numValidNets; netID++) {
+  for (int netID = 0; netID < numValidNets; netID++) {
     NET         currentNet;
     std::string netName(nets[netID]->name);
-    currentNet.name = netName;
-    currentNet.id   = netID;
-    treeedges       = sttrees[netID].edges;
-    deg             = sttrees[netID].deg;
+    currentNet.name     = netName;
+    currentNet.id       = netID;
+    TreeEdge* treeedges = sttrees[netID].edges;
+    int       deg       = sttrees[netID].deg;
 
-    nodes = sttrees[netID].nodes;
-    for (edgeID = 0; edgeID < 2 * deg - 3; edgeID++) {
-      edge     = sttrees[netID].edges[edgeID];
-      treeedge = &(treeedges[edgeID]);
+    TreeNode* nodes = sttrees[netID].nodes;
+    for (int edgeID = 0; edgeID < 2 * deg - 3; edgeID++) {
+      TreeEdge* treeedge = &(treeedges[edgeID]);
       if (treeedge->len > 0) {
-        routeLen = treeedge->route.routelen;
-        gridsX   = treeedge->route.gridsX;
-        gridsY   = treeedge->route.gridsY;
-        gridsL   = treeedge->route.gridsL;
-        lastX    = wTile * (gridsX[0] + 0.5) + xcorner;
-        lastY    = hTile * (gridsY[0] + 0.5) + ycorner;
-        lastL    = gridsL[0];
-        for (i = 1; i <= routeLen; i++) {
-          xreal = wTile * (gridsX[i] + 0.5) + xcorner;
-          yreal = hTile * (gridsY[i] + 0.5) + ycorner;
+        int    routeLen = treeedge->route.routelen;
+        short* gridsX   = treeedge->route.gridsX;
+        short* gridsY   = treeedge->route.gridsY;
+        short* gridsL   = treeedge->route.gridsL;
+        int    lastX    = wTile * (gridsX[0] + 0.5) + xcorner;
+        int    lastY    = hTile * (gridsY[0] + 0.5) + ycorner;
+        int    lastL    = gridsL[0];
+        for (int i = 1; i <= routeLen; i++) {
+          int xreal = wTile * (gridsX[i] + 0.5) + xcorner;
+          int yreal = hTile * (gridsY[i] + 0.5) + ycorner;
 
           ROUTE routing;
           routing.initX      = lastX;
@@ -898,8 +873,6 @@ std::vector<NET> FT::getResults()
 
 void FT::writeCongestionReport2D(std::string fileName)
 {
-  long          xReal, yReal;
-  int           grid, j, k, i;
   std::ofstream congestFile;
   congestFile.open(fileName);
 
@@ -915,8 +888,8 @@ void FT::writeCongestionReport2D(std::string fileName)
       << "Area    Vertical Capacity/Usage    Horizontal Capacity/Usage\n";
   congestFile << "---------------------------------------------\n";
 
-  for (i = 0; i < yGrid; i++) {
-    for (j = 0; j < xGrid - 1; j++) {
+  for (int i = 0; i < yGrid; i++) {
+    for (int j = 0; j < xGrid - 1; j++) {
       gridH = i * (xGrid - 1) + j;
       gridV = i * xGrid + j;
 
@@ -926,8 +899,8 @@ void FT::writeCongestionReport2D(std::string fileName)
       unsigned short capV   = v_edges[gridV].cap;
       unsigned short usageV = v_edges[gridV].usage;
 
-      xReal = wTile * (j + 0.5) + xcorner;
-      yReal = hTile * (i + 0.5) + ycorner;
+      long xReal = wTile * (j + 0.5) + xcorner;
+      long yReal = hTile * (i + 0.5) + ycorner;
 
       long llX = xReal - (wTile / 2);
       long llY = yReal - (hTile / 2);
@@ -947,8 +920,6 @@ void FT::writeCongestionReport2D(std::string fileName)
 
 void FT::writeCongestionReport3D(std::string fileName)
 {
-  long          xReal, yReal;
-  int           grid, j, k, i;
   std::ofstream congestFile;
   congestFile.open(fileName);
 
@@ -964,12 +935,12 @@ void FT::writeCongestionReport3D(std::string fileName)
       << "Area    Vertical Capacity/Usage    Horizontal Capacity/Usage\n";
   congestFile << "---------------------------------------------\n";
 
-  for (k = 0; k < numLayers; k++) {
+  for (int k = 0; k < numLayers; k++) {
     congestFile << "Layer " << k + 1 << "\n";
-    for (i = 0; i < yGrid; i++) {
-      for (j = 0; j < xGrid - 1; j++) {
-        gridH = i * (xGrid - 1) + j + k * (xGrid - 1) * yGrid;
-        gridV = i * xGrid + j + k * xGrid * (yGrid - 1);
+    for (int i = 0; i < yGrid; i++) {
+      for (int j = 0; j < xGrid - 1; j++) {
+        int gridH = i * (xGrid - 1) + j + k * (xGrid - 1) * yGrid;
+        int gridV = i * xGrid + j + k * xGrid * (yGrid - 1);
 
         unsigned short capH   = h_edges3D[gridH].cap;
         unsigned short usageH = h_edges3D[gridH].usage;
@@ -977,8 +948,8 @@ void FT::writeCongestionReport3D(std::string fileName)
         unsigned short capV   = v_edges3D[gridV].cap;
         unsigned short usageV = v_edges3D[gridV].usage;
 
-        xReal = wTile * (j + 0.5) + xcorner;
-        yReal = hTile * (i + 0.5) + ycorner;
+        long xReal = wTile * (j + 0.5) + xcorner;
+        long yReal = hTile * (i + 0.5) + ycorner;
 
         long llX = xReal - (wTile / 2);
         long llY = yReal - (hTile / 2);
@@ -999,25 +970,10 @@ void FT::writeCongestionReport3D(std::string fileName)
 
 int FT::run(std::vector<NET>& result)
 {
-  //    char benchFile[FILESTRLEN];
-  char    routingFile[STRINGLEN];
-  char    degreeFile[STRINGLEN];
-  char    optionS[STRINGLEN];
-  clock_t t1 = 0, t2 = 0, t3 = 0, t4 = 0;
-  float   gen_brk_Time, P1_Time, P2_Time, P3_Time, maze_Time, totalTime,
-      congestionmap_time;
-  int iter, last_totalOverflow, diff_totalOverflow, enlarge, ripup_threshold;
-  int i, j, past_overflow, cur_overflow;
-  int L_afterSTOP;
-  int ESTEP1, CSTEP1, thStep1;
-  int ESTEP2, CSTEP2, thStep2;
-  int ESTEP3, CSTEP3, thStep3, tUsage, CSTEP4;
-  int Ripvalue, LVIter, cost_step;
-  int maxOverflow, past_cong, last_cong, finallength, numVia, ripupTH3D, newTH,
-      healingTrigger;
-  int updateType, minofl, minoflrnd, mazeRound, upType, cost_type, bmfl, bwcnt;
-
-  Bool goingLV, healingNeed, noADJ, extremeNeeded;
+  int tUsage;
+  int cost_step;
+  int maxOverflow;
+  int minoflrnd, bwcnt;
 
   // TODO: check this size
   int maxPin = maxNetDegree;
@@ -1033,37 +989,37 @@ int FT::run(std::vector<NET>& result)
   LB = 0.9;
   UB = 1.3;
 
-  SLOPE         = 5;
-  THRESH_M      = 20;
-  ENLARGE       = 15;  // 5
-  ESTEP1        = 10;  // 10
-  ESTEP2        = 5;   // 5
-  ESTEP3        = 5;   // 5
-  CSTEP1        = 2;   // 5
-  CSTEP2        = 2;   // 3
-  CSTEP3        = 5;   // 15
-  CSTEP4        = 1000;
-  COSHEIGHT     = 4;
-  L             = 0;
-  VIA           = 2;
-  L_afterSTOP   = 1;
-  Ripvalue      = -1;
-  ripupTH3D     = 10;
-  goingLV       = TRUE;
-  noADJ         = FALSE;
-  thStep1       = 10;
-  thStep2       = 4;
-  healingNeed   = FALSE;
-  updateType    = 0;
-  LVIter        = 3;
-  extremeNeeded = FALSE;
-  mazeRound     = 500;
-  bmfl          = BIG_INT;
-  minofl        = BIG_INT;
+  SLOPE              = 5;
+  THRESH_M           = 20;
+  ENLARGE            = 15;  // 5
+  int ESTEP1         = 10;  // 10
+  int ESTEP2         = 5;   // 5
+  int ESTEP3         = 5;   // 5
+  int CSTEP1         = 2;   // 5
+  int CSTEP2         = 2;   // 3
+  int CSTEP3         = 5;   // 15
+  int CSTEP4         = 1000;
+  COSHEIGHT          = 4;
+  L                  = 0;
+  VIA                = 2;
+  int  L_afterSTOP   = 1;
+  int  Ripvalue      = -1;
+  int  ripupTH3D     = 10;
+  Bool goingLV       = TRUE;
+  Bool noADJ         = FALSE;
+  int  thStep1       = 10;
+  int  thStep2       = 4;
+  Bool healingNeed   = FALSE;
+  int  updateType    = 0;
+  int  LVIter        = 3;
+  Bool extremeNeeded = FALSE;
+  int  mazeRound     = 500;
+  int  bmfl          = BIG_INT;
+  int  minofl        = BIG_INT;
 
   // call FLUTE to generate RSMT and break the nets into segments (2-pin nets)
 
-  t1 = clock();
+  clock_t t1 = clock();
 
   VIA = 2;
   // viacost = VIA;
@@ -1082,15 +1038,15 @@ int FT::run(std::vector<NET>& result)
   newrouteZAll(10);
   if (verbose > 1)
     printf("First Z Route\n");
-  past_cong = getOverflow2D(&maxOverflow);
+  int past_cong = getOverflow2D(&maxOverflow);
 
   convertToMazeroute();
 
-  enlarge        = 10;
-  newTH          = 10;
-  healingTrigger = 0;
-  stopDEC        = 0;
-  upType         = 1;
+  int enlarge        = 10;
+  int newTH          = 10;
+  int healingTrigger = 0;
+  stopDEC            = 0;
+  int upType         = 1;
   // iniBDE();
   costheight = COSHEIGHT;
   if (maxOverflow > 700) {
@@ -1102,7 +1058,7 @@ int FT::run(std::vector<NET>& result)
     slope      = BIG_INT;
   }
 
-  for (i = 0; i < LVIter; i++) {
+  for (int i = 0; i < LVIter; i++) {
     LOGIS_COF = std::max<float>(2.0 / (1 + log(maxOverflow)), LOGIS_COF);
     LOGIS_COF = 2.0 / (1 + log(maxOverflow));
     if (verbose > 1)
@@ -1120,20 +1076,20 @@ int FT::run(std::vector<NET>& result)
 
   //	past_cong = getOverflow2Dmaze( &maxOverflow);
 
-  t3 = clock();
+  clock_t t3 = clock();
   InitEstUsage();
 
-  i               = 1;
-  costheight      = COSHEIGHT;
-  enlarge         = ENLARGE;
-  ripup_threshold = Ripvalue;
+  int i               = 1;
+  costheight          = COSHEIGHT;
+  enlarge             = ENLARGE;
+  int ripup_threshold = Ripvalue;
 
   minofl  = totalOverflow;
   stopDEC = FALSE;
 
-  slope     = 20;
-  L         = 1;
-  cost_type = 1;
+  slope         = 20;
+  L             = 1;
+  int cost_type = 1;
 
   InitLastUsage(upType);
   if (totalOverflow > 0) {
@@ -1240,8 +1196,8 @@ int FT::run(std::vector<NET>& result)
                   mazeedge_Threshold,
                   !(i % 3),
                   cost_type);
-    last_cong = past_cong;
-    past_cong = getOverflow2Dmaze(&maxOverflow, &tUsage);
+    int last_cong = past_cong;
+    past_cong     = getOverflow2Dmaze(&maxOverflow, &tUsage);
 
     if (minofl > past_cong) {
       minofl    = past_cong;
@@ -1378,8 +1334,8 @@ int FT::run(std::vector<NET>& result)
   if (verbose > 1)
     printf("Maze routing finished\n");
 
-  t4        = clock();
-  maze_Time = (float) (t4 - t3) / CLOCKS_PER_SEC;
+  clock_t t4        = clock();
+  float   maze_Time = (float) (t4 - t3) / CLOCKS_PER_SEC;
 
   if (verbose > 1) {
     printf("[INFO] P3 runtime: %f sec\n", maze_Time);
@@ -1394,8 +1350,8 @@ int FT::run(std::vector<NET>& result)
   if (verbose > 1)
     printf("Layer assignment finished\n");
 
-  t2           = clock();
-  gen_brk_Time = (float) (t2 - t1) / CLOCKS_PER_SEC;
+  clock_t t2           = clock();
+  float   gen_brk_Time = (float) (t2 - t1) / CLOCKS_PER_SEC;
 
   if (verbose > 1)
     printf("[INFO] 2D + Layer Assignment Runtime: %f sec\n", gen_brk_Time);
@@ -1425,12 +1381,12 @@ int FT::run(std::vector<NET>& result)
   }
 
   fillVIA();
-  finallength = getOverflow3D();
-  numVia      = threeDVIA();
+  int finallength = getOverflow3D();
+  int numVia      = threeDVIA();
   checkRoute3D();
 
-  t4        = clock();
-  maze_Time = (float) (t4 - t1) / CLOCKS_PER_SEC;
+  clock_t t5 = clock();
+  maze_Time  = (float) (t5 - t1) / CLOCKS_PER_SEC;
   printf("[INFO] Final usage          : %d\n", finallength);
   printf("[INFO] Final number of vias : %d\n", numVia);
   printf("[INFO] Final usage 3D       : %d\n", (finallength + 3 * numVia));
