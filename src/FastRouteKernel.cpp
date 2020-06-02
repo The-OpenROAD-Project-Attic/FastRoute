@@ -1004,6 +1004,10 @@ unsigned FastRouteKernel::getDbId() {
 }
 
 void FastRouteKernel::addLayerAdjustment(int layer, float reductionPercentage) {
+        if (layer > _maxRoutingLayer) {
+                std::cout << "[ERROR] Specified layer " << layer << " for adjustment is greater than max routing layer " << _maxRoutingLayer << " and will be ignored" << std::endl;
+                return;
+        }
         _layersToAdjust.push_back(layer);
         _layersReductionPercentage.push_back(reductionPercentage);
 }
