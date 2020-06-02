@@ -247,20 +247,18 @@ void FastRouteKernel::startFastRoute() {
         std::cout << "[PARAMS] Unidirectional routing: " << _unidirectionalRoute << "\n";
         std::cout << "[PARAMS] Clock net routing: " << _clockNetRouting << "\n";
         std::cout << "[PARAMS] Grid origin: (" << _gridOrigin->getX() << ", " << _gridOrigin->getY() << ")\n";
+        if (!_layerPitches.empty()) {
+                std::cout << "[PARAMS] Layers pitches: \n";
+                std::map<int, float>::iterator it;
+                for (it = _layerPitches.begin(); it != _layerPitches.end(); it++) {
+                        std::cout << "Layer " << it->first << " pitch: " << it->second << "\n";
+                }
+        }
+        std::cout << "\n";
         
         std::cout << "Initializing grid...\n";
         initGrid();
         std::cout << "Initializing grid... Done!\n";
-
-        std::cout << "Searching for transition layers...\n";
-        std::set<int> transitionLayers = _dbWrapper->findTransitionLayers(_maxRoutingLayer);
-
-        std::cout << "[INFO] Found " << transitionLayers.size() << " transition layers\n";
-        for (std::set<int>::iterator it = transitionLayers.begin(); it != transitionLayers.end(); ++it) {
-                _layersToAdjust.push_back(*it);
-                _layersReductionPercentage.push_back(transitionLayerAdjust);
-        }
-        std::cout << "Searching for transition layers... Done!\n";
         
         std::cout << "Initializing routing layers...\n";
         initRoutingLayers();
@@ -302,7 +300,7 @@ void FastRouteKernel::startFastRoute() {
         computeUserLayerAdjustments();
         std::cout << "Computing user defined layers adjustments... Done!\n";
         
-        for (int i = 0; i < regionsReductionPercentage.size(); i++) {
+        for (uint i = 0; i < regionsReductionPercentage.size(); i++) {
                 if (regionsLayer[i] < 1)
                         break;
                 
@@ -341,7 +339,7 @@ void FastRouteKernel::runFastRoute() {
 void FastRouteKernel::initGrid() {        
         _dbWrapper->initGrid(_maxRoutingLayer);
         
-        _dbWrapper->computeCapacities(_maxRoutingLayer);
+        _dbWrapper->computeCapacities(_maxRoutingLayer, _layerPitches);
         _dbWrapper->computeSpacingsAndMinWidth(_maxRoutingLayer);
         _dbWrapper->initObstacles();
         
@@ -358,7 +356,7 @@ void FastRouteKernel::initRoutingLayers() {
 }
 
 void FastRouteKernel::initRoutingTracks() {
-        _dbWrapper->initRoutingTracks(*_allRoutingTracks, _maxRoutingLayer);
+        _dbWrapper->initRoutingTracks(*_allRoutingTracks, _maxRoutingLayer, _layerPitches);
 }
 
 void FastRouteKernel::setCapacities() {
@@ -405,11 +403,12 @@ void FastRouteKernel::initializeNets() {
         int idx = 0;
         int validNets = 0;
 
+        int minDegree = std::numeric_limits<int>::max();
+        int maxDegree = std::numeric_limits<int>::min();
+
         _netlist->randomizeNetsOrder(_seed);
 
         for (Net net : _netlist->getNets()) {
-                float netAlpha = _alpha;
-
                 if (net.getNumPins() <= 1) {
                         continue;
                 }
@@ -434,6 +433,14 @@ void FastRouteKernel::initializeNets() {
                 if (net.getNumPins() <= 1) {
                         continue;
                 }
+
+                if (net.getNumPins() < minDegree) {
+                        minDegree = net.getNumPins();
+                }
+
+                if (net.getNumPins() > maxDegree) {
+                        maxDegree = net.getNumPins();
+                }
                 
                 if (_clockNetRouting && net.getSignalType() != "CLOCK") {
                         continue;
@@ -453,7 +460,7 @@ void FastRouteKernel::initializeNets() {
                         int topLayer = pin.getTopLayer();
                         RoutingLayer layer = getRoutingLayerByIndex(topLayer);
 
-                        std::vector<Box> pinBoxes = pin.getBoxes()[topLayer];
+                        std::vector<Box> pinBoxes = pin.getBoxes().at(topLayer);
                         std::vector<Coordinate> pinPositionsOnGrid;
                         Coordinate posOnGrid;
                         Coordinate trackPos;
@@ -511,6 +518,9 @@ void FastRouteKernel::initializeNets() {
                 idx++;
         }
 
+        std::cout << "[INFO] Minimum degree: " << minDegree << "\n";
+        std::cout << "[INFO] Maximum degree: " << maxDegree << "\n";
+
         _fastRoute->initEdges();
 }
 
@@ -550,11 +560,7 @@ void FastRouteKernel::computeGridAdjustments() {
                     std::exit(1);
                 }
                 
-                int numAdjustments = 0;
-                for (int i = 1; i < yGrids; i++)
-                        numAdjustments++;
-                for (int i = 1; i < xGrids; i++)
-                        numAdjustments++;
+                int numAdjustments = yGrids - 1 + xGrids - 1;
                 _fastRoute->setNumAdjustments(numAdjustments);
 
                 if (!_grid->isPerfectRegularX()) {
@@ -719,15 +725,7 @@ void FastRouteKernel::computeUserGlobalAdjustments() {
         int xGrids = _grid->getXGrids();
         int yGrids = _grid->getYGrids();
         
-        int numAdjustments = 0;
-
-        for (int layer = 1; layer <= _grid->getNumLayers(); layer++) {
-                for (int y = 0; y < yGrids; y++) {
-                        for (int x = 0; x < xGrids; x++) {
-                                numAdjustments++;
-                        }
-                }
-        }
+        int numAdjustments = _grid->getNumLayers() * yGrids * xGrids;
 
         numAdjustments *= 2;
         _fastRoute->setNumAdjustments(numAdjustments);
@@ -765,23 +763,15 @@ void FastRouteKernel::computeUserLayerAdjustments() {
         int xGrids = _grid->getXGrids();
         int yGrids = _grid->getYGrids();
         
-        int numAdjustments = 0;
-
-        for (int layer = 0; layer < _layersToAdjust.size(); layer++) {
-                for (int y = 0; y < yGrids; y++) {
-                        for (int x = 0; x < xGrids; x++) {
-                                numAdjustments++;
-                        }
-                }
-        }
+        int numAdjustments = _layersToAdjust.size() * yGrids * xGrids;
 
         numAdjustments *= 2;
         _fastRoute->setNumAdjustments(numAdjustments);
 
-        for (int idx = 0; idx < _layersToAdjust.size(); idx++) {
+        for (uint idx = 0; idx < _layersToAdjust.size(); idx++) {
                 int layer = _layersToAdjust[idx];
                 float adjustment = _layersReductionPercentage[idx];
-                std::cout << "[INFO] Reducing resources of layer " << layer << " in " << adjustment*100 << "%\n";
+                std::cout << "[INFO] Reducing resources of layer " << layer << " by " << adjustment*100 << "%\n";
                 if (_hCapacities[layer - 1] != 0) {
                         int newCap = _grid->getHorizontalEdgesCapacities()[layer - 1] * (1 - adjustment);
                         _grid->updateHorizontalEdgesCapacities(layer-1, newCap);
@@ -810,7 +800,7 @@ void FastRouteKernel::computeUserLayerAdjustments() {
         }
 }
 
-void FastRouteKernel::computeRegionAdjustments(Coordinate lowerBound, Coordinate upperBound,
+void FastRouteKernel::computeRegionAdjustments(const Coordinate& lowerBound, const Coordinate& upperBound,
                                                int layer, float reductionPercentage) {
         Box firstTileBox;
         Box lastTileBox;
@@ -915,10 +905,6 @@ void FastRouteKernel::computeObstaclesAdjustments() {
                         
                         Grid::TILE &firstTile = blockedTiles.first;
                         Grid::TILE &lastTile = blockedTiles.second;
-                        
-                        if (lastTile._x == _grid->getXGrids() - 1 || 
-                            lastTile._y == _grid->getYGrids())
-                                continue;
                         
                         int firstTileReduce = _grid->computeTileReduce(obs, firstTileBox, trackSpace, true, direction);
 
@@ -1030,6 +1016,10 @@ void FastRouteKernel::addRegionAdjustment(int minX, int minY, int maxX, int maxY
         regionsMaxY.push_back(maxY);
         regionsLayer.push_back(layer);
         regionsReductionPercentage.push_back(reductionPercentage);
+}
+
+void FastRouteKernel::setLayerPitch(int layer, float pitch) {
+        _layerPitches[layer] = pitch;
 }
 
 void FastRouteKernel::addAlphaForNet(char * netName, float alpha) {
@@ -1227,7 +1217,7 @@ void FastRouteKernel::addRemainingGuides(std::vector<FastRoute::NET> &globalRout
 
                 if (netRoute.route.size() == 0) { // Try to add local guides for net with no output of FR core
                         int lastLayer = -1;
-                        for (int p = 0; p < pins.size(); p++){
+                        for (uint p = 0; p < pins.size(); p++){
                                 if (p > 0){
                                         if (pins[p].x != pins[p-1].x || pins[p].y != pins[p-1].y) { // If the net is not local, FR core result is invalid
                                                 std::cout << "[ERROR] Net " << netRoute.name << " not properly covered.";
@@ -1257,7 +1247,7 @@ void FastRouteKernel::addRemainingGuides(std::vector<FastRoute::NET> &globalRout
                                         std::vector<FastRoute::ROUTE> coverSegs;
 
                                         int wireViaLayer = std::numeric_limits<int>::max();
-                                        for (int i = 0; i < segments.size(); i++) {
+                                        for (uint i = 0; i < segments.size(); i++) {
                                                 if ((pin.x == segments[i].initX && pin.y == segments[i].initY) ||
                                                     (pin.x == segments[i].finalX && pin.y == segments[i].finalY)) {
                                                         if (!(segments[i].initX == segments[i].finalX &&
@@ -1270,7 +1260,7 @@ void FastRouteKernel::addRemainingGuides(std::vector<FastRoute::NET> &globalRout
                                                 }
                                         }
 
-                                        for (int i = 0; i < segments.size(); i++) {
+                                        for (uint i = 0; i < segments.size(); i++) {
                                                 if ((pin.x == segments[i].initX && pin.y == segments[i].initY) || 
                                                     (pin.x == segments[i].finalX && pin.y == segments[i].finalY)) {
                                                         // remove all vias to this pin that doesn't connects two wires
@@ -1332,15 +1322,13 @@ void FastRouteKernel::addRemainingGuides(std::vector<FastRoute::NET> &globalRout
         }
 
         if (allNets.size() > 0) { // If some net still with no routing, add local guides
-                for (std::map<std::string, std::vector<FastRoute::PIN>>::iterator
-                     it = allNets.begin();
-                     it != allNets.end(); ++it) {
-                        std::vector<FastRoute::PIN> &pins = it->second;
+                for (auto& name_pins : allNets) {
+                        std::vector<FastRoute::PIN> &pins = name_pins.second;
 
                         FastRoute::NET localNet;
                         localNet.id = localNetsId;
                         localNetsId++;
-                        localNet.name = it->first;
+                        localNet.name = name_pins.first;
                         for (FastRoute::PIN pin : pins) {
                                 FastRoute::ROUTE route;
                                 route.initLayer = pin.layer;
@@ -1363,7 +1351,7 @@ void FastRouteKernel::mergeBox(std::vector<Box>& guideBox) {
                 std::exit(1);
         }
         finalBox.push_back(guideBox[0]);
-        for (int i=1; i < guideBox.size(); i++){
+        for (uint i=1; i < guideBox.size(); i++){
                 Box box = guideBox[i];
                 Box & lastBox = finalBox.back();
                 if (lastBox.overlap(box)) {
@@ -1503,7 +1491,7 @@ FastRouteKernel::ROUTE_ FastRouteKernel::getRoute() {
                 cnt++;
         }
         
-        for (int i = 0; i <  _grid->getMinWidths().size(); i++) {
+        for (uint i = 0; i <  _grid->getMinWidths().size(); i++) {
                 route.minWireWidths.push_back(100);
         }
         
@@ -1627,7 +1615,7 @@ void FastRouteKernel::mergeSegments(FastRoute::NET &net) {
                 std::exit(1);
         }
         
-        int i = 0;
+        uint i = 0;
         while (i < segments.size() - 1) {
 		ROUTE newSeg = segments[i];
                 ROUTE segment0 = segments[i];
@@ -1656,7 +1644,7 @@ void FastRouteKernel::mergeSegments(FastRoute::NET &net) {
         net.route = segments;
 }
 
-bool FastRouteKernel::segmentsOverlaps(ROUTE seg0, ROUTE seg1, ROUTE &newSeg) {
+bool FastRouteKernel::segmentsOverlaps(const ROUTE& seg0, const ROUTE& seg1, ROUTE &newSeg) {
 	long initX0 = std::min(seg0.initX, seg0.finalX);
 	long initY0 = std::min(seg0.initY, seg0.finalY);
 	long finalX0 = std::max(seg0.finalX, seg0.initX);
@@ -1690,7 +1678,7 @@ bool FastRouteKernel::segmentsOverlaps(ROUTE seg0, ROUTE seg1, ROUTE &newSeg) {
 	return false;
 }
 
-bool FastRouteKernel::pinOverlapsWithSingleTrack(Pin pin, Coordinate &trackPosition) {
+bool FastRouteKernel::pinOverlapsWithSingleTrack(const Pin& pin, Coordinate &trackPosition) {
         DBU minX = std::numeric_limits<DBU>::max();
         DBU minY = std::numeric_limits<DBU>::max();
         DBU maxX = std::numeric_limits<DBU>::min();
@@ -1699,7 +1687,7 @@ bool FastRouteKernel::pinOverlapsWithSingleTrack(Pin pin, Coordinate &trackPosit
         DBU min, max;
 
         int topLayer = pin.getTopLayer();
-        std::vector<Box> pinBoxes = pin.getBoxes()[topLayer];
+        std::vector<Box> pinBoxes = pin.getBoxes().at(topLayer);
 
         RoutingLayer layer = getRoutingLayerByIndex(topLayer);
         RoutingTracks tracks = getRoutingTracksByIndex(topLayer);

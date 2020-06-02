@@ -58,13 +58,13 @@ private:
         
 public:
         Net() = default;
-        Net(const std::string name, const std::string signalType,
-            const std::vector<Pin> pins)
+        Net(const std::string& name, const std::string& signalType,
+            const std::vector<Pin>& pins)
             : _name(name), _signalType(signalType), _pins(pins) {}
         
-        std::string getName() const { return _name; }
-        std::string getSignalType() const { return _signalType; }
-        std::vector<Pin> getPins() const { return _pins; }
+        const std::string& getName() const { return _name; }
+        const std::string& getSignalType() const { return _signalType; }
+        const std::vector<Pin>& getPins() const { return _pins; }
         int getNumPins() const { return _pins.size(); }
 };
 

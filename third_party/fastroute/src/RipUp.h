@@ -19,27 +19,48 @@
 //
 // THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
 // AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
-// IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-// DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
-// FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
-// DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
-// SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
-// CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
-// OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
-// USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+// IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+// ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+// LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+// CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+// SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+// INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+// CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+// ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+// POSSIBILITY OF SUCH DAMAGE.
 ////////////////////////////////////////////////////////////////////////////////
 
 #ifndef __RIPUP_H__
 #define __RIPUP_H__
 
+#include "DataType.h"
+
 namespace FastRoute {
 
-extern void ripupSegL(Segment *seg);
-extern void ripupSegZ(Segment *seg);
-extern void newRipup(TreeEdge *treeedge, TreeNode *treenodes, int x1, int y1, int x2, int y2);
-extern Bool newRipupCheck(TreeEdge *treeedge, int x1, int y1, int x2, int y2, int ripup_threshold, int netID, int edgeID);
+extern void ripupSegL(Segment* seg);
+extern void ripupSegZ(Segment* seg);
+extern void newRipup(TreeEdge* treeedge,
+                     TreeNode* treenodes,
+                     int       x1,
+                     int       y1,
+                     int       x2,
+                     int       y2);
+extern Bool newRipupCheck(TreeEdge* treeedge,
+                          int       x1,
+                          int       y1,
+                          int       x2,
+                          int       y2,
+                          int       ripup_threshold,
+                          int       netID,
+                          int       edgeID);
 
-extern Bool newRipupType2(TreeEdge *treeedge, TreeNode *treenodes, int x1, int y1, int x2, int y2, int deg);
+extern Bool newRipupType2(TreeEdge* treeedge,
+                          TreeNode* treenodes,
+                          int       x1,
+                          int       y1,
+                          int       x2,
+                          int       y2,
+                          int       deg);
 extern Bool newRipup3DType3(int netID, int edgeID);
 
 extern void newRipupNet(int netID);

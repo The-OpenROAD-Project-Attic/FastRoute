@@ -110,6 +110,9 @@ private:
         std::vector<int> regionsLayer;
         std::vector<float> regionsReductionPercentage;
 
+        // Pitches variables
+        std::map<int, float> _layerPitches;
+
         // Clock net routing variables
         bool _pdRev;
         float _alpha;
@@ -130,7 +133,7 @@ private:
         void computeTrackAdjustments();
         void computeUserGlobalAdjustments();
         void computeUserLayerAdjustments();
-        void computeRegionAdjustments(Coordinate lowerBound, Coordinate upperBound, int layer, float reductionPercentage);
+        void computeRegionAdjustments(const Coordinate& lowerBound, const Coordinate& upperBound, int layer, float reductionPercentage);
         void computeObstaclesAdjustments();
         void computeWirelength();
         
@@ -140,9 +143,9 @@ private:
         void addRemainingGuides(std::vector<FastRoute::NET> &globalRoute);
         void mergeBox(std::vector<Box>& guideBox);
         Box globalRoutingToBox(const FastRoute::ROUTE &route);
-        bool segmentsOverlaps(ROUTE seg0, ROUTE seg1, ROUTE &newSeg);
+        bool segmentsOverlaps(const ROUTE& seg0, const ROUTE& seg1, ROUTE &newSeg);
         void mergeSegments(FastRoute::NET &net);
-        bool pinOverlapsWithSingleTrack(Pin pin, Coordinate &trackPosition);
+        bool pinOverlapsWithSingleTrack(const Pin& pin, Coordinate &trackPosition);
         
         // check functions
         void checkPinPlacement();
@@ -208,6 +211,7 @@ public:
         unsigned getDbId();
         void addLayerAdjustment(int layer, float reductionPercentage);
         void addRegionAdjustment(int minX, int minY, int maxX, int maxY, int layer, float reductionPercentage);
+        void setLayerPitch(int layer, float pitch);
         void addAlphaForNet(char * netName, float alpha);
         void setVerbose(const int v);
         void setOverflowIterations(int iterations);
