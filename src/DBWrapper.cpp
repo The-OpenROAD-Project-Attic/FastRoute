@@ -162,26 +162,28 @@ void DBWrapper::initRoutingTracks(std::vector<RoutingTracks>& allRoutingTracks, 
                 int trackStepX, trackStepY;
                 int initTrackX, numTracksX;
                 int initTrackY, numTracksY;
-                int spacing, location, numTracks;
+                int trackPitch, line2ViaPitch, location, numTracks;
                 bool orientation;
 
                 selectedTrack->getGridPatternX(0, initTrackX, numTracksX, trackStepX);
                 selectedTrack->getGridPatternY(0, initTrackY, numTracksY, trackStepY);
 
                 if (techayer->getDirection().getValue() == odb::dbTechLayerDir::HORIZONTAL) {
-                        spacing = trackStepY;
+                        trackPitch = trackStepY;
                         if (layerPitches.find(layer) != layerPitches.end()) {
-                                int layerPitch = (int)(tech->getLefUnits()*layerPitches[layer]);
-                                spacing = std::max(layerPitch, trackStepY);
+                                line2ViaPitch = (int)(tech->getLefUnits()*layerPitches[layer]);
+                        } else {
+                                line2ViaPitch = -1;
                         }
                         location = initTrackY;
                         numTracks = numTracksY;
                         orientation = RoutingLayer::HORIZONTAL;
                 } else if (techayer->getDirection().getValue() == odb::dbTechLayerDir::VERTICAL) {
-                        spacing = trackStepX;
+                        trackPitch = trackStepX;
                         if (layerPitches.find(layer) != layerPitches.end()) {
-                                int layerPitch = (int)(tech->getLefUnits()*layerPitches[layer]);
-                                spacing = std::max(layerPitch, trackStepX);
+                                line2ViaPitch = (int)(tech->getLefUnits()*layerPitches[layer]);
+                        } else {
+                                line2ViaPitch = -1;
                         }
                         location = initTrackX;
                         numTracks = numTracksX;
@@ -191,9 +193,9 @@ void DBWrapper::initRoutingTracks(std::vector<RoutingTracks>& allRoutingTracks, 
                         std::exit(1);
                 }
                 
-                RoutingTracks routingTracks = RoutingTracks(layer, spacing,
-                                                           location, numTracks,
-                                                           orientation);
+                RoutingTracks routingTracks = RoutingTracks(layer, trackPitch,
+                                                           line2ViaPitch, location,
+                                                           numTracks, orientation);
                 allRoutingTracks.push_back(routingTracks);
         }
 }

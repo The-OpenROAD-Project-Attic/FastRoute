@@ -593,7 +593,7 @@ void FastRouteKernel::computeTrackAdjustments() {
                 if (layer.getPreferredDirection() == RoutingLayer::HORIZONTAL) {
                         RoutingTracks routingTracks = getRoutingTracksByIndex(layer.getIndex());
                         trackLocation = routingTracks.getLocation();
-                        trackSpace = routingTracks.getSpace();
+                        trackSpace = std::max(routingTracks.getTrackPitch(), routingTracks.getLine2ViaPitch());
                         numTracks = routingTracks.getNumTracks();
                         
                         if (numTracks > 0) {
@@ -655,7 +655,7 @@ void FastRouteKernel::computeTrackAdjustments() {
                 } else {
                         RoutingTracks routingTracks = getRoutingTracksByIndex(layer.getIndex());
                         trackLocation = routingTracks.getLocation();
-                        trackSpace = routingTracks.getSpace();
+                        trackSpace = std::max(routingTracks.getTrackPitch(), routingTracks.getLine2ViaPitch());
                         numTracks = routingTracks.getNumTracks();
                         
                         if (numTracks > 0) {
@@ -826,7 +826,7 @@ void FastRouteKernel::computeRegionAdjustments(const Coordinate& lowerBound, con
         Grid::TILE &lastTile = tilesToAdjust.second;
         
         RoutingTracks routingTracks = getRoutingTracksByIndex(layer);
-        DBU trackSpace = routingTracks.getSpace();
+        DBU trackSpace = std::max(routingTracks.getTrackPitch(), routingTracks.getLine2ViaPitch());
         
         int firstTileReduce = _grid->computeTileReduce(regionToAdjust, firstTileBox, trackSpace, true, direction);
 
@@ -1715,9 +1715,9 @@ bool FastRouteKernel::pinOverlapsWithSingleTrack(const Pin& pin, Coordinate &tra
                 min = minY;
                 max = maxY;
 
-                if ((float)(max - min)/tracks.getSpace() <= 3) {
-                        DBU nearestTrack = std::floor((float)(max - tracks.getLocation())/tracks.getSpace()) * tracks.getSpace() + tracks.getLocation();
-                        DBU nearestTrack2 = std::floor((float)(max - tracks.getLocation())/tracks.getSpace() - 1) * tracks.getSpace() + tracks.getLocation();
+                if ((float)(max - min)/tracks.getTrackPitch() <= 3) {
+                        DBU nearestTrack = std::floor((float)(max - tracks.getLocation())/tracks.getTrackPitch()) * tracks.getTrackPitch() + tracks.getLocation();
+                        DBU nearestTrack2 = std::floor((float)(max - tracks.getLocation())/tracks.getTrackPitch() - 1) * tracks.getTrackPitch() + tracks.getLocation();
 
                         if ((nearestTrack >= min && nearestTrack <= max) && (nearestTrack2 >= min && nearestTrack2 <= max)) {
                                 return false;
@@ -1737,9 +1737,9 @@ bool FastRouteKernel::pinOverlapsWithSingleTrack(const Pin& pin, Coordinate &tra
                 min = minX;
                 max = maxX;
 
-                if ((float)(max - min)/tracks.getSpace() <= 3) {
-                        DBU nearestTrack = std::floor((float)(max - tracks.getLocation())/tracks.getSpace()) * tracks.getSpace() + tracks.getLocation();
-                        DBU nearestTrack2 = std::floor((float)(max - tracks.getLocation())/tracks.getSpace() - 1) * tracks.getSpace() + tracks.getLocation();
+                if ((float)(max - min)/tracks.getTrackPitch() <= 3) {
+                        DBU nearestTrack = std::floor((float)(max - tracks.getLocation())/tracks.getTrackPitch()) * tracks.getTrackPitch() + tracks.getLocation();
+                        DBU nearestTrack2 = std::floor((float)(max - tracks.getLocation())/tracks.getTrackPitch() - 1) * tracks.getTrackPitch() + tracks.getLocation();
                         
                         if ((nearestTrack >= min && nearestTrack <= max) && (nearestTrack2 >= min && nearestTrack2 <= max)) {
                                 return false;
