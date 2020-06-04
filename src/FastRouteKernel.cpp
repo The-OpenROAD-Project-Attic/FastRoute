@@ -406,6 +406,8 @@ void FastRouteKernel::initializeNets() {
         int minDegree = std::numeric_limits<int>::max();
         int maxDegree = std::numeric_limits<int>::min();
 
+        Coordinate gridMiddle = _grid->getMiddle();
+
         _netlist->randomizeNetsOrder(_seed);
 
         for (Net net : _netlist->getNets()) {
@@ -492,6 +494,28 @@ void FastRouteKernel::initializeNets() {
                                         }
                                 }
                         }
+
+                        if (pin.isConnectedToPad()) { // If pin is connected to PAD, create a "fake" location in routing grid to avoid PAD obstacles
+                                if (layer.getPreferredDirection() == RoutingLayer::HORIZONTAL) {
+                                        DBU newXPosition;
+                                        if (pinPosition.getX() < gridMiddle.getX()) {
+                                                newXPosition = pinPosition().getX() + _grid->getTileWidth();
+                                                pinPosition.setX(newXPosition);
+                                        } else {
+                                                newXPosition = pinPosition().getX() - _grid->getTileWidth();
+                                                pinPosition.setX(newXPosition);
+                                        }
+                                } else {
+                                        DBU newYPosition;
+                                        if (pinPosition.getY() < gridMiddle.getY()) {
+                                                newYPosition = pinPosition().getY() + _grid->getTileHeight();
+                                                pinPosition.setY(newYPosition);
+                                        } else {
+                                                newYPosition = pinPosition().getY() - _grid->getTileHeight();
+                                                pinPosition.setY(newYPosition);
+                                        }
+                                }
+                        }
                         
                         FastRoute::PIN grPin;
                         grPin.x = pinPosition.getX();
@@ -507,7 +531,7 @@ void FastRouteKernel::initializeNets() {
                 
                 for (FastRoute::PIN pin : pins) {
                         grPins[count] = pin;
-                        count ++;
+                        count++;
                 }
                 
                 if (_netsAlpha.find(net.getName()) != _netsAlpha.end()) {
