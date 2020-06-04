@@ -417,9 +417,15 @@ void DBWrapper::initNetlist() {
                         
                         currBTerm->getFirstPinLocation(posX, posY);
                         odb::dbITerm* iTerm = currBTerm->getITerm();
-                        odb::dbMTerm* mTerm = iTerm->getMTerm();
-                        odb::dbMaster* master = mTerm->getMaster();
-                        bool connectedToPad = master->getType().isPad();
+                        odb::dbMTerm* mTerm;
+                        odb::dbMaster* master;
+                        bool connectedToPad;
+
+                        if (iTerm != NULL) {
+                                mTerm = iTerm->getMTerm();
+                                master = mTerm->getMaster();
+                                connectedToPad = master->getType().isPad();                            
+                        }
                         
                         std::vector<int> pinLayers;
                         std::map<int, std::vector<Box>> pinBoxes;
@@ -551,10 +557,6 @@ void DBWrapper::initObstacles() {
                 int pX, pY;
 
                 odb::dbMaster* master = currInst->getMaster();
-
-                if (master->getType().isPad()) {
-                        continue;
-                }
                 
                 currInst->getOrigin(pX, pY);
                 odb::Point origin = odb::Point(pX, pY);
