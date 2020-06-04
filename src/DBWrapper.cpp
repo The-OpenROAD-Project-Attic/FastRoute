@@ -416,7 +416,8 @@ void DBWrapper::initNetlist() {
                         std::string pinName;
                         
                         currBTerm->getFirstPinLocation(posX, posY);
-                        odb::dbMTerm* mTerm = currBTerm->getMTerm();
+                        odb::dbITerm* iTerm = currBTerm->getITerm();
+                        odb::dbMTerm* mTerm = iTerm->getMTerm();
                         odb::dbMaster* master = mTerm->getMaster();
                         bool connectedToPad = master->getType().isPad();
                         

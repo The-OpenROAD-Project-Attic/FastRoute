@@ -499,19 +499,19 @@ void FastRouteKernel::initializeNets() {
                                 if (layer.getPreferredDirection() == RoutingLayer::HORIZONTAL) {
                                         DBU newXPosition;
                                         if (pinPosition.getX() < gridMiddle.getX()) {
-                                                newXPosition = pinPosition().getX() + _grid->getTileWidth();
+                                                newXPosition = pinPosition.getX() + _grid->getTileWidth();
                                                 pinPosition.setX(newXPosition);
                                         } else {
-                                                newXPosition = pinPosition().getX() - _grid->getTileWidth();
+                                                newXPosition = pinPosition.getX() - _grid->getTileWidth();
                                                 pinPosition.setX(newXPosition);
                                         }
                                 } else {
                                         DBU newYPosition;
                                         if (pinPosition.getY() < gridMiddle.getY()) {
-                                                newYPosition = pinPosition().getY() + _grid->getTileHeight();
+                                                newYPosition = pinPosition.getY() + _grid->getTileHeight();
                                                 pinPosition.setY(newYPosition);
                                         } else {
-                                                newYPosition = pinPosition().getY() - _grid->getTileHeight();
+                                                newYPosition = pinPosition.getY() - _grid->getTileHeight();
                                                 pinPosition.setY(newYPosition);
                                         }
                                 }
