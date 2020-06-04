@@ -361,6 +361,8 @@ void DBWrapper::initNetlist() {
                             master->getType() == odb::dbMasterType::COVER_BUMP) {
                                 std::cout << "[WARNING] Net connected with instance of class COVER added for routing\n";
                         }
+
+                        bool connectedToPad = master->getType().isPad();
                         
                         std::string instName = currITerm->getInst()->getConstName();
                         pinName = mTerm->getConstName();
@@ -404,7 +406,7 @@ void DBWrapper::initNetlist() {
                                 }
                                 
                                 Coordinate pinPos = Coordinate(pX, pY);
-                                Pin pin = Pin(pinName, pinPos, pinLayers, pinBoxes, netName, false);
+                                Pin pin = Pin(pinName, pinPos, pinLayers, pinBoxes, netName, false, connectedToPad);
                                 netPins.push_back(pin);
                         }
                 }
@@ -414,6 +416,9 @@ void DBWrapper::initNetlist() {
                         std::string pinName;
                         
                         currBTerm->getFirstPinLocation(posX, posY);
+                        odb::dbMTerm* mTerm = currBTerm->getMTerm();
+                        odb::dbMaster* master = mTerm->getMaster();
+                        bool connectedToPad = master->getType().isPad();
                         
                         std::vector<int> pinLayers;
                         std::map<int, std::vector<Box>> pinBoxes;
@@ -449,7 +454,7 @@ void DBWrapper::initNetlist() {
                         }
                         
                         Coordinate pinPos = Coordinate(posX, posY);
-                        Pin pin = Pin(pinName, pinPos, pinLayers, pinBoxes, netName, true);
+                        Pin pin = Pin(pinName, pinPos, pinLayers, pinBoxes, netName, true, connectedToPad);
                         netPins.push_back(pin);
                 }
                 _netlist->addNet(netName, signalType, netPins);

@@ -58,6 +58,7 @@ private:
         std::map<int, std::vector<Box>> _boxesPerLayer;
         std::string _netName;
         bool _isPort;
+        bool _connectedToPad;
         
         void sortLayers() { std::sort(_layers.begin(), _layers.end()); }
         
@@ -66,10 +67,10 @@ public:
         Pin(const std::string& name, const Coordinate& position,
             const std::vector<int>& layers,
             const std::map<int, std::vector<Box>>& boxesPerLayer,
-            const std::string& netName, bool isPort)
+            const std::string& netName, bool isPort, bool connectedToPad)
             : _name(name), _position(position), _layers(layers),
             _boxesPerLayer(boxesPerLayer), _netName(netName),
-            _isPort(isPort) { sortLayers(); }
+            _isPort(isPort), _connectedToPad(connectedToPad) { sortLayers(); }
         
         const std::string& getName() const { return _name; }
         const Coordinate& getPosition() const { return _position; }
@@ -79,6 +80,7 @@ public:
         const std::map<int, std::vector<Box>>& getBoxes() const { return _boxesPerLayer; }
         const std::string& getNetName() const { return _netName; }
         bool isPort() const { return _isPort; }
+        bool isConnectedToPad() const { return _connectedToPad; }
 };
 
 }
