@@ -496,25 +496,43 @@ void FastRouteKernel::initializeNets() {
                         }
 
                         if (pin.isConnectedToPad()) { // If pin is connected to PAD, create a "fake" location in routing grid to avoid PAD obstacles
+                                FastRoute::ROUTE pinConnection;
+                                pinConnection.initLayer = topLayer;
+                                pinConnection.finalLayer = topLayer;
+
                                 if (layer.getPreferredDirection() == RoutingLayer::HORIZONTAL) {
+                                        pinConnection.finalX = pinPosition.getX();
+                                        pinConnection.initY = pinPosition.getY();
+                                        pinConnection.finalY = pinPosition.getY();
+
                                         DBU newXPosition;
                                         if (pinPosition.getX() < gridMiddle.getX()) {
                                                 newXPosition = pinPosition.getX() + _grid->getTileWidth();
+                                                pinConnection.initX = newXPosition;
                                                 pinPosition.setX(newXPosition);
                                         } else {
                                                 newXPosition = pinPosition.getX() - _grid->getTileWidth();
+                                                pinConnection.initX = newXPosition;
                                                 pinPosition.setX(newXPosition);
                                         }
                                 } else {
+                                        pinConnection.initX = pinPosition.getX();
+                                        pinConnection.finalX = pinPosition.getX();
+                                        pinConnection.finalY = pinPosition.getY();
+
                                         DBU newYPosition;
                                         if (pinPosition.getY() < gridMiddle.getY()) {
                                                 newYPosition = pinPosition.getY() + _grid->getTileHeight();
+                                                pinConnection.initY = newYPosition;
                                                 pinPosition.setY(newYPosition);
                                         } else {
                                                 newYPosition = pinPosition.getY() - _grid->getTileHeight();
+                                                pinConnection.initY = newYPosition;
                                                 pinPosition.setY(newYPosition);
                                         }
                                 }
+
+                                _padPinsConnections[net.getName()].push_back(pinConnection);
                         }
                         
                         FastRoute::PIN grPin;
@@ -1368,6 +1386,21 @@ void FastRouteKernel::addRemainingGuides(std::vector<FastRoute::NET> &globalRout
                                 localNet.route.push_back(route);
                         }
                         globalRoute.push_back(localNet);
+                }
+        }
+}
+
+void FastRouteKernel::connectPadPins(std::vector<FastRoute::NET> &globalRoute) {
+        std::map<std::string, std::vector<FastRoute::PIN>> allNets;
+        allNets = _fastRoute->getNets();
+        int localNetsId = allNets.size();
+
+        for (FastRoute::NET &netRoute : globalRoute) {
+                if (_padPinsConnections.find(netRoute.name) != _padPinsConnections.end() ||
+                    _netsDegree[netRoute.name] > 1) {
+                        for (FastRoute::ROUTE route : _padPinsConnections[netRoute.name]) {
+                                netRoute.route.push_back(route);
+                        }
                 }
         }
 }

@@ -121,6 +121,9 @@ private:
         
         // temporary for congestion driven replace
         int _numAdjusts = 0;
+
+        // Variables for PADs obstacles handling
+        std::map<std::string, std::vector<FastRoute::ROUTE>> _padPinsConnections;
         
         // main functions
         void initGrid();
@@ -141,6 +144,7 @@ private:
         RoutingLayer getRoutingLayerByIndex(int index);
         RoutingTracks getRoutingTracksByIndex(int layer);
         void addRemainingGuides(std::vector<FastRoute::NET> &globalRoute);
+        void connectPadPins(std::vector<FastRoute::NET> &globalRoute);
         void mergeBox(std::vector<Box>& guideBox);
         Box globalRoutingToBox(const FastRoute::ROUTE &route);
         bool segmentsOverlaps(const ROUTE& seg0, const ROUTE& seg1, ROUTE &newSeg);
