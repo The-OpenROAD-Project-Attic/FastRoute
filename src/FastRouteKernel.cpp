@@ -55,7 +55,11 @@
 #include "FastRouteKernel.h"
 #include "include/FastRoute.h"
 
+#include "openroad/Error.hh"
+
 namespace FastRoute {
+
+using ord::error;
 
 FastRouteKernel::FastRouteKernel() {
         init();
@@ -598,8 +602,7 @@ void FastRouteKernel::computeGridAdjustments() {
                         vSpace = _grid->getMinWidths()[layer-1];
                         newVCapacity = std::floor((_grid->getTileWidth() + xExtra)/vSpace);
                 } else {
-                    std::cout << " > [ERROR] Layer spacing not found. Exiting...\n";
-                    std::exit(1);
+                    error("Layer spacing not found\n");
                 }
                 
                 int numAdjustments = yGrids - 1 + xGrids - 1;
@@ -853,10 +856,7 @@ void FastRouteKernel::computeRegionAdjustments(const Coordinate& lowerBound, con
         
         if ((dieBox.getLowerBound().getX() > lowerBound.getX() && dieBox.getLowerBound().getY() > lowerBound.getY()) ||
             (dieBox.getUpperBound().getX() < upperBound.getX() && dieBox.getUpperBound().getY() < upperBound.getY())) {
-                std::cout << " > [ERROR] Informed region is outside die area!\n";
-                std::cout << "Informed region: (" << lowerBound.getX() << ", " << lowerBound.getY() << "); ("
-                          << upperBound.getX() << ", " << upperBound.getY() << ")\n";
-                std::exit(-1);
+                error("Informed region is outside die area\n");
         }
         
         RoutingLayer routingLayer = getRoutingLayerByIndex(layer);
@@ -1104,9 +1104,8 @@ void FastRouteKernel::writeGuides() {
         std::ofstream guideFile;
         guideFile.open(_outfile);
         if (!guideFile.is_open()) {
-                std::cout << "[ERROR] Guides file could not be open!" << std::endl;
                 guideFile.close();
-                std::exit(1);
+                error("Guides file could not be open\n");
         }
         RoutingLayer phLayerF;
         addRemainingGuides(*_result);
@@ -1138,9 +1137,7 @@ void FastRouteKernel::writeGuides() {
                         if (route.initLayer == route.finalLayer) {
                                 if (route.initLayer < _minRoutingLayer && 
                                     route.initX != route.finalX && route.initY != route.finalY) {
-                                        std::cout << "[ERROR] Routing with guides in blocked metal\n"
-                                                "[ERROR] Net: " << netRoute.name << "\n";
-                                        std::exit(1);
+                                        error("Routing with guides in blocked metal for net %s\n", netRoute.name.c_str());
                                 }
                                 Box box;
                                 box = globalRoutingToBox(route);
@@ -1153,9 +1150,7 @@ void FastRouteKernel::writeGuides() {
                                 finalLayer = route.finalLayer;
                         } else {
                                 if (abs(route.finalLayer - route.initLayer) > 1) {
-                                        std::cout << "[ERROR] Connection between"
-                                                     "non-adjacent layers in net " << netRoute.name << "\n";
-                                        std::exit(1);
+                                        error("Connection between non-adjacent layers in net %s\n", netRoute.name.c_str());
                                 } else {
                                         RoutingLayer phLayerI;
                                         if (route.initLayer < _minRoutingLayer && !_unidirectionalRoute) {
@@ -1266,8 +1261,7 @@ void FastRouteKernel::addRemainingGuides(std::vector<FastRoute::NET> &globalRout
                         for (uint p = 0; p < pins.size(); p++){
                                 if (p > 0){
                                         if (pins[p].x != pins[p-1].x || pins[p].y != pins[p-1].y) { // If the net is not local, FR core result is invalid
-                                                std::cout << "[ERROR] Net " << netRoute.name << " not properly covered.";
-                                                exit(-1);
+                                                error("Net %s not properly covered\n", netRoute.name.c_str());
                                         }
                                 }
 
@@ -1325,8 +1319,7 @@ void FastRouteKernel::addRemainingGuides(std::vector<FastRoute::NET> &globalRout
 
                                         for (FastRoute::ROUTE seg : coverSegs) {
                                                 if (seg.initLayer != seg.finalLayer) {
-                                                        std::cout << "[ERROR] Segment has invalid layer assignment\n";
-                                                        std::exit(1);
+                                                        error("Segment has invalid layer assignment\n");
                                                 }
 
                                                 int diffLayers = std::abs(pin.layer - seg.initLayer);
@@ -1408,8 +1401,7 @@ void FastRouteKernel::connectPadPins(std::vector<FastRoute::NET> &globalRoute) {
 void FastRouteKernel::mergeBox(std::vector<Box>& guideBox) {
         std::vector<Box> finalBox;
         if (guideBox.size() < 1) {
-                std::cout << "[ERROR] Guides vector is empty!!!\n";
-                std::exit(1);
+                error("Guides vector is empty\n");
         }
         finalBox.push_back(guideBox[0]);
         for (uint i=1; i < guideBox.size(); i++){
@@ -1481,9 +1473,7 @@ void FastRouteKernel::checkPinPlacement() {
         
         for (Pin port : _netlist->getAllPorts()) {
                 if (port.getNumLayers() == 0) {
-                        std::cout << "[ERROR] Pin " << port.getName() << " does "
-                            "not have layer assignment\n";
-                        exit(1);
+                        error("Pin %s does not have layer assignment\n", port.getName().c_str());
                 }
                 DBU layer = port.getLayers()[0]; // port have only one layer
                 
@@ -1494,7 +1484,7 @@ void FastRouteKernel::checkPinPlacement() {
                 
                 for (Coordinate pos : mapLayerToPositions[layer]) {
                         if (pos == port.getPosition()) {
-                                std::cout << "[ERROR] At least 2 pins in position ("
+                                std::cout << "[WARNING] At least 2 pins in position ("
                                           << pos.getX() << ", " << pos.getY()
                                           << "), layer " << layer+1 << "\n";
                                 invalid = true;
@@ -1504,7 +1494,7 @@ void FastRouteKernel::checkPinPlacement() {
         }
         
         if (invalid) {
-                std::exit(-1);
+                error("Invalid pin placement\n");
         }
 }
 
@@ -1672,8 +1662,7 @@ void FastRouteKernel::mergeSegments(FastRoute::NET &net) {
         std::vector<ROUTE> segments = net.route;
         std::vector<ROUTE> finalSegments;
         if (segments.size() < 1) {
-                std::cout << "[ERROR] Net " << net.name << " has segments vector empty\n";
-                std::exit(1);
+                error("Net %s has segments vector empty\n", net.name.c_str());
         }
         
         uint i = 0;

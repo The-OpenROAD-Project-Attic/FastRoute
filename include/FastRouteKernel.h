@@ -89,7 +89,7 @@ private:
         unsigned _dbId;
         const int _selectedMetal = 3;
         const float transitionLayerAdjust = 0.6;
-        const int _gcellsOffset = 2;
+        const int _gcellsOffset = 1;
         int _overflowIterations;
         int _pdRevForHighFanout;
         bool _allowOverflow;
