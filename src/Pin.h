@@ -50,11 +50,14 @@
 
 namespace FastRoute {
 
+enum Orientation { ORIENT_NORTH, ORIENT_SOUTH, ORIENT_EAST, ORIENT_WEST, INVALID };
+
 class Pin {
 private:
         std::string _name;
         Coordinate _position;
         std::vector<int> _layers;
+        Orientation _orientation;
         std::map<int, std::vector<Box>> _boxesPerLayer;
         std::string _netName;
         bool _isPort;
@@ -65,10 +68,10 @@ private:
 public:
         Pin() = default;
         Pin(const std::string& name, const Coordinate& position,
-            const std::vector<int>& layers,
+            const std::vector<int>& layers, const Orientation orientation,
             const std::map<int, std::vector<Box>>& boxesPerLayer,
             const std::string& netName, bool isPort, bool connectedToPad)
-            : _name(name), _position(position), _layers(layers),
+            : _name(name), _position(position), _layers(layers), _orientation(orientation),
             _boxesPerLayer(boxesPerLayer), _netName(netName),
             _isPort(isPort), _connectedToPad(connectedToPad) { sortLayers(); }
         
@@ -77,6 +80,8 @@ public:
         const std::vector<int>& getLayers() const { return _layers; }
         int getNumLayers() const { return _layers.size(); }
         int getTopLayer() const { return _layers.back(); }
+        Orientation getOrientation() const { return _orientation; }
+        void setOrientation(Orientation orientation) { _orientation = orientation; }
         const std::map<int, std::vector<Box>>& getBoxes() const { return _boxesPerLayer; }
         const std::string& getNetName() const { return _netName; }
         bool isPort() const { return _isPort; }

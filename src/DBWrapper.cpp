@@ -41,7 +41,7 @@ void DBWrapper::initGrid(int maxLayer) {
         odb::dbTrackGrid* selectedTrack = block->findTrackGrid(selectedLayer);
         
         if (!selectedTrack) {
-                error("[ERROR] Track for layer %d not found\n", selectedMetal);
+                error("Track for layer %d not found\n", selectedMetal);
         }
         
         int trackStepX, trackStepY;
@@ -57,7 +57,7 @@ void DBWrapper::initGrid(int maxLayer) {
         } else if (selectedLayer->getDirection().getValue() == odb::dbTechLayerDir::VERTICAL) {
                 trackSpacing = trackStepX;
         } else {
-                error("[ERROR] Layer %d does not have valid direction\n", selectedMetal);
+                error("Layer %d does not have valid direction\n", selectedMetal);
         }
         
         odb::Rect rect;
@@ -181,7 +181,7 @@ void DBWrapper::initRoutingTracks(std::vector<RoutingTracks>& allRoutingTracks, 
                         numTracks = numTracksX;
                         orientation = RoutingLayer::VERTICAL;
                 } else {
-                        error("[ERROR] Layer %d does not have valid direction! Exiting...\n", selectedMetal);
+                        error("Layer %d does not have valid direction! Exiting...\n", selectedMetal);
                 }
                 
                 RoutingTracks routingTracks = RoutingTracks(layer, trackPitch,
@@ -207,7 +207,7 @@ void DBWrapper::computeCapacities(int maxLayer, std::map<int, float> layerPitche
         
         odb::dbBlock* block = _chip->getBlock();
         if (!block) {
-                error("[ERROR] odb::dbBlock not found\n");
+                error("odb::dbBlock not found\n");
         }
         
         for (int l = 1; l <= tech->getRoutingLayerCount(); l++) {
@@ -308,6 +308,7 @@ void DBWrapper::initNetlist() {
                     _grid->getUpperRightX(), _grid->getUpperRightY(), -1);
         
         odb::dbBlock* block = _chip->getBlock();
+        odb::dbTech* tech = _db->getTech();
         if (!block) {
                 error("odb::dbBlock not found\n");
         }
@@ -353,6 +354,10 @@ void DBWrapper::initNetlist() {
                         inst->getOrigin(pX, pY);
                         odb::Point origin = odb::Point(pX, pY);
                         odb::dbTransform transform(inst->getOrient(), origin);
+
+                        odb::dbBox* instBox = inst->getBBox();
+                        Coordinate instMiddle = Coordinate((instBox->xMin() + (instBox->xMax() - instBox->xMin()) / 2.0),
+                                                           (instBox->yMin() + (instBox->yMax() - instBox->yMin()) / 2.0));
                         
                         for (odb::dbMPin* currMTermPin : mTerm->getMPins()) {
                                 Coordinate lowerBound;
@@ -387,7 +392,29 @@ void DBWrapper::initNetlist() {
                                 }
                                 
                                 Coordinate pinPos = Coordinate(pX, pY);
-                                Pin pin = Pin(pinName, pinPos, pinLayers, pinBoxes, netName, false, connectedToPad);
+                                Pin pin = Pin(pinName, pinPos, pinLayers, Orientation::INVALID, pinBoxes, netName, false, connectedToPad);
+
+                                if (connectedToPad) {
+                                        Coordinate pinPosition = pin.getPosition();
+                                        odb::dbTechLayer* techLayer = tech->findRoutingLayer(pin.getTopLayer());
+                                        
+                                        if (techLayer->getDirection().getValue() == odb::dbTechLayerDir::HORIZONTAL) {
+                                                DBU instToPin = pinPosition.getX() - instMiddle.getX();
+                                                if (instToPin < 0) {
+                                                        pin.setOrientation(Orientation::ORIENT_EAST);
+                                                } else {
+                                                        pin.setOrientation(Orientation::ORIENT_WEST);
+                                                }
+                                        } else if (techLayer->getDirection().getValue() == odb::dbTechLayerDir::VERTICAL) {
+                                                DBU instToPin = pinPosition.getY() - instMiddle.getY();
+                                                if (instToPin < 0) {
+                                                        pin.setOrientation(Orientation::ORIENT_NORTH);
+                                                } else {
+                                                        pin.setOrientation(Orientation::ORIENT_SOUTH);
+                                                }
+                                        }
+                                }
+
                                 netPins.push_back(pin);
                         }
                 }
@@ -401,11 +428,19 @@ void DBWrapper::initNetlist() {
                         odb::dbMTerm* mTerm;
                         odb::dbMaster* master;
                         bool connectedToPad = false;
+                        odb::dbInst* inst;
+                        odb::dbBox* instBox;
+                        Coordinate instMiddle = Coordinate(-1, -1);
 
                         if (iTerm != nullptr) {
                                 mTerm = iTerm->getMTerm();
                                 master = mTerm->getMaster();
-                                connectedToPad = master->getType().isPad();                            
+                                connectedToPad = master->getType().isPad();
+
+                                inst = iTerm->getInst();
+                                instBox = inst->getBBox();
+                                instMiddle = Coordinate((instBox->xMin() + (instBox->xMax() - instBox->xMin()) / 2.0),
+                                                        (instBox->yMin() + (instBox->yMax() - instBox->yMin()) / 2.0));
                         }
                         
                         std::vector<int> pinLayers;
@@ -442,7 +477,29 @@ void DBWrapper::initNetlist() {
                         }
                         
                         Coordinate pinPos = Coordinate(posX, posY);
-                        Pin pin = Pin(pinName, pinPos, pinLayers, pinBoxes, netName, true, connectedToPad);
+                        Pin pin = Pin(pinName, pinPos, pinLayers, Orientation::INVALID, pinBoxes, netName, true, connectedToPad);
+
+                        if (connectedToPad) {
+                                Coordinate pinPosition = pin.getPosition();
+                                odb::dbTechLayer* techLayer = tech->findRoutingLayer(pin.getTopLayer());
+                                
+                                if (techLayer->getDirection().getValue() == odb::dbTechLayerDir::HORIZONTAL) {
+                                        DBU instToPin = pinPosition.getX() - instMiddle.getX();
+                                        if (instToPin < 0) {
+                                                pin.setOrientation(Orientation::ORIENT_EAST);
+                                        } else {
+                                                pin.setOrientation(Orientation::ORIENT_WEST);
+                                        }
+                                } else if (techLayer->getDirection().getValue() == odb::dbTechLayerDir::VERTICAL) {
+                                        DBU instToPin = pinPosition.getY() - instMiddle.getY();
+                                        if (instToPin < 0) {
+                                                pin.setOrientation(Orientation::ORIENT_NORTH);
+                                        } else {
+                                                pin.setOrientation(Orientation::ORIENT_SOUTH);
+                                        }
+                                }
+                        }
+
                         netPins.push_back(pin);
                 }
                 _netlist->addNet(netName, signalType, netPins);

@@ -410,8 +410,6 @@ void FastRouteKernel::initializeNets() {
         int minDegree = std::numeric_limits<int>::max();
         int maxDegree = std::numeric_limits<int>::min();
 
-        Coordinate gridMiddle = _grid->getMiddle();
-
         _netlist->randomizeNetsOrder(_seed);
 
         for (Net net : _netlist->getNets()) {
@@ -510,14 +508,16 @@ void FastRouteKernel::initializeNets() {
                                         pinConnection.finalY = pinPosition.getY();
 
                                         DBU newXPosition;
-                                        if (pinPosition.getX() < gridMiddle.getX()) {
+                                        if (pin.getOrientation() == Orientation::ORIENT_WEST) {
                                                 newXPosition = pinPosition.getX() + (_gcellsOffset * _grid->getTileWidth());
                                                 pinConnection.initX = newXPosition;
                                                 pinPosition.setX(newXPosition);
-                                        } else {
+                                        } else if (pin.getOrientation() == Orientation::ORIENT_EAST) {
                                                 newXPosition = pinPosition.getX() - (_gcellsOffset * _grid->getTileWidth());
                                                 pinConnection.initX = newXPosition;
                                                 pinPosition.setX(newXPosition);
+                                        } else {
+                                                std::cout << "[WARNING] Pin " << pin.getName() << " has invalid orientation\n";
                                         }
                                 } else {
                                         pinConnection.initX = pinPosition.getX();
@@ -525,14 +525,16 @@ void FastRouteKernel::initializeNets() {
                                         pinConnection.finalY = pinPosition.getY();
 
                                         DBU newYPosition;
-                                        if (pinPosition.getY() < gridMiddle.getY()) {
+                                        if (pin.getOrientation() == Orientation::ORIENT_SOUTH) {
                                                 newYPosition = pinPosition.getY() + (_gcellsOffset * _grid->getTileHeight());
                                                 pinConnection.initY = newYPosition;
                                                 pinPosition.setY(newYPosition);
-                                        } else {
+                                        } else if (pin.getOrientation() == Orientation::ORIENT_NORTH) {
                                                 newYPosition = pinPosition.getY() - (_gcellsOffset * _grid->getTileHeight());
                                                 pinConnection.initY = newYPosition;
                                                 pinPosition.setY(newYPosition);
+                                        } else {
+                                                std::cout << "[WARNING] Pin " << pin.getName() << " has invalid orientation\n";
                                         }
                                 }
 
