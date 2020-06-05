@@ -217,10 +217,8 @@ proc fastroute { args } {
   }
 
   for {set layer 1} {$layer <= $max_layer} {set layer [expr $layer+1]} {
-    if { [ord::db_layer_has_hor_tracks $layer] && \
-         [ord::db_layer_has_ver_tracks $layer] } {
-      continue
-    } else {
+    if { !([ord::db_layer_has_hor_tracks $layer] && \
+         [ord::db_layer_has_ver_tracks $layer]) } {
       ord::error "missing track structure"
     }
   }
