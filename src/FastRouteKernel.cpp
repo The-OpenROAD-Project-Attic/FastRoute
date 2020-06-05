@@ -507,11 +507,11 @@ void FastRouteKernel::initializeNets() {
 
                                         DBU newXPosition;
                                         if (pinPosition.getX() < gridMiddle.getX()) {
-                                                newXPosition = pinPosition.getX() + _grid->getTileWidth();
+                                                newXPosition = pinPosition.getX() + (_gcellsOffset * _grid->getTileWidth());
                                                 pinConnection.initX = newXPosition;
                                                 pinPosition.setX(newXPosition);
                                         } else {
-                                                newXPosition = pinPosition.getX() - _grid->getTileWidth();
+                                                newXPosition = pinPosition.getX() - (_gcellsOffset * _grid->getTileWidth());
                                                 pinConnection.initX = newXPosition;
                                                 pinPosition.setX(newXPosition);
                                         }
@@ -522,11 +522,11 @@ void FastRouteKernel::initializeNets() {
 
                                         DBU newYPosition;
                                         if (pinPosition.getY() < gridMiddle.getY()) {
-                                                newYPosition = pinPosition.getY() + _grid->getTileHeight();
+                                                newYPosition = pinPosition.getY() + (_gcellsOffset * _grid->getTileHeight());
                                                 pinConnection.initY = newYPosition;
                                                 pinPosition.setY(newYPosition);
                                         } else {
-                                                newYPosition = pinPosition.getY() - _grid->getTileHeight();
+                                                newYPosition = pinPosition.getY() - (_gcellsOffset * _grid->getTileHeight());
                                                 pinConnection.initY = newYPosition;
                                                 pinPosition.setY(newYPosition);
                                         }
