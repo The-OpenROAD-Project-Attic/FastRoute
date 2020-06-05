@@ -419,9 +419,9 @@ void DBWrapper::initNetlist() {
                         odb::dbITerm* iTerm = currBTerm->getITerm();
                         odb::dbMTerm* mTerm;
                         odb::dbMaster* master;
-                        bool connectedToPad;
+                        bool connectedToPad = false;
 
-                        if (iTerm != NULL) {
+                        if (iTerm != nullptr) {
                                 mTerm = iTerm->getMTerm();
                                 master = mTerm->getMaster();
                                 connectedToPad = master->getType().isPad();                            
@@ -741,7 +741,7 @@ std::set<int> DBWrapper::findTransitionLayers(int maxRoutingLayer) {
         for (odb::dbTechVia* currVia : vias) {
                 odb::dbStringProperty* prop = odb::dbStringProperty::find(currVia, "OR_DEFAULT");
                 
-                if (prop == NULL) {
+                if (prop == nullptr) {
                         continue;
                 } else {
                         std::cout << "[INFO] Default via: " << currVia->getConstName() << "\n";
