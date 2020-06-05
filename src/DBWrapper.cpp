@@ -364,7 +364,9 @@ void DBWrapper::initNetlist() {
                                 Coordinate upperBound;
                                 Box pinBox;
                                 int pinLayer;
-                                
+                                int lastLayer = -1;
+                                Coordinate pinPos;
+
                                 for (odb::dbBox* box : currMTermPin->getGeometry()) {
                                         odb::Rect rect;
                                         box->getBox(rect);
@@ -385,13 +387,16 @@ void DBWrapper::initNetlist() {
                                                 std::cout << "[WARNING] Pin " << pinName << " is outside die area\n";
                                         }
                                         pinBoxes[pinLayer].push_back(pinBox);
+                                        if (pinLayer > lastLayer) {
+                                                pinPos = lowerBound;
+                                        }
                                 }
                                 
                                 for (auto& layer_boxes : pinBoxes) {
                                         pinLayers.push_back(layer_boxes.first);
                                 }
                                 
-                                Coordinate pinPos = Coordinate(pX, pY);
+
                                 Pin pin = Pin(pinName, pinPos, pinLayers, Orientation::INVALID, pinBoxes, netName, false, connectedToPad);
 
                                 if (connectedToPad) {
@@ -447,12 +452,14 @@ void DBWrapper::initNetlist() {
                         std::map<int, std::vector<Box>> pinBoxes;
                                                 
                         pinName = currBTerm->getConstName();
+                        Coordinate pinPos;
                         
                         for (odb::dbBPin* currBTermPin : currBTerm->getBPins()) {
                                 Coordinate lowerBound;
                                 Coordinate upperBound;
                                 Box pinBox;
                                 int pinLayer;
+                                int lastLayer = -1;
                                 
                                 odb::dbBox* currBTermBox = currBTermPin->getBox();
                                 odb::dbTechLayer* techLayer = currBTermBox->getTechLayer();
@@ -470,13 +477,16 @@ void DBWrapper::initNetlist() {
                                         std::cout << "[WARNING] Pin " << pinName << " is outside die area\n";
                                 }
                                 pinBoxes[pinLayer].push_back(pinBox);
+
+                                if (pinLayer > lastLayer) {
+                                        pinPos = lowerBound;
+                                }
                         }
                         
                         for (auto& layer_boxes : pinBoxes) {
                                 pinLayers.push_back(layer_boxes.first);
                         }
                         
-                        Coordinate pinPos = Coordinate(posX, posY);
                         Pin pin = Pin(pinName, pinPos, pinLayers, Orientation::INVALID, pinBoxes, netName, true, connectedToPad);
 
                         if (connectedToPad) {
