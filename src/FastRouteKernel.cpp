@@ -1111,6 +1111,7 @@ void FastRouteKernel::writeGuides() {
         }
         RoutingLayer phLayerF;
         addRemainingGuides(*_result);
+        connectPadPins(*_result);
 
         int offsetX = _gridOrigin->getX();
         int offsetY = _gridOrigin->getY();
