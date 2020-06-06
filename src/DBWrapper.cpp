@@ -396,9 +396,8 @@ void DBWrapper::initNetlist() {
                                 for (auto& layer_boxes : pinBoxes) {
                                         pinLayers.push_back(layer_boxes.first);
                                 }
-                                
 
-                                Pin pin = Pin(pinName, pinPos, pinLayers, Orientation::INVALID, pinBoxes, netName, false, connectedToPad);
+                                Pin pin = Pin(pinName, pinPos, pinLayers, Orientation::INVALID, pinBoxes, netName, false, (connectedToPad || connectedToMacro));
 
                                 if (connectedToPad || connectedToMacro) {
                                         Coordinate pinPosition = pin.getPosition();
@@ -490,7 +489,7 @@ void DBWrapper::initNetlist() {
                                 pinLayers.push_back(layer_boxes.first);
                         }
                         
-                        Pin pin = Pin(pinName, pinPos, pinLayers, Orientation::INVALID, pinBoxes, netName, true, connectedToPad);
+                        Pin pin = Pin(pinName, pinPos, pinLayers, Orientation::INVALID, pinBoxes, netName, true, (connectedToPad || connectedToMacro));
 
                         if (connectedToPad) {
                                 Coordinate pinPosition = pin.getPosition();
