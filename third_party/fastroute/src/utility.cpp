@@ -1516,9 +1516,6 @@ Bool checkRoute2DTree(int netID)
         }
       }
 
-      if (gridFlag) {
-        printEdge2D(netID, edgeID);
-      }
       if (STHwrong) {
         printf("checking failed %d\n", netID);
         return (TRUE);
