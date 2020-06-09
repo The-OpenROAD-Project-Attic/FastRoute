@@ -889,8 +889,7 @@ void updateRouteType23D(int       netID,
 
 void mazeRouteMSMDOrder3D(int expand, int ripupTHlb, int ripupTHub)
 {
-  short *gridsLtmp, gridsX[MAXLEN], gridsY[MAXLEN], gridsL[MAXLEN],
-      tmp_gridsX[MAXLEN], tmp_gridsY[MAXLEN], tmp_gridsL[MAXLEN];
+  short *gridsLtmp;
   int   netID, enlarge, endIND;
   Bool* pop_heap23D;
 
@@ -1295,6 +1294,8 @@ void mazeRouteMSMDOrder3D(int expand, int ripupTHlb, int ripupTHub)
           // printf("the initial value %f LYX [%d %d
           // %d]\n",d13D[curL][curY][curX],curL, curY, curX);
 
+          std::vector<int> tmp_gridsX, tmp_gridsY, tmp_gridsL;
+
           while (d13D[curL][curY][curX] != 0)  // loop until reach subtree1
           {
             tmpL = pr3D[curL][curY][curX].l;
@@ -1304,25 +1305,22 @@ void mazeRouteMSMDOrder3D(int expand, int ripupTHlb, int ripupTHub)
             curY = tmpY;
             curL = tmpL;
             fflush(stdout);
-            tmp_gridsX[cnt] = curX;
-            tmp_gridsY[cnt] = curY;
-            tmp_gridsL[cnt] = curL;
+            tmp_gridsX.push_back(curX);
+            tmp_gridsY.push_back(curY);
+            tmp_gridsL.push_back(curL);
             cnt++;
           }
 
           // printf("the end value %f\n",d13D[curL][curY][curX]);
           // reverse the grids on the path
-          for (i = 0; i < cnt; i++) {
-            tmpind    = cnt - 1 - i;
-            gridsX[i] = tmp_gridsX[tmpind];
-            gridsY[i] = tmp_gridsY[tmpind];
-            gridsL[i] = tmp_gridsL[tmpind];
-          }
+          std::vector<int> gridsX(tmp_gridsX.rbegin(), tmp_gridsX.rend());
+          std::vector<int> gridsY(tmp_gridsY.rbegin(), tmp_gridsY.rend());
+          std::vector<int> gridsL(tmp_gridsL.rbegin(), tmp_gridsL.rend());
 
           // add the connection point (crossX, crossY)
-          gridsX[cnt] = crossX;
-          gridsY[cnt] = crossY;
-          gridsL[cnt] = crossL;
+          gridsX.push_back(crossX);
+          gridsY.push_back(crossY);
+          gridsL.push_back(crossL);
           cnt++;
 
           curX = crossX;
@@ -1333,8 +1331,8 @@ void mazeRouteMSMDOrder3D(int expand, int ripupTHlb, int ripupTHub)
 
           E1x = gridsX[0];
           E1y = gridsY[0];
-          E2x = gridsX[cnt_n1n2 - 1];
-          E2y = gridsY[cnt_n1n2 - 1];
+          E2x = gridsX.back();
+          E2y = gridsY.back();
 
           headRoom = 0;
           origL    = gridsL[0];
