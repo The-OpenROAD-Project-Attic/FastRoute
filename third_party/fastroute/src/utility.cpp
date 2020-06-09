@@ -1094,8 +1094,8 @@ void checkRoute3D()
                    + ADIFF(gridsL[i + 1], gridsL[i]);
         if (distance > 1 || distance < 0) {
           gridFlag = TRUE;
-          printf("net[%d] edge[%d] maze route wrong, distance %d, i %d\n",
-                 netID,
+          printf("net %s edge[%d] maze route wrong, distance %d, i %d\n",
+                 nets[netID]->name,
                  edgeID,
                  distance,
                  i);
@@ -1506,8 +1506,8 @@ Bool checkRoute2DTree(int netID)
         distance
             = ADIFF(gridsX[i + 1], gridsX[i]) + ADIFF(gridsY[i + 1], gridsY[i]);
         if (distance != 1) {
-          printf("net[%d] edge[%d] maze route wrong, distance %d, i %d\n",
-                 netID,
+          printf("net %s edge[%d] maze route wrong, distance %d, i %d\n",
+                 nets[netID]->name,
                  edgeID,
                  distance,
                  i);
