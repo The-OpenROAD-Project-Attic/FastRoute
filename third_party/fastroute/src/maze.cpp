@@ -1849,8 +1849,6 @@ void mazeRouteMSMD(int   iter,
 
           if (checkRoute2DTree(netID)) {
             reInitTree(netID);
-            delete[] netEO;
-            netEO = NULL;
             return;
           }
         }  // congested route
@@ -1858,10 +1856,6 @@ void mazeRouteMSMD(int   iter,
     }      // loop edgeID
   }
 
-  // TODO: check this frees
-  if (!netEO) {
-    delete[] netEO;
-  }
   if (!h_costTable) {
     delete[] h_costTable;
   }

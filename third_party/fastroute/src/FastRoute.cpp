@@ -1395,6 +1395,9 @@ int FT::run(std::vector<NET>& result)
   result = getResults();
   std::cout << "Getting results... Done!\n\n";
 
+  delete[] netEO;
+  netEO = nullptr;
+
   /* TODO:  <11-07-19, this function leads to a segfault, but as the OS
    * frees all memory after the application end (next line) we can omit
    * this function call for now.> */
