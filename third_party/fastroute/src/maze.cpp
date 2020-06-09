@@ -1032,10 +1032,6 @@ void reInitTree(int netID)
   TreeEdge* treeedge;
   Tree      rsmt;
 
-  // TODO: check this size
-  int x[nets[netID]->numPins];
-  int y[nets[netID]->numPins];
-
   // printf("re init tree for net %d\n",netID);
 
   newRipupNet(netID);
@@ -1057,6 +1053,9 @@ void reInitTree(int netID)
   // fflush(stdout);
 
   d = nets[netID]->deg;
+  int x[d];
+  int y[d];
+
   // printf("net deg %d\n",d);
   // fflush(stdout);
   for (j = 0; j < d; j++) {
@@ -1105,9 +1104,7 @@ void mazeRouteMSMD(int   iter,
   int  i, j, deg, edgeID, n1, n2, n1x, n1y, n2x, n2y, ymin, ymax, xmin, xmax,
       curX, curY, crossX, crossY, tmpX, tmpY, tmpi, min_x, min_y, num_edges;
   int regionX1, regionX2, regionY1, regionY2;
-  int heapLen1, heapLen2, ind, ind1, tmpind,
-      *gridsX = new int[XRANGE], *gridsY = new int[XRANGE],
-      *tmp_gridsX = new int[XRANGE], *tmp_gridsY = new int[XRANGE];
+  int heapLen1, heapLen2, ind, ind1, tmpind;
   int endpt1, endpt2, A1, A2, B1, B2, C1, C2, D1, D2, cnt, cnt_n1n2;
   int edge_n1n2, edge_n1A1, edge_n1A2, edge_n1C1, edge_n1C2, edge_A1A2,
       edge_C1C2;
@@ -1504,6 +1501,7 @@ void mazeRouteMSMD(int   iter,
           cnt  = 0;
           curX = crossX;
           curY = crossY;
+          std::vector<int> tmp_gridsX,tmp_gridsY;
           while (d1[curY][curX] != 0)  // loop until reach subtree1
           {
             hypered = FALSE;
@@ -1527,19 +1525,17 @@ void mazeRouteMSMD(int   iter,
                 curX = parentX3[tmpY][tmpX];
               }
             }
-            tmp_gridsX[cnt] = curX;
-            tmp_gridsY[cnt] = curY;
+            tmp_gridsX.push_back(curX);
+            tmp_gridsY.push_back(curY);
             cnt++;
           }
           // reverse the grids on the path
-          for (i = 0; i < cnt; i++) {
-            tmpind    = cnt - 1 - i;
-            gridsX[i] = tmp_gridsX[tmpind];
-            gridsY[i] = tmp_gridsY[tmpind];
-          }
+          std::vector<int> gridsX(tmp_gridsX.rbegin(), tmp_gridsX.rend());
+          std::vector<int> gridsY(tmp_gridsY.rbegin(), tmp_gridsY.rend());
+
           // add the connection point (crossX, crossY)
-          gridsX[cnt] = crossX;
-          gridsY[cnt] = crossY;
+          gridsX.push_back(crossX);
+          gridsY.push_back(crossY);
           cnt++;
 
           curX     = crossX;
@@ -1550,8 +1546,8 @@ void mazeRouteMSMD(int   iter,
           // edge find E1 and E2, and the endpoints of the edges they are on
           E1x = gridsX[0];
           E1y = gridsY[0];
-          E2x = gridsX[cnt_n1n2 - 1];
-          E2y = gridsY[cnt_n1n2 - 1];
+          E2x = gridsX.back();
+          E2y = gridsY.back();
 
           edge_n1n2 = edgeID;
           // (1) consider subtree1
@@ -1862,13 +1858,6 @@ void mazeRouteMSMD(int   iter,
   if (!v_costTable) {
     delete[] v_costTable;
   }
-
-  delete[] gridsX;
-  delete[] gridsY;
-  delete[] tmp_gridsX;
-  delete[] tmp_gridsY;
-
-  // free memory
 }
 
 int getOverflow2Dmaze(int* maxOverflow, int* tUsage)
