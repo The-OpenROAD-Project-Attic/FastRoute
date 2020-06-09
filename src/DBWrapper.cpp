@@ -345,6 +345,7 @@ void DBWrapper::initNetlist() {
                         }
 
                         bool connectedToPad = master->getType().isPad();
+                        bool connectedToMacro = master->isBlock();
                         
                         std::string instName = currITerm->getInst()->getConstName();
                         pinName = mTerm->getConstName();
@@ -395,11 +396,10 @@ void DBWrapper::initNetlist() {
                                 for (auto& layer_boxes : pinBoxes) {
                                         pinLayers.push_back(layer_boxes.first);
                                 }
-                                
 
-                                Pin pin = Pin(pinName, pinPos, pinLayers, Orientation::INVALID, pinBoxes, netName, false, connectedToPad);
+                                Pin pin = Pin(pinName, pinPos, pinLayers, Orientation::INVALID, pinBoxes, netName, false, (connectedToPad || connectedToMacro));
 
-                                if (connectedToPad) {
+                                if (connectedToPad || connectedToMacro) {
                                         Coordinate pinPosition = pin.getPosition();
                                         odb::dbTechLayer* techLayer = tech->findRoutingLayer(pin.getTopLayer());
                                         
@@ -433,6 +433,7 @@ void DBWrapper::initNetlist() {
                         odb::dbMTerm* mTerm;
                         odb::dbMaster* master;
                         bool connectedToPad = false;
+                        bool connectedToMacro = false;
                         odb::dbInst* inst;
                         odb::dbBox* instBox;
                         Coordinate instMiddle = Coordinate(-1, -1);
@@ -441,6 +442,7 @@ void DBWrapper::initNetlist() {
                                 mTerm = iTerm->getMTerm();
                                 master = mTerm->getMaster();
                                 connectedToPad = master->getType().isPad();
+                                connectedToMacro = master->isBlock();
 
                                 inst = iTerm->getInst();
                                 instBox = inst->getBBox();
@@ -487,7 +489,7 @@ void DBWrapper::initNetlist() {
                                 pinLayers.push_back(layer_boxes.first);
                         }
                         
-                        Pin pin = Pin(pinName, pinPos, pinLayers, Orientation::INVALID, pinBoxes, netName, true, connectedToPad);
+                        Pin pin = Pin(pinName, pinPos, pinLayers, Orientation::INVALID, pinBoxes, netName, true, (connectedToPad || connectedToMacro));
 
                         if (connectedToPad) {
                                 Coordinate pinPosition = pin.getPosition();
