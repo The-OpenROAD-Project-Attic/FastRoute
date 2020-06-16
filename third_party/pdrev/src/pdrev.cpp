@@ -1,5 +1,5 @@
 #include "pdrev.h"
-#include "aux.h"
+#include "auxr.h"
 
 namespace PD{
 
