@@ -251,7 +251,7 @@ void FastRouteKernel::startFastRoute() {
         std::cout << "[PARAMS] Global adjustment: " << _adjustment << "\n";
         std::cout << "[PARAMS] Unidirectional routing: " << _unidirectionalRoute << "\n";
         std::cout << "[PARAMS] Clock net routing: " << _clockNetRouting << "\n";
-        std::cout << "[PARAMS] Max routing length: " << _maxLength << "um\n";
+        std::cout << "[PARAMS] Max routing length: " << _maxLengthMicrons << "um\n";
         std::cout << "[PARAMS] Grid origin: (" << _gridOrigin->getX() << ", " << _gridOrigin->getY() << ")\n";
         if (!_layerPitches.empty()) {
                 std::cout << "[PARAMS] Layers pitches: \n";
@@ -316,13 +316,13 @@ void FastRouteKernel::startFastRoute() {
                 computeRegionAdjustments(lowerLeft, upperRight, regionsLayer[i], regionsReductionPercentage[i]);
         }
 
-        if (_maxLength != -1) {
-                _maxRoutingLength = _maxLength * _grid->getDatabaseUnit();
+        if (_maxLengthMicrons != -1) {
+                _maxLengthDBU = _maxLengthMicrons * _grid->getDatabaseUnit();
                 for (int i = 1; i <= _maxRoutingLayer; i++) {
-                        if (_layersMaxLength.find(i) == _layersMaxLength.end()) {
-                                _layersMaxRoutingLength[i] = _maxRoutingLength;
+                        if (_layersMaxLengthMicrons.find(i) == _layersMaxLengthMicrons.end()) {
+                                _layersMaxLengthDBU[i] = _maxLengthDBU;
                         } else {
-                                _layersMaxRoutingLength[i] = _layersMaxLength[i] * _grid->getDatabaseUnit();
+                                _layersMaxLengthDBU[i] = _layersMaxLengthMicrons[i] * _grid->getDatabaseUnit();
                         }
                 }
         }
@@ -342,7 +342,7 @@ void FastRouteKernel::runFastRoute() {
         std::cout << "Running FastRoute... Done!\n";
         
         std::cout << " > Fixing long segments...\n";
-        if (_maxRoutingLength == -1) {
+        if (_maxLengthDBU == -1) {
                         std::cout << "[WARNING] Max routing length not defined. Skipping...\n";
             } else {
                     fixLongSegments();
@@ -1152,11 +1152,11 @@ void FastRouteKernel::setReportCongestion(char * congestFile) {
 }
 
 void FastRouteKernel::setMaxLength(float maxLength) {
-        _maxLength = maxLength;
+        _maxLengthMicrons = maxLength;
 }
 
 void FastRouteKernel::addLayerMaxLength(int layer, float length) {
-        _layersMaxLength[layer] = length;
+        _layersMaxLengthMicrons[layer] = length;
 }
 
 void FastRouteKernel::writeGuides() {
@@ -1980,7 +1980,7 @@ void FastRouteKernel::fixLongSegments() {
                                     long segLen = std::abs(seg.finalX - seg.initX)
                                     + std::abs(seg.finalY - seg.initY);
 
-                                    if (segLen >= _layersMaxRoutingLength[seg.finalLayer]) {
+                                    if (segLen >= _layersMaxLengthDBU[seg.finalLayer]) {
                                                 possibleViolation = true;
                                 possibleViols++;
                                     }
@@ -2010,7 +2010,7 @@ void FastRouteKernel::fixLongSegments() {
                                             long segLen = std::abs(seg.getLastNode().getPosition().getX() - seg.getFirstNode().getPosition().getX())
                                                             + std::abs(seg.getLastNode().getPosition().getY() - seg.getFirstNode().getPosition().getY());
 
-                                            if (segLen >= _layersMaxRoutingLength[seg.getFirstNode().getLayer()]) {
+                                            if (segLen >= _layersMaxLengthDBU[seg.getFirstNode().getLayer()]) {
                                                         segsToFix.push_back(seg);
                                             }
                                             seg = sTree.getSegmentByIndex(index);
@@ -2026,7 +2026,7 @@ void FastRouteKernel::fixLongSegments() {
                                                     s.getFirstNode().getLayer() == seg.initLayer && s.getLastNode().getLayer() == seg.finalLayer) {
                                         segment = seg;
                                                             std::vector<ROUTE> newSegs;
-                                                            bool success = breakSegment(segment, _layersMaxRoutingLength[seg.finalLayer], newSegs);
+                                                            bool success = breakSegment(segment, _layersMaxLengthDBU[seg.finalLayer], newSegs);
                                                             if (!success) {
                                                                        continue;
                                                             }

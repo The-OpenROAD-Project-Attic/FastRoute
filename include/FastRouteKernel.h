@@ -89,8 +89,6 @@ private:
         bool _clockNetRouting;
         unsigned _dbId;
         const int _selectedMetal = 3;
-        float _maxLength = -1;
-        std::map<int, float> _layersMaxLength;
         const float transitionLayerAdjust = 0.6;
         const int _gcellsOffset = 2;
         int _overflowIterations = 50;
@@ -124,8 +122,10 @@ private:
         std::map<std::string, float> _netsAlpha;
 
         // Antenna variables
-        long _maxRoutingLength = -1;
-        std::map<int, long> _layersMaxRoutingLength;
+        float _maxLengthMicrons = -1;
+        std::map<int, float> _layersMaxLengthMicrons;
+        long _maxLengthDBU = -1;
+        std::map<int, long> _layersMaxLengthDBU;
         
         // temporary for congestion driven replace
         int _numAdjusts = 0;
