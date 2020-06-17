@@ -369,9 +369,6 @@ void FastRouteKernel::estimateRC() {
 
                 SteinerTree sTree;
                 Net net = _netlist->getNetByName(netRoute.name);
-                if(net.getName() == "net36") {
-                        std::cout << netRoute.route.size() << "\n";
-                }
                 std::vector<Pin> pins = net.getPins();
                 std::vector<ROUTE> route = netRoute.route;
                 sTree = createSteinerTree(route, pins);
