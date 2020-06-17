@@ -57,7 +57,7 @@ public:
 
         Segment(int index, Node firstNode, Node lastNode, int parent)
             : _index(index), _firstNode(firstNode), _lastNode(lastNode), _parent(parent) {}
-                
+
         bool operator==(const Segment& segment) {
                 return (((_firstNode == segment._firstNode && _lastNode == segment._lastNode) ||
                         (_firstNode == segment._lastNode && _lastNode == segment._firstNode)) &&
@@ -68,13 +68,13 @@ public:
         Node getFirstNode() const { return _firstNode; }
         Node getLastNode() const { return _lastNode; }
         int getParent() const { return _parent; }
-        
+
         void setParent(int parent) { _parent = parent; }
 
         void printSegment() {
                 std::cout << "----(" << _firstNode.getPosition().getX() << ", " <<
                             _firstNode.getPosition().getY() << ", " <<
-                            _firstNode.getLayer() << "); (" << 
+                            _firstNode.getLayer() << "); (" <<
                             _lastNode.getPosition().getX() << ", " <<
                             _lastNode.getPosition().getY() << ", " <<
                             _lastNode.getLayer() << ")\n";

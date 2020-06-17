@@ -50,15 +50,19 @@
 
 namespace FastRoute {
 
+enum Orientation { ORIENT_NORTH, ORIENT_SOUTH, ORIENT_EAST, ORIENT_WEST, INVALID };
+
 class Pin {
 private:
         std::string _name;
         Coordinate _position;
         std::vector<int> _layers;
+        Orientation _orientation;
         std::map<int, std::vector<Box>> _boxesPerLayer;
         std::string _netName;
         bool _isPort;
         int _type;
+        bool _connectedToPad;
         
         void sortLayers() { std::sort(_layers.begin(), _layers.end()); }
         
@@ -66,25 +70,29 @@ public:
         static const int SINK = 0;
         static const int SOURCE = 1;
         static const int OTHER = 2;
-        
+
         Pin() = default;
-        Pin(const std::string& name, Coordinate position,
-            const std::vector<int> layers,
+        Pin(const std::string& name, const Coordinate& position,
+            const std::vector<int>& layers, const Orientation orientation,
             const std::map<int, std::vector<Box>>& boxesPerLayer,
-            const std::string& netName, bool isPort, int type)
-            : _name(name), _position(position), _layers(layers),
+            const std::string& netName, bool isPort, bool connectedToPad, int type)
+            : _name(name), _position(position), _layers(layers), _orientation(orientation),
             _boxesPerLayer(boxesPerLayer), _netName(netName),
-            _isPort(isPort), _type(type) { sortLayers(); }
+            _isPort(isPort), _connectedToPad(connectedToPad),
+            _type(type)  { sortLayers(); }
         
-        std::string getName() const { return _name; }
-        Coordinate getPosition() const { return _position; }
-        std::vector<int> getLayers() const { return _layers; }
+        const std::string& getName() const { return _name; }
+        const Coordinate& getPosition() const { return _position; }
+        const std::vector<int>& getLayers() const { return _layers; }
         int getNumLayers() const { return _layers.size(); }
         int getTopLayer() const { return _layers.back(); }
-        std::map<int, std::vector<Box>> getBoxes() const { return _boxesPerLayer; }
-        std::string getNetName() const { return _netName; }
+        Orientation getOrientation() const { return _orientation; }
+        void setOrientation(Orientation orientation) { _orientation = orientation; }
+        const std::map<int, std::vector<Box>>& getBoxes() const { return _boxesPerLayer; }
+        const std::string& getNetName() const { return _netName; }
         bool isPort() const { return _isPort; }
         int getType() const { return _type; }
+        bool isConnectedToPad() const { return _connectedToPad; }
 };
 
 }

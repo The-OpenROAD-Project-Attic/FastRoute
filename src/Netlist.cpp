@@ -36,8 +36,11 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 #include "Netlist.h"
+#include "openroad/Error.hh"
 
 namespace FastRoute {
+
+using ord::error;
 
 Net Netlist::getNetByName(std::string name) {
         Net choosenNet;
@@ -58,8 +61,7 @@ void Netlist::addNet(const std::string& name, const std::string& signalType, con
         
 int Netlist::getMaxNetDegree() {
         if (_nets.size() < 1) {
-                std::cout << "[ERROR] Netlist not initialized yet. Exiting...\n";
-                std::exit(1);
+                error("Netlist not initialized yet\n");
         }
     
         int maxDegree = -1;
@@ -85,6 +87,11 @@ std::vector<Pin> Netlist::getAllPorts() {
         }
         
         return ports;
+}
+
+void Netlist::randomizeNetsOrder(unsigned seed) {
+        if (seed != 0)
+                std::shuffle(_nets.begin(), _nets.end(), std::default_random_engine(seed));
 }
 
 }

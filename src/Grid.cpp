@@ -58,9 +58,7 @@ Coordinate Grid::getPositionOnGrid(const Coordinate& position) {
         DBU centerX = (gCellId_X * _tileWidth) + (_tileWidth / 2) + _lowerLeftX;
         DBU centerY = (gCellId_Y * _tileHeight) + (_tileHeight / 2) + _lowerLeftY;
 
-        Coordinate posOnGrid = Coordinate(centerX, centerY);
-        
-        return posOnGrid;
+        return Coordinate(centerX, centerY);
 }
 
 std::pair<Grid::TILE, Grid::TILE> Grid::getBlockedTiles(const Box& obstacle, Box& firstTileBds,
@@ -111,24 +109,33 @@ std::pair<Grid::TILE, Grid::TILE> Grid::getBlockedTiles(const Box& obstacle, Box
 int Grid::computeTileReduce(const Box &obs, const Box &tile, int trackSpace, bool first, bool direction) {
         int reduce = -1;
         if (direction == RoutingLayer::VERTICAL) {
-                if (first) {
-                        reduce = floor(std::abs(tile.getUpperBound().getX() - obs.getLowerBound().getX()) / trackSpace);
+                if (obs.getLowerBound().getX() >= tile.getLowerBound().getX() &&
+                    obs.getUpperBound().getX() <= tile.getUpperBound().getX()) {
+                        reduce = ceil(std::abs(obs.getUpperBound().getX() - obs.getLowerBound().getX()) / trackSpace);
+                } else if (first) {
+                        reduce = ceil(std::abs(tile.getUpperBound().getX() - obs.getLowerBound().getX()) / trackSpace);
                 } else {
-                        reduce = floor(std::abs(obs.getUpperBound().getX() - tile.getLowerBound().getX()) / trackSpace);
+                        reduce = ceil(std::abs(obs.getUpperBound().getX() - tile.getLowerBound().getX()) / trackSpace);
                 }
         } else {
-                if (first) {
-                        reduce = floor(std::abs(tile.getUpperBound().getY() - obs.getLowerBound().getY()) / trackSpace);
+                if (obs.getLowerBound().getY() >= tile.getLowerBound().getY() &&
+                    obs.getUpperBound().getY() <= tile.getUpperBound().getY()) {
+                        reduce = ceil(std::abs(obs.getUpperBound().getY() - obs.getLowerBound().getY()) / trackSpace);
+                } else if (first) {
+                        reduce = ceil(std::abs(tile.getUpperBound().getY() - obs.getLowerBound().getY()) / trackSpace);
                 } else {
-                        reduce = floor(std::abs(obs.getUpperBound().getY() - tile.getLowerBound().getY()) / trackSpace);
+                        reduce = ceil(std::abs(obs.getUpperBound().getY() - tile.getLowerBound().getY()) / trackSpace);
                 }
         }
 
         if (reduce < 0) {
-                std::cout << "Error!!!\n";
-                std::exit(0);
+                std::cout << "[WARNING] Invalid reduction\n";
         }
         return reduce;
+}
+
+Coordinate Grid::getMiddle() {
+        return Coordinate((_lowerLeftX + (_upperRightX - _lowerLeftX)/ 2.0) , (_lowerLeftY + (_upperRightY - _lowerLeftY)/ 2.0));
 }
 
 }

@@ -41,7 +41,7 @@
 
 namespace FastRoute {
 
-DBU Coordinate::dst(Coordinate a) {
+DBU Coordinate::dst(const Coordinate& a) {
         DBU ax = a.getX();
         DBU ay = a.getY();
         return std::sqrt(std::pow(_x - ax, 2) + std::pow(_y - ay, 2));

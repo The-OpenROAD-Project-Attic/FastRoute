@@ -60,15 +60,15 @@ void set_output_file(const char * file) {
         fastRouteKernel->setOutputFile(file);
 }
 
-void set_pitches_in_tile(int numPitches) {
-        fastRouteKernel->setPitchesInTile(numPitches);
+void set_tile_size(int tileSize) {
+        fastRouteKernel->setPitchesInTile(tileSize);
 }
 
 void set_capacity_adjustment(float adjustment) {
         fastRouteKernel->setAdjustment(adjustment);
 }
 
-extern void add_layer_adjustment(int layer, float reductionPercentage) {
+void add_layer_adjustment(int layer, float reductionPercentage) {
         fastRouteKernel->addLayerAdjustment(layer, reductionPercentage);
 }
 
@@ -133,8 +133,12 @@ void set_allow_overflow(bool allowOverflow) {
         fastRouteKernel->setAllowOverflow(allowOverflow);
 }
 
-void set_route_nets_with_pad(bool routePad) {
-        fastRouteKernel->setRouteNetsWithPad(routePad);
+void set_seed(unsigned seed) {
+        fastRouteKernel->setSeed(seed);
+}
+
+void set_layer_pitch(int layer, float pitch) {
+        fastRouteKernel->setLayerPitch(layer, pitch);
 }
 
 void start_fastroute() {
@@ -149,12 +153,16 @@ void estimate_rc() {
         fastRouteKernel->estimateRC();
 }
 
-void run() {
-        fastRouteKernel->run();
+void reset_fastroute() {
+        fastRouteKernel->reset();
 }
 
 void write_guides() {
         fastRouteKernel->writeGuides();
+}
+
+void report_congestion(char * congest_file) {
+        fastRouteKernel->setReportCongestion(congest_file);
 }
 
 }

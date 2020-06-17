@@ -42,33 +42,34 @@
 
 namespace FastRoute {
 
-typedef struct {
+struct PIN {
         long x;
         long y;
         int layer;
-} PIN;
+};
 
-typedef struct {
+struct ROUTE {
         long initX;
         long initY;
         int initLayer;
         long finalX;
         long finalY;
         int finalLayer;
-} ROUTE;
+};
 
-typedef struct {
+struct NET {
         std::string name;
         int id;
         std::vector<ROUTE> route;
-} NET;
-
-std::map<std::string, std::vector<PIN>> allNets;
-int maxNetDegree;
+};
 
 class FT {
        public:
-        FT() = default;
+        FT();
+        ~FT();
+
+        std::map<std::string, std::vector<PIN>> allNets;
+        int maxNetDegree;
 
         void setGridsAndLayers(int x, int y, int nLayers);
         void addVCapacity(int verticalCapacity, int layer);
@@ -87,7 +88,8 @@ class FT {
         void initAuxVar();
         int run(std::vector<NET> &);
         std::vector<NET> getResults();
-        void deleteGlobalArrays();
+        void writeCongestionReport2D(std::string fileName);
+        void writeCongestionReport3D(std::string fileName);
 
         int getEdgeCapacity(long x1, long y1, int l1, long x2, long y2, int l2);
 	int getEdgeCurrentResource(long x1, long y1, int l1, long x2, long y2, int l2);

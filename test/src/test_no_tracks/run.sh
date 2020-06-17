@@ -10,7 +10,7 @@ fi
 binary=$1
 testdir=$2
 
-$binary -no_init < run.tcl > log.txt 2>&1
+$binary -no_init -exit run.tcl > log.txt 2>&1
  
 grep -q "missing track structure" log.txt
 

@@ -46,29 +46,29 @@
 #include "Segment.h"
 
 namespace FastRoute {
-    
+
 class SteinerTree {
 private:
         std::vector<Node> _nodes;
         std::vector<Segment> _segments;
-    
+
 public:
         SteinerTree() = default;
-        
+
         const std::vector<Node>& getNodes() const { return _nodes; }
         const std::vector<Segment>& getSegments() const { return _segments; }
-        
+
         void addSegment(Segment segment);
         void addNode(Node node);
 
         void printSegments();
-                
+
         void setSegments(std::vector<Segment> segments) { _segments = segments; }
-        
+
         bool nodeExists(Node node);
         bool getNodeIfExists(Node node, Node &requestedNode);
         std::vector<Segment> getNodeSegments(Node node);
-        
+
         Node getSource();
         std::vector<Node> getSinks();
         Segment getSegmentByIndex(int index);

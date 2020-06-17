@@ -39,7 +39,7 @@ sta::define_cmd_args "fastroute" {[-output_file out_file] \
                                            [-min_routing_layer min_layer] \
                                            [-max_routing_layer max_layer] \
                                            [-unidirectional_routing] \
-                                           [-pitches_in_tile pitches] \
+                                           [-tile_size tile_size] \
                                            [-layers_adjustments layers_adjustments] \
                                            [-regions_adjustments regions_adjustments] \
                                            [-nets_alphas_priorities nets_alphas] \
@@ -54,22 +54,24 @@ sta::define_cmd_args "fastroute" {[-output_file out_file] \
                                            [-allow_overflow] \
                                            [-route_nets_with_pad] \
                                            [-estimateRC] \
+                                           [-seed seed] \
+                                           [-report_congestion congest_file] \
+                                           [-layers_pitches layers_pitches] \
 }
 
 proc fastroute { args } {
   sta::parse_key_args "fastroute" args \
     keys {-output_file -capacity_adjustment -min_routing_layer -max_routing_layer \
-          -pitches_in_tile -alpha -verbose -layers_adjustments \
+          -tile_size -alpha -verbose -layers_adjustments \
           -regions_adjustments -nets_alphas_priorities -overflow_iterations \
-          -grid_origin -pdrev_for_high_fanout -max_routing_length -max_length_per_layer} \
-    flags {-unidirectional_routing -clock_net_routing -allow_overflow -route_nets_with_pad \
-           -estimateRC}
+          -grid_origin -pdrev_for_high_fanout -seed -report_congestion -layers_pitches -max_routing_length -max_length_per_layer} \
+    flags {-unidirectional_routing -clock_net_routing -allow_overflow -route_nets_with_pad -estimateRC} \
 
   if { [info exists keys(-output_file)] } {
     set out_file $keys(-output_file)
     FastRoute::set_output_file $out_file
   } else {
-    puts "WARNING: Default output guide name: out.guide"
+    puts "\[WARNING\] Default output guide name: out.guide"
     FastRoute::set_output_file "out.guide"
   }
 
@@ -95,9 +97,9 @@ proc fastroute { args } {
     FastRoute::set_max_layer -1
   }
 
-  if { [info exists keys(-pitches_in_tile)] } {
-    set pitches $keys(-pitches_in_tile)
-    FastRoute::set_pitches_in_tile $pitches
+  if { [info exists keys(-tile_size)] } {
+    set tile_size $keys(-tile_size)
+    FastRoute::set_tile_size $tile_size
   }
 
   if { [info exists keys(-layers_adjustments)] } {
@@ -106,7 +108,6 @@ proc fastroute { args } {
       set layer [lindex $layer_adjustment 0]
       set reductionPercentage [lindex $layer_adjustment 1]
 
-      puts "Adjust layer $layer in [expr $reductionPercentage * 100]%"
       FastRoute::add_layer_adjustment $layer $reductionPercentage
     }
   }
@@ -132,7 +133,7 @@ proc fastroute { args } {
     foreach net_alpha $nets_alphas {
       set net_name [lindex $net_alpha 0]
       set alpha [lindex $net_alpha 1]
-      puts "Alpha $alpha for net $net_name"
+
       FastRoute::set_alpha_for_net $net_name $alpha
     }
   }
@@ -146,16 +147,22 @@ proc fastroute { args } {
   if { [info exists keys(-alpha) ] } {
     set alpha $keys(-alpha)
     FastRoute::set_alpha $alpha
+  } else {
+    FastRoute::set_alpha 0.3
   }
 
   if { [info exists keys(-verbose) ] } {
     set verbose $keys(-verbose)
     FastRoute::set_verbose $verbose
+  } else {
+    FastRoute::set_verbose 0
   }
   
   if { [info exists keys(-overflow_iterations) ] } {
     set iterations $keys(-overflow_iterations)
     FastRoute::set_overflow_iterations $iterations
+  } else {
+    FastRoute::set_overflow_iterations 50
   }
 
   if { [info exists flags(-clock_net_routing)] } {
@@ -189,27 +196,49 @@ proc fastroute { args } {
     set origin_y [lindex $origin 1]
 
     FastRoute::set_grid_origin $origin_x $origin_y
+  } else {
+    FastRoute::set_grid_origin -1 -1
   }
 
   if { [info exists keys(-pdrev_for_high_fanout)] } {
     set faonut $keys(-pdrev_for_high_fanout)
 
     FastRoute::set_pdrev_for_high_fanout $faonut
+  } else {
+    FastRoute::set_pdrev_for_high_fanout -1
+  }
+
+  if { [info exists keys(-seed) ] } {
+    set seed $keys(-seed)
+    FastRoute::set_seed $seed
+  } else {
+    FastRoute::set_seed 0
   }
 
   if { [info exists flags(-allow_overflow)] } {
     FastRoute::set_allow_overflow 1
+  } else {
+    FastRoute::set_allow_overflow 0
   }
 
-  if { [info exists flags(-route_nets_with_pad)] } {
-    FastRoute::set_route_nets_with_pad 1
+  if { [info exists keys(-report_congestion)] } {
+    set congest_file $keys(-report_congestion)
+    FastRoute::report_congestion $congest_file
+  }
+
+  if { [info exists keys(-layers_pitches)] } {
+    set layers_pitches $keys(-layers_pitches)
+    foreach layer_pitch $layers_pitches {
+      set layer [lindex $layer_pitch 0]
+      set pitch [lindex $layer_pitch 1]
+
+      FastRoute::set_layer_pitch $layer $pitch
+    }
   }
 
   for {set layer 1} {$layer <= $max_layer} {set layer [expr $layer+1]} {
-    if { [ord::db_layer_has_hor_tracks $layer] && \
-         [ord::db_layer_has_ver_tracks $layer] } {
-      continue
-    } else {
+    if { !([ord::db_layer_has_hor_tracks $layer] && \
+         [ord::db_layer_has_ver_tracks $layer]) } {
       ord::error "missing track structure"
     }
   }

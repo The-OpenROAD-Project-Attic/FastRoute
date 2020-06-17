@@ -61,21 +61,22 @@ namespace FastRoute {
 class DBWrapper {
 public:        
         DBWrapper() = default;
-        DBWrapper(Netlist& netlist, Grid& grid) 
-                  : _netlist(&netlist),
-                  _grid(&grid) {
+        DBWrapper(Netlist *netlist, Grid *grid) 
+                  : _netlist(netlist),
+                  _grid(grid) {
         }
         
         void initGrid(int maxLayer);
-        void initRoutingLayers(std::vector<RoutingLayer>& routingLayers, int maxLayer);
-        void initRoutingTracks(std::vector<RoutingTracks>& allRoutingTracks, int maxLayer);
-        void computeCapacities(int maxLayer);
+        void initRoutingLayers(std::vector<RoutingLayer>& routingLayers);
+        void initRoutingTracks(std::vector<RoutingTracks>& allRoutingTracks, int maxLayer, std::map<int, float> layerPitches);
+        void computeCapacities(int maxLayer, std::map<int, float> layerPitches);
         void computeSpacingsAndMinWidth(int maxLayer);
-        void initNetlist(bool routeNetsWithPad);
+        void initNetlist();
         void initObstacles();
         int computeMaxRoutingLayer();
         void getLayerRC(unsigned layerId, float& r, float& c);
         float dbuToMeters(unsigned dbu);
+        std::set<int> findTransitionLayers(int maxRoutingLayer);
         
         void setDB(unsigned idx) { _db = odb::dbDatabase::getDatabase(idx); }
         void setSelectedMetal (int metal) { selectedMetal = metal; }

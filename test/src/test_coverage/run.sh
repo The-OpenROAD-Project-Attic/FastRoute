@@ -47,7 +47,7 @@ binary=$1
 testdir=$2
 flexBinary="FlexRoute"
 
-$binary -no_init < run.tcl > log.txt 2>&1
+$binary -no_init run.tcl > log.txt 2>&1
 ./$flexBinary run_checker_input.param > test.log 2>&1
 
 mkdir -p ../../results/test_coverage

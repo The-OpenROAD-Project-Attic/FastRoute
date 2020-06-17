@@ -20,7 +20,7 @@ namespace FastRoute {
 class RcTreeBuilder {
 public:
         RcTreeBuilder(Net& net, SteinerTree& steinerTree, Grid &grid,
-                      DBWrapper& dbWrapper); 
+                      DBWrapper& dbWrapper);
         void run();
         void reportParasitics();
 
@@ -42,9 +42,9 @@ protected:
         DBWrapper*                _dbWrapper     = nullptr;
         sta::Net*                 _staNet        = nullptr;
         SteinerTree*              _steinerTree   = nullptr;
-        sta::Parasitic*           _parasitic     = nullptr; 
+        sta::Parasitic*           _parasitic     = nullptr;
         sta::Parasitics*          _parasitics    = nullptr;
-        sta::ParasiticAnalysisPt* _analysisPoint = nullptr; 
+        sta::ParasiticAnalysisPt* _analysisPoint = nullptr;
         sta::Network*             _network       = nullptr;
         sta::Units*               _units         = nullptr;
         bool                      _debug         = false;

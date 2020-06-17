@@ -47,7 +47,7 @@ void SteinerTree::printSegments() {
                              seg.getFirstNode().getPosition().getY() << ", " <<
                              seg.getFirstNode().getLayer() << "); (" <<
                              seg.getLastNode().getPosition().getX() << ", " <<
-                             seg.getLastNode().getPosition().getY() << ", " << 
+                             seg.getLastNode().getPosition().getY() << ", " <<
                              seg.getLastNode().getLayer() << ")\n";
         }
 }
@@ -55,10 +55,10 @@ void SteinerTree::printSegments() {
 void SteinerTree::addNode(Node node) {
         if (!nodeExists(node)) {
                 _nodes.push_back(node);
-        } else if(node.getType() == SOURCE) {
+        } else if(node.getType() == NodeType::SOURCE) {
                 for (Node &n : _nodes) {
                         if (n == node) {
-                                n.setType(SOURCE);
+                                n.setType(NodeType::SOURCE);
                         }
                 }
         }
@@ -73,7 +73,7 @@ void SteinerTree::addSegment(Segment segment) {
                        return;
                 }
         }
-        
+
         _segments.push_back(segment);
 }
 
@@ -93,7 +93,7 @@ bool SteinerTree::getNodeIfExists(Node node, Node &requestedNode) {
                         return true;
                 }
         }
-        
+
         return false;
 }
 
@@ -104,7 +104,7 @@ std::vector<Segment> SteinerTree::getNodeSegments(Node node) {
                         nodeSegments.push_back(seg);
                 }
         }
-        
+
         return nodeSegments;
 }
 
@@ -112,29 +112,29 @@ Node SteinerTree::getSource() {
         Node source;
         bool found = false;
         for (Node node : _nodes) {
-                if (node.getType() == SOURCE) {
+                if (node.getType() == NodeType::SOURCE) {
                         source = node;
                         found = true;
                 }
         }
-        
+
         if (!found) {
                 std::cout << "[ERROR] Source not found\n";
                 std::exit(0);
         }
-        
+
         return source;
 }
 
 std::vector<Node> SteinerTree::getSinks() {
         std::vector<Node> sinks;
-        
+
         for (Node node : _nodes) {
-                if (node.getType() == SINK) {
+                if (node.getType() == NodeType::SINK) {
                         sinks.push_back(node);
                 }
         }
-        
+
         return sinks;
 }
 
@@ -146,7 +146,7 @@ Segment SteinerTree::getSegmentByIndex(int index) {
                         break;
                 }
         }
-        
+
         return idxSeg;
 }
 

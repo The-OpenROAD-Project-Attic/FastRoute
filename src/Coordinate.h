@@ -59,12 +59,12 @@ public:
         bool operator!=(const Coordinate& coord) const {
                 return (_x != coord._x || _y != coord._y);
         }
-        
+
         void setX(const DBU x) { _x = x; }
         void setY(const DBU y) { _y = y; }
         DBU getX() const { return _x; }
         DBU getY() const { return _y; }
-        DBU dst(Coordinate);
+        DBU dst(const Coordinate& a);
 };
 
 }
