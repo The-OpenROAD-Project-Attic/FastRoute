@@ -1344,6 +1344,19 @@ void checkUsage()
               if (gridsX[i] == gridsX[j]
                   && gridsY[i] == gridsY[j])  // a vertical edge
               {
+                // Update usage for edges to be removed
+                for (k = j; k < i; k++) {
+                  if (gridsX[k] == gridsX[k + 1]) {
+                    int min_y = std::min(gridsY[k], gridsY[k + 1]);
+                    int grid  =  min_y * xGrid + gridsX[k];
+                    v_edges[grid].usage -= 1;
+                  } else {
+                    int min_x = std::min(gridsX[k], gridsX[k + 1]);
+                    int grid  =  gridsY[k] * (xGrid - 1) + min_x;
+                    h_edges[grid].usage -= 1;
+                  }
+                }
+
                 cnt = 1;
                 for (k = i + 1; k <= treeedge->route.routelen; k++) {
                   gridsX[j + cnt] = gridsX[k];
