@@ -356,9 +356,8 @@ void FastRouteKernel::runFastRoute() {
         }
         
         std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
-        std::cout << " > ---- Elapsed time: " << (std::chrono::duration_cast<std::chrono::microseconds>(end - begin).count()) /1000000.0 << "\n";
-        std::cout << " > \n";
-
+        if (_verbose > 0)
+                std::cout << "[INFO] Elapsed time: " << (std::chrono::duration_cast<std::chrono::microseconds>(end - begin).count()) /1000000.0 << "\n";
 }
 
 void FastRouteKernel::estimateRC() {
@@ -1726,7 +1725,7 @@ void FastRouteKernel::checkSinksAndSource() {
         }
 
         if (invalid) {
-                std::exit(1);
+                error("Invalid sources and sinks");
         }
 }
 
@@ -1867,63 +1866,65 @@ bool FastRouteKernel::breakSegment(ROUTE actualSegment, long maxLength, std::vec
                 bool horizontal;
 
                 if (actualSegment.initX == actualSegment.finalX) { // Vertical segment
+                        long x = actualSegment.initX;
                         horizontal = false;
                         if (actualSegment.finalY > actualSegment.initY) {
                                 segment = actualSegment;
                         } else {
-                                segment = {actualSegment.initX, actualSegment.finalY, actualSegment.initLayer,
-                                           actualSegment.finalX, actualSegment.initY, actualSegment.finalLayer};
+                                segment = {x, actualSegment.finalY, actualSegment.initLayer,
+                                           x, actualSegment.initY, actualSegment.finalLayer};
                         }
 
-                        segment0 = {segment.initX, segment.initY, segment.initLayer,
-                                    segment.finalX, segment.initY + newSegsLen, segment.finalLayer};
+                        segment0 = {x, segment.initY, segment.initLayer,
+                                    x, segment.initY + newSegsLen, segment.finalLayer};
+                        // Via up two layers
+                        via0 = {x, segment0.finalY, segment0.initLayer,
+                                x, segment0.finalY, segment0.initLayer + 1};
 
-                        via0 = {segment0.finalX, segment0.finalY, segment0.initLayer,
-                                segment0.finalX, segment0.finalY, segment0.initLayer + 1};
+                        via1 = {x, via0.finalY, via0.finalLayer,
+                                x, via0.finalY, via0.finalLayer + 1};
 
-                        via1 = {via0.finalX, via0.finalY, via0.finalLayer,
-                                via0.finalX, via0.finalY, via0.finalLayer + 1};
+                        segment1 = {x, via1.finalY, via1.finalLayer,
+                                    x, via1.finalY + newSegsLen, via1.finalLayer};
+                        // Via down two layers
+                        via2 = {x, segment1.finalY, segment1.finalLayer,
+                                x, segment1.finalY, segment1.finalLayer - 1};
 
-                        segment1 = {via1.finalX, via1.finalY, via1.finalLayer,
-                                    via1.finalX, via1.finalY + newSegsLen, via1.finalLayer};
+                        via3 = {x, via2.finalY, via2.finalLayer,
+                                x, via2.finalY, via2.finalLayer - 1};
 
-                        via2 = {segment1.finalX, segment1.finalY, segment1.finalLayer,
-                                segment1.finalX, segment1.finalY, segment1.finalLayer - 1};
-
-                        via3 = {via2.finalX, via2.finalY, via2.finalLayer,
-                                via2.finalX, via2.finalY, via2.finalLayer - 1};
-
-                        segment2 = {via3.finalX, via3.finalY, via3.finalLayer,
-                                    via3.finalX, segment.finalY, via3.finalLayer};
+                        segment2 = {x, via3.finalY, via3.finalLayer,
+                                    x, segment.finalY, via3.finalLayer};
                 } else if (actualSegment.initY == actualSegment.finalY) { // Horizontal segment
+                        long y = actualSegment.initY;
                         horizontal = true;
                         if (actualSegment.finalX > actualSegment.initX) {
                                 segment = actualSegment;
                         } else {
-                                segment = {actualSegment.finalX, actualSegment.initY, actualSegment.initLayer,
-                                           actualSegment.initX, actualSegment.finalY, actualSegment.finalLayer};
+                                segment = {actualSegment.finalX, y, actualSegment.initLayer,
+                                           actualSegment.initX, y, actualSegment.finalLayer};
                         }
 
-                        segment0 = {segment.initX, segment.initY, segment.initLayer,
-                                    segment.initX + newSegsLen, segment.initY, segment.finalLayer};
+                        segment0 = {segment.initX, y, segment.initLayer,
+                                    segment.initX + newSegsLen, y, segment.finalLayer};
+                        // Via up two layers
+                        via0 = {segment0.finalX, y, segment0.initLayer,
+                                segment0.finalX, y, segment0.initLayer + 1};
 
-                        via0 = {segment0.finalX, segment0.finalY, segment0.initLayer,
-                                segment0.finalX, segment0.finalY, segment0.initLayer + 1};
+                        via1 = {via0.finalX, y, via0.finalLayer,
+                                via0.finalX, y, via0.finalLayer + 1};
 
-                        via1 = {via0.finalX, via0.finalY, via0.finalLayer,
-                                via0.finalX, via0.finalY, via0.finalLayer + 1};
+                        segment1 = {via1.finalX, y, via1.finalLayer,
+                                    via1.finalX + newSegsLen, y, via1.finalLayer};
+                        // Via down two layers
+                        via2 = {segment1.finalX, y, segment1.finalLayer,
+                                segment1.finalX, y, segment1.finalLayer - 1};
 
-                        segment1 = {via1.finalX, via1.finalY, via1.finalLayer,
-                                    via1.finalX + newSegsLen, via1.finalY, via1.finalLayer};
+                        via3 = {via2.finalX, y, via2.finalLayer,
+                                via2.finalX, y, via2.finalLayer - 1};
 
-                        via2 = {segment1.finalX, segment1.finalY, segment1.finalLayer,
-                                segment1.finalX, segment1.finalY, segment1.finalLayer - 1};
-
-                        via3 = {via2.finalX, via2.finalY, via2.finalLayer,
-                                via2.finalX, via2.finalY, via2.finalLayer - 1};
-
-                        segment2 = {via3.finalX, via3.finalY, via3.finalLayer,
-                                    segment.finalX, via3.finalY, via3.finalLayer};
+                        segment2 = {via3.finalX, y, via3.finalLayer,
+                                    segment.finalX, y, via3.finalLayer};
                 } else {
                         std::cout << "[ERROR] Invalid segment\n";
                         std::exit(1);
@@ -1958,7 +1959,7 @@ bool FastRouteKernel::breakSegment(ROUTE actualSegment, long maxLength, std::vec
 
                 return true;
         } else {
-//                std::cout << "[TODO] Handle segments more than 3 times greater than the limit\n";
+                std::cout << "[TODO] Handle segments more than 3 times greater than the limit\n";
                 return false;
         }
 
