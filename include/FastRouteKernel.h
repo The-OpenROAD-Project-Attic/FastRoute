@@ -126,7 +126,7 @@ private:
         std::map<int, float> _layersMaxLengthMicrons;
         long _maxLengthDBU = -1;
         std::map<int, long> _layersMaxLengthDBU;
-        
+
         // temporary for congestion driven replace
         int _numAdjusts = 0;
 

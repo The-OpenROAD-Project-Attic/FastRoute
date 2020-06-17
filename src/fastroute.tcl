@@ -52,7 +52,6 @@ sta::define_cmd_args "fastroute" {[-output_file out_file] \
                                            [-grid_origin origin] \
                                            [-pdrev_for_high_fanout fanout] \
                                            [-allow_overflow] \
-                                           [-route_nets_with_pad] \
                                            [-estimateRC] \
                                            [-seed seed] \
                                            [-report_congestion congest_file] \
@@ -65,7 +64,7 @@ proc fastroute { args } {
           -tile_size -alpha -verbose -layers_adjustments \
           -regions_adjustments -nets_alphas_priorities -overflow_iterations \
           -grid_origin -pdrev_for_high_fanout -seed -report_congestion -layers_pitches -max_routing_length -max_length_per_layer} \
-    flags {-unidirectional_routing -clock_net_routing -allow_overflow -route_nets_with_pad -estimateRC} \
+    flags {-unidirectional_routing -clock_net_routing -allow_overflow -estimateRC} \
 
   if { [info exists keys(-output_file)] } {
     set out_file $keys(-output_file)
