@@ -1367,7 +1367,7 @@ void FastRouteKernel::addRemainingGuides(std::vector<FastRoute::NET> &globalRout
                                                             (segments[i].initLayer < wireViaLayer ||
                                                              segments[i].finalLayer < wireViaLayer)) {
                                                                 segments.erase(segments.begin()+i);
-								i = 0;
+                                                                i = 0;
                                                         }
                                                 }
                                         }
@@ -1782,22 +1782,22 @@ void FastRouteKernel::mergeSegments(FastRoute::NET &net) {
 }
 
 bool FastRouteKernel::segmentsOverlaps(const ROUTE& seg0, const ROUTE& seg1, ROUTE &newSeg) {
-	long initX0 = std::min(seg0.initX, seg0.finalX);
-	long initY0 = std::min(seg0.initY, seg0.finalY);
-	long finalX0 = std::max(seg0.finalX, seg0.initX);
-	long finalY0 = std::max(seg0.finalY, seg0.initY);
+        long initX0 = std::min(seg0.initX, seg0.finalX);
+        long initY0 = std::min(seg0.initY, seg0.finalY);
+        long finalX0 = std::max(seg0.finalX, seg0.initX);
+        long finalY0 = std::max(seg0.finalY, seg0.initY);
 
-	long initX1 = std::min(seg1.initX, seg1.finalX);
-	long initY1 = std::min(seg1.initY, seg1.finalY);
-	long finalX1 = std::max(seg1.finalX, seg1.initX);
-	long finalY1 = std::max(seg1.finalY, seg1.initY);
+        long initX1 = std::min(seg1.initX, seg1.finalX);
+        long initY1 = std::min(seg1.initY, seg1.finalY);
+        long finalX1 = std::max(seg1.finalX, seg1.initX);
+        long finalY1 = std::max(seg1.finalY, seg1.initY);
 
-	if (initX0 == finalX0 && initX1 == finalX1 && initX0 == initX1) { // vertical segments aligned
-		if ((initY0 >= initY1 && initY0 <= finalY1) || 
-		    (finalY0 >= initY1 && finalY0 <= finalY1)) {
-			newSeg.initX = std::min(initX0, initX1);
-			newSeg.initY = std::min(initY0, initY1);
-			newSeg.finalX = std::max(finalX0, finalX1);
+        if (initX0 == finalX0 && initX1 == finalX1 && initX0 == initX1) { // vertical segments aligned
+                if ((initY0 >= initY1 && initY0 <= finalY1) || 
+                    (finalY0 >= initY1 && finalY0 <= finalY1)) {
+                        newSeg.initX = std::min(initX0, initX1);
+                        newSeg.initY = std::min(initY0, initY1);
+                        newSeg.finalX = std::max(finalX0, finalX1);
                         newSeg.finalY = std::max(finalY0, finalY1);
                         return true;
                 }
@@ -1973,19 +1973,19 @@ void FastRouteKernel::fixLongSegments() {
         addRemainingGuides(*_result);
         for (FastRoute::NET &netRoute : *_result) {
                 mergeSegments(netRoute);
-                        bool possibleViolation = false;
-                        for (ROUTE seg : netRoute.route) {
-                                    long segLen = std::abs(seg.finalX - seg.initX)
-                                    + std::abs(seg.finalY - seg.initY);
+                bool possibleViolation = false;
+                for (ROUTE seg : netRoute.route) {
+                            long segLen = std::abs(seg.finalX - seg.initX)
+                            + std::abs(seg.finalY - seg.initY);
 
-                                    if (segLen >= _layersMaxLengthDBU[seg.finalLayer]) {
-                                                possibleViolation = true;
-                                possibleViols++;
-                                    }
-                        }
+                            if (segLen >= _layersMaxLengthDBU[seg.finalLayer]) {
+                                        possibleViolation = true;
+                        possibleViols++;
+                            }
+                }
 
-                        if (!possibleViolation)
-                                continue;
+                if (!possibleViolation)
+                        continue;
 
                 SteinerTree sTree;
                 Net net = _netlist->getNetByName(netRoute.name);
