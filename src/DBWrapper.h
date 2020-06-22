@@ -75,6 +75,7 @@ public:
         void initObstacles();
         int computeMaxRoutingLayer();
         void getLayerRC(unsigned layerId, float& r, float& c);
+        void getCutLayerRes(unsigned belowLayerId, float& r);
         float dbuToMeters(unsigned dbu);
         std::set<int> findTransitionLayers(int maxRoutingLayer);
         

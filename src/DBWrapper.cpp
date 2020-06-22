@@ -335,7 +335,6 @@ void DBWrapper::initNetlist() {
                         std::string pinName;
                         std::vector<int> pinLayers;
                         std::map<int, std::vector<Box>> pinBoxes;
-                        int type;
                         
                         odb::dbMTerm* mTerm = currITerm->getMTerm();
                         odb::dbMaster* master = mTerm->getMaster();
@@ -352,6 +351,7 @@ void DBWrapper::initNetlist() {
                         pinName = mTerm->getConstName();
                         pinName = instName + "/" + pinName;
 
+                        Pin::Type type(Pin::Type::OTHER);
                         if (mTerm->getIoType() == odb::dbIoType::INPUT) {
                                 type = Pin::SINK;
                         } else if (mTerm->getIoType() == odb::dbIoType::OUTPUT) {
@@ -434,7 +434,6 @@ void DBWrapper::initNetlist() {
                 for (odb::dbBTerm* currBTerm : currNet->getBTerms()) {
                         int posX, posY;
                         std::string pinName;
-                        int type;
                         
                         currBTerm->getFirstPinLocation(posX, posY);
                         odb::dbITerm* iTerm = currBTerm->getITerm();
@@ -463,7 +462,8 @@ void DBWrapper::initNetlist() {
                                                 
                         pinName = currBTerm->getConstName();
                         Coordinate pinPos;
-                        
+
+                        Pin::Type type(Pin::Type::OTHER);
                         if (currBTerm->getIoType() == odb::dbIoType::INPUT) {
                                 type = Pin::SOURCE;
                         } else if (currBTerm->getIoType() == odb::dbIoType::OUTPUT) {
@@ -785,6 +785,13 @@ int DBWrapper::computeMaxRoutingLayer() {
         return maxRoutingLayer;
 }
 
+void DBWrapper::getCutLayerRes(unsigned belowLayerId, float& r) {
+        odb::dbBlock* block = _chip->getBlock();
+        odb::dbTech* tech = _db->getTech();
+        odb::dbTechLayer* cut = tech->findRoutingLayer(belowLayerId)->getUpperLayer();
+        r = cut->getResistance(); // assumes single cut
+}
+
 void DBWrapper::getLayerRC(unsigned layerId, float& r, float& c) {
         odb::dbBlock* block = _chip->getBlock();
         odb::dbTech* tech = _db->getTech();
@@ -793,11 +800,11 @@ void DBWrapper::getLayerRC(unsigned layerId, float& r, float& c) {
         float layerWidth = (float) techLayer->getWidth() /
                             block->getDbUnitsPerMicron();
         float resOhmPerMicron =  techLayer->getResistance() / layerWidth;
-        float capPfPerMicron = (1.0/block->getDbUnitsPerMicron()) * layerWidth
-                                * techLayer->getCapacitance() + 2 * techLayer->getEdgeCapacitance();
+        float capPfPerMicron = layerWidth * techLayer->getCapacitance()
+                               + 2 * techLayer->getEdgeCapacitance();
 
         r = 1E+6 * resOhmPerMicron; // Meters
-        c = 1E+6 * 1E-12 * techLayer->getCapacitance(); // F/m2
+        c = 1E+6 * 1E-12 * capPfPerMicron; // F/m
 }
 
 float DBWrapper::dbuToMeters(unsigned dbu) {

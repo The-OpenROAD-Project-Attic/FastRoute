@@ -37,8 +37,6 @@ void RcTreeBuilder::initStaData() {
 
         // Init units
         _units = dbSta->units();
-
-        _debug = _net->getName() == "net36";
 }
 
 void RcTreeBuilder::run() {
@@ -83,8 +81,9 @@ void RcTreeBuilder::computeGlobalParasitics() {
                 float cap = 1.0;
                 float res = 1.0;
                 if (node1.getPosition() == node2.getPosition()) { // Via
+                        int lower_layer = std::min(node1.getLayer(), node2.getLayer());
+                        _dbWrapper->getCutLayerRes(lower_layer, res);
                         cap = 0.0;
-                        res = 0.003;
                 } else { // Wire
                         // First compute wirelength
                         unsigned dbuWirelength = computeDist(node1, node2);

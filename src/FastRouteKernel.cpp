@@ -1751,7 +1751,13 @@ void FastRouteKernel::mergeSegments(FastRoute::NET &net) {
         if (segments.size() < 1) {
                 error("Net %s has segments vector empty\n", net.name.c_str());
         }
-        
+
+        std::map<Point, int> segsAtPoint;
+        for (const ROUTE& seg : segments) {
+          segsAtPoint[{seg.initX, seg.initY, seg.initLayer}] += 1;
+          segsAtPoint[{seg.finalX, seg.finalY, seg.finalLayer}] += 1;
+        }
+
         uint i = 0;
         while (i < segments.size() - 1) {
                 ROUTE newSeg = segments[i];
@@ -1764,13 +1770,12 @@ void FastRouteKernel::mergeSegments(FastRoute::NET &net) {
                         continue;
                 }
                 
-                if (segment0.initLayer != segment1.initLayer ||
-                    segment0.finalLayer != segment1.finalLayer) { // if the segments are in different layers
+                if (segment0.initLayer != segment1.initLayer) { // if the segments are in different layers
                         i++;
                         continue;
                 }
                 
-                if (segmentsOverlaps(segment0, segment1, newSeg)) { // if segment 0 connects to the end of segment 1
+                if (segmentsConnect(segment0, segment1, newSeg, segsAtPoint)) { // if segment 0 connects to the end of segment 1
                         segments[i] = newSeg;
                         segments.erase(segments.begin() + i + 1);
                 } else {
@@ -1781,7 +1786,7 @@ void FastRouteKernel::mergeSegments(FastRoute::NET &net) {
         net.route = segments;
 }
 
-bool FastRouteKernel::segmentsOverlaps(const ROUTE& seg0, const ROUTE& seg1, ROUTE &newSeg) {
+bool FastRouteKernel::segmentsConnect(const ROUTE& seg0, const ROUTE& seg1, ROUTE &newSeg, const std::map<Point, int>& segsAtPoint) {
         long initX0 = std::min(seg0.initX, seg0.finalX);
         long initY0 = std::min(seg0.initY, seg0.finalY);
         long finalX0 = std::max(seg0.finalX, seg0.initX);
@@ -1793,8 +1798,13 @@ bool FastRouteKernel::segmentsOverlaps(const ROUTE& seg0, const ROUTE& seg1, ROU
         long finalY1 = std::max(seg1.finalY, seg1.initY);
 
         if (initX0 == finalX0 && initX1 == finalX1 && initX0 == initX1) { // vertical segments aligned
-                if ((initY0 >= initY1 && initY0 <= finalY1) || 
-                    (finalY0 >= initY1 && finalY0 <= finalY1)) {
+                bool merge = false;
+                if (initY0 == finalY1) {
+                         merge = segsAtPoint.at({initX0, initY0, seg0.initLayer}) == 2;
+                } else if (finalY0 == initY1) {
+                        merge = segsAtPoint.at({initX1, initY1, seg1.initLayer}) == 2;
+                }
+                if (merge) {
                         newSeg.initX = std::min(initX0, initX1);
                         newSeg.initY = std::min(initY0, initY1);
                         newSeg.finalX = std::max(finalX0, finalX1);
@@ -1802,8 +1812,13 @@ bool FastRouteKernel::segmentsOverlaps(const ROUTE& seg0, const ROUTE& seg1, ROU
                         return true;
                 }
         } else if (initY0 == finalY0 && initY1 == finalY1 && initY0 == initY1) { // horizontal segments aligned
-                if ((initX0 >= initX1 && initX0 <= finalX1) ||
-                    (finalX0 >= initX1 && finalX0 <= finalX1)) {
+                bool merge = false;
+                if (initX0 == finalX1) {
+                        merge = segsAtPoint.at({initX0, initY0, seg0.initLayer}) == 2;
+                } else if (finalX0 == initX1) {
+                        merge = segsAtPoint.at({initX1, initY1, seg1.initLayer}) == 2;
+                }
+                if (merge) {
                         newSeg.initX = std::min(initX0, initX1);
                         newSeg.initY = std::min(initY0, initY1);
                         newSeg.finalX = std::max(finalX0, finalX1);
@@ -2153,7 +2168,7 @@ SteinerTree FastRouteKernel::createSteinerTree(std::vector<ROUTE> route, std::ve
 
                 counter++;
                 if (counter > numSegs) {
-                //        std::cout << "[WARNING] Fail when create Steiner tree\n";
+                        std::cout << "[WARNING] Fail when create Steiner tree\n";
                         sTree.setSegments(parents);
                         return sTree;
                 }

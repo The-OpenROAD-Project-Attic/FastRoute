@@ -155,7 +155,9 @@ private:
         void connectPadPins(std::vector<FastRoute::NET> &globalRoute);
         void mergeBox(std::vector<Box>& guideBox);
         Box globalRoutingToBox(const FastRoute::ROUTE &route);
-        bool segmentsOverlaps(const ROUTE& seg0, const ROUTE& seg1, ROUTE &newSeg);
+        using Point = std::tuple<long, long, int>; // x, y, layer
+        bool segmentsConnect(const ROUTE& seg0, const ROUTE& seg1, ROUTE &newSeg,
+                              const std::map<Point, int>& segsAtPoint);
         void mergeSegments(FastRoute::NET &net);
         bool pinOverlapsWithSingleTrack(const Pin& pin, Coordinate &trackPosition);
         
