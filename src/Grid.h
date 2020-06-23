@@ -147,6 +147,8 @@ public:
                                               Box& lastTileBds);
         
         int computeTileReduce(const Box &obs, const Box &tile, int trackSpace, bool first, bool direction);
+
+        Coordinate getMiddle();
 };
 
 }

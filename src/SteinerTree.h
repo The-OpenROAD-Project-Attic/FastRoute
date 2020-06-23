@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////
-// Authors: Vitor Bandeira, Mateus Fogaça, Eder Matheus Monteiro e Isadora
+// Authors: Vitor Bandeira, Eder Matheus Monteiro e Isadora
 // Oliveira
 //          (Advisor: Ricardo Reis)
 //
@@ -35,61 +35,46 @@
 // POSSIBILITY OF SUCH DAMAGE.
 ////////////////////////////////////////////////////////////////////////////////
 
-
-#ifndef DBWRAPPER_h
-#define DBWRAPPER_h
+#ifndef __STEINERTREE_H_
+#define __STEINERTREE_H_
 
 #include <string>
-#include "Netlist.h"
-#include "Grid.h"
-#include "RoutingLayer.h"
-#include "RoutingTracks.h"
-
-#include "opendb/db.h"
-#include "opendb/dbShape.h"
-
-// Forward declaration protects FastRoute code from any
-// header file from the DB. FastRoute code keeps independent.
-namespace odb{
-class dbDatabase;
-class dbChip;
-class dbTech;
-}
+#include <vector>
+#include <iostream>
+#include "Coordinate.h"
+#include "Node.h"
+#include "Segment.h"
 
 namespace FastRoute {
 
-class DBWrapper {
-public:        
-        DBWrapper() = default;
-        DBWrapper(Netlist *netlist, Grid *grid) 
-                  : _netlist(netlist),
-                  _grid(grid) {
-        }
-        
-        void initGrid(int maxLayer);
-        void initRoutingLayers(std::vector<RoutingLayer>& routingLayers);
-        void initRoutingTracks(std::vector<RoutingTracks>& allRoutingTracks, int maxLayer, std::map<int, float> layerPitches);
-        void computeCapacities(int maxLayer, std::map<int, float> layerPitches);
-        void computeSpacingsAndMinWidth(int maxLayer);
-        void initNetlist();
-        void initObstacles();
-        int computeMaxRoutingLayer();
-        void getLayerRC(unsigned layerId, float& r, float& c);
-        void getCutLayerRes(unsigned belowLayerId, float& r);
-        float dbuToMeters(unsigned dbu);
-        std::set<int> findTransitionLayers(int maxRoutingLayer);
-        
-        void setDB(unsigned idx) { _db = odb::dbDatabase::getDatabase(idx); }
-        void setSelectedMetal (int metal) { selectedMetal = metal; }
+class SteinerTree {
 private:
-        int selectedMetal = 3;
-        odb::dbDatabase *_db;
-        odb::dbChip     *_chip;
-        Netlist         *_netlist = nullptr;
-        Grid            *_grid = nullptr;
-        bool            _verbose = false;
+        std::vector<Node> _nodes;
+        std::vector<Segment> _segments;
+
+public:
+        SteinerTree() = default;
+
+        const std::vector<Node>& getNodes() const { return _nodes; }
+        const std::vector<Segment>& getSegments() const { return _segments; }
+
+        void addSegment(Segment segment);
+        void addNode(Node node);
+
+        void printSegments();
+
+        void setSegments(std::vector<Segment> segments) { _segments = segments; }
+
+        bool nodeExists(Node node);
+        bool getNodeIfExists(Node node, Node &requestedNode);
+        std::vector<Segment> getNodeSegments(Node node);
+
+        Node getSource();
+        std::vector<Node> getSinks();
+        Segment getSegmentByIndex(int index);
 };
 
 }
 
-#endif
+#endif /* __STEINERTREE_H_ */
+

@@ -59,6 +59,7 @@ class Pin;
 class Netlist;
 class RoutingTracks;
 class RoutingLayer;
+class SteinerTree;
 struct NET;
 struct ROUTE;
 struct PIN;
@@ -89,9 +90,10 @@ private:
         unsigned _dbId;
         const int _selectedMetal = 3;
         const float transitionLayerAdjust = 0.6;
-        int _overflowIterations;
-        int _pdRevForHighFanout;
-        bool _allowOverflow;
+        const int _gcellsOffset = 2;
+        int _overflowIterations = 50;
+        int _pdRevForHighFanout = -1;
+        bool _allowOverflow = false;
         bool _reportCongest;
         std::vector<int> _vCapacities;
         std::vector<int> _hCapacities;
@@ -118,9 +120,18 @@ private:
         float _alpha;
         int _verbose;
         std::map<std::string, float> _netsAlpha;
-        
+
+        // Antenna variables
+        float _maxLengthMicrons = -1;
+        std::map<int, float> _layersMaxLengthMicrons;
+        long _maxLengthDBU = -1;
+        std::map<int, long> _layersMaxLengthDBU;
+
         // temporary for congestion driven replace
         int _numAdjusts = 0;
+
+        // Variables for PADs obstacles handling
+        std::map<std::string, std::vector<FastRoute::ROUTE>> _padPinsConnections;
         
         // main functions
         void initGrid();
@@ -141,14 +152,25 @@ private:
         RoutingLayer getRoutingLayerByIndex(int index);
         RoutingTracks getRoutingTracksByIndex(int layer);
         void addRemainingGuides(std::vector<FastRoute::NET> &globalRoute);
+        void connectPadPins(std::vector<FastRoute::NET> &globalRoute);
         void mergeBox(std::vector<Box>& guideBox);
         Box globalRoutingToBox(const FastRoute::ROUTE &route);
-        bool segmentsOverlaps(const ROUTE& seg0, const ROUTE& seg1, ROUTE &newSeg);
+        using Point = std::tuple<long, long, int>; // x, y, layer
+        bool segmentsConnect(const ROUTE& seg0, const ROUTE& seg1, ROUTE &newSeg,
+                              const std::map<Point, int>& segsAtPoint);
         void mergeSegments(FastRoute::NET &net);
         bool pinOverlapsWithSingleTrack(const Pin& pin, Coordinate &trackPosition);
         
         // check functions
         void checkPinPlacement();
+        void checkSinksAndSource();
+
+        // antenna functions
+        bool checkResource(ROUTE segment);
+        bool breakSegment(ROUTE segment, long maxLength, std::vector<ROUTE> &newSegments);
+        void fixLongSegments();
+        SteinerTree createSteinerTree(std::vector<ROUTE> route, std::vector<Pin> pins);
+        bool checkSteinerTree(SteinerTree sTree);
 
 public:
         struct EST_ {
@@ -221,10 +243,13 @@ public:
         void setReportCongestion(char * congestFile);
         void printGrid();
         void printHeader();
+        void setMaxLength (float maxLength);
+        void addLayerMaxLength (int layer, float length);
         
         // flow functions
         void writeGuides();
         void startFastRoute();
+        void estimateRC();
         void runFastRoute();
         
         // congestion drive replace functions

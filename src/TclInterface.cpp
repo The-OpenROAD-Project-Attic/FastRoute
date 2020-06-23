@@ -113,6 +113,14 @@ void set_overflow_iterations(int iterations) {
         fastRouteKernel->setOverflowIterations(iterations);
 }
 
+void set_max_routing_length(float maxLength) {
+           fastRouteKernel->setMaxLength(maxLength);
+}
+
+void add_layer_max_length(int layer, float length) {
+        fastRouteKernel->addLayerMaxLength(layer, length);
+}
+
 void set_grid_origin(long x, long y) {
         fastRouteKernel->setGridOrigin(x, y);
 }
@@ -139,6 +147,10 @@ void start_fastroute() {
 
 void run_fastroute() {
         fastRouteKernel->runFastRoute();
+}
+
+void estimate_rc() {
+        fastRouteKernel->estimateRC();
 }
 
 void reset_fastroute() {

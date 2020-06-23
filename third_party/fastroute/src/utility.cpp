@@ -1094,8 +1094,8 @@ void checkRoute3D()
                    + ADIFF(gridsL[i + 1], gridsL[i]);
         if (distance > 1 || distance < 0) {
           gridFlag = TRUE;
-          printf("net[%d] edge[%d] maze route wrong, distance %d, i %d\n",
-                 netID,
+          printf("net %s edge[%d] maze route wrong, distance %d, i %d\n",
+                 nets[netID]->name,
                  edgeID,
                  distance,
                  i);
@@ -1344,6 +1344,19 @@ void checkUsage()
               if (gridsX[i] == gridsX[j]
                   && gridsY[i] == gridsY[j])  // a vertical edge
               {
+                // Update usage for edges to be removed
+                for (k = j; k < i; k++) {
+                  if (gridsX[k] == gridsX[k + 1]) {
+                    int min_y = std::min(gridsY[k], gridsY[k + 1]);
+                    int grid  =  min_y * xGrid + gridsX[k];
+                    v_edges[grid].usage -= 1;
+                  } else {
+                    int min_x = std::min(gridsX[k], gridsX[k + 1]);
+                    int grid  =  gridsY[k] * (xGrid - 1) + min_x;
+                    h_edges[grid].usage -= 1;
+                  }
+                }
+
                 cnt = 1;
                 for (k = i + 1; k <= treeedge->route.routelen; k++) {
                   gridsX[j + cnt] = gridsX[k];
@@ -1506,8 +1519,8 @@ Bool checkRoute2DTree(int netID)
         distance
             = ADIFF(gridsX[i + 1], gridsX[i]) + ADIFF(gridsY[i + 1], gridsY[i]);
         if (distance != 1) {
-          printf("net[%d] edge[%d] maze route wrong, distance %d, i %d\n",
-                 netID,
+          printf("net %s edge[%d] maze route wrong, distance %d, i %d\n",
+                 nets[netID]->name,
                  edgeID,
                  distance,
                  i);
@@ -1516,9 +1529,6 @@ Bool checkRoute2DTree(int netID)
         }
       }
 
-      if (gridFlag) {
-        printEdge2D(netID, edgeID);
-      }
       if (STHwrong) {
         printf("checking failed %d\n", netID);
         return (TRUE);

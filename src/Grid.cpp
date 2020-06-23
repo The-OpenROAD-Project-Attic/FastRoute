@@ -134,4 +134,8 @@ int Grid::computeTileReduce(const Box &obs, const Box &tile, int trackSpace, boo
         return reduce;
 }
 
+Coordinate Grid::getMiddle() {
+        return Coordinate((_lowerLeftX + (_upperRightX - _lowerLeftX)/ 2.0) , (_lowerLeftY + (_upperRightY - _lowerLeftY)/ 2.0));
+}
+
 }

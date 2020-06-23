@@ -71,6 +71,10 @@ extern void set_verbose(int v);
 
 extern void set_overflow_iterations(int iterations);
 
+extern void set_max_routing_length(float maxLength);
+
+extern void add_layer_max_length(int layer, float length);
+
 extern void set_grid_origin(long x, long y);
 
 extern void set_pdrev_for_high_fanout(int pdRevForHighFanout);
@@ -80,6 +84,8 @@ extern void set_allow_overflow(bool allowOverflow);
 extern void set_seed(unsigned seed);
 
 extern void set_layer_pitch(int layer, float pitch);
+
+extern void estimate_rc();
 
 extern void start_fastroute();
 
@@ -92,3 +98,4 @@ extern void write_guides();
 extern void report_congestion(char * congest_file);
 
 }
+

@@ -46,7 +46,7 @@ fi
 binary=$1
 testdir=$2
 
-$binary -no_init < run.tcl > test.log 2>&1
+$binary -no_init run.tcl > test.log 2>&1
 
 if [ $? -eq 0 ];
 then

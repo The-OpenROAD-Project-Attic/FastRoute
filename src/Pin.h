@@ -50,35 +50,52 @@
 
 namespace FastRoute {
 
+enum Orientation { ORIENT_NORTH, ORIENT_SOUTH, ORIENT_EAST, ORIENT_WEST, INVALID };
+
 class Pin {
+public:
+        enum Type {
+                   SINK,
+                   SOURCE,
+                   OTHER
+        };
+
 private:
         std::string _name;
         Coordinate _position;
         std::vector<int> _layers;
+        Orientation _orientation;
         std::map<int, std::vector<Box>> _boxesPerLayer;
         std::string _netName;
         bool _isPort;
+        Type _type;
+        bool _connectedToPad;
         
         void sortLayers() { std::sort(_layers.begin(), _layers.end()); }
         
 public:
         Pin() = default;
         Pin(const std::string& name, const Coordinate& position,
-            const std::vector<int>& layers,
+            const std::vector<int>& layers, const Orientation orientation,
             const std::map<int, std::vector<Box>>& boxesPerLayer,
-            const std::string& netName, bool isPort)
-            : _name(name), _position(position), _layers(layers),
+            const std::string& netName, bool isPort, bool connectedToPad, Type type)
+            : _name(name), _position(position), _layers(layers), _orientation(orientation),
             _boxesPerLayer(boxesPerLayer), _netName(netName),
-            _isPort(isPort) { sortLayers(); }
+            _isPort(isPort), _connectedToPad(connectedToPad),
+            _type(type)  { sortLayers(); }
         
         const std::string& getName() const { return _name; }
         const Coordinate& getPosition() const { return _position; }
         const std::vector<int>& getLayers() const { return _layers; }
         int getNumLayers() const { return _layers.size(); }
         int getTopLayer() const { return _layers.back(); }
+        Orientation getOrientation() const { return _orientation; }
+        void setOrientation(Orientation orientation) { _orientation = orientation; }
         const std::map<int, std::vector<Box>>& getBoxes() const { return _boxesPerLayer; }
         const std::string& getNetName() const { return _netName; }
         bool isPort() const { return _isPort; }
+        Type getType() const { return _type; }
+        bool isConnectedToPad() const { return _connectedToPad; }
 };
 
 }

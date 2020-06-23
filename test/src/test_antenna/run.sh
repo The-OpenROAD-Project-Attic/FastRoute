@@ -46,19 +46,12 @@ fi
 binary=$1
 testdir=$2
 
-$binary -no_init run.tcl > log.txt 2>&1
+$binary -no_init run.tcl > test.log 2>&1
 
-diff golden.guide out.guide > guides_diff.log
-status=$?
-
-mkdir -p ../../results/test_guides
-cp log.txt ../../results/test_guides/fastroute.log
-cp guides_diff.log ../../results/test_guides/
-
-if [ $status -eq 0 ]
+if grep -q -e "#Modified segments: 62" ./test.log;
 then
 	exit $GREEN
 else
-        echo "     - [ERROR] Test failed. Check $testdir/src/test_guides/guides_diff.log"
+        echo "     - [ERROR] Test failed. Check $testdir/src/test_wl/test.log and Check $testdir/src/test_wl/golden.wl"
 	exit $RED
 fi

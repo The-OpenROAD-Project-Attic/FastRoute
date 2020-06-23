@@ -686,6 +686,26 @@ void FT::setNumAdjustments(int nAdjustments)
   numAdjust = nAdjustments;
 }
 
+int FT::getEdgeCurrentResource(long x1, long y1, int l1, long x2, long y2, int l2) {
+	int grid, k;
+	int resource;
+
+	k = l1 - 1;
+	if (y1 == y2) {
+		grid = y1*(xGrid - 1) + x1 + k * (xGrid - 1) * yGrid;
+		resource = h_edges3D[grid].cap - h_edges3D[grid].usage;
+	} else if (x1 == x2) {
+		grid = y1 * xGrid + x1 + k * xGrid * (yGrid - 1);
+		resource = v_edges3D[grid].cap - v_edges3D[grid].usage;
+	}
+
+	return resource;
+}
+
+void FT::setMaxNetDegree(int deg) {
+        maxNetDegree = deg;
+}
+
 void FT::addAdjustment(long x1,
                        long y1,
                        int  l1,
@@ -774,11 +794,6 @@ int FT::getEdgeCapacity(long x1, long y1, int l1, long x2, long y2, int l2)
   }
 
   return cap;
-}
-
-void FT::setMaxNetDegree(int deg)
-{
-  maxNetDegree = deg;
 }
 
 void FT::initAuxVar()
@@ -1394,6 +1409,9 @@ int FT::run(std::vector<NET>& result)
   std::cout << "Getting results...\n";
   result = getResults();
   std::cout << "Getting results... Done!\n\n";
+
+  delete[] netEO;
+  netEO = nullptr;
 
   /* TODO:  <11-07-19, this function leads to a segfault, but as the OS
    * frees all memory after the application end (next line) we can omit

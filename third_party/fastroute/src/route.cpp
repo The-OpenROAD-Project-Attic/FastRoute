@@ -309,7 +309,6 @@ void routeLAll(Bool firstTime)
 }
 
 // L-route, rip-up the previous route according to the ripuptype
-// L-route, rip-up the previous route according to the ripuptype
 void newrouteL(int netID, RouteType ripuptype, Bool viaGuided)
 {
   int       i, j, d, n1, n2, x1, y1, x2, y2, grid, grid1;

@@ -53,22 +53,24 @@ namespace FastRoute {
 class RoutingTracks {
 private:
         int _layerIndex;
-        DBU _space;
+        DBU _trackPitch;
+        DBU _line2ViaPitch;
         DBU _location;
         int _numTracks;
         bool _orientation;
         
 public:
         RoutingTracks() = default;
-        RoutingTracks(const int layerIndex, const DBU space,
-                      const DBU location, const int numTracks,
-                      const bool orientation)
-            : _layerIndex(layerIndex), _space(space),
-              _location(location), _numTracks(numTracks),
-              _orientation(orientation) {}
+        RoutingTracks(const int layerIndex, const DBU trackPitch,
+                      const DBU line2ViaPitch, const DBU location,
+                      const int numTracks, const bool orientation)
+            : _layerIndex(layerIndex), _trackPitch(trackPitch),
+              _line2ViaPitch(line2ViaPitch), _location(location),
+              _numTracks(numTracks), _orientation(orientation) {}
         
         int getLayerIndex() const { return _layerIndex; }
-        DBU getSpace() const { return _space; }
+        DBU getTrackPitch() const { return _trackPitch; }
+        DBU getLine2ViaPitch() const { return _line2ViaPitch; }
         DBU getLocation() const { return _location; }
         int getNumTracks() const { return _numTracks; }
         bool getOrientation() const { return _orientation; }

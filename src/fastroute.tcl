@@ -47,9 +47,12 @@ sta::define_cmd_args "fastroute" {[-output_file out_file] \
                                            [-alpha alpha] \
                                            [-verbose verbose] \
                                            [-overflow_iterations iterations] \
+                                           [-max_routing_length max_length] \
+                                           [-max_length_per_layer max_length_per_layer] \
                                            [-grid_origin origin] \
                                            [-pdrev_for_high_fanout fanout] \
                                            [-allow_overflow] \
+                                           [-estimateRC] \
                                            [-seed seed] \
                                            [-report_congestion congest_file] \
                                            [-layers_pitches layers_pitches] \
@@ -60,8 +63,8 @@ proc fastroute { args } {
     keys {-output_file -capacity_adjustment -min_routing_layer -max_routing_layer \
           -tile_size -alpha -verbose -layers_adjustments \
           -regions_adjustments -nets_alphas_priorities -overflow_iterations \
-          -grid_origin -pdrev_for_high_fanout -seed -report_congestion -layers_pitches} \
-    flags {-unidirectional_routing -clock_net_routing -allow_overflow} \
+          -grid_origin -pdrev_for_high_fanout -seed -report_congestion -layers_pitches -max_routing_length -max_length_per_layer} \
+    flags {-unidirectional_routing -clock_net_routing -allow_overflow -estimateRC} \
 
   if { [info exists keys(-output_file)] } {
     set out_file $keys(-output_file)
@@ -169,6 +172,22 @@ proc fastroute { args } {
     FastRoute::set_pdrev 0
   }
 
+  if { [info exists keys(-max_routing_length)] } {
+          set max_length $keys(-max_routing_length)
+          FastRoute::set_max_routing_length $max_length
+  }
+
+  if { [info exists keys(-max_length_per_layer)] } {
+    set max_length_per_layer $keys(-max_length_per_layer)
+    foreach length_per_layer $max_length_per_layer {
+      set layer [lindex $length_per_layer 0]
+      set length [lindex $length_per_layer 1]
+
+      puts "Max length in layer $layer:  $length um"
+      FastRoute::add_layer_max_length $layer $length
+    }
+  }
+
   if { [info exists keys(-grid_origin)] } {
     set origin $keys(-grid_origin)
 
@@ -217,15 +236,17 @@ proc fastroute { args } {
   }
 
   for {set layer 1} {$layer <= $max_layer} {set layer [expr $layer+1]} {
-    if { [ord::db_layer_has_hor_tracks $layer] && \
-         [ord::db_layer_has_ver_tracks $layer] } {
-      continue
-    } else {
+    if { !([ord::db_layer_has_hor_tracks $layer] && \
+         [ord::db_layer_has_ver_tracks $layer]) } {
       ord::error "missing track structure"
     }
   }
 
   FastRoute::start_fastroute
-  FastRoute::run_fastroute
-  FastRoute::write_guides
+  if {[info exists flags(-estimateRC)]} {
+    FastRoute::estimate_rc
+  } else {
+    FastRoute::run_fastroute
+    FastRoute::write_guides
+  }
 }

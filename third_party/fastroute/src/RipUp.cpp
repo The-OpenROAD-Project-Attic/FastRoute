@@ -217,10 +217,7 @@ void newRipup(TreeEdge* treeedge,
         xmin = std::min(gridsX[i], gridsX[i + 1]);
         h_edges[gridsY[i] * (xGrid - 1) + xmin].est_usage -= 1;
       } else {
-        printf("MAZE RIPUP WRONG\n");
-        for (j = 0; j < treeedge->route.routelen; j++) {
-          printf("x %d y %d\n", gridsX[j], gridsY[j]);
-        }
+        printf("MAZE RIPUP WRONG in newRipup\n");
         exit(1);
       }
     }
@@ -623,11 +620,8 @@ void newRipupNet(int netID)
             xmin = std::min(gridsX[i], gridsX[i + 1]);
             h_edges[gridsY[i] * (xGrid - 1) + xmin].est_usage -= 1;
           } else {
-            printf("MAZE RIPUP WRONG in newRipupNet\n");
-            for (j = 0; j < treeedge->route.routelen; j++) {
-              printf("x %d y %d\n", gridsX[j], gridsY[j]);
-            }
-            // exit(1);
+            printf("MAZE RIPUP WRONG in newRipupNet for net %s\n", nets[netID]->name);
+            exit(1);
           }
         }
       }

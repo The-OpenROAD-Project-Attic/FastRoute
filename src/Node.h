@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////
-// Authors: Vitor Bandeira, Mateus Fogaça, Eder Matheus Monteiro e Isadora
+// Authors: Vitor Bandeira, Eder Matheus Monteiro e Isadora
 // Oliveira
 //          (Advisor: Ricardo Reis)
 //
@@ -35,61 +35,48 @@
 // POSSIBILITY OF SUCH DAMAGE.
 ////////////////////////////////////////////////////////////////////////////////
 
-
-#ifndef DBWRAPPER_h
-#define DBWRAPPER_h
+#ifndef __NODE_H_
+#define __NODE_H_
 
 #include <string>
-#include "Netlist.h"
-#include "Grid.h"
-#include "RoutingLayer.h"
-#include "RoutingTracks.h"
-
-#include "opendb/db.h"
-#include "opendb/dbShape.h"
-
-// Forward declaration protects FastRoute code from any
-// header file from the DB. FastRoute code keeps independent.
-namespace odb{
-class dbDatabase;
-class dbChip;
-class dbTech;
-}
+#include <vector>
+#include "Coordinate.h"
 
 namespace FastRoute {
 
-class DBWrapper {
-public:        
-        DBWrapper() = default;
-        DBWrapper(Netlist *netlist, Grid *grid) 
-                  : _netlist(netlist),
-                  _grid(grid) {
-        }
-        
-        void initGrid(int maxLayer);
-        void initRoutingLayers(std::vector<RoutingLayer>& routingLayers);
-        void initRoutingTracks(std::vector<RoutingTracks>& allRoutingTracks, int maxLayer, std::map<int, float> layerPitches);
-        void computeCapacities(int maxLayer, std::map<int, float> layerPitches);
-        void computeSpacingsAndMinWidth(int maxLayer);
-        void initNetlist();
-        void initObstacles();
-        int computeMaxRoutingLayer();
-        void getLayerRC(unsigned layerId, float& r, float& c);
-        void getCutLayerRes(unsigned belowLayerId, float& r);
-        float dbuToMeters(unsigned dbu);
-        std::set<int> findTransitionLayers(int maxRoutingLayer);
-        
-        void setDB(unsigned idx) { _db = odb::dbDatabase::getDatabase(idx); }
-        void setSelectedMetal (int metal) { selectedMetal = metal; }
+enum class NodeType {SOURCE, SINK, STEINER, INVALID};
+
+class Node {
 private:
-        int selectedMetal = 3;
-        odb::dbDatabase *_db;
-        odb::dbChip     *_chip;
-        Netlist         *_netlist = nullptr;
-        Grid            *_grid = nullptr;
-        bool            _verbose = false;
+        Coordinate _position;
+        int _layer;
+        NodeType _type;
+
+
+public:
+        Node() : _position(Coordinate(0, 0)), _layer(-1), _type(NodeType::INVALID) {}
+
+        Node(const Coordinate& position, const int layer, const NodeType type)
+            : _position(position), _layer(layer), _type(type) {}
+
+        Node(const DBU x, const DBU y, const int layer, const NodeType type)
+            : _position(Coordinate(x, y)), _layer(layer), _type(type) {}
+
+        bool operator==(const Node& node) const {
+                return (_position == node._position && _layer == node._layer);
+        }
+
+        bool operator!=(const Node& node) const {
+                return (_position != node._position || _layer != node._layer);
+        }
+
+        Coordinate getPosition() const { return _position; }
+        int getLayer() const { return _layer; }
+        NodeType getType() const { return _type; }
+
+	void setType(NodeType type) { _type = type; }
 };
 
 }
 
-#endif
+#endif /* __NODE_H_ */

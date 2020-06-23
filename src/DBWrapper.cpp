@@ -12,8 +12,11 @@
 #include "Coordinate.h"
 #include "Box.h"
 #include "Pin.h"
+#include "openroad/Error.hh"
 
 namespace FastRoute {
+
+using ord::error;
 
 void DBWrapper::initGrid(int maxLayer) {
         // WORKAROUND: Initializing _chip here while we don't have a "populateFastRoute" function"
@@ -21,28 +24,24 @@ void DBWrapper::initGrid(int maxLayer) {
     
         odb::dbTech* tech = _db->getTech();
         if (!tech) {
-                std::cout << "[ERROR] obd::dbTech not initialized! Exiting...\n";
-                std::exit(1);
+                error("obd::dbTech not initialized\n");
         }
 
         odb::dbBlock* block = _chip->getBlock();
         if (!block) {
-                std::cout << "[ERROR] odb::dbBlock not found! Exiting...\n";
-                std::exit(1);
+                error("odb::dbBlock not found\n");
         }
         
         odb::dbTechLayer* selectedLayer = tech->findRoutingLayer(selectedMetal);
         
         if (!selectedLayer) {
-                std::cout << "[ERROR] Layer " << selectedMetal << " not found! Exiting...\n";
-                std::exit(1);
+                error("Layer %d not found\n", selectedMetal);
         }
         
         odb::dbTrackGrid* selectedTrack = block->findTrackGrid(selectedLayer);
         
         if (!selectedTrack) {
-                std::cout << "[ERROR] Track for layer " << selectedMetal << " not found! Exiting...\n";
-                std::exit(1);
+                error("Track for layer %d not found\n", selectedMetal);
         }
         
         int trackStepX, trackStepY;
@@ -58,8 +57,7 @@ void DBWrapper::initGrid(int maxLayer) {
         } else if (selectedLayer->getDirection().getValue() == odb::dbTechLayerDir::VERTICAL) {
                 trackSpacing = trackStepX;
         } else {
-                std::cout << "[ERROR] Layer " << selectedMetal << " does not have valid direction! Exiting...\n";
-                std::exit(1);
+                error("Layer %d does not have valid direction\n", selectedMetal);
         }
         
         odb::Rect rect;
@@ -104,8 +102,7 @@ void DBWrapper::initRoutingLayers(std::vector<RoutingLayer>& routingLayers) {
         odb::dbTech* tech = _db->getTech();
         
         if (!tech) {
-                std::cout << "[ERROR] obd::dbTech not initialized! Exiting...\n";
-                std::exit(1);
+                error("obd::dbTech not initialized\n");
         }
         
         for (int l = 1; l <= tech->getRoutingLayerCount(); l++) {
@@ -118,8 +115,7 @@ void DBWrapper::initRoutingLayers(std::vector<RoutingLayer>& routingLayers) {
                 } else if (techLayer->getDirection().getValue() == odb::dbTechLayerDir::VERTICAL) {
                         preferredDirection = RoutingLayer::VERTICAL;
                 } else {
-                        std::cout << "[ERROR] Layer 1 does not have valid direction! Exiting...\n";
-                        std::exit(1);
+                        error("Layer %d does not have valid direction\n", l);
                 }
                 
                 RoutingLayer routingLayer = RoutingLayer(index, name, preferredDirection);
@@ -130,14 +126,12 @@ void DBWrapper::initRoutingLayers(std::vector<RoutingLayer>& routingLayers) {
 void DBWrapper::initRoutingTracks(std::vector<RoutingTracks>& allRoutingTracks, int maxLayer, std::map<int, float> layerPitches) {
         odb::dbTech* tech = _db->getTech();
         if (!tech) {
-                std::cout << "[ERROR] obd::dbTech not initialized! Exiting...\n";
-                std::exit(1);
+                error("obd::dbTech not initialized\n");
         }
 
         odb::dbBlock* block = _chip->getBlock();
         if (!block) {
-                std::cout << "[ERROR] odb::dbBlock not found! Exiting...\n";
-                std::exit(1);
+                error("odb::dbBlock not found\n");
         }
         
         for (int layer = 1; layer <= tech->getRoutingLayerCount(); layer++) {
@@ -148,52 +142,51 @@ void DBWrapper::initRoutingTracks(std::vector<RoutingTracks>& allRoutingTracks, 
                 odb::dbTechLayer* techayer = tech->findRoutingLayer(layer);
         
                 if (!techayer) {
-                        std::cout << "[ERROR] Layer" << selectedMetal << " not found! Exiting...\n";
-                        std::exit(1);
+                        error("Layer %d not found\n", selectedMetal);
                 }
 
                 odb::dbTrackGrid* selectedTrack = block->findTrackGrid(techayer);
 
                 if (!selectedTrack) {
-                        std::cout << "[ERROR] Track for layer " << selectedMetal << " not found! Exiting...\n";
-                        std::exit(1);
+                        error("Track for layer %d not found\n", selectedMetal);
                 }
                 
                 int trackStepX, trackStepY;
                 int initTrackX, numTracksX;
                 int initTrackY, numTracksY;
-                int spacing, location, numTracks;
+                int trackPitch, line2ViaPitch, location, numTracks;
                 bool orientation;
 
                 selectedTrack->getGridPatternX(0, initTrackX, numTracksX, trackStepX);
                 selectedTrack->getGridPatternY(0, initTrackY, numTracksY, trackStepY);
 
                 if (techayer->getDirection().getValue() == odb::dbTechLayerDir::HORIZONTAL) {
-                        spacing = trackStepY;
+                        trackPitch = trackStepY;
                         if (layerPitches.find(layer) != layerPitches.end()) {
-                                int layerPitch = (int)(tech->getLefUnits()*layerPitches[layer]);
-                                spacing = std::max(layerPitch, trackStepY);
+                                line2ViaPitch = (int)(tech->getLefUnits()*layerPitches[layer]);
+                        } else {
+                                line2ViaPitch = -1;
                         }
                         location = initTrackY;
                         numTracks = numTracksY;
                         orientation = RoutingLayer::HORIZONTAL;
                 } else if (techayer->getDirection().getValue() == odb::dbTechLayerDir::VERTICAL) {
-                        spacing = trackStepX;
+                        trackPitch = trackStepX;
                         if (layerPitches.find(layer) != layerPitches.end()) {
-                                int layerPitch = (int)(tech->getLefUnits()*layerPitches[layer]);
-                                spacing = std::max(layerPitch, trackStepX);
+                                line2ViaPitch = (int)(tech->getLefUnits()*layerPitches[layer]);
+                        } else {
+                                line2ViaPitch = -1;
                         }
                         location = initTrackX;
                         numTracks = numTracksX;
                         orientation = RoutingLayer::VERTICAL;
                 } else {
-                        std::cout << "[ERROR] Layer " << selectedMetal << " does not have valid direction! Exiting...\n";
-                        std::exit(1);
+                        error("Layer %d does not have valid direction! Exiting...\n", selectedMetal);
                 }
                 
-                RoutingTracks routingTracks = RoutingTracks(layer, spacing,
-                                                           location, numTracks,
-                                                           orientation);
+                RoutingTracks routingTracks = RoutingTracks(layer, trackPitch,
+                                                           line2ViaPitch, location,
+                                                           numTracks, orientation);
                 allRoutingTracks.push_back(routingTracks);
         }
 }
@@ -209,14 +202,12 @@ void DBWrapper::computeCapacities(int maxLayer, std::map<int, float> layerPitche
         odb::dbTech* tech = _db->getTech();
         
         if (!tech) {
-                std::cout << "[ERROR] obd::dbTech not initialized! Exiting...\n";
-                std::exit(1);
+                error("obd::dbTech not initialized\n");
         }
         
         odb::dbBlock* block = _chip->getBlock();
         if (!block) {
-                std::cout << "[ERROR] odb::dbBlock not found! Exiting...\n";
-                std::exit(1);
+                error("odb::dbBlock not found\n");
         }
         
         for (int l = 1; l <= tech->getRoutingLayerCount(); l++) {
@@ -229,8 +220,7 @@ void DBWrapper::computeCapacities(int maxLayer, std::map<int, float> layerPitche
                 odb::dbTrackGrid* track = block->findTrackGrid(techLayer);
                 
                 if (!track) {
-                        std::cout << "[ERROR] Track for layer " << l << " not found! Exiting...\n";
-                        std::exit(1);
+                        error("Track for layer %d not found\n", l);
                 }
                 
                 track->getGridPatternX(0, initTrackX, numTracksX, trackStepX);
@@ -261,8 +251,7 @@ void DBWrapper::computeCapacities(int maxLayer, std::map<int, float> layerPitche
                         _grid->addHorizontalCapacity(0, l-1);
                         _grid->addVerticalCapacity(vCapacity, l-1);
                 } else {
-                        std::cout << "[ERROR] Layer " << l << " does not have valid direction! Exiting...\n";
-                        std::exit(1);
+                        error("Layer %d does not have valid direction\n", l);
                 }
         }
 }
@@ -277,14 +266,12 @@ void DBWrapper::computeSpacingsAndMinWidth(int maxLayer) {
         odb::dbTech* tech = _db->getTech();
         
         if (!tech) {
-                std::cout << "[ERROR] obd::dbTech not initialized! Exiting...\n";
-                std::exit(1);
+                error("obd::dbTech not initialized\n");
         }
         
         odb::dbBlock* block = _chip->getBlock();
         if (!block) {
-                std::cout << "[ERROR] odb::dbBlock not found! Exiting...\n";
-                std::exit(1);
+                error("odb::dbBlock not found\n");
         }
         
         for (int l = 1; l <= tech->getRoutingLayerCount(); l++) {
@@ -297,8 +284,7 @@ void DBWrapper::computeSpacingsAndMinWidth(int maxLayer) {
                 odb::dbTrackGrid* track = block->findTrackGrid(techLayer);
                 
                 if (!track) {
-                        std::cout << "[ERROR] Track for layer " << l << " not found! Exiting...\n";
-                        std::exit(1);
+                        error("Track for layer %d not found\n", l);
                 }
                 
                 track->getGridPatternX(0, initTrackX, numTracksX, trackStepX);
@@ -309,8 +295,7 @@ void DBWrapper::computeSpacingsAndMinWidth(int maxLayer) {
                 } else if (techLayer->getDirection().getValue() == odb::dbTechLayerDir::VERTICAL) {
                         minWidth = trackStepX;
                 } else {
-                        std::cout << "[ERROR] Layer " << l << " does not have valid direction! Exiting...\n";
-                        std::exit(1);
+                        error("Layer %d does not have valid direction\n", l);
                 }
                 
                 _grid->addSpacing(minSpacing, l-1);
@@ -323,16 +308,15 @@ void DBWrapper::initNetlist() {
                     _grid->getUpperRightX(), _grid->getUpperRightY(), -1);
         
         odb::dbBlock* block = _chip->getBlock();
+        odb::dbTech* tech = _db->getTech();
         if (!block) {
-                std::cout << "[ERROR] ads::dbBlock not found! Exiting...\n";
-                std::exit(1);
+                error("odb::dbBlock not found\n");
         }
         
         odb::dbSet<odb::dbNet> nets = block->getNets();
         
         if (nets.size() == 0) {
-                std::cout << "[ERROR] Design without nets. Exiting...\n";
-                std::exit(1);
+                error("Design without nets");
         }
         
         for (odb::dbNet* currNet : nets) {
@@ -359,22 +343,38 @@ void DBWrapper::initNetlist() {
                             master->getType() == odb::dbMasterType::COVER_BUMP) {
                                 std::cout << "[WARNING] Net connected with instance of class COVER added for routing\n";
                         }
+
+                        bool connectedToPad = master->getType().isPad();
+                        bool connectedToMacro = master->isBlock();
                         
                         std::string instName = currITerm->getInst()->getConstName();
                         pinName = mTerm->getConstName();
-                        pinName = instName + ":" + pinName;
+                        pinName = instName + "/" + pinName;
+
+                        Pin::Type type(Pin::Type::OTHER);
+                        if (mTerm->getIoType() == odb::dbIoType::INPUT) {
+                                type = Pin::SINK;
+                        } else if (mTerm->getIoType() == odb::dbIoType::OUTPUT) {
+                                type = Pin::SOURCE;
+                        }
                         
                         odb::dbInst* inst = currITerm->getInst();
                         inst->getOrigin(pX, pY);
                         odb::Point origin = odb::Point(pX, pY);
                         odb::dbTransform transform(inst->getOrient(), origin);
+
+                        odb::dbBox* instBox = inst->getBBox();
+                        Coordinate instMiddle = Coordinate((instBox->xMin() + (instBox->xMax() - instBox->xMin()) / 2.0),
+                                                           (instBox->yMin() + (instBox->yMax() - instBox->yMin()) / 2.0));
                         
                         for (odb::dbMPin* currMTermPin : mTerm->getMPins()) {
                                 Coordinate lowerBound;
                                 Coordinate upperBound;
                                 Box pinBox;
                                 int pinLayer;
-                                
+                                int lastLayer = -1;
+                                Coordinate pinPos;
+
                                 for (odb::dbBox* box : currMTermPin->getGeometry()) {
                                         odb::Rect rect;
                                         box->getBox(rect);
@@ -395,14 +395,38 @@ void DBWrapper::initNetlist() {
                                                 std::cout << "[WARNING] Pin " << pinName << " is outside die area\n";
                                         }
                                         pinBoxes[pinLayer].push_back(pinBox);
+                                        if (pinLayer > lastLayer) {
+                                                pinPos = lowerBound;
+                                        }
                                 }
                                 
                                 for (auto& layer_boxes : pinBoxes) {
                                         pinLayers.push_back(layer_boxes.first);
                                 }
-                                
-                                Coordinate pinPos = Coordinate(pX, pY);
-                                Pin pin = Pin(pinName, pinPos, pinLayers, pinBoxes, netName, false);
+
+                                Pin pin = Pin(pinName, pinPos, pinLayers, Orientation::INVALID, pinBoxes, netName, false, (connectedToPad || connectedToMacro), type);
+
+                                if (connectedToPad || connectedToMacro) {
+                                        Coordinate pinPosition = pin.getPosition();
+                                        odb::dbTechLayer* techLayer = tech->findRoutingLayer(pin.getTopLayer());
+                                        
+                                        if (techLayer->getDirection().getValue() == odb::dbTechLayerDir::HORIZONTAL) {
+                                                DBU instToPin = pinPosition.getX() - instMiddle.getX();
+                                                if (instToPin < 0) {
+                                                        pin.setOrientation(Orientation::ORIENT_EAST);
+                                                } else {
+                                                        pin.setOrientation(Orientation::ORIENT_WEST);
+                                                }
+                                        } else if (techLayer->getDirection().getValue() == odb::dbTechLayerDir::VERTICAL) {
+                                                DBU instToPin = pinPosition.getY() - instMiddle.getY();
+                                                if (instToPin < 0) {
+                                                        pin.setOrientation(Orientation::ORIENT_NORTH);
+                                                } else {
+                                                        pin.setOrientation(Orientation::ORIENT_SOUTH);
+                                                }
+                                        }
+                                }
+
                                 netPins.push_back(pin);
                         }
                 }
@@ -412,17 +436,46 @@ void DBWrapper::initNetlist() {
                         std::string pinName;
                         
                         currBTerm->getFirstPinLocation(posX, posY);
+                        odb::dbITerm* iTerm = currBTerm->getITerm();
+                        odb::dbMTerm* mTerm;
+                        odb::dbMaster* master;
+                        bool connectedToPad = false;
+                        bool connectedToMacro = false;
+                        odb::dbInst* inst;
+                        odb::dbBox* instBox;
+                        Coordinate instMiddle = Coordinate(-1, -1);
+
+                        if (iTerm != nullptr) {
+                                mTerm = iTerm->getMTerm();
+                                master = mTerm->getMaster();
+                                connectedToPad = master->getType().isPad();
+                                connectedToMacro = master->isBlock();
+
+                                inst = iTerm->getInst();
+                                instBox = inst->getBBox();
+                                instMiddle = Coordinate((instBox->xMin() + (instBox->xMax() - instBox->xMin()) / 2.0),
+                                                        (instBox->yMin() + (instBox->yMax() - instBox->yMin()) / 2.0));
+                        }
                         
                         std::vector<int> pinLayers;
                         std::map<int, std::vector<Box>> pinBoxes;
                                                 
                         pinName = currBTerm->getConstName();
-                        
+                        Coordinate pinPos;
+
+                        Pin::Type type(Pin::Type::OTHER);
+                        if (currBTerm->getIoType() == odb::dbIoType::INPUT) {
+                                type = Pin::SOURCE;
+                        } else if (currBTerm->getIoType() == odb::dbIoType::OUTPUT) {
+                                type = Pin::SINK;
+                        }
+
                         for (odb::dbBPin* currBTermPin : currBTerm->getBPins()) {
                                 Coordinate lowerBound;
                                 Coordinate upperBound;
                                 Box pinBox;
                                 int pinLayer;
+                                int lastLayer = -1;
                                 
                                 odb::dbBox* currBTermBox = currBTermPin->getBox();
                                 odb::dbTechLayer* techLayer = currBTermBox->getTechLayer();
@@ -440,14 +493,39 @@ void DBWrapper::initNetlist() {
                                         std::cout << "[WARNING] Pin " << pinName << " is outside die area\n";
                                 }
                                 pinBoxes[pinLayer].push_back(pinBox);
+
+                                if (pinLayer > lastLayer) {
+                                        pinPos = lowerBound;
+                                }
                         }
                         
                         for (auto& layer_boxes : pinBoxes) {
                                 pinLayers.push_back(layer_boxes.first);
                         }
                         
-                        Coordinate pinPos = Coordinate(posX, posY);
-                        Pin pin = Pin(pinName, pinPos, pinLayers, pinBoxes, netName, true);
+                        Pin pin = Pin(pinName, pinPos, pinLayers, Orientation::INVALID, pinBoxes, netName, true, (connectedToPad || connectedToMacro), type);
+
+                        if (connectedToPad) {
+                                Coordinate pinPosition = pin.getPosition();
+                                odb::dbTechLayer* techLayer = tech->findRoutingLayer(pin.getTopLayer());
+                                
+                                if (techLayer->getDirection().getValue() == odb::dbTechLayerDir::HORIZONTAL) {
+                                        DBU instToPin = pinPosition.getX() - instMiddle.getX();
+                                        if (instToPin < 0) {
+                                                pin.setOrientation(Orientation::ORIENT_EAST);
+                                        } else {
+                                                pin.setOrientation(Orientation::ORIENT_WEST);
+                                        }
+                                } else if (techLayer->getDirection().getValue() == odb::dbTechLayerDir::VERTICAL) {
+                                        DBU instToPin = pinPosition.getY() - instMiddle.getY();
+                                        if (instToPin < 0) {
+                                                pin.setOrientation(Orientation::ORIENT_NORTH);
+                                        } else {
+                                                pin.setOrientation(Orientation::ORIENT_SOUTH);
+                                        }
+                                }
+                        }
+
                         netPins.push_back(pin);
                 }
                 _netlist->addNet(netName, signalType, netPins);
@@ -461,14 +539,58 @@ void DBWrapper::initObstacles() {
         // Get routing obstructions
         odb::dbTech* tech = _db->getTech();
         if (!tech) {
-                std::cout << "[ERROR] obd::dbTech not initialized! Exiting...\n";
-                std::exit(1);
+                error("obd::dbTech not initialized");
         }
 
         odb::dbBlock* block = _chip->getBlock();
         if (!block) {
-                std::cout << "[ERROR] odb::dbBlock not found! Exiting...\n";
-                std::exit(1);
+                error("odb::dbBlock not found\n");
+        }
+
+        std::map<std::string, uint> layerExtensions;
+
+        for (odb::dbTechLayer* obstructLayer : tech->getLayers()) {
+
+                if (obstructLayer->getType().getValue() != odb::dbTechLayerType::ROUTING){
+                        continue;
+                }
+
+                int maxInt = std::numeric_limits<int>::max();
+
+                //Gets the smallest possible minimum spacing that won't cause violations for ANY configuration of PARALLELRUNLENGTH (the biggest value in the table)
+                
+                uint macroExtension = obstructLayer->getSpacing(maxInt,maxInt);
+
+                odb::dbSet<odb::dbTechLayerSpacingRule> eolRules;
+
+                //Check for EOL spacing values and, if the spacing is higher than the one found, use them as the macro extension instead of PARALLELRUNLENGTH
+
+                if (obstructLayer->getV54SpacingRules(eolRules)){
+                        for (odb::dbTechLayerSpacingRule* currentRule : eolRules){
+                                uint currentSpacing = currentRule->getSpacing();
+                                if (currentSpacing > macroExtension){
+                                        macroExtension = currentSpacing;
+                                }
+                        }
+                }
+
+                //Check for TWOWIDTHS table values and, if the spacing is higher than the one found, use them as the macro extension instead of PARALLELRUNLENGTH
+
+                if(obstructLayer->hasTwoWidthsSpacingRules()){
+                        std::vector<std::vector<uint>> spacingTable;
+                        obstructLayer->getTwoWidthsSpacingTable(spacingTable);
+                        if (!spacingTable.empty()){
+                                std::vector<uint> lastRow = spacingTable.back();
+                                uint lastValue = lastRow.back();
+                                if (lastValue > macroExtension){
+                                        macroExtension = lastValue;
+                                }
+                        }
+                }
+                
+                //Save the extension to use when defining Macros
+
+                layerExtensions[obstructLayer->getName()] = macroExtension;
         }
 
         int obstructionsCnt = 0;
@@ -497,18 +619,16 @@ void DBWrapper::initObstacles() {
                 int pX, pY;
 
                 odb::dbMaster* master = currInst->getMaster();
-
-                if (master->getType().isPad()) {
-                        continue;
-                }
                 
                 currInst->getOrigin(pX, pY);
                 odb::Point origin = odb::Point(pX, pY);
                 
                 odb::dbTransform transform(currInst->getOrient(), origin);
-                
+
+                bool isMacro = false;
                 if (master->isBlock()) {
                         macrosCnt++;
+                        isMacro = true;
                 }
                 
                 for (odb::dbBox* currBox : master->getObstructions()) {
@@ -518,8 +638,14 @@ void DBWrapper::initObstacles() {
                         currBox->getBox(rect);
                         transform.apply(rect);
 
-                        Coordinate lowerBound = Coordinate(rect.xMin(), rect.yMin());
-                        Coordinate upperBound = Coordinate(rect.xMax(), rect.yMax());
+                        uint macroExtension = 0;
+
+                        if (isMacro){
+                                macroExtension = layerExtensions[currBox->getTechLayer()->getName()];
+                        }
+
+                        Coordinate lowerBound = Coordinate(rect.xMin() - macroExtension, rect.yMin() - macroExtension);
+                        Coordinate upperBound = Coordinate(rect.xMax() + macroExtension, rect.yMax() + macroExtension);
                         Box obstacleBox = Box(lowerBound, upperBound, layer);
                         if (!dieArea.inside(obstacleBox)) {
                                 std::cout << "[WARNING] Found obstacle outside die area in instance " << currInst->getConstName() << "\n";
@@ -567,8 +693,7 @@ void DBWrapper::initObstacles() {
         odb::dbSet<odb::dbNet> nets = block->getNets();
         
         if (nets.size() == 0) {
-                std::cout << "[ERROR] Design without nets. Exiting...\n";
-                std::exit(1);
+                error("Design without nets\n");
         }
         
         for (odb::dbNet* currNet : nets) {
@@ -636,23 +761,21 @@ int DBWrapper::computeMaxRoutingLayer() {
 
         odb::dbTech* tech = _db->getTech();
         if (!tech) {
-                std::cout << "[ERROR] obd::dbTech not initialized! Exiting...\n";
-                std::exit(1);
+                error("obd::dbTech not initialized\n");
         }
 
         odb::dbBlock* block = _chip->getBlock();
         if (!block) {
-                std::cout << "[ERROR] odb::dbBlock not found! Exiting...\n";
-                std::exit(1);
+                error("odb::dbBlock not found\n");
         }
         
         for (int layer = 1; layer <= tech->getRoutingLayerCount(); layer++) {          
-                odb::dbTechLayer* techayer = tech->findRoutingLayer(layer);
-                if (!techayer) {
+                odb::dbTechLayer* techLayer = tech->findRoutingLayer(layer);
+                if (!techLayer) {
                         std::cout << "[ERROR] Layer" << selectedMetal << " not found! Exiting...\n";
                         std::exit(1);
                 }
-                odb::dbTrackGrid* selectedTrack = block->findTrackGrid(techayer);
+                odb::dbTrackGrid* selectedTrack = block->findTrackGrid(techLayer);
                 if (!selectedTrack) {
                     break;
                 }
@@ -662,14 +785,40 @@ int DBWrapper::computeMaxRoutingLayer() {
         return maxRoutingLayer;
 }
 
+void DBWrapper::getCutLayerRes(unsigned belowLayerId, float& r) {
+        odb::dbBlock* block = _chip->getBlock();
+        odb::dbTech* tech = _db->getTech();
+        odb::dbTechLayer* cut = tech->findRoutingLayer(belowLayerId)->getUpperLayer();
+        r = cut->getResistance(); // assumes single cut
+}
+
+void DBWrapper::getLayerRC(unsigned layerId, float& r, float& c) {
+        odb::dbBlock* block = _chip->getBlock();
+        odb::dbTech* tech = _db->getTech();
+        odb::dbTechLayer* techLayer = tech->findRoutingLayer(layerId);
+
+        float layerWidth = (float) techLayer->getWidth() /
+                            block->getDbUnitsPerMicron();
+        float resOhmPerMicron =  techLayer->getResistance() / layerWidth;
+        float capPfPerMicron = layerWidth * techLayer->getCapacitance()
+                               + 2 * techLayer->getEdgeCapacitance();
+
+        r = 1E+6 * resOhmPerMicron; // Meters
+        c = 1E+6 * 1E-12 * capPfPerMicron; // F/m
+}
+
+float DBWrapper::dbuToMeters(unsigned dbu) {
+        odb::dbBlock* block = _chip->getBlock();
+        return (float) dbu / (block->getDbUnitsPerMicron() * 1E+6);
+}
+
 std::set<int> DBWrapper::findTransitionLayers(int maxRoutingLayer) {
         std::set<int> transitionLayers;
         odb::dbTech* tech = _db->getTech();
         odb::dbSet<odb::dbTechVia> vias = tech->getVias();
         
         if (vias.size() == 0) {
-                std::cout << "[ERROR] Tech without vias. Exiting...\n";
-                std::exit(1);
+                error("Tech without vias\n");
         }
         
         std::vector<odb::dbTechVia*> defaultVias;
@@ -677,7 +826,7 @@ std::set<int> DBWrapper::findTransitionLayers(int maxRoutingLayer) {
         for (odb::dbTechVia* currVia : vias) {
                 odb::dbStringProperty* prop = odb::dbStringProperty::find(currVia, "OR_DEFAULT");
                 
-                if (prop == NULL) {
+                if (prop == nullptr) {
                         continue;
                 } else {
                         std::cout << "[INFO] Default via: " << currVia->getConstName() << "\n";

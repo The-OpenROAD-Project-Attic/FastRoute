@@ -46,7 +46,7 @@ fi
 binary=$1
 testdir=$2
 
-$binary -no_init < run.tcl > test.log 2>&1
+$binary -no_init run.tcl > test.log 2>&1
 
 gold_wl=$(grep -Eo "[0-9]+\.[0-9]+" golden.wl)
 reported_wl=$(grep -Eo "[0-9]+\.[0-9]+" test.log | tail -2 | head -1)
