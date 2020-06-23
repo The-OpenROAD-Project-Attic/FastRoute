@@ -769,7 +769,7 @@ void FT::addAdjustment(long x1,
     grid = y1 * xGrid + x1;
     if (!isReduce) {
       int increase = reducedCap - cap;
-      h_edges[grid].cap += increase;
+      v_edges[grid].cap += increase;
     }
 
     v_edges[grid].cap -= reduce;
