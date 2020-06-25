@@ -47,6 +47,7 @@
 
 #include "opendb/db.h"
 #include "opendb/dbShape.h"
+#include "include/FastRoute.h"
 
 // Forward declaration protects FastRoute code from any
 // header file from the DB. FastRoute code keeps independent.
@@ -78,6 +79,8 @@ public:
         void getCutLayerRes(unsigned belowLayerId, float& r);
         float dbuToMeters(unsigned dbu);
         std::set<int> findTransitionLayers(int maxRoutingLayer);
+        std::map<int, odb::dbTechVia*> getDefaultVias(int maxRoutingLayer);
+        void commitGlobalSegmentsToDB(std::vector<FastRoute::NET> routing, int maxRoutingLayer);
         
         void setDB(unsigned idx) { _db = odb::dbDatabase::getDatabase(idx); }
         void setSelectedMetal (int metal) { selectedMetal = metal; }

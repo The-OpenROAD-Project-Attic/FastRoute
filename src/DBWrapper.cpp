@@ -13,6 +13,7 @@
 #include "Box.h"
 #include "Pin.h"
 #include "openroad/Error.hh"
+#include "include/FastRoute.h"
 
 namespace FastRoute {
 
@@ -878,6 +879,96 @@ std::set<int> DBWrapper::findTransitionLayers(int maxRoutingLayer) {
         }
 
         return transitionLayers;
+}
+
+std::map<int, odb::dbTechVia*> DBWrapper::getDefaultVias(int maxRoutingLayer) {
+        odb::dbTech* tech = _db->getTech();
+        odb::dbSet<odb::dbTechVia> vias = tech->getVias();
+        std::map<int, odb::dbTechVia*> defaultVias;
+
+        for (odb::dbTechVia* currVia : vias) {
+                odb::dbStringProperty* prop = odb::dbStringProperty::find(currVia, "OR_DEFAULT");
+                
+                if (prop == nullptr) {
+                        continue;
+                } else {
+                        std::cout << "[INFO] Default via: " << currVia->getConstName() << "\n";
+                        defaultVias[currVia->getBottomLayer()->getRoutingLevel()] = currVia;
+                }
+        }
+
+        if (defaultVias.size() == 0) {
+                std::cout << "[WARNING]No OR_DEFAULT vias defined\n";
+                for (int i = 1; i <= maxRoutingLayer; i++) {
+                        for (odb::dbTechVia* currVia : vias) {
+                                if (currVia->getBottomLayer()->getRoutingLevel() == i) {
+                                        defaultVias[i] = currVia;
+                                        break;
+                                }
+                        }
+                }
+        }
+
+        return defaultVias;
+}
+
+void DBWrapper::commitGlobalSegmentsToDB(std::vector<FastRoute::NET> routing, int maxRoutingLayer) {
+        odb::dbTech* tech = _db->getTech();
+        if (!tech) {
+                error("obd::dbTech not initialized\n");
+        }
+
+        odb::dbBlock* block = _chip->getBlock();
+        if (!block) {
+                error("odb::dbBlock not found\n");
+        }
+
+        std::map<int, odb::dbTechVia*> defaultVias = getDefaultVias(maxRoutingLayer);
+
+        std::map<std::string, odb::dbNet*> dbNets;
+        odb::dbSet<odb::dbNet> nets = block->getNets();
+
+        for (odb::dbNet* currNet : nets) {
+                std::string netName = currNet->getConstName();
+                
+                if (currNet->getSigType().getValue() == odb::dbSigType::POWER ||
+                    currNet->getSigType().getValue() == odb::dbSigType::GROUND ||
+                    currNet->isSpecial() || currNet->getSWires().size() > 0) {
+                        continue;
+                }
+
+                dbNets[netName] = currNet;
+        }
+
+        for (FastRoute::NET netRoute : routing) {
+                std::string netName = netRoute.name;
+
+                odb::dbWire* wire = odb::dbWire::create(dbNets[netName]);
+                odb::dbWireEncoder wireEncoder;
+                wireEncoder.begin(wire);
+                odb::dbWireType wireType = odb::dbWireType::ROUTED;
+
+                for (FastRoute::ROUTE seg : netRoute.route) {
+                        if (std::abs(seg.initLayer - seg.finalLayer) > 1) {
+                                error("Global route segment not valid\n");
+                        }
+                        int x1 = seg.initX;
+                        int y1 = seg.initY;
+                        int x2 = seg.finalX;
+                        int y2 = seg.finalY;
+
+                        odb::dbTechLayer* currLayer = tech->findRoutingLayer(seg.initLayer);
+
+                        if (seg.initLayer == seg.finalLayer) {
+                                if (x1 == x2 && y1 == y2)
+                                        continue;
+                                wireEncoder.newPath(currLayer, wireType);
+                                wireEncoder.addPoint(x1, y1);
+                                wireEncoder.addPoint(x2, y2);
+                        }
+                }
+                wireEncoder.end();
+        }
 }
 
 }

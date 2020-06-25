@@ -341,12 +341,12 @@ void FastRouteKernel::runFastRoute() {
         _fastRoute->run(*_result);
         std::cout << "Running FastRoute... Done!\n";
         
-        std::cout << " > Fixing long segments...\n";
+        std::cout << "Fixing long segments...\n";
         if (_maxLengthDBU == -1) {
                         std::cout << "[WARNING] Max routing length not defined. Skipping...\n";
             } else {
                     fixLongSegments();
-                    std::cout << " > Fixing long segments... Done!\n";
+                    std::cout << "Fixing long segments... Done!\n";
             }
         computeWirelength();
 
@@ -1173,7 +1173,7 @@ void FastRouteKernel::writeGuides() {
         std::cout << "[INFO] Num routed nets: " << _result->size() << "\n";
         int finalLayer;
 
-        for (FastRoute::NET netRoute : *_result) {
+        for (FastRoute::NET &netRoute : *_result) {
                 mergeSegments(netRoute);
                 guideFile << netRoute.name << "\n";
                 guideFile << "(\n";
@@ -1253,6 +1253,7 @@ void FastRouteKernel::writeGuides() {
 
         guideFile.close();
         std::cout << "Writing guides... Done!\n";
+        _dbWrapper->commitGlobalSegmentsToDB(*_result, _maxRoutingLayer);
 }
 
 void FastRouteKernel::printGrid() {
