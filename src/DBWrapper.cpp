@@ -940,6 +940,10 @@ void DBWrapper::commitGlobalSegmentsToDB(std::vector<FastRoute::NET> routing, in
                 dbNets[netName] = currNet;
         }
 
+        // for (int l = 1; l <= maxRoutingLayer; l++) {
+        //         std::cout << "Via " << defaultVias[l]->getConstName() << "\n";
+        // }
+
         for (FastRoute::NET netRoute : routing) {
                 std::string netName = netRoute.name;
 
@@ -956,15 +960,22 @@ void DBWrapper::commitGlobalSegmentsToDB(std::vector<FastRoute::NET> routing, in
                         int y1 = seg.initY;
                         int x2 = seg.finalX;
                         int y2 = seg.finalY;
+                        int l1 = seg.initLayer;
+                        int l2 = seg.finalLayer;
 
-                        odb::dbTechLayer* currLayer = tech->findRoutingLayer(seg.initLayer);
+                        odb::dbTechLayer* currLayer = tech->findRoutingLayer(l1);
 
-                        if (seg.initLayer == seg.finalLayer) {
+                        if (l1 == l2) { // Add wire
                                 if (x1 == x2 && y1 == y2)
                                         continue;
                                 wireEncoder.newPath(currLayer, wireType);
                                 wireEncoder.addPoint(x1, y1);
                                 wireEncoder.addPoint(x2, y2);
+                        } else { // Add via
+                                int bottomLayer = (l1 < l2) ? l1 : l2;
+                                wireEncoder.newPath(currLayer, wireType);
+                                wireEncoder.addPoint(x1, y1);
+                                wireEncoder.addTechVia(defaultVias[bottomLayer]);
                         }
                 }
                 wireEncoder.end();
