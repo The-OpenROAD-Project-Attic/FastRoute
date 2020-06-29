@@ -350,6 +350,7 @@ void DBWrapper::initNetlist() {
                         std::string instName = currITerm->getInst()->getConstName();
                         pinName = mTerm->getConstName();
                         pinName = instName + "/" + pinName;
+                        Coordinate pinPos;
 
                         Pin::Type type(Pin::Type::OTHER);
                         if (mTerm->getIoType() == odb::dbIoType::INPUT) {
@@ -373,7 +374,6 @@ void DBWrapper::initNetlist() {
                                 Box pinBox;
                                 int pinLayer;
                                 int lastLayer = -1;
-                                Coordinate pinPos;
 
                                 for (odb::dbBox* box : currMTermPin->getGeometry()) {
                                         odb::Rect rect;
@@ -399,36 +399,36 @@ void DBWrapper::initNetlist() {
                                                 pinPos = lowerBound;
                                         }
                                 }
-                                
-                                for (auto& layer_boxes : pinBoxes) {
-                                        pinLayers.push_back(layer_boxes.first);
-                                }
+                        }
 
-                                Pin pin = Pin(pinName, pinPos, pinLayers, Orientation::INVALID, pinBoxes, netName, false, (connectedToPad || connectedToMacro), type);
+                        for (auto& layer_boxes : pinBoxes) {
+                                pinLayers.push_back(layer_boxes.first);
+                        }
 
-                                if (connectedToPad || connectedToMacro) {
-                                        Coordinate pinPosition = pin.getPosition();
-                                        odb::dbTechLayer* techLayer = tech->findRoutingLayer(pin.getTopLayer());
-                                        
-                                        if (techLayer->getDirection().getValue() == odb::dbTechLayerDir::HORIZONTAL) {
-                                                DBU instToPin = pinPosition.getX() - instMiddle.getX();
-                                                if (instToPin < 0) {
-                                                        pin.setOrientation(Orientation::ORIENT_EAST);
-                                                } else {
-                                                        pin.setOrientation(Orientation::ORIENT_WEST);
-                                                }
-                                        } else if (techLayer->getDirection().getValue() == odb::dbTechLayerDir::VERTICAL) {
-                                                DBU instToPin = pinPosition.getY() - instMiddle.getY();
-                                                if (instToPin < 0) {
-                                                        pin.setOrientation(Orientation::ORIENT_NORTH);
-                                                } else {
-                                                        pin.setOrientation(Orientation::ORIENT_SOUTH);
-                                                }
+                        Pin pin = Pin(pinName, pinPos, pinLayers, Orientation::INVALID, pinBoxes, netName, false, (connectedToPad || connectedToMacro), type);
+
+                        if (connectedToPad || connectedToMacro) {
+                                Coordinate pinPosition = pin.getPosition();
+                                odb::dbTechLayer* techLayer = tech->findRoutingLayer(pin.getTopLayer());
+
+                                if (techLayer->getDirection().getValue() == odb::dbTechLayerDir::HORIZONTAL) {
+                                        DBU instToPin = pinPosition.getX() - instMiddle.getX();
+                                        if (instToPin < 0) {
+                                                pin.setOrientation(Orientation::ORIENT_EAST);
+                                        } else {
+                                                pin.setOrientation(Orientation::ORIENT_WEST);
+                                        }
+                                } else if (techLayer->getDirection().getValue() == odb::dbTechLayerDir::VERTICAL) {
+                                        DBU instToPin = pinPosition.getY() - instMiddle.getY();
+                                        if (instToPin < 0) {
+                                                pin.setOrientation(Orientation::ORIENT_NORTH);
+                                        } else {
+                                                pin.setOrientation(Orientation::ORIENT_SOUTH);
                                         }
                                 }
-
-                                netPins.push_back(pin);
                         }
+
+                        netPins.push_back(pin);
                 }
                 
                 for (odb::dbBTerm* currBTerm : currNet->getBTerms()) {
