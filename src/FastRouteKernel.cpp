@@ -545,6 +545,8 @@ void FastRouteKernel::initializeNets() {
                                 }
                         }
 
+                        pin.setOnGridPosition(pinPosition);
+
                         if (pin.isConnectedToPad()) { // If pin is connected to PAD, create a "fake" location in routing grid to avoid PAD obstacles
                                 FastRoute::ROUTE pinConnection;
                                 pinConnection.initLayer = topLayer;
@@ -588,8 +590,6 @@ void FastRouteKernel::initializeNets() {
 
                                 _padPinsConnections[net.getName()].push_back(pinConnection);
                         }
-
-                        pin.setOnGridPosition(pinPosition);
                         
                         FastRoute::PIN grPin;
                         grPin.x = pinPosition.getX();
