@@ -343,17 +343,19 @@ void FastRouteKernel::runFastRoute() {
         
         std::cout << "Fixing long segments...\n";
         if (_maxLengthDBU == -1) {
-                        std::cout << "[WARNING] Max routing length not defined. Skipping...\n";
-            } else {
-                    fixLongSegments();
-                    std::cout << "Fixing long segments... Done!\n";
-            }
+                std::cout << "[WARNING] Max routing length not defined. Skipping...\n";
+        } else {
+                fixLongSegments();
+                std::cout << "Fixing long segments... Done!\n";
+        }
         computeWirelength();
 
         if (_reportCongest) {
                 _fastRoute->writeCongestionReport2D(_congestFile+"2D.log");
                 _fastRoute->writeCongestionReport3D(_congestFile+"3D.log");
         }
+
+        writeGlobalSegments();
         
         std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
         if (_verbose > 0)
@@ -1253,7 +1255,6 @@ void FastRouteKernel::writeGuides() {
 
         guideFile.close();
         std::cout << "Writing guides... Done!\n";
-        _dbWrapper->commitGlobalSegmentsToDB(*_result, _maxRoutingLayer);
 }
 
 void FastRouteKernel::printGrid() {
@@ -2202,6 +2203,87 @@ bool FastRouteKernel::checkSteinerTree(SteinerTree sTree) {
         }
 
         return true;
+}
+
+void FastRouteKernel::addLocalConnections(std::vector<FastRoute::NET> &globalRoute) {
+        for (FastRoute::NET &netRoute : globalRoute) {
+                Net net = _netlist->getNetByName(netRoute.name);
+
+                for (Pin pin : net.getPins()) {
+                        Coordinate pinPosition;
+                        int topLayer = pin.getTopLayer();
+                        RoutingLayer layer = getRoutingLayerByIndex(topLayer);
+
+                        std::vector<Box> pinBoxes = pin.getBoxes().at(topLayer);
+                        std::vector<Coordinate> pinPositionsOnGrid;
+                        Coordinate posOnGrid;
+                        Coordinate trackPos;
+                                
+                        for (Box pinBox : pinBoxes) {
+                                posOnGrid = _grid->getPositionOnGrid(pinBox.getMiddle());
+                                pinPositionsOnGrid.push_back(posOnGrid);
+                        }
+                        
+                        int votes = -1;
+                        
+                        for (Coordinate pos : pinPositionsOnGrid) {
+                                int equals = std::count(pinPositionsOnGrid.begin(),
+                                                        pinPositionsOnGrid.end(),
+                                                        pos);
+                                if (equals > votes) {
+                                        pinPosition = pos;
+                                        votes = equals;
+                                }
+                        }
+
+                        if (pinOverlapsWithSingleTrack(pin, trackPos)) {
+                                posOnGrid = _grid->getPositionOnGrid(trackPos);
+
+                                if (!(posOnGrid == pinPosition)) {
+                                        if ((layer.getPreferredDirection() == RoutingLayer::HORIZONTAL && posOnGrid.getY() != pinPosition.getY()) ||
+                                             (layer.getPreferredDirection() == RoutingLayer::VERTICAL && posOnGrid.getX() != pinPosition.getX())) {
+                                                pinPosition = posOnGrid;
+                                        }
+                                }
+                        }
+
+                        Coordinate realPinPosition = pinBoxes[0].getMiddle();
+                        FastRoute::ROUTE horSegment;
+                        horSegment.initX = realPinPosition.getX();
+                        horSegment.initY = realPinPosition.getY();
+                        horSegment.initLayer = topLayer;
+                        horSegment.finalX = pinPosition.getX();
+                        horSegment.finalY = realPinPosition.getY();
+                        horSegment.finalLayer = topLayer;
+
+                        FastRoute::ROUTE verSegment;
+                        verSegment.initX = pinPosition.getX();
+                        verSegment.initY = realPinPosition.getY();
+                        verSegment.initLayer = topLayer;
+                        verSegment.finalX = pinPosition.getX();
+                        verSegment.finalY = pinPosition.getY();
+                        verSegment.finalLayer = topLayer;
+
+                        netRoute.route.push_back(horSegment);
+                        netRoute.route.push_back(verSegment);
+                }
+        }
+}
+
+void FastRouteKernel::writeGlobalSegments() {
+        std::cout << "Writing global segments...\n";
+        std::vector<FastRoute::NET> globalRoute = *_result;
+        addRemainingGuides(globalRoute);
+        connectPadPins(globalRoute);
+
+        for (FastRoute::NET &netRoute : globalRoute) {
+                mergeSegments(netRoute);
+        }
+
+        addLocalConnections(globalRoute);
+
+        _dbWrapper->commitGlobalSegmentsToDB(globalRoute, _maxRoutingLayer);
+        std::cout << "Writing global segments... Done!\n";
 }
 
 bool FastRouteKernel::pinOverlapsWithSingleTrack(const Pin& pin, Coordinate &trackPosition) {

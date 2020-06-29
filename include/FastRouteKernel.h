@@ -171,6 +171,8 @@ private:
         void fixLongSegments();
         SteinerTree createSteinerTree(std::vector<ROUTE> route, std::vector<Pin> pins);
         bool checkSteinerTree(SteinerTree sTree);
+        void addLocalConnections(std::vector<FastRoute::NET> &globalRoute);
+        void writeGlobalSegments();
 
 public:
         struct EST_ {
