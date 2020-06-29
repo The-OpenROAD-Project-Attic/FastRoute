@@ -63,6 +63,7 @@ public:
 private:
         std::string _name;
         Coordinate _position;
+        Coordinate _onGridPosition;
         std::vector<int> _layers;
         Orientation _orientation;
         std::map<int, std::vector<Box>> _boxesPerLayer;
@@ -79,13 +80,16 @@ public:
             const std::vector<int>& layers, const Orientation orientation,
             const std::map<int, std::vector<Box>>& boxesPerLayer,
             const std::string& netName, bool isPort, bool connectedToPad, Type type)
-            : _name(name), _position(position), _layers(layers), _orientation(orientation),
+            : _name(name), _position(position), _onGridPosition(Coordinate(-1, -1)), 
+            _layers(layers), _orientation(orientation),
             _boxesPerLayer(boxesPerLayer), _netName(netName),
             _isPort(isPort), _connectedToPad(connectedToPad),
             _type(type)  { sortLayers(); }
         
         const std::string& getName() const { return _name; }
         const Coordinate& getPosition() const { return _position; }
+        const Coordinate& getOnGridPosition() const { return _onGridPosition; }
+        void setOnGridPosition(Coordinate onGridPos) { _onGridPosition = onGridPos; }
         const std::vector<int>& getLayers() const { return _layers; }
         int getNumLayers() const { return _layers.size(); }
         int getTopLayer() const { return _layers.back(); }

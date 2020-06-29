@@ -64,7 +64,7 @@ public:
         
         const std::string& getName() const { return _name; }
         const std::string& getSignalType() const { return _signalType; }
-        const std::vector<Pin>& getPins() const { return _pins; }
+        std::vector<Pin>& getPins() { return _pins; }
         int getNumPins() const { return _pins.size(); }
 };
 

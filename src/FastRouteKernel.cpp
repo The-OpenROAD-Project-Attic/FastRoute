@@ -479,7 +479,7 @@ void FastRouteKernel::initializeNets() {
         _fastRoute->setNumberNets(validNets);
         _fastRoute->setMaxNetDegree(_netlist->getMaxNetDegree());
         
-        for (Net net : _netlist->getNets()) {
+        for (Net &net : _netlist->getNets()) {
                 float netAlpha = _alpha;
 
                 if (net.getNumPins() <= 1) {
@@ -507,7 +507,7 @@ void FastRouteKernel::initializeNets() {
                 _netsDegree[net.getName()] = net.getNumPins();
                 
                 std::vector<FastRoute::PIN> pins;
-                for (Pin pin : net.getPins()) {
+                for (Pin &pin : net.getPins()) {
                         Coordinate pinPosition;
                         int topLayer = pin.getTopLayer();
                         RoutingLayer layer = getRoutingLayerByIndex(topLayer);
@@ -588,6 +588,8 @@ void FastRouteKernel::initializeNets() {
 
                                 _padPinsConnections[net.getName()].push_back(pinConnection);
                         }
+
+                        pin.setOnGridPosition(pinPosition);
                         
                         FastRoute::PIN grPin;
                         grPin.x = pinPosition.getX();
@@ -2210,42 +2212,9 @@ void FastRouteKernel::addLocalConnections(std::vector<FastRoute::NET> &globalRou
                 Net net = _netlist->getNetByName(netRoute.name);
 
                 for (Pin pin : net.getPins()) {
-                        Coordinate pinPosition;
                         int topLayer = pin.getTopLayer();
-                        RoutingLayer layer = getRoutingLayerByIndex(topLayer);
-
                         std::vector<Box> pinBoxes = pin.getBoxes().at(topLayer);
-                        std::vector<Coordinate> pinPositionsOnGrid;
-                        Coordinate posOnGrid;
-                        Coordinate trackPos;
-                                
-                        for (Box pinBox : pinBoxes) {
-                                posOnGrid = _grid->getPositionOnGrid(pinBox.getMiddle());
-                                pinPositionsOnGrid.push_back(posOnGrid);
-                        }
-                        
-                        int votes = -1;
-                        
-                        for (Coordinate pos : pinPositionsOnGrid) {
-                                int equals = std::count(pinPositionsOnGrid.begin(),
-                                                        pinPositionsOnGrid.end(),
-                                                        pos);
-                                if (equals > votes) {
-                                        pinPosition = pos;
-                                        votes = equals;
-                                }
-                        }
-
-                        if (pinOverlapsWithSingleTrack(pin, trackPos)) {
-                                posOnGrid = _grid->getPositionOnGrid(trackPos);
-
-                                if (!(posOnGrid == pinPosition)) {
-                                        if ((layer.getPreferredDirection() == RoutingLayer::HORIZONTAL && posOnGrid.getY() != pinPosition.getY()) ||
-                                             (layer.getPreferredDirection() == RoutingLayer::VERTICAL && posOnGrid.getX() != pinPosition.getX())) {
-                                                pinPosition = posOnGrid;
-                                        }
-                                }
-                        }
+                        Coordinate pinPosition = pin.getOnGridPosition();
 
                         Coordinate realPinPosition = pinBoxes[0].getMiddle();
                         FastRoute::ROUTE horSegment;
