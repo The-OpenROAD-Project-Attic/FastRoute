@@ -614,6 +614,8 @@ void FastRouteKernel::initializeNets() {
                 
                 _fastRoute->addNet(netName, idx, pins.size(), 1, grPins, netAlpha);
                 idx++;
+
+                _netlist->addNetToMap(net);
         }
 
         std::cout << "[INFO] Minimum degree: " << minDegree << "\n";
@@ -2208,16 +2210,23 @@ bool FastRouteKernel::checkSteinerTree(SteinerTree sTree) {
 }
 
 void FastRouteKernel::addLocalConnections(std::vector<FastRoute::NET> &globalRoute) {
+        Net net;
+        int topLayer;
+        std::vector<Box> pinBoxes;
+        Coordinate pinPosition;
+        Coordinate realPinPosition;
+        FastRoute::ROUTE horSegment;
+        FastRoute::ROUTE verSegment;
+
         for (FastRoute::NET &netRoute : globalRoute) {
-                Net net = _netlist->getNetByName(netRoute.name);
+                net = _netlist->getNetByName(netRoute.name);
 
                 for (Pin pin : net.getPins()) {
-                        int topLayer = pin.getTopLayer();
-                        std::vector<Box> pinBoxes = pin.getBoxes().at(topLayer);
-                        Coordinate pinPosition = pin.getOnGridPosition();
+                        topLayer = pin.getTopLayer();
+                        pinBoxes = pin.getBoxes().at(topLayer);
+                        pinPosition = pin.getOnGridPosition();
 
-                        Coordinate realPinPosition = pinBoxes[0].getMiddle();
-                        FastRoute::ROUTE horSegment;
+                        realPinPosition = pinBoxes[0].getMiddle();
                         horSegment.initX = realPinPosition.getX();
                         horSegment.initY = realPinPosition.getY();
                         horSegment.initLayer = topLayer;
@@ -2225,7 +2234,6 @@ void FastRouteKernel::addLocalConnections(std::vector<FastRoute::NET> &globalRou
                         horSegment.finalY = realPinPosition.getY();
                         horSegment.finalLayer = topLayer;
 
-                        FastRoute::ROUTE verSegment;
                         verSegment.initX = pinPosition.getX();
                         verSegment.initY = realPinPosition.getY();
                         verSegment.initLayer = topLayer;

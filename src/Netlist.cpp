@@ -43,14 +43,7 @@ namespace FastRoute {
 using ord::error;
 
 Net Netlist::getNetByName(std::string name) {
-        Net choosenNet;
-        for (Net net : _nets) {
-                if (net.getName() == name) {
-                        choosenNet = net;
-                }
-        }
-        
-        return choosenNet;
+        return _netsPerName[name];
 }
 
 void Netlist::addNet(const std::string& name, const std::string& signalType, const std::vector<Pin>& pins) {

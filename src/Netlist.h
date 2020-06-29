@@ -55,6 +55,7 @@ namespace FastRoute {
 class Netlist {
 private:
         std::vector<Net> _nets;
+        std::map<std::string, Net> _netsPerName;
         int _netCount;
         
 public:
@@ -67,6 +68,7 @@ public:
         
         
         void addNet(const std::string& name, const std::string& signalType, const std::vector<Pin>& pins);
+        void addNetToMap(Net net) { _netsPerName[net.getName()] = net; };
         
         int getMaxNetDegree();
         
