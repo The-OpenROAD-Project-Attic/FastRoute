@@ -47,6 +47,7 @@
 
 #include "opendb/db.h"
 #include "opendb/dbShape.h"
+#include "opendb/wOrder.h"
 #include "include/FastRoute.h"
 #include "antennachecker/AntennaChecker.hh"
 

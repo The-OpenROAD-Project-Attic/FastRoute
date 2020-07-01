@@ -940,10 +940,6 @@ void DBWrapper::commitGlobalSegmentsToDB(std::vector<FastRoute::NET> routing, in
                 dbNets[netName] = currNet;
         }
 
-        // for (int l = 1; l <= maxRoutingLayer; l++) {
-        //         std::cout << "Via " << defaultVias[l]->getConstName() << "\n";
-        // }
-
         for (FastRoute::NET netRoute : routing) {
                 std::string netName = netRoute.name;
 
@@ -979,6 +975,8 @@ void DBWrapper::commitGlobalSegmentsToDB(std::vector<FastRoute::NET> routing, in
                         }
                 }
                 wireEncoder.end();
+
+                odb::orderWires(dbNets[netName], false, false);
         }
 }
 
