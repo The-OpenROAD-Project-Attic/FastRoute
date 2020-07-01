@@ -356,6 +356,7 @@ void FastRouteKernel::runFastRoute() {
         }
 
         writeGlobalSegments();
+        _dbWrapper->checkAntennaViolations();
         
         std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
         if (_verbose > 0)

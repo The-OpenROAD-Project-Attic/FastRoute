@@ -982,6 +982,36 @@ void DBWrapper::commitGlobalSegmentsToDB(std::vector<FastRoute::NET> routing, in
         }
 }
 
+void DBWrapper::checkAntennaViolations() {
+        odb::dbBlock* block = _chip->getBlock();
+        if (!block) {
+                error("odb::dbBlock not found\n");
+        }
+
+        Tcl_Interp *tcl_interp;
+        _arc = new antenna_checker::AntennaChecker;
+        _arc->setDb(_db);
+        _arc->load_antenna_rules();
+        _arc->check_antennas();
+
+        std::map<std::string, std::vector<std::pair<int, std::vector<odb::dbITerm *>>>> violationsPerNet;
+
+        odb::dbSet<odb::dbNet> nets = block->getNets();
+        
+        if (nets.size() == 0) {
+                error("Design without nets");
+        }
+        
+        for (odb::dbNet* currNet : nets) {
+                std::vector<std::pair<int, std::vector<odb::dbITerm *>>> netViol = _arc->get_net_antenna_violations(currNet);
+                if (netViol.size() > 0) {
+                        violationsPerNet[currNet->getConstName()] = netViol;
+                }
+        }
+
+        std::cout << "#Antenna violations: " << violationsPerNet.size() << "\n";
+}
+
 }
 
 

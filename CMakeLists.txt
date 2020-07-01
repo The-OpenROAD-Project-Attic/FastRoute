@@ -97,6 +97,7 @@ target_include_directories(${LIB_NAME} PUBLIC
         ${OPENSTA_HOME}/include
         ${FASTROUTE_HOME}/src
 	${TCL_INCLUDE_PATH}
+        ${ANTENNACHECKER_HOME}/include
         )
 
 target_link_libraries(${LIB_NAME}

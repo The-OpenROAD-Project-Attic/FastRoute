@@ -48,6 +48,7 @@
 #include "opendb/db.h"
 #include "opendb/dbShape.h"
 #include "include/FastRoute.h"
+#include "antennachecker/AntennaChecker.hh"
 
 // Forward declaration protects FastRoute code from any
 // header file from the DB. FastRoute code keeps independent.
@@ -81,6 +82,7 @@ public:
         std::set<int> findTransitionLayers(int maxRoutingLayer);
         std::map<int, odb::dbTechVia*> getDefaultVias(int maxRoutingLayer);
         void commitGlobalSegmentsToDB(std::vector<FastRoute::NET> routing, int maxRoutingLayer);
+        void checkAntennaViolations();
         
         void setDB(unsigned idx) { _db = odb::dbDatabase::getDatabase(idx); }
         void setSelectedMetal (int metal) { selectedMetal = metal; }
@@ -91,6 +93,7 @@ private:
         Netlist         *_netlist = nullptr;
         Grid            *_grid = nullptr;
         bool            _verbose = false;
+        antenna_checker::AntennaChecker *_arc = nullptr;
 };
 
 }
