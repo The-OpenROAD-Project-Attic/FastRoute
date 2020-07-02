@@ -172,7 +172,7 @@ private:
         SteinerTree createSteinerTree(std::vector<ROUTE> route, std::vector<Pin> pins);
         bool checkSteinerTree(SteinerTree sTree);
         void addLocalConnections(std::vector<FastRoute::NET> &globalRoute);
-        void writeGlobalSegments();
+        void fixAntennaViolations();
 
 public:
         struct EST_ {

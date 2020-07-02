@@ -348,19 +348,38 @@ void FastRouteKernel::runFastRoute() {
                 fixLongSegments();
                 std::cout << "Fixing long segments... Done!\n";
         }
+
+        fixAntennaViolations();
         computeWirelength();
 
         if (_reportCongest) {
                 _fastRoute->writeCongestionReport2D(_congestFile+"2D.log");
                 _fastRoute->writeCongestionReport3D(_congestFile+"3D.log");
         }
-
-        writeGlobalSegments();
-        _dbWrapper->checkAntennaViolations();
         
         std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
         if (_verbose > 0)
                 std::cout << "[INFO] Elapsed time: " << (std::chrono::duration_cast<std::chrono::microseconds>(end - begin).count()) /1000000.0 << "\n";
+}
+
+void FastRouteKernel::fixAntennaViolations() {
+        std::vector<FastRoute::NET> globalRoute = *_result;
+        addRemainingGuides(globalRoute);
+        connectPadPins(globalRoute);
+
+        for (FastRoute::NET &netRoute : globalRoute) {
+                mergeSegments(netRoute);
+        }
+
+        addLocalConnections(globalRoute);
+
+        int violationsCnt = _dbWrapper->checkAntennaViolations(globalRoute, _maxRoutingLayer);
+        
+        if (violationsCnt > 0) {
+                _netlist->resetNetlist();
+                _dbWrapper->updateNetlist();
+                std::cout << "[INFO] #Nets to reroute: " << _netlist->getNetCount() << "\n";
+        }
 }
 
 void FastRouteKernel::estimateRC() {
@@ -2246,22 +2265,6 @@ void FastRouteKernel::addLocalConnections(std::vector<FastRoute::NET> &globalRou
                         netRoute.route.push_back(verSegment);
                 }
         }
-}
-
-void FastRouteKernel::writeGlobalSegments() {
-        std::cout << "Writing global segments...\n";
-        std::vector<FastRoute::NET> globalRoute = *_result;
-        addRemainingGuides(globalRoute);
-        connectPadPins(globalRoute);
-
-        for (FastRoute::NET &netRoute : globalRoute) {
-                mergeSegments(netRoute);
-        }
-
-        addLocalConnections(globalRoute);
-
-        _dbWrapper->commitGlobalSegmentsToDB(globalRoute, _maxRoutingLayer);
-        std::cout << "Writing global segments... Done!\n";
 }
 
 bool FastRouteKernel::pinOverlapsWithSingleTrack(const Pin& pin, Coordinate &trackPosition) {
