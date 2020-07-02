@@ -82,8 +82,8 @@ public:
         float dbuToMeters(unsigned dbu);
         std::set<int> findTransitionLayers(int maxRoutingLayer);
         std::map<int, odb::dbTechVia*> getDefaultVias(int maxRoutingLayer);
-        void commitGlobalSegmentsToDB(std::vector<FastRoute::NET> routing, int maxRoutingLayer);
-        void checkAntennaViolations();
+        int checkAntennaViolations(std::vector<FastRoute::NET> routing, int maxRoutingLayer);
+        void updateNetlist();
         
         void setDB(unsigned idx) { _db = odb::dbDatabase::getDatabase(idx); }
         void setSelectedMetal (int metal) { selectedMetal = metal; }
@@ -95,6 +95,9 @@ private:
         Grid            *_grid = nullptr;
         bool            _verbose = false;
         antenna_checker::AntennaChecker *_arc = nullptr;
+
+        std::map<std::string, std::vector<std::pair<int, std::vector<odb::dbITerm *>>>> antennaViolations;
+        std::vector<odb::dbNet*> dirtyNets;
 };
 
 }
