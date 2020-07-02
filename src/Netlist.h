@@ -65,7 +65,7 @@ public:
         std::vector<Net>& getNets() { return _nets; }
         int getNetCount() const { return _netCount; }
         Net getNetByName(std::string name);
-        
+        void resetNetlist();
         
         void addNet(const std::string& name, const std::string& signalType, const std::vector<Pin>& pins);
         void addNetToMap(Net net) { _netsPerName[net.getName()] = net; };

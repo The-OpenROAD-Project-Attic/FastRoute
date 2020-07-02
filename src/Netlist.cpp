@@ -51,6 +51,12 @@ void Netlist::addNet(const std::string& name, const std::string& signalType, con
         _nets.push_back(net);
         _netCount++;
 }
+
+void Netlist::resetNetlist() {
+        _nets.clear();
+        _netsPerName.clear();
+        _netCount = 0;
+}
         
 int Netlist::getMaxNetDegree() {
         if (_nets.size() < 1) {
