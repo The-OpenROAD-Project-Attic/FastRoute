@@ -283,7 +283,7 @@ void FastRouteKernel::startFastRoute() {
         std::cout << "Setting spacings and widths... Done!\n";
         
         std::cout << "Initializing nets...\n";
-        initializeNets();
+        initializeNets(false);
         std::cout << "Initializing nets... Done!\n";
         
         std::cout << "Adjusting grid...\n";
@@ -340,7 +340,7 @@ void FastRouteKernel::runFastRoute() {
         std::cout << "Running FastRoute...\n\n";
         _fastRoute->run(*_result);
         std::cout << "Running FastRoute... Done!\n";
-        
+
         std::cout << "Fixing long segments...\n";
         if (_maxLengthDBU == -1) {
                 std::cout << "[WARNING] Max routing length not defined. Skipping...\n";
@@ -377,7 +377,7 @@ void FastRouteKernel::fixAntennaViolations() {
         
         if (violationsCnt > 0) {
                 _netlist->resetNetlist();
-                _dbWrapper->updateNetlist();
+                initializeNets(true);
                 std::cout << "[INFO] #Nets to reroute: " << _netlist->getNetCount() << "\n";
         }
 }
@@ -461,8 +461,8 @@ void FastRouteKernel::setSpacingsAndMinWidths() {
         }
 }
 
-void FastRouteKernel::initializeNets() {
-        _dbWrapper->initNetlist();
+void FastRouteKernel::initializeNets(bool reroute) {
+        _dbWrapper->initNetlist(reroute);
         
         std::cout << "Checking pin placement...\n";
         checkPinPlacement();

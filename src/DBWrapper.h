@@ -74,7 +74,7 @@ public:
         void initRoutingTracks(std::vector<RoutingTracks>& allRoutingTracks, int maxLayer, std::map<int, float> layerPitches);
         void computeCapacities(int maxLayer, std::map<int, float> layerPitches);
         void computeSpacingsAndMinWidth(int maxLayer);
-        void initNetlist();
+        void initNetlist(bool reroute);
         void initObstacles();
         int computeMaxRoutingLayer();
         void getLayerRC(unsigned layerId, float& r, float& c);
@@ -83,7 +83,6 @@ public:
         std::set<int> findTransitionLayers(int maxRoutingLayer);
         std::map<int, odb::dbTechVia*> getDefaultVias(int maxRoutingLayer);
         int checkAntennaViolations(std::vector<FastRoute::NET> routing, int maxRoutingLayer);
-        void updateNetlist();
         
         void setDB(unsigned idx) { _db = odb::dbDatabase::getDatabase(idx); }
         void setSelectedMetal (int metal) { selectedMetal = metal; }

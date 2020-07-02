@@ -139,7 +139,7 @@ private:
         void initRoutingTracks();
         void setCapacities();
         void setSpacingsAndMinWidths();
-        void initializeNets();
+        void initializeNets(bool reroute);
         void computeGridAdjustments();
         void computeTrackAdjustments();
         void computeUserGlobalAdjustments();
