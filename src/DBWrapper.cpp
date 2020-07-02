@@ -985,6 +985,7 @@ int DBWrapper::checkAntennaViolations(std::vector<FastRoute::NET> routing, int m
                 std::vector<std::pair<int, std::vector<odb::dbITerm *>>> netViol = _arc->get_net_antenna_violations(dbNets[netName]);
                 if (netViol.size() > 0) {
                         antennaViolations[dbNets[netName]->getConstName()] = netViol;
+                        dirtyNets.push_back(dbNets[netName]);
                 }
                 if (wire != nullptr) {
                         odb::dbWire::destroy(wire);
