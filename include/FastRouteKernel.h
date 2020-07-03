@@ -126,6 +126,7 @@ private:
         std::map<int, float> _layersMaxLengthMicrons;
         long _maxLengthDBU = -1;
         std::map<int, long> _layersMaxLengthDBU;
+        FT* _reFastRoute = nullptr;
 
         // temporary for congestion driven replace
         int _numAdjusts = 0;

@@ -72,6 +72,7 @@ void FastRouteKernel::init() {
         _grid = new Grid;
         _dbWrapper = new DBWrapper;
         _fastRoute = new FT;
+        _reFastRoute = new FT;
         _gridOrigin = new Coordinate(-1, -1);
         _routingLayers = new std::vector<RoutingLayer>;
         _allRoutingTracks = new std::vector<RoutingTracks>;
@@ -108,6 +109,8 @@ void FastRouteKernel::resetResources() {
                 delete _dbWrapper;
         if (_fastRoute)
                 delete _fastRoute;
+        if (_reFastRoute)
+                delete _reFastRoute;
         if (_gridOrigin)
                 delete _gridOrigin;
         if (_routingLayers)
@@ -121,6 +124,7 @@ void FastRouteKernel::resetResources() {
         _grid = nullptr;
         _dbWrapper = nullptr;
         _fastRoute = nullptr;
+        _reFastRoute = nullptr;
         _gridOrigin = nullptr;
         _routingLayers = nullptr;
         _allRoutingTracks = nullptr;
@@ -134,6 +138,7 @@ void FastRouteKernel::resetResources() {
         _grid = new Grid;
         _dbWrapper = new DBWrapper;
         _fastRoute = new FT;
+        _reFastRoute = new FT;
         _gridOrigin = new Coordinate(-1, -1);
         _routingLayers = new std::vector<RoutingLayer>;
         _allRoutingTracks = new std::vector<RoutingTracks>;
@@ -151,6 +156,8 @@ void FastRouteKernel::reset() {
                 delete _dbWrapper;
         if (_fastRoute)
                 delete _fastRoute;
+        if (_reFastRoute)
+                delete _reFastRoute;
         if (_gridOrigin)
                 delete _gridOrigin;
         if (_routingLayers)
@@ -164,6 +171,7 @@ void FastRouteKernel::reset() {
         _grid = nullptr;
         _dbWrapper = nullptr;
         _fastRoute = nullptr;
+        _reFastRoute = nullptr;
         _gridOrigin = nullptr;
         _routingLayers = nullptr;
         _allRoutingTracks = nullptr;
@@ -194,6 +202,8 @@ FastRouteKernel::~FastRouteKernel() {
                 delete _dbWrapper;
         if (_fastRoute)
                 delete _fastRoute;
+        if (_reFastRoute)
+                delete _reFastRoute;
         if (_gridOrigin)
                 delete _gridOrigin;
         if (_routingLayers)
@@ -207,6 +217,7 @@ FastRouteKernel::~FastRouteKernel() {
         _grid = nullptr;
         _dbWrapper = nullptr;
         _fastRoute = nullptr;
+        _reFastRoute = nullptr;
         _gridOrigin = nullptr;
         _routingLayers = nullptr;
         _allRoutingTracks = nullptr;
@@ -235,16 +246,25 @@ void FastRouteKernel::startFastRoute() {
         if (_clockNetRouting && _pdRev) {
                 _fastRoute->usePdRev();
                 _fastRoute->setAlpha(_alpha);
+
+                _reFastRoute->usePdRev();
+                _reFastRoute->setAlpha(_alpha);
         }
 
         if (_pdRevForHighFanout != -1) {
                 _fastRoute->setAlpha(_alpha);
+                _reFastRoute->setAlpha(_alpha);
         }
         
         _fastRoute->setVerbose(_verbose);
         _fastRoute->setOverflowIterations(_overflowIterations);
         _fastRoute->setPDRevForHighFanout(_pdRevForHighFanout);
         _fastRoute->setAllowOverflow(_allowOverflow);
+
+        _reFastRoute->setVerbose(_verbose);
+        _reFastRoute->setOverflowIterations(_overflowIterations);
+        _reFastRoute->setPDRevForHighFanout(_pdRevForHighFanout);
+        _reFastRoute->setAllowOverflow(_allowOverflow);
         
         std::cout << "[PARAMS] Min routing layer: " << _minRoutingLayer << "\n";
         std::cout << "[PARAMS] Max routing layer: " << _maxRoutingLayer << "\n";
@@ -328,6 +348,7 @@ void FastRouteKernel::startFastRoute() {
         }
 
         _fastRoute->initAuxVar();
+        _reFastRoute->initAuxVar();
         std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
  
         if (_verbose > 0)       
@@ -378,8 +399,8 @@ void FastRouteKernel::fixAntennaViolations() {
         if (violationsCnt > 0) {
                 _netlist->resetNetlist();
                 initializeNets(true);
-                std::cout << "[INFO] #Nets to reroute: " << _netlist->getNetCount() << "\n";
         }
+        std::cout << "[INFO] #Nets to reroute: " << _reFastRoute->getNets().size() << "\n";
 }
 
 void FastRouteKernel::estimateRC() {
@@ -414,6 +435,10 @@ void FastRouteKernel::initGrid() {
         _fastRoute->setLowerLeft(_grid->getLowerLeftX(), _grid->getLowerLeftY());
         _fastRoute->setTileSize(_grid->getTileWidth(), _grid->getTileHeight());
         _fastRoute->setGridsAndLayers(_grid->getXGrids(), _grid->getYGrids(), _grid->getNumLayers());
+
+        _reFastRoute->setLowerLeft(_grid->getLowerLeftX(), _grid->getLowerLeftY());
+        _reFastRoute->setTileSize(_grid->getTileWidth(), _grid->getTileHeight());
+        _reFastRoute->setGridsAndLayers(_grid->getXGrids(), _grid->getYGrids(), _grid->getNumLayers());
 }
 
 void FastRouteKernel::initRoutingLayers() {
@@ -421,6 +446,8 @@ void FastRouteKernel::initRoutingLayers() {
         
         RoutingLayer routingLayer = getRoutingLayerByIndex(1);
         _fastRoute->setLayerOrientation(routingLayer.getPreferredDirection());
+        
+        _reFastRoute->setLayerOrientation(routingLayer.getPreferredDirection());
 }
 
 void FastRouteKernel::initRoutingTracks() {
@@ -433,11 +460,17 @@ void FastRouteKernel::setCapacities() {
                         _fastRoute->addHCapacity(0, l);
                         _fastRoute->addVCapacity(0, l);
 
+                        _reFastRoute->addHCapacity(0, l);
+                        _reFastRoute->addVCapacity(0, l);
+
                         _hCapacities.push_back(0);
                         _vCapacities.push_back(0);
                 } else {
                         _fastRoute->addHCapacity(_grid->getHorizontalEdgesCapacities()[l-1], l);
                         _fastRoute->addVCapacity(_grid->getVerticalEdgesCapacities()[l-1], l);
+
+                        _reFastRoute->addHCapacity(_grid->getHorizontalEdgesCapacities()[l-1], l);
+                        _reFastRoute->addVCapacity(_grid->getVerticalEdgesCapacities()[l-1], l);
 
                         _hCapacities.push_back(_grid->getHorizontalEdgesCapacities()[l-1]);
                         _vCapacities.push_back(_grid->getVerticalEdgesCapacities()[l-1]);
@@ -458,6 +491,10 @@ void FastRouteKernel::setSpacingsAndMinWidths() {
                 _fastRoute->addMinSpacing(_grid->getSpacings()[l-1], l);
                 _fastRoute->addMinWidth(_grid->getMinWidths()[l-1], l);
                 _fastRoute->addViaSpacing(1, l);
+
+                _reFastRoute->addMinSpacing(_grid->getSpacings()[l-1], l);
+                _reFastRoute->addMinWidth(_grid->getMinWidths()[l-1], l);
+                _reFastRoute->addViaSpacing(1, l);
         }
 }
 
@@ -496,8 +533,13 @@ void FastRouteKernel::initializeNets(bool reroute) {
                 validNets++;
         }
 
-        _fastRoute->setNumberNets(validNets);
-        _fastRoute->setMaxNetDegree(_netlist->getMaxNetDegree());
+        if (reroute) {
+                _reFastRoute->setNumberNets(validNets);
+                _reFastRoute->setMaxNetDegree(_netlist->getMaxNetDegree());
+        } else {
+                _fastRoute->setNumberNets(validNets);
+                _fastRoute->setMaxNetDegree(_netlist->getMaxNetDegree());
+        }
         
         for (Net &net : _netlist->getNets()) {
                 float netAlpha = _alpha;
@@ -632,7 +674,11 @@ void FastRouteKernel::initializeNets(bool reroute) {
                         netAlpha = _netsAlpha[net.getName()];
                 }
                 
-                _fastRoute->addNet(netName, idx, pins.size(), 1, grPins, netAlpha);
+                if (reroute) {
+                        _reFastRoute->addNet(netName, idx, pins.size(), 1, grPins, netAlpha);
+                } else {
+                        _fastRoute->addNet(netName, idx, pins.size(), 1, grPins, netAlpha);
+                }
                 idx++;
 
                 _netlist->addNetToMap(net);
@@ -641,7 +687,11 @@ void FastRouteKernel::initializeNets(bool reroute) {
         std::cout << "[INFO] Minimum degree: " << minDegree << "\n";
         std::cout << "[INFO] Maximum degree: " << maxDegree << "\n";
 
-        _fastRoute->initEdges();
+        if (reroute) {
+                _reFastRoute->initEdges();
+        } else {
+                _fastRoute->initEdges();
+        }
 }
 
 void FastRouteKernel::computeGridAdjustments() {
