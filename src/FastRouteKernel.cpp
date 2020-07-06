@@ -1357,16 +1357,25 @@ void FastRouteKernel::addRemainingGuides(std::vector<FastRoute::NET> &globalRout
                                                 }
                                         }
 
-                                        for (uint i = 0; i < segments.size(); i++) {
-                                                if ((pin.x == segments[i].initX && pin.y == segments[i].initY) || 
-                                                    (pin.x == segments[i].finalX && pin.y == segments[i].finalY)) {
-                                                        // remove all vias to this pin that doesn't connects two wires
-                                                        if (segments[i].initX == segments[i].finalX &&
-                                                            segments[i].initY == segments[i].finalY &&
-                                                            (segments[i].initLayer < wireViaLayer ||
-                                                             segments[i].finalLayer < wireViaLayer)) {
-                                                                segments.erase(segments.begin()+i);
-                                                                i = 0;
+                                        bool bottomLayerPin = false;
+                                        for (FastRoute::PIN pin2 : pins) {
+                                                if (pin.x == pin2.x && pin.y == pin2.y && pin.layer > pin2.layer) {
+                                                        bottomLayerPin = true;
+                                                }
+                                        }
+
+                                        if (!bottomLayerPin) {
+                                                for (uint i = 0; i < segments.size(); i++) {
+                                                        if ((pin.x == segments[i].initX && pin.y == segments[i].initY) || 
+                                                            (pin.x == segments[i].finalX && pin.y == segments[i].finalY)) {
+                                                                // remove all vias to this pin that doesn't connects two wires
+                                                                if (segments[i].initX == segments[i].finalX &&
+                                                                    segments[i].initY == segments[i].finalY &&
+                                                                    (segments[i].initLayer < wireViaLayer ||
+                                                                     segments[i].finalLayer < wireViaLayer)) {
+                                                                        segments.erase(segments.begin()+i);
+                                                                        i = 0;
+                                                                }
                                                         }
                                                 }
                                         }
