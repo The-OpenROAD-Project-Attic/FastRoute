@@ -71,7 +71,6 @@ void FastRouteKernel::init() {
         _grid = new Grid;
         _dbWrapper = new DBWrapper;
         _fastRoute = new FT;
-        _reFastRoute = new FT;
         _gridOrigin = new Coordinate(-1, -1);
         _routingLayers = new std::vector<RoutingLayer>;
         _allRoutingTracks = new std::vector<RoutingTracks>;
@@ -245,25 +244,16 @@ void FastRouteKernel::startFastRoute() {
         if (_clockNetRouting && _pdRev) {
                 _fastRoute->usePdRev();
                 _fastRoute->setAlpha(_alpha);
-
-                _reFastRoute->usePdRev();
-                _reFastRoute->setAlpha(_alpha);
         }
 
         if (_pdRevForHighFanout != -1) {
                 _fastRoute->setAlpha(_alpha);
-                _reFastRoute->setAlpha(_alpha);
         }
         
         _fastRoute->setVerbose(_verbose);
         _fastRoute->setOverflowIterations(_overflowIterations);
         _fastRoute->setPDRevForHighFanout(_pdRevForHighFanout);
         _fastRoute->setAllowOverflow(_allowOverflow);
-
-        _reFastRoute->setVerbose(_verbose);
-        _reFastRoute->setOverflowIterations(_overflowIterations);
-        _reFastRoute->setPDRevForHighFanout(_pdRevForHighFanout);
-        _reFastRoute->setAllowOverflow(_allowOverflow);
         
         std::cout << "[PARAMS] Min routing layer: " << _minRoutingLayer << "\n";
         std::cout << "[PARAMS] Max routing layer: " << _maxRoutingLayer << "\n";
@@ -347,11 +337,57 @@ void FastRouteKernel::startFastRoute() {
         }
 
         _fastRoute->initAuxVar();
-        _reFastRoute->initAuxVar();
         std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
  
         if (_verbose > 0)       
                 std::cout << "[INFO] Elapsed time: " << (std::chrono::duration_cast<std::chrono::microseconds>(end - begin).count()) /1000000.0 << "\n";
+}
+
+void FastRouteKernel::restartFastRoute() {
+        _reFastRoute = new FT;
+        // Set flags
+        if (_clockNetRouting && _pdRev) {
+                _reFastRoute->usePdRev();
+                _reFastRoute->setAlpha(_alpha);
+        }
+        if (_pdRevForHighFanout != -1) {
+                _reFastRoute->setAlpha(_alpha);
+        }
+        _reFastRoute->setVerbose(_verbose);
+        _reFastRoute->setOverflowIterations(_overflowIterations);
+        _reFastRoute->setPDRevForHighFanout(_pdRevForHighFanout);
+        _reFastRoute->setAllowOverflow(_allowOverflow);
+
+        // Set grid
+        _reFastRoute->setLowerLeft(_grid->getLowerLeftX(), _grid->getLowerLeftY());
+        _reFastRoute->setTileSize(_grid->getTileWidth(), _grid->getTileHeight());
+        _reFastRoute->setGridsAndLayers(_grid->getXGrids(), _grid->getYGrids(), _grid->getNumLayers());
+
+        // Set layer orientation
+        RoutingLayer routingLayer = getRoutingLayerByIndex(1);
+        _reFastRoute->setLayerOrientation(routingLayer.getPreferredDirection());
+
+        // Set capacities
+        for (int l = 1; l <= _grid->getNumLayers(); l++) {
+                if (l < _minRoutingLayer || l > _maxRoutingLayer) {
+                        _reFastRoute->addHCapacity(0, l);
+                        _reFastRoute->addVCapacity(0, l);
+                } else {
+                        _reFastRoute->addHCapacity(_grid->getHorizontalEdgesCapacities()[l-1], l);
+                        _reFastRoute->addVCapacity(_grid->getVerticalEdgesCapacities()[l-1], l);
+                }
+        }
+
+        // Set widths/spacings
+        for (int l = 1; l <= _grid->getNumLayers(); l++) {
+                _reFastRoute->addMinSpacing(_grid->getSpacings()[l-1], l);
+                _reFastRoute->addMinWidth(_grid->getMinWidths()[l-1], l);
+                _reFastRoute->addViaSpacing(1, l);
+        }
+
+        initializeNets(true);
+
+        _reFastRoute->initAuxVar();
 }
 
 void FastRouteKernel::runFastRoute() {
@@ -397,7 +433,7 @@ void FastRouteKernel::fixAntennaViolations() {
         
         if (violationsCnt > 0) {
                 _netlist->resetNetlist();
-                initializeNets(true);
+                restartFastRoute();
         }
         std::cout << "[INFO] #Nets to reroute: " << _reFastRoute->getNets().size() << "\n";
 }
@@ -434,10 +470,6 @@ void FastRouteKernel::initGrid() {
         _fastRoute->setLowerLeft(_grid->getLowerLeftX(), _grid->getLowerLeftY());
         _fastRoute->setTileSize(_grid->getTileWidth(), _grid->getTileHeight());
         _fastRoute->setGridsAndLayers(_grid->getXGrids(), _grid->getYGrids(), _grid->getNumLayers());
-
-        _reFastRoute->setLowerLeft(_grid->getLowerLeftX(), _grid->getLowerLeftY());
-        _reFastRoute->setTileSize(_grid->getTileWidth(), _grid->getTileHeight());
-        _reFastRoute->setGridsAndLayers(_grid->getXGrids(), _grid->getYGrids(), _grid->getNumLayers());
 }
 
 void FastRouteKernel::initRoutingLayers() {
@@ -445,8 +477,6 @@ void FastRouteKernel::initRoutingLayers() {
         
         RoutingLayer routingLayer = getRoutingLayerByIndex(1);
         _fastRoute->setLayerOrientation(routingLayer.getPreferredDirection());
-        
-        _reFastRoute->setLayerOrientation(routingLayer.getPreferredDirection());
 }
 
 void FastRouteKernel::initRoutingTracks() {
@@ -459,17 +489,11 @@ void FastRouteKernel::setCapacities() {
                         _fastRoute->addHCapacity(0, l);
                         _fastRoute->addVCapacity(0, l);
 
-                        _reFastRoute->addHCapacity(0, l);
-                        _reFastRoute->addVCapacity(0, l);
-
                         _hCapacities.push_back(0);
                         _vCapacities.push_back(0);
                 } else {
                         _fastRoute->addHCapacity(_grid->getHorizontalEdgesCapacities()[l-1], l);
                         _fastRoute->addVCapacity(_grid->getVerticalEdgesCapacities()[l-1], l);
-
-                        _reFastRoute->addHCapacity(_grid->getHorizontalEdgesCapacities()[l-1], l);
-                        _reFastRoute->addVCapacity(_grid->getVerticalEdgesCapacities()[l-1], l);
 
                         _hCapacities.push_back(_grid->getHorizontalEdgesCapacities()[l-1]);
                         _vCapacities.push_back(_grid->getVerticalEdgesCapacities()[l-1]);
@@ -490,10 +514,6 @@ void FastRouteKernel::setSpacingsAndMinWidths() {
                 _fastRoute->addMinSpacing(_grid->getSpacings()[l-1], l);
                 _fastRoute->addMinWidth(_grid->getMinWidths()[l-1], l);
                 _fastRoute->addViaSpacing(1, l);
-
-                _reFastRoute->addMinSpacing(_grid->getSpacings()[l-1], l);
-                _reFastRoute->addMinWidth(_grid->getMinWidths()[l-1], l);
-                _reFastRoute->addViaSpacing(1, l);
         }
 }
 

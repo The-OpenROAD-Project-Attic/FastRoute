@@ -174,6 +174,7 @@ private:
         bool checkSteinerTree(SteinerTree sTree);
         void addLocalConnections(std::vector<FastRoute::NET> &globalRoute);
         void fixAntennaViolations();
+        void restartFastRoute();
 
 public:
         struct EST_ {
