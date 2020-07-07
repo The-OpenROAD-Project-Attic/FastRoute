@@ -373,8 +373,8 @@ void FastRouteKernel::restartFastRoute() {
                         _reFastRoute->addHCapacity(0, l);
                         _reFastRoute->addVCapacity(0, l);
                 } else {
-                        _reFastRoute->addHCapacity(_grid->getHorizontalEdgesCapacities()[l-1], l);
-                        _reFastRoute->addVCapacity(_grid->getVerticalEdgesCapacities()[l-1], l);
+                        _reFastRoute->addHCapacity(_grid->getHorizontalEdgesCapacities()[l-1]/100, l);
+                        _reFastRoute->addVCapacity(_grid->getVerticalEdgesCapacities()[l-1]/100, l);
                 }
         }
 
@@ -434,8 +434,8 @@ void FastRouteKernel::fixAntennaViolations() {
         if (violationsCnt > 0) {
                 _netlist->resetNetlist();
                 restartFastRoute();
+                std::cout << "[INFO] #Nets to reroute: " << _reFastRoute->getNets().size() << "\n";
         }
-        std::cout << "[INFO] #Nets to reroute: " << _reFastRoute->getNets().size() << "\n";
 }
 
 void FastRouteKernel::estimateRC() {
