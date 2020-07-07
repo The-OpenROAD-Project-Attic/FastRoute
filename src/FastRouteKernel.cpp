@@ -1,11 +1,8 @@
-////////////////////////////////////////////////////////////////////////////////
-// Authors: Vitor Bandeira, Mateus Fogaça, Eder Matheus Monteiro e Isadora
-// Oliveira
-//          (Advisor: Ricardo Reis)
+/////////////////////////////////////////////////////////////////////////////
 //
 // BSD 3-Clause License
 //
-// Copyright (c) 2019, Federal University of Rio Grande do Sul (UFRGS)
+// Copyright (c) 2019, University of California, San Diego.
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -33,7 +30,9 @@
 // CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 // ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
-////////////////////////////////////////////////////////////////////////////////
+//
+///////////////////////////////////////////////////////////////////////////////
+
 
 #include <iostream>
 #include <vector>
@@ -1170,7 +1169,7 @@ unsigned FastRouteKernel::getDbId() {
 }
 
 void FastRouteKernel::addLayerAdjustment(int layer, float reductionPercentage) {
-        if (layer > _maxRoutingLayer) {
+        if (layer > _maxRoutingLayer && _maxRoutingLayer > 0) {
                 std::cout << "[ERROR] Specified layer " << layer << " for adjustment is greater than max routing layer " << _maxRoutingLayer << " and will be ignored" << std::endl;
                 return;
         }
@@ -1434,16 +1433,25 @@ void FastRouteKernel::addRemainingGuides(std::vector<FastRoute::NET> &globalRout
                                                 }
                                         }
 
-                                        for (uint i = 0; i < segments.size(); i++) {
-                                                if ((pin.x == segments[i].initX && pin.y == segments[i].initY) || 
-                                                    (pin.x == segments[i].finalX && pin.y == segments[i].finalY)) {
-                                                        // remove all vias to this pin that doesn't connects two wires
-                                                        if (segments[i].initX == segments[i].finalX &&
-                                                            segments[i].initY == segments[i].finalY &&
-                                                            (segments[i].initLayer < wireViaLayer ||
-                                                             segments[i].finalLayer < wireViaLayer)) {
-                                                                segments.erase(segments.begin()+i);
-                                                                i = 0;
+                                        bool bottomLayerPin = false;
+                                        for (FastRoute::PIN pin2 : pins) {
+                                                if (pin.x == pin2.x && pin.y == pin2.y && pin.layer > pin2.layer) {
+                                                        bottomLayerPin = true;
+                                                }
+                                        }
+
+                                        if (!bottomLayerPin) {
+                                                for (uint i = 0; i < segments.size(); i++) {
+                                                        if ((pin.x == segments[i].initX && pin.y == segments[i].initY) || 
+                                                            (pin.x == segments[i].finalX && pin.y == segments[i].finalY)) {
+                                                                // remove all vias to this pin that doesn't connects two wires
+                                                                if (segments[i].initX == segments[i].finalX &&
+                                                                    segments[i].initY == segments[i].finalY &&
+                                                                    (segments[i].initLayer < wireViaLayer ||
+                                                                     segments[i].finalLayer < wireViaLayer)) {
+                                                                        segments.erase(segments.begin()+i);
+                                                                        i = 0;
+                                                                }
                                                         }
                                                 }
                                         }

@@ -1,3 +1,38 @@
+/////////////////////////////////////////////////////////////////////////////
+//
+// BSD 3-Clause License
+//
+// Copyright (c) 2019, University of California, San Diego.
+// All rights reserved.
+//
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions are met:
+//
+// * Redistributions of source code must retain the above copyright notice, this
+//   list of conditions and the following disclaimer.
+//
+// * Redistributions in binary form must reproduce the above copyright notice,
+//   this list of conditions and the following disclaimer in the documentation
+//   and/or other materials provided with the distribution.
+//
+// * Neither the name of the copyright holder nor the names of its
+//   contributors may be used to endorse or promote products derived from
+//   this software without specific prior written permission.
+//
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+// AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+// IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+// ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+// LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+// CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+// SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+// INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+// CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+// ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+// POSSIBILITY OF SUCH DAMAGE.
+//
+///////////////////////////////////////////////////////////////////////////////
+
 #include "DBWrapper.h"
 
 #include <iostream>
@@ -358,6 +393,7 @@ void DBWrapper::initNetlist(bool reroute) {
                         std::string instName = currITerm->getInst()->getConstName();
                         pinName = mTerm->getConstName();
                         pinName = instName + "/" + pinName;
+                        Coordinate pinPos;
 
                         Pin::Type type(Pin::Type::OTHER);
                         if (mTerm->getIoType() == odb::dbIoType::INPUT) {
@@ -381,7 +417,6 @@ void DBWrapper::initNetlist(bool reroute) {
                                 Box pinBox;
                                 int pinLayer;
                                 int lastLayer = -1;
-                                Coordinate pinPos;
 
                                 for (odb::dbBox* box : currMTermPin->getGeometry()) {
                                         odb::Rect rect;
@@ -407,36 +442,36 @@ void DBWrapper::initNetlist(bool reroute) {
                                                 pinPos = lowerBound;
                                         }
                                 }
-                                
-                                for (auto& layer_boxes : pinBoxes) {
-                                        pinLayers.push_back(layer_boxes.first);
-                                }
+                        }
 
-                                Pin pin = Pin(pinName, pinPos, pinLayers, Orientation::INVALID, pinBoxes, netName, false, (connectedToPad || connectedToMacro), type);
+                        for (auto& layer_boxes : pinBoxes) {
+                                pinLayers.push_back(layer_boxes.first);
+                        }
 
-                                if (connectedToPad || connectedToMacro) {
-                                        Coordinate pinPosition = pin.getPosition();
-                                        odb::dbTechLayer* techLayer = tech->findRoutingLayer(pin.getTopLayer());
-                                        
-                                        if (techLayer->getDirection().getValue() == odb::dbTechLayerDir::HORIZONTAL) {
-                                                DBU instToPin = pinPosition.getX() - instMiddle.getX();
-                                                if (instToPin < 0) {
-                                                        pin.setOrientation(Orientation::ORIENT_EAST);
-                                                } else {
-                                                        pin.setOrientation(Orientation::ORIENT_WEST);
-                                                }
-                                        } else if (techLayer->getDirection().getValue() == odb::dbTechLayerDir::VERTICAL) {
-                                                DBU instToPin = pinPosition.getY() - instMiddle.getY();
-                                                if (instToPin < 0) {
-                                                        pin.setOrientation(Orientation::ORIENT_NORTH);
-                                                } else {
-                                                        pin.setOrientation(Orientation::ORIENT_SOUTH);
-                                                }
+                        Pin pin = Pin(pinName, pinPos, pinLayers, Orientation::INVALID, pinBoxes, netName, false, (connectedToPad || connectedToMacro), type);
+
+                        if (connectedToPad || connectedToMacro) {
+                                Coordinate pinPosition = pin.getPosition();
+                                odb::dbTechLayer* techLayer = tech->findRoutingLayer(pin.getTopLayer());
+
+                                if (techLayer->getDirection().getValue() == odb::dbTechLayerDir::HORIZONTAL) {
+                                        DBU instToPin = pinPosition.getX() - instMiddle.getX();
+                                        if (instToPin < 0) {
+                                                pin.setOrientation(Orientation::ORIENT_EAST);
+                                        } else {
+                                                pin.setOrientation(Orientation::ORIENT_WEST);
+                                        }
+                                } else if (techLayer->getDirection().getValue() == odb::dbTechLayerDir::VERTICAL) {
+                                        DBU instToPin = pinPosition.getY() - instMiddle.getY();
+                                        if (instToPin < 0) {
+                                                pin.setOrientation(Orientation::ORIENT_NORTH);
+                                        } else {
+                                                pin.setOrientation(Orientation::ORIENT_SOUTH);
                                         }
                                 }
-
-                                netPins.push_back(pin);
                         }
+
+                        netPins.push_back(pin);
                 }
                 
                 for (odb::dbBTerm* currBTerm : currNet->getBTerms()) {
