@@ -422,6 +422,7 @@ void FastRouteKernel::runFastRoute() {
 
 void FastRouteKernel::fixAntennaViolations() {
         std::cout << "Running antenna avoidance flow...\n";
+        std::vector<FastRoute::NET> newRoute;
         std::vector<FastRoute::NET> globalRoute = *_result;
         addRemainingGuides(globalRoute);
         connectPadPins(globalRoute);
@@ -440,6 +441,8 @@ void FastRouteKernel::fixAntennaViolations() {
                 _netlist->resetNetlist();
                 restartFastRoute();
                 std::cout << "[INFO] #Nets to reroute: " << _reFastRoute->getNets().size() << "\n";
+                _reFastRoute->run(newRoute);
+                mergeResults(newRoute);
         }
         std::cout << "Running antenna avoidance flow... Done!\n";
 }
@@ -2354,6 +2357,22 @@ void FastRouteKernel::addLocalConnections(std::vector<FastRoute::NET> &globalRou
                         netRoute.route.push_back(horSegment);
                         netRoute.route.push_back(verSegment);
                 }
+        }
+}
+
+void FastRouteKernel::mergeResults(std::vector<FastRoute::NET> newRoute) {
+        std::map<std::string, FastRoute::NET> mergedResult;
+        for (FastRoute::NET netRes : *_result) {
+                mergedResult[netRes.name] = netRes;
+        }
+
+        for (FastRoute::NET netRes : newRoute) {
+                mergedResult[netRes.name] = netRes;
+        }
+
+        _result->clear();
+        for (auto const& netRes : mergedResult) {
+                _result->push_back(netRes.second);
         }
 }
 

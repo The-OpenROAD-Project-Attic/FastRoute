@@ -175,6 +175,7 @@ private:
         SteinerTree createSteinerTree(std::vector<ROUTE> route, std::vector<Pin> pins);
         bool checkSteinerTree(SteinerTree sTree);
         void addLocalConnections(std::vector<FastRoute::NET> &globalRoute);
+        void mergeResults(std::vector<FastRoute::NET> newRoute);
         void fixAntennaViolations();
         void restartFastRoute();
 
