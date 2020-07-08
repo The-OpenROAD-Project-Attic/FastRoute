@@ -432,6 +432,8 @@ void FastRouteKernel::fixAntennaViolations() {
         int violationsCnt = _dbWrapper->checkAntennaViolations(globalRoute, _maxRoutingLayer);
         
         if (violationsCnt > 0) {
+                std::string antennaCellName;
+                _dbWrapper->fixAntennas(antennaCellName);
                 _netlist->resetNetlist();
                 restartFastRoute();
                 std::cout << "[INFO] #Nets to reroute: " << _reFastRoute->getNets().size() << "\n";

@@ -971,7 +971,6 @@ int DBWrapper::checkAntennaViolations(std::vector<FastRoute::NET> routing, int m
 
         std::map<int, odb::dbTechVia*> defaultVias = getDefaultVias(maxRoutingLayer);
 
-        std::map<std::string, odb::dbNet*> dbNets;
         odb::dbSet<odb::dbNet> nets = block->getNets();
 
         for (odb::dbNet* currNet : nets) {
@@ -1036,6 +1035,45 @@ int DBWrapper::checkAntennaViolations(std::vector<FastRoute::NET> routing, int m
 
         std::cout << "[INFO] #Antenna violations: " << antennaViolations.size() << "\n";
         return antennaViolations.size();
+}
+
+void DBWrapper::insertDiode(odb::dbNet* net, 
+                  std::string antennaCellName,
+                  odb::dbInst* sinkInst,
+                  odb::dbITerm* sinkITerm,
+                  std::string antennaInstName) {
+        odb::dbBlock* block = _chip->getBlock();
+        std::string netName = net->getConstName();
+
+        odb::dbMaster* antennaMaster = _db->findMaster(antennaCellName.c_str());
+        odb::dbSet<odb::dbMTerm> antennaMTerms = antennaMaster->getMTerms();
+
+        int instLocX, instLocY;
+        sinkInst->getLocation(instLocX, instLocY);
+        odb::dbOrientType instOrient = sinkInst->getOrient();
+
+        odb::dbInst* antennaInst = odb::dbInst::create(block, antennaMaster, antennaInstName.c_str());
+        odb::dbITerm* antennaITerm = antennaInst->findITerm("A");
+
+        antennaInst->setLocation(instLocX, instLocY);
+        antennaInst->setOrient(instOrient);
+        antennaInst->setPlacementStatus(odb::dbPlacementStatus::PLACED);
+        odb::dbITerm::connect(antennaITerm, net);
+}
+
+void DBWrapper::fixAntennas(std::string antennaCellName) {
+        int cnt = 0;
+        for (auto const& violation : antennaViolations) {
+                odb::dbNet* net = dbNets[violation.first];
+                for (int i = 0; i < violation.second.size(); i++) {
+                        for (odb::dbITerm * sinkITerm : std::get<1>(violation.second[i])) {
+                                odb::dbInst* sinkInst = sinkITerm->getInst();
+                                std::string antennaInstName = "ANTENNA_" + std::to_string(cnt);
+                                insertDiode(net, antennaCellName, sinkInst, sinkITerm, antennaInstName);
+                                cnt++;
+                        }
+                }
+        }
 }
 
 }
