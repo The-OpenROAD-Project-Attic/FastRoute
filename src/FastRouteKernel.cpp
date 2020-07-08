@@ -2361,18 +2361,13 @@ void FastRouteKernel::addLocalConnections(std::vector<FastRoute::NET> &globalRou
 }
 
 void FastRouteKernel::mergeResults(std::vector<FastRoute::NET> newRoute) {
-        std::map<std::string, FastRoute::NET> mergedResult;
-        for (FastRoute::NET netRes : *_result) {
-                mergedResult[netRes.name] = netRes;
-        }
-
-        for (FastRoute::NET netRes : newRoute) {
-                mergedResult[netRes.name] = netRes;
-        }
-
-        _result->clear();
-        for (auto const& netRes : mergedResult) {
-                _result->push_back(netRes.second);
+        for (FastRoute::NET netRoute : newRoute) {
+                for (int i = 0; i < _result->size(); i++) {
+                        if (netRoute.name == _result->at(i).name) {
+                                _result->at(i) = netRoute;
+                                break;
+                        }
+                }
         }
 }
 
