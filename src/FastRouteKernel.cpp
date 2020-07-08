@@ -353,7 +353,7 @@ void FastRouteKernel::restartFastRoute() {
         if (_pdRevForHighFanout != -1) {
                 _reFastRoute->setAlpha(_alpha);
         }
-        _reFastRoute->setVerbose(_verbose);
+        _reFastRoute->setVerbose(0);
         _reFastRoute->setOverflowIterations(_overflowIterations);
         _reFastRoute->setPDRevForHighFanout(_pdRevForHighFanout);
         _reFastRoute->setAllowOverflow(_allowOverflow);
