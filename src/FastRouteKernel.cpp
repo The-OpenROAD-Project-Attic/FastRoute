@@ -405,7 +405,9 @@ void FastRouteKernel::runFastRoute() {
                 std::cout << "Fixing long segments... Done!\n";
         }
 
-        fixAntennaViolations();
+        if (enableAntennaFlow) {
+                fixAntennaViolations();
+        }
         computeWirelength();
 
         if (_reportCongest) {
@@ -419,6 +421,7 @@ void FastRouteKernel::runFastRoute() {
 }
 
 void FastRouteKernel::fixAntennaViolations() {
+        std::cout << "Running antenna avoidance flow...\n";
         std::vector<FastRoute::NET> globalRoute = *_result;
         addRemainingGuides(globalRoute);
         connectPadPins(globalRoute);
@@ -432,13 +435,13 @@ void FastRouteKernel::fixAntennaViolations() {
         int violationsCnt = _dbWrapper->checkAntennaViolations(globalRoute, _maxRoutingLayer);
         
         if (violationsCnt > 0) {
-                std::string antennaCellName;
-                _dbWrapper->fixAntennas(antennaCellName);
+                _dbWrapper->fixAntennas(diodeName);
                 _dbWrapper->legalizePlacedCells();
                 _netlist->resetNetlist();
                 restartFastRoute();
                 std::cout << "[INFO] #Nets to reroute: " << _reFastRoute->getNets().size() << "\n";
         }
+        std::cout << "Running antenna avoidance flow... Done!\n";
 }
 
 void FastRouteKernel::estimateRC() {
@@ -461,6 +464,12 @@ void FastRouteKernel::estimateRC() {
                 RcTreeBuilder builder(net, sTree, *_grid, *_dbWrapper);
                 builder.run();
         }
+}
+
+void FastRouteKernel::enableAntennaAvoidance(char * diodeCellName) {
+        enableAntennaFlow = true;
+        std::string cellName(diodeCellName);
+        diodeName = cellName;
 }
 
 void FastRouteKernel::initGrid() {        

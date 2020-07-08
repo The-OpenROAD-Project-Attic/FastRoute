@@ -68,8 +68,9 @@ void set_seed(unsigned seed);
 void set_layer_pitch(int layer, float pitch);
 
 // Run
-void start_fastroute();
 void estimate_rc();
+void enable_antenna_avoidance_flow(char * diodeCellName);
+void start_fastroute();
 void run_fastroute();
 void reset_fastroute();
 void write_guides();

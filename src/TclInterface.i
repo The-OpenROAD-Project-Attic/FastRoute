@@ -87,6 +87,8 @@ extern void set_layer_pitch(int layer, float pitch);
 
 extern void estimate_rc();
 
+extern void enable_antenna_avoidance_flow(char * diodeCellName);
+
 extern void start_fastroute();
 
 extern void run_fastroute();

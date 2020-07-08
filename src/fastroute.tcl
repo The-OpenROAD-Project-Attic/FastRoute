@@ -56,6 +56,7 @@ sta::define_cmd_args "fastroute" {[-output_file out_file] \
                                            [-seed seed] \
                                            [-report_congestion congest_file] \
                                            [-layers_pitches layers_pitches] \
+                                           [-antenna_avoidance_flow diode_cell_name] \
 }
 
 proc fastroute { args } {
@@ -63,7 +64,9 @@ proc fastroute { args } {
     keys {-output_file -capacity_adjustment -min_routing_layer -max_routing_layer \
           -tile_size -alpha -verbose -layers_adjustments \
           -regions_adjustments -nets_alphas_priorities -overflow_iterations \
-          -grid_origin -pdrev_for_high_fanout -seed -report_congestion -layers_pitches -max_routing_length -max_length_per_layer} \
+          -grid_origin -pdrev_for_high_fanout -seed -report_congestion \
+          -layers_pitches -max_routing_length -max_length_per_layer \
+          -antenna_avoidance_flow} \
     flags {-unidirectional_routing -clock_net_routing -allow_overflow -estimateRC} \
 
   if { [info exists keys(-output_file)] } {
@@ -233,6 +236,12 @@ proc fastroute { args } {
 
       FastRoute::set_layer_pitch $layer $pitch
     }
+  }
+
+  if { [info exists keys(-antenna_avoidance_flow)] } {
+    set diode_cell_name $keys(-antenna_avoidance_flow)
+
+    FastRoute::enable_antenna_avoidance_flow $diode_cell_name
   }
 
   for {set layer 1} {$layer <= $max_layer} {set layer [expr $layer+1]} {

@@ -127,6 +127,8 @@ private:
         long _maxLengthDBU = -1;
         std::map<int, long> _layersMaxLengthDBU;
         FT* _reFastRoute = nullptr;
+        bool enableAntennaFlow = false;
+        std::string diodeName;
 
         // temporary for congestion driven replace
         int _numAdjusts = 0;
@@ -251,6 +253,7 @@ public:
         void addLayerMaxLength (int layer, float length);
         
         // flow functions
+        void enableAntennaAvoidance(char * diodeCellName);
         void writeGuides();
         void startFastRoute();
         void estimateRC();
