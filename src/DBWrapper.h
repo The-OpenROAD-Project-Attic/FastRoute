@@ -48,6 +48,7 @@
 #include "opendb/wOrder.h"
 #include "include/FastRoute.h"
 #include "antennachecker/AntennaChecker.hh"
+#include "opendp/Opendp.h"
 
 // Forward declaration protects FastRoute code from any
 // header file from the DB. FastRoute code keeps independent.
@@ -83,6 +84,7 @@ public:
         int checkAntennaViolations(std::vector<FastRoute::NET> routing, int maxRoutingLayer);
         void insertDiode(odb::dbNet* net, std::string antennaCellName, odb::dbInst* sinkInst, odb::dbITerm* sinkITerm, std::string antennaInstName);
         void fixAntennas(std::string antennaCellName);
+        void legalizePlacedCells();
         
         void setDB(unsigned idx) { _db = odb::dbDatabase::getDatabase(idx); }
         void setSelectedMetal (int metal) { selectedMetal = metal; }
@@ -94,6 +96,7 @@ private:
         Grid            *_grid = nullptr;
         bool            _verbose = false;
         antenna_checker::AntennaChecker *_arc = nullptr;
+        opendp::Opendp *_opendp = nullptr;
 
         std::map<std::string, odb::dbNet*> dbNets;
         std::map<std::string, std::vector<std::pair<int, std::vector<odb::dbITerm *>>>> antennaViolations;

@@ -1076,40 +1076,13 @@ void DBWrapper::fixAntennas(std::string antennaCellName) {
         }
 }
 
+void DBWrapper::legalizePlacedCells() {
+        _opendp = new opendp::Opendp();
+        _opendp->init(_db);
+        _opendp->setPaddingGlobal(2, 2);
+        _opendp->detailedPlacement(0);
+        _opendp->optimizeMirroring();
+        _opendp->checkPlacement(true);
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+}
