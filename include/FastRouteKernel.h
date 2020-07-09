@@ -178,6 +178,7 @@ private:
         void mergeResults(std::vector<FastRoute::NET> newRoute);
         void fixAntennaViolations();
         void restartFastRoute();
+        void restorePreviousCapacities();
 
 public:
         struct EST_ {

@@ -387,6 +387,8 @@ void FastRouteKernel::restartFastRoute() {
 
         initializeNets(true);
 
+        restorePreviousCapacities();
+
         _reFastRoute->initAuxVar();
 }
 
@@ -521,6 +523,42 @@ void FastRouteKernel::setCapacities() {
 
                 int newCapV = _grid->getVerticalEdgesCapacities()[l - 1] * 100;
                 _grid->updateVerticalEdgesCapacities(l-1, newCapV);
+        }
+}
+
+void FastRouteKernel::restorePreviousCapacities() {
+        int xGrids = _grid->getXGrids();
+        int yGrids = _grid->getYGrids();
+        
+        int numAdjustments = _grid->getNumLayers() * yGrids * xGrids;
+        int currCap, newCap;
+        bool isReduce;
+
+        numAdjustments *= 2;
+        _reFastRoute->setNumAdjustments(numAdjustments);
+
+        for (int layer = 1; layer <= _grid->getNumLayers(); layer++) {
+                if (_hCapacities[layer - 1] != 0) {
+                        for (int y = 1; y < yGrids; y++) {
+                                for (int x = 1; x < xGrids; x++) {
+                                        currCap = _reFastRoute->getEdgeCurrentResource(x - 1, y - 1, layer, x, y - 1, layer);
+                                        newCap = _fastRoute->getEdgeCurrentResource(x - 1, y - 1, layer, x, y - 1, layer);
+                                        
+                                        _reFastRoute->setEdgeCapacity(x - 1, y - 1, layer, x, y - 1, layer, newCap);
+                                }
+                        }
+                }
+
+                if (_vCapacities[layer - 1] != 0) {
+                        for (int x = 1; x < xGrids; x++) {
+                                for (int y = 1; y < yGrids; y++) {
+                                        currCap = _reFastRoute->getEdgeCurrentResource(x - 1, y - 1, layer, x - 1, y, layer);
+                                        newCap = _fastRoute->getEdgeCurrentResource(x - 1, y - 1, layer, x - 1, y, layer);
+
+                                        _reFastRoute->setEdgeCapacity(x - 1, y - 1, layer, x - 1, y, layer, newCap);
+                                }
+                        }
+                }
         }
 }
 

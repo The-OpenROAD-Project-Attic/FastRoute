@@ -796,6 +796,39 @@ int FT::getEdgeCapacity(long x1, long y1, int l1, long x2, long y2, int l2)
   return cap;
 }
 
+void FT::setEdgeCapacity(long x1, long y1, int l1, long x2, long y2, int l2, int newCap) {
+  const int k = l1 - 1;
+  int reduce = 0;
+
+  if (y1 == y2)  // horizontal edge
+  {
+    int grid = y1 * (xGrid - 1) + x1 + k * (xGrid - 1) * yGrid;
+    int currCap = h_edges3D[grid].cap;
+    if (newCap < currCap) {
+      reduce = currCap - newCap;
+      h_edges[grid].cap -= reduce;
+      h_edges[grid].red += reduce;
+    } else {
+      h_edges[grid].cap += (newCap - currCap);
+    }
+
+    h_edges3D[grid].cap = newCap;
+  } else if (x1 == x2)  // vertical edge
+  {
+    int grid = y1 * xGrid + x1 + k * xGrid * (yGrid - 1);
+    int currCap = v_edges3D[grid].cap;
+    if (newCap < currCap) {
+      reduce = currCap - newCap;
+      v_edges[grid].cap += reduce;
+      v_edges[grid].red -= reduce;
+    } else {
+      v_edges[grid].cap += (newCap - currCap);
+    }
+
+    v_edges3D[grid].cap = newCap;
+  }
+}
+
 void FT::initAuxVar()
 {
   treeOrderCong = NULL;
