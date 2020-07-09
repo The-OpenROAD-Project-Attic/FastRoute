@@ -819,8 +819,8 @@ void FT::setEdgeCapacity(long x1, long y1, int l1, long x2, long y2, int l2, int
     int currCap = v_edges3D[grid].cap;
     if (newCap < currCap) {
       reduce = currCap - newCap;
-      v_edges[grid].cap += reduce;
-      v_edges[grid].red -= reduce;
+      v_edges[grid].cap -= reduce;
+      v_edges[grid].red += reduce;
     } else {
       v_edges[grid].cap += (newCap - currCap);
     }
