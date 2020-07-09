@@ -1417,6 +1417,12 @@ void FastRouteKernel::addRemainingGuides(std::vector<FastRoute::NET> &globalRout
         allNets = _fastRoute->getNets();
         int localNetsId = allNets.size();
 
+        if (_reFastRoute) {
+                for (auto const& newRoute : _reFastRoute->getNets()) {
+                        allNets[newRoute.first] = newRoute.second;
+                }
+        }
+
         for (FastRoute::NET &netRoute : globalRoute) {
                 std::vector<FastRoute::PIN> &pins = allNets[netRoute.name];
 
