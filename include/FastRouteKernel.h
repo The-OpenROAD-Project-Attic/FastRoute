@@ -129,6 +129,8 @@ private:
         FT* _reFastRoute = nullptr;
         bool enableAntennaFlow = false;
         std::string diodeName;
+        int ***oldHCaps;
+        int ***oldVCaps;
 
         // temporary for congestion driven replace
         int _numAdjusts = 0;
@@ -178,6 +180,7 @@ private:
         void mergeResults(std::vector<FastRoute::NET> newRoute);
         void fixAntennaViolations();
         void restartFastRoute();
+        void getPreviousCapacities();
         void restorePreviousCapacities();
 
 public:

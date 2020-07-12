@@ -54,12 +54,14 @@
 #include "FastRouteKernel.h"
 #include "RcTreeBuilder.h"
 #include "include/FastRoute.h"
+#include "boost/multi_array.hpp"
 
 #include "openroad/Error.hh"
 
 namespace FastRoute {
 
 using ord::error;
+using boost::multi_array;
 
 FastRouteKernel::FastRouteKernel() {
         init();
@@ -385,6 +387,8 @@ void FastRouteKernel::restartFastRoute() {
                 _reFastRoute->addViaSpacing(1, l);
         }
 
+        getPreviousCapacities();
+
         initializeNets(true);
 
         restorePreviousCapacities();
@@ -436,10 +440,11 @@ void FastRouteKernel::fixAntennaViolations() {
         addLocalConnections(globalRoute);
 
         int violationsCnt = _dbWrapper->checkAntennaViolations(globalRoute, _maxRoutingLayer);
+        violationsCnt++;
         
         if (violationsCnt > 0) {
-                _dbWrapper->fixAntennas(diodeName);
-                _dbWrapper->legalizePlacedCells();
+                // _dbWrapper->fixAntennas(diodeName);
+                // _dbWrapper->legalizePlacedCells();
                 _netlist->resetNetlist();
                 restartFastRoute();
                 std::cout << "[INFO] #Nets to reroute: " << _reFastRoute->getNets().size() << "\n";
@@ -526,17 +531,62 @@ void FastRouteKernel::setCapacities() {
         }
 }
 
-void FastRouteKernel::restorePreviousCapacities() {
+void FastRouteKernel::getPreviousCapacities() {
+        int oldCap;
         int xGrids = _grid->getXGrids();
         int yGrids = _grid->getYGrids();
-        int newCap;
 
+        oldHCaps = new int**[_grid->getNumLayers()];
+        for (int l = 0; l < _grid->getNumLayers(); l++) {
+                oldHCaps[l] = new int*[yGrids];
+                for (int i = 0; i < yGrids; i++) {
+                        oldHCaps[l][i] = new int[xGrids];
+                }
+        }
+
+        oldVCaps = new int**[_grid->getNumLayers()];
+        for (int l = 0; l < _grid->getNumLayers(); l++) {
+                oldVCaps[l] = new int*[xGrids];
+                for (int i = 0; i < xGrids; i++) {
+                        oldVCaps[l][i] = new int[yGrids];
+                }
+        }
+
+        int oldResources = 0;
         for (int layer = 1; layer <= _grid->getNumLayers(); layer++) {
                 if (_hCapacities[layer - 1] != 0) {
                         for (int y = 1; y < yGrids; y++) {
                                 for (int x = 1; x < xGrids; x++) {
-                                        newCap = _fastRoute->getEdgeCurrentResource(x - 1, y - 1, layer, x, y - 1, layer);
-                                        
+                                        oldCap = _fastRoute->getEdgeCurrentResource(x - 1, y - 1, layer, x, y - 1, layer);
+                                        oldResources += oldCap;
+                                        oldHCaps[layer-1][y-1][x-1] = oldCap;
+                                }
+                        }
+                }
+
+                if (_vCapacities[layer - 1] != 0) {
+                        for (int x = 1; x < xGrids; x++) {
+                                for (int y = 1; y < yGrids; y++) {
+                                        oldCap = _fastRoute->getEdgeCurrentResource(x - 1, y - 1, layer, x - 1, y, layer);
+                                        oldResources += oldCap;
+                                        oldVCaps[layer-1][x-1][y-1] = oldCap;
+                                }
+                        }
+                }
+        }
+}
+
+void FastRouteKernel::restorePreviousCapacities() {
+        int newCap;
+        int xGrids = _grid->getXGrids();
+        int yGrids = _grid->getYGrids();
+
+        int newResources = 0;
+        for (int layer = 1; layer <= _grid->getNumLayers(); layer++) {
+                if (_hCapacities[layer - 1] != 0) {
+                        for (int y = 1; y < yGrids; y++) {
+                                for (int x = 1; x < xGrids; x++) {
+                                        newCap = oldHCaps[layer-1][y-1][x-1];
                                         _reFastRoute->setEdgeCapacity(x - 1, y - 1, layer, x, y - 1, layer, newCap);
                                 }
                         }
@@ -545,8 +595,7 @@ void FastRouteKernel::restorePreviousCapacities() {
                 if (_vCapacities[layer - 1] != 0) {
                         for (int x = 1; x < xGrids; x++) {
                                 for (int y = 1; y < yGrids; y++) {
-                                        newCap = _fastRoute->getEdgeCurrentResource(x - 1, y - 1, layer, x - 1, y, layer);
-
+                                        newCap = oldVCaps[layer-1][x-1][y-1];
                                         _reFastRoute->setEdgeCapacity(x - 1, y - 1, layer, x - 1, y, layer, newCap);
                                 }
                         }
