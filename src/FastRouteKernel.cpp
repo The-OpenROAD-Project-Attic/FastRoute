@@ -440,11 +440,10 @@ void FastRouteKernel::fixAntennaViolations() {
         addLocalConnections(globalRoute);
 
         int violationsCnt = _dbWrapper->checkAntennaViolations(globalRoute, _maxRoutingLayer);
-        violationsCnt++;
         
         if (violationsCnt > 0) {
-                // _dbWrapper->fixAntennas(diodeName);
-                // _dbWrapper->legalizePlacedCells();
+                _dbWrapper->fixAntennas(diodeName);
+                _dbWrapper->legalizePlacedCells();
                 _netlist->resetNetlist();
                 restartFastRoute();
                 std::cout << "[INFO] #Nets to reroute: " << _reFastRoute->getNets().size() << "\n";

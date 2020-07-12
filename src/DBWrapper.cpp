@@ -954,6 +954,56 @@ std::map<int, odb::dbTechVia*> DBWrapper::getDefaultVias(int maxRoutingLayer) {
         return defaultVias;
 }
 
+void DBWrapper::commitGlobalSegmentsToDB(std::vector<FastRoute::NET> routing, int maxRoutingLayer) {
+        odb::dbTech* tech = _db->getTech();
+        if (!tech) {
+                error("obd::dbTech not initialized\n");
+        }
+
+        odb::dbBlock* block = _chip->getBlock();
+        if (!block) {
+                error("odb::dbBlock not found\n");
+        }
+
+        std::map<int, odb::dbTechVia*> defaultVias = getDefaultVias(maxRoutingLayer);
+
+        for (FastRoute::NET netRoute : routing) {
+                std::string netName = netRoute.name;
+                odb::dbWire* wire = odb::dbWire::create(dbNets[netName]);
+                odb::dbWireEncoder wireEncoder;
+                wireEncoder.begin(wire);
+                odb::dbWireType wireType = odb::dbWireType::ROUTED;
+
+                for (FastRoute::ROUTE seg : netRoute.route) {
+                        if (std::abs(seg.initLayer - seg.finalLayer) > 1) {
+                                error("Global route segment not valid\n");
+                        }
+                        int x1 = seg.initX;
+                        int y1 = seg.initY;
+                        int x2 = seg.finalX;
+                        int y2 = seg.finalY;
+                        int l1 = seg.initLayer;
+                        int l2 = seg.finalLayer;
+
+                        odb::dbTechLayer* currLayer = tech->findRoutingLayer(l1);
+
+                        if (l1 == l2) { // Add wire
+                                if (x1 == x2 && y1 == y2)
+                                        continue;
+                                wireEncoder.newPath(currLayer, wireType);
+                                wireEncoder.addPoint(x1, y1);
+                                wireEncoder.addPoint(x2, y2);
+                        } else { // Add via
+                                int bottomLayer = (l1 < l2) ? l1 : l2;
+                                wireEncoder.newPath(currLayer, wireType);
+                                wireEncoder.addPoint(x1, y1);
+                                wireEncoder.addTechVia(defaultVias[bottomLayer]);
+                        }
+                }
+                wireEncoder.end();
+        }
+}
+
 int DBWrapper::checkAntennaViolations(std::vector<FastRoute::NET> routing, int maxRoutingLayer) {
         odb::dbTech* tech = _db->getTech();
         if (!tech) {

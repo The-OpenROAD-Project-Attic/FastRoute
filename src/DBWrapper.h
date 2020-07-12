@@ -81,6 +81,7 @@ public:
         float dbuToMeters(unsigned dbu);
         std::set<int> findTransitionLayers(int maxRoutingLayer);
         std::map<int, odb::dbTechVia*> getDefaultVias(int maxRoutingLayer);
+        void commitGlobalSegmentsToDB(std::vector<FastRoute::NET> routing, int maxRoutingLayer);
         int checkAntennaViolations(std::vector<FastRoute::NET> routing, int maxRoutingLayer);
         void insertDiode(odb::dbNet* net, std::string antennaCellName, odb::dbInst* sinkInst, odb::dbITerm* sinkITerm, std::string antennaInstName);
         void fixAntennas(std::string antennaCellName);
