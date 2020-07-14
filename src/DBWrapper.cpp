@@ -1099,14 +1099,18 @@ void DBWrapper::insertDiode(odb::dbNet* net,
         odb::dbSet<odb::dbMTerm> antennaMTerms = antennaMaster->getMTerms();
 
         int instLocX, instLocY;
-        sinkInst->getLocation(instLocX, instLocY);
+        odb::dbBox* sinkBBox = sinkInst->getBBox();
+        instLocX = sinkBBox->xMin();
+        instLocY = sinkBBox->yMin();
         odb::dbOrientType instOrient = sinkInst->getOrient();
 
         odb::dbInst* antennaInst = odb::dbInst::create(block, antennaMaster, antennaInstName.c_str());
         odb::dbITerm* antennaITerm = antennaInst->findITerm("A");
 
-        antennaInst->setLocation(instLocX, instLocY);
+        odb::dbBox* antennaBBox = antennaInst->getBBox();
+        int antennaWidth = antennaBBox->xMax() - antennaBBox->xMin();
         antennaInst->setOrient(instOrient);
+        antennaInst->setLocation(instLocX - antennaWidth, instLocY);
         antennaInst->setPlacementStatus(odb::dbPlacementStatus::PLACED);
         odb::dbITerm::connect(antennaITerm, net);
 }
