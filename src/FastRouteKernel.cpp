@@ -445,10 +445,10 @@ void FastRouteKernel::fixAntennaViolations() {
                 _dbWrapper->fixAntennas(diodeName);
                 _dbWrapper->legalizePlacedCells();
                 _netlist->resetNetlist();
-                restartFastRoute();
-                std::cout << "[INFO] #Nets to reroute: " << _reFastRoute->getNets().size() << "\n";
-                _reFastRoute->run(newRoute);
-                mergeResults(newRoute);
+                // restartFastRoute();
+                // std::cout << "[INFO] #Nets to reroute: " << _reFastRoute->getNets().size() << "\n";
+                // _reFastRoute->run(newRoute);
+                // mergeResults(newRoute);
         }
         std::cout << "Running antenna avoidance flow... Done!\n";
 }

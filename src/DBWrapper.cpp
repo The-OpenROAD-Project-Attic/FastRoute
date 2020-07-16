@@ -1111,7 +1111,9 @@ void DBWrapper::insertDiode(odb::dbNet* net,
         int antennaWidth = antennaBBox->xMax() - antennaBBox->xMin();
         antennaInst->setOrient(instOrient);
         antennaInst->setLocation(instLocX - antennaWidth, instLocY);
-        antennaInst->setPlacementStatus(odb::dbPlacementStatus::PLACED);
+        antennaInst->setPlacementStatus(odb::dbPlacementStatus::LOCKED);
+        sinkInst->setPlacementStatus(odb::dbPlacementStatus::LOCKED);
+
         odb::dbITerm::connect(antennaITerm, net);
 }
 
@@ -1133,9 +1135,9 @@ void DBWrapper::fixAntennas(std::string antennaCellName) {
 void DBWrapper::legalizePlacedCells() {
         _opendp = new opendp::Opendp();
         _opendp->init(_db);
-        _opendp->setPaddingGlobal(0, 0);
+        _opendp->setPaddingGlobal(2, 2);
         _opendp->detailedPlacement(0);
-        _opendp->checkPlacement(true);
+        _opendp->checkPlacement(false);
 }
 
 }
