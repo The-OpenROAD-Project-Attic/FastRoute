@@ -479,6 +479,7 @@ void FastRouteKernel::initializeNets() {
         
         for (Net net : _netlist->getNets()) {
                 float netAlpha = _alpha;
+                bool isClock = (net.getSignalType() == "CLOCK") ? true : false;
 
                 if (net.getNumPins() <= 1) {
                         continue;
@@ -608,7 +609,7 @@ void FastRouteKernel::initializeNets() {
                         netAlpha = _netsAlpha[net.getName()];
                 }
                 
-                _fastRoute->addNet(netName, idx, pins.size(), 1, grPins, netAlpha);
+                _fastRoute->addNet(netName, idx, pins.size(), 1, grPins, netAlpha, isClock);
                 idx++;
         }
 

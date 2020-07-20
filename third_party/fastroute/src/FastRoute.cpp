@@ -540,7 +540,8 @@ void FT::addNet(char* name,
                 int   nPins,
                 int   minWidth,
                 PIN   pins[],
-                float alpha)
+                float alpha,
+                bool isClock)
 {
   // std::cout << "Adding net " << name << "\n";
 
@@ -590,6 +591,7 @@ void FT::addNet(char* name,
     nets[newnetID]->pinY    = new short[pinInd];
     nets[newnetID]->pinL    = new short[pinInd];
     nets[newnetID]->alpha   = alpha;
+    nets[newnetID]->isClock = isClock;
 
     for (int j = 0; j < pinInd; j++) {
       nets[newnetID]->pinX[j] = pinXarray[j];
