@@ -85,7 +85,6 @@ void FastRouteKernel::init() {
         _maxRoutingLayer = -1;
         _unidirectionalRoute = 0;
         _fixLayer = 0;
-        _clockNetRouting = 0;
         _overflowIterations = 500;
         _pdRevForHighFanout = -1;
         _allowOverflow = 0;
@@ -231,11 +230,6 @@ void FastRouteKernel::startFastRoute() {
                 _dbWrapper->setSelectedMetal(_maxRoutingLayer);
         }
 
-        if (_clockNetRouting && _pdRev) {
-                _fastRoute->usePdRev();
-                _fastRoute->setAlpha(_alpha);
-        }
-
         if (_pdRevForHighFanout != -1) {
                 _fastRoute->setAlpha(_alpha);
         }
@@ -249,7 +243,6 @@ void FastRouteKernel::startFastRoute() {
         std::cout << "[PARAMS] Max routing layer: " << _maxRoutingLayer << "\n";
         std::cout << "[PARAMS] Global adjustment: " << _adjustment << "\n";
         std::cout << "[PARAMS] Unidirectional routing: " << _unidirectionalRoute << "\n";
-        std::cout << "[PARAMS] Clock net routing: " << _clockNetRouting << "\n";
         std::cout << "[PARAMS] Max routing length: " << _maxLengthMicrons << "um\n";
         std::cout << "[PARAMS] Grid origin: (" << _gridOrigin->getX() << ", " << _gridOrigin->getY() << ")\n";
         if (!_layerPitches.empty()) {
@@ -462,10 +455,6 @@ void FastRouteKernel::initializeNets() {
                 if (net.getNumPins() <= 1) {
                         continue;
                 }
-                
-                if (_clockNetRouting && net.getSignalType() != "CLOCK") {
-                        continue;
-                }
 
                 if (net.getNumPins() >= std::numeric_limits<short>::max()) {
                         continue;
@@ -491,10 +480,6 @@ void FastRouteKernel::initializeNets() {
 
                 if (net.getNumPins() > maxDegree) {
                         maxDegree = net.getNumPins();
-                }
-                
-                if (_clockNetRouting && net.getSignalType() != "CLOCK") {
-                        continue;
                 }
 
                 if (net.getNumPins() >= std::numeric_limits<short>::max()) {
@@ -1060,14 +1045,6 @@ void FastRouteKernel::setMaxRoutingLayer(const int maxLayer) {
 
 void FastRouteKernel::setUnidirectionalRoute(const bool unidirRoute) {
         _unidirectionalRoute = unidirRoute;
-}
-
-void FastRouteKernel::setClockNetRouting(const bool clockNetRouting) {
-        _clockNetRouting = clockNetRouting;
-}
-
-void FastRouteKernel::setPDRev(const bool pdRev) {
-        _pdRev = pdRev;
 }
 
 void FastRouteKernel::setAlpha(const float alpha) {

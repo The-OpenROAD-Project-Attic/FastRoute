@@ -1422,11 +1422,6 @@ int FT::run(std::vector<NET>& result)
   return (0);
 }
 
-void FT::usePdRev()
-{
-  pdRev = true;
-}
-
 void FT::setAlpha(float a)
 {
   alpha = a;

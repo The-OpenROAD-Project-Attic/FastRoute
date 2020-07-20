@@ -86,7 +86,6 @@ private:
         int _maxRoutingLayer;
         bool _unidirectionalRoute;
         int _fixLayer;
-        bool _clockNetRouting;
         unsigned _dbId;
         const int _selectedMetal = 3;
         const float transitionLayerAdjust = 0.6;
@@ -223,8 +222,6 @@ public:
         void setMinRoutingLayer(const int minLayer);
         void setMaxRoutingLayer(const int maxLayer);
         void setUnidirectionalRoute(const bool unidirRoute);
-        void setClockNetRouting(const bool clockNetRouting);
-        void setPDRev(const bool pdRev);
         void setAlpha(const float alpha);
         void setOutputFile(const std::string& outfile);
         void setPitchesInTile(const int pitchesInTile);

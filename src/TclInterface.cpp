@@ -88,14 +88,6 @@ void set_unidirectional_routing(bool unidirRouting) {
         fastRouteKernel->setUnidirectionalRoute(unidirRouting);
 }
 
-void set_pdrev(bool pdRev) {
-        fastRouteKernel->setPDRev(pdRev);
-}
-
-void set_clock_net_routing(bool clockNetRouting) {
-        fastRouteKernel->setClockNetRouting(clockNetRouting);
-}
-
 void set_alpha(float alpha) {
         fastRouteKernel->setAlpha(alpha);
 }

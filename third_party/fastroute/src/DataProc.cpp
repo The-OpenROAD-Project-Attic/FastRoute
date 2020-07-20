@@ -60,7 +60,6 @@ Edge *                h_edges, *v_edges;
 multi_array<float, 2> d1;
 multi_array<float, 2> d2;
 int                   layerOrientation;
-bool                  pdRev;
 float                 alpha;
 int                   verbose;
 int                   overflowIterations;
