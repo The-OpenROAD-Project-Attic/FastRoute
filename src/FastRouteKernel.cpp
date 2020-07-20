@@ -439,6 +439,7 @@ void FastRouteKernel::setSpacingsAndMinWidths() {
 }
 
 void FastRouteKernel::initializeNets() {
+        _dbWrapper->initClockNets();
         _dbWrapper->initNetlist();
         
         std::cout << "Checking pin placement...\n";

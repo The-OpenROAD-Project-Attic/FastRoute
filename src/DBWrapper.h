@@ -46,6 +46,10 @@
 #include "opendb/db.h"
 #include "opendb/dbShape.h"
 
+#include "db_sta/dbSta.hh"
+#include "sta/Clock.hh"
+#include "sta/Set.hh"
+
 // Forward declaration protects FastRoute code from any
 // header file from the DB. FastRoute code keeps independent.
 namespace odb{
@@ -69,7 +73,9 @@ public:
         void initRoutingTracks(std::vector<RoutingTracks>& allRoutingTracks, int maxLayer, std::map<int, float> layerPitches);
         void computeCapacities(int maxLayer, std::map<int, float> layerPitches);
         void computeSpacingsAndMinWidth(int maxLayer);
+        void addNet(odb::dbNet* net, Box dieArea, bool isClock);
         void initNetlist();
+        void initClockNets();
         void initObstacles();
         int computeMaxRoutingLayer();
         void getLayerRC(unsigned layerId, float& r, float& c);
@@ -80,7 +86,9 @@ public:
         void setDB(unsigned idx) { _db = odb::dbDatabase::getDatabase(idx); }
         void setSelectedMetal (int metal) { selectedMetal = metal; }
 private:
+        std::set<odb::dbNet*> _clockNets;
         int selectedMetal = 3;
+        sta::dbSta      *_openSta = nullptr;
         odb::dbDatabase *_db;
         odb::dbChip     *_chip;
         Netlist         *_netlist = nullptr;
