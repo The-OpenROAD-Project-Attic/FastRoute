@@ -877,14 +877,15 @@ void gen_brk_RSMT(Bool congestionDriven,
       coeffV = 1.2;
     }
     if (pdRevForHighFanout > 0 && nets[i]->deg >= pdRevForHighFanout && nets[i]->isClock) {
-      PD::PdRev             pd;
+      PD::PdRev *pd;
       std::vector<unsigned> vecX(x, x + d);
       std::vector<unsigned> vecY(y, y + d);
-      pd.setAlphaPDII(nets[i]->alpha);
-      pd.addNet(d, vecX, vecY);
-      pd.runPDII();
-      PD::Tree pdTree = pd.translateTree(0);
+      pd->setAlphaPDII(nets[i]->alpha);
+      pd->addNet(d, vecX, vecY);
+      pd->runPDII();
+      PD::Tree pdTree = pd->translateTree(0);
       rsmt            = pdToTree(pdTree);
+      delete pd;
     } else {
       if (congestionDriven) {
         // call congestion driven flute to generate RSMT
@@ -904,6 +905,11 @@ void gen_brk_RSMT(Bool congestionDriven,
 
     if (genTree) {
       copyStTree(i, rsmt);
+    }
+
+    if (nets[i]->deg != rsmt.deg) {
+      printf("[WARNING] Net degree differs from rsmt degree\n");
+      d = rsmt.deg;
     }
 
     if (congestionDriven) {
