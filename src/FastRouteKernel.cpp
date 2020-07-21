@@ -542,7 +542,7 @@ void FastRouteKernel::initializeNets() {
                                 }
                         }
 
-                        if (pin.isConnectedToPad()) { // If pin is connected to PAD, create a "fake" location in routing grid to avoid PAD obstacles
+                        if (pin.isConnectedToPad() || pin.isPort()) { // If pin is connected to PAD, create a "fake" location in routing grid to avoid PAD obstacles
                                 FastRoute::ROUTE pinConnection;
                                 pinConnection.initLayer = topLayer;
                                 pinConnection.finalLayer = topLayer;
