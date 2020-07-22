@@ -542,7 +542,8 @@ void FastRouteKernel::initializeNets() {
                                 }
                         }
 
-                        if (pin.isConnectedToPad() || pin.isPort()) { // If pin is connected to PAD, create a "fake" location in routing grid to avoid PAD obstacles
+                        if ((pin.isConnectedToPad() || pin.isPort()) && !_estimateRC ) { // If pin is connected to PAD, create a "fake" location in routing grid to avoid PAD obstacles
+                                std::cout << "Creating fake pin\n";
                                 FastRoute::ROUTE pinConnection;
                                 pinConnection.initLayer = topLayer;
                                 pinConnection.finalLayer = topLayer;
@@ -1138,6 +1139,10 @@ void FastRouteKernel::setPDRevForHighFanout(int pdRevForHighFanout) {
 
 void FastRouteKernel::setAllowOverflow(bool allowOverflow) {
         _allowOverflow = allowOverflow;
+}
+
+void FastRouteKernel::setEstimateRC(bool estimateRC) {
+        _estimateRC = estimateRC;
 }
 
 void FastRouteKernel::setReportCongestion(char * congestFile) {
@@ -2094,7 +2099,8 @@ SteinerTree FastRouteKernel::createSteinerTree(std::vector<ROUTE> route, std::ve
                         }
                 }
 
-                if (pin.isConnectedToPad() || pin.isPort()) { // If pin is connected to PAD, create a "fake" location in routing grid to avoid PAD obstacles
+                if ((pin.isConnectedToPad() || pin.isPort()) && !_estimateRC) { // If pin is connected to PAD, create a "fake" location in routing grid to avoid PAD obstacles
+                        std::cout << "Creating fake pin\n";
                         FastRoute::ROUTE pinConnection;
                         pinConnection.initLayer = topLayer;
                         pinConnection.finalLayer = topLayer;
