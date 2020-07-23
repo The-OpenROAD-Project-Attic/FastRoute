@@ -553,7 +553,8 @@ void FastRouteKernel::initializeNets() {
                                 }
                         }
 
-                        if (pin.isConnectedToPad()) { // If pin is connected to PAD, create a "fake" location in routing grid to avoid PAD obstacles
+                        if ((pin.isConnectedToPad() || pin.isPort()) && !_estimateRC ) { // If pin is connected to PAD, create a "fake" location in routing grid to avoid PAD obstacles
+                                std::cout << "Creating fake pin\n";
                                 FastRoute::ROUTE pinConnection;
                                 pinConnection.initLayer = topLayer;
                                 pinConnection.finalLayer = topLayer;
@@ -1149,6 +1150,10 @@ void FastRouteKernel::setPDRevForHighFanout(int pdRevForHighFanout) {
 
 void FastRouteKernel::setAllowOverflow(bool allowOverflow) {
         _allowOverflow = allowOverflow;
+}
+
+void FastRouteKernel::setEstimateRC(bool estimateRC) {
+        _estimateRC = estimateRC;
 }
 
 void FastRouteKernel::setReportCongestion(char * congestFile) {
@@ -2082,6 +2087,7 @@ SteinerTree FastRouteKernel::createSteinerTree(std::vector<ROUTE> route, std::ve
         for (Pin pin : pins) {
                 Coordinate pinPosition;
                 int topLayer = pin.getTopLayer();
+                RoutingLayer layer = getRoutingLayerByIndex(topLayer);
 
                 std::vector<Box> pinBoxes = pin.getBoxes().at(topLayer);
                 std::vector<Coordinate> pinPositionsOnGrid;
@@ -2101,6 +2107,49 @@ SteinerTree FastRouteKernel::createSteinerTree(std::vector<ROUTE> route, std::ve
                         if (equals > votes) {
                                 pinPosition = pos;
                                 votes = equals;
+                        }
+                }
+
+                if ((pin.isConnectedToPad() || pin.isPort()) && !_estimateRC) { // If pin is connected to PAD, create a "fake" location in routing grid to avoid PAD obstacles
+                        std::cout << "Creating fake pin\n";
+                        FastRoute::ROUTE pinConnection;
+                        pinConnection.initLayer = topLayer;
+                        pinConnection.finalLayer = topLayer;
+
+                        if (layer.getPreferredDirection() == RoutingLayer::HORIZONTAL) {
+                                pinConnection.finalX = pinPosition.getX();
+                                pinConnection.initY = pinPosition.getY();
+                                pinConnection.finalY = pinPosition.getY();
+
+                                DBU newXPosition;
+                                if (pin.getOrientation() == Orientation::ORIENT_WEST) {
+                                        newXPosition = pinPosition.getX() + (_gcellsOffset * _grid->getTileWidth());
+                                        pinConnection.initX = newXPosition;
+                                        pinPosition.setX(newXPosition);
+                                } else if (pin.getOrientation() == Orientation::ORIENT_EAST) {
+                                        newXPosition = pinPosition.getX() - (_gcellsOffset * _grid->getTileWidth());
+                                        pinConnection.initX = newXPosition;
+                                        pinPosition.setX(newXPosition);
+                                } else {
+                                        std::cout << "[WARNING] Pin " << pin.getName() << " has invalid orientation\n";
+                                }
+                        } else {
+                                pinConnection.initX = pinPosition.getX();
+                                pinConnection.finalX = pinPosition.getX();
+                                pinConnection.finalY = pinPosition.getY();
+
+                                DBU newYPosition;
+                                if (pin.getOrientation() == Orientation::ORIENT_SOUTH) {
+                                        newYPosition = pinPosition.getY() + (_gcellsOffset * _grid->getTileHeight());
+                                        pinConnection.initY = newYPosition;
+                                        pinPosition.setY(newYPosition);
+                                } else if (pin.getOrientation() == Orientation::ORIENT_NORTH) {
+                                        newYPosition = pinPosition.getY() - (_gcellsOffset * _grid->getTileHeight());
+                                        pinConnection.initY = newYPosition;
+                                        pinPosition.setY(newYPosition);
+                                } else {
+                                        std::cout << "[WARNING] Pin " << pin.getName() << " has invalid orientation\n";
+                                }
                         }
                 }
 

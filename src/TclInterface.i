@@ -85,6 +85,8 @@ extern void set_seed(unsigned seed);
 
 extern void set_layer_pitch(int layer, float pitch);
 
+extern void set_estimate_rc();
+
 extern void estimate_rc();
 
 extern void start_fastroute();

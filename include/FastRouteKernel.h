@@ -94,6 +94,7 @@ private:
         int _overflowIterations = 50;
         int _pdRevForHighFanout = -1;
         bool _allowOverflow = false;
+        bool _estimateRC = false;
         bool _reportCongest;
         std::vector<int> _vCapacities;
         std::vector<int> _hCapacities;
@@ -240,6 +241,7 @@ public:
         void setGridOrigin(long x, long y);
         void setPDRevForHighFanout(int pdRevForHighFanout);
         void setAllowOverflow(bool allowOverflow);
+        void setEstimateRC(bool estimateRC);
         void setReportCongestion(char * congestFile);
         void printGrid();
         void printHeader();
