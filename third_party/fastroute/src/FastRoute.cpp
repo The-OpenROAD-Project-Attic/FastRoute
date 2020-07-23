@@ -726,7 +726,7 @@ void FT::addAdjustment(long x1,
     int reduce;
 
     if (((int) cap - reducedCap) < 0) {
-      if (isReduce) {
+      if (isReduce && verbose > 1) {
         std::cout << "[WARNING] Underflow in reduce\n";
         std::cout << "[WARNING] cap, reducedCap: " << cap << ", " << reducedCap
                   << "\n";
@@ -755,7 +755,7 @@ void FT::addAdjustment(long x1,
     int reduce;
 
     if (((int) cap - reducedCap) < 0) {
-      if (isReduce) {
+      if (isReduce && verbose > 1) {
         std::cout << "[WARNING] Underflow in reduce\n";
         std::cout << "[WARNING] cap, reducedCap: " << cap << ", " << reducedCap
                   << "\n";
@@ -796,6 +796,32 @@ int FT::getEdgeCapacity(long x1, long y1, int l1, long x2, long y2, int l2)
   }
 
   return cap;
+}
+
+void FT::setEdgeCapacity(long x1, long y1, int l1, long x2, long y2, int l2, int newCap) {
+  const int k = l1 - 1;
+  int grid;
+  int reduce;
+
+  if (y1 == y2)  // horizontal edge
+  {
+    grid = y1 * (xGrid - 1) + x1 + k * (xGrid - 1) * yGrid;
+    int currCap = h_edges3D[grid].cap;
+    h_edges3D[grid].cap = newCap;
+
+    grid = y1 * (xGrid - 1) + x1;
+    reduce = currCap - newCap;
+    h_edges[grid].cap -= reduce;
+  } else if (x1 == x2)  // vertical edge
+  {
+    grid = y1 * xGrid + x1 + k * xGrid * (yGrid - 1);
+    int currCap = v_edges3D[grid].cap;
+    v_edges3D[grid].cap = newCap;
+
+    grid = y1 * xGrid + x1;
+    reduce = currCap - newCap;
+    v_edges[grid].cap -= reduce;
+  }
 }
 
 void FT::initAuxVar()
