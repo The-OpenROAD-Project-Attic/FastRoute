@@ -47,17 +47,9 @@
 
 namespace FastRoute {
 
-RcTreeBuilder::RcTreeBuilder(Net& net, SteinerTree& steinerTree, Grid& grid, DBWrapper& dbWrapper) :
-                             _net(&net), _steinerTree(&steinerTree), _grid(&grid),
-                             _dbWrapper(&dbWrapper) {
-  //  _debug = true;
-}
-
-void RcTreeBuilder::initStaData() {
-        // references global variable - huge no no - cherry
-	ord::OpenRoad* openRoad = ord::OpenRoad::openRoad();
-        sta::dbSta* dbSta = openRoad->getSta();
-
+RcTreeBuilder::RcTreeBuilder(ord::OpenRoad *openroad, DBWrapper* dbWrapper) {
+        _dbWrapper = dbWrapper;
+        sta::dbSta* dbSta = openroad->getSta();
         // Init analysis point
         _corner = dbSta->cmdCorner();
         sta::MinMax* minMax = sta::MinMax::max();
@@ -70,14 +62,16 @@ void RcTreeBuilder::initStaData() {
         _parasitics = dbSta->parasitics();
 
         // Init network
-        _network = openRoad->getDbNetwork();
+        _network = openroad->getDbNetwork();
 
         // Init units
         _units = dbSta->units();
 }
 
-void RcTreeBuilder::run() {
-        initStaData();
+void RcTreeBuilder::run(Net& net, SteinerTree& steinerTree, Grid& grid) {
+    _net = &net;
+    _steinerTree = &steinerTree;
+    _grid = &grid;
         makeParasiticNetwork();
         computeGlobalParasitics();
         computeLocalParasitics();

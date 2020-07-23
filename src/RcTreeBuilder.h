@@ -52,13 +52,16 @@ namespace sta {
         class Units;
 }
 
+namespace ord {
+class OpenRoad;
+}
+
 namespace FastRoute {
 
 class RcTreeBuilder {
 public:
-        RcTreeBuilder(Net& net, SteinerTree& steinerTree, Grid &grid,
-                      DBWrapper& dbWrapper);
-        void run();
+        RcTreeBuilder(ord::OpenRoad *openroad, DBWrapper* dbWrapper);
+        void run(Net& net, SteinerTree& steinerTree, Grid &grid);
         void reportParasitics();
 
 protected:
