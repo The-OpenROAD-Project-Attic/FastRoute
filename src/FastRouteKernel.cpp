@@ -319,7 +319,6 @@ void FastRouteKernel::startFastRoute() {
                 }
         }
 
-        _fastRoute->initAuxVar();
         std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
  
         if (_verbose > 0)       
@@ -330,17 +329,23 @@ void FastRouteKernel::runFastRoute() {
         std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
         
         std::cout << "Running FastRoute...\n\n";
+        _fastRoute->initAuxVar();
         if (_clockNetRouteFlow) {
                 std::vector<FastRoute::NET> clockNetsRoute;
                 _fastRoute->setVerbose(0);
                 _fastRoute->run(clockNetsRoute);
                 addRemainingGuides(clockNetsRoute);
+
+                getPreviousCapacities();
                 
                 resetResources();
                 _onlyClockNets = false;
                 _onlySignalNets = true;
 
                 startFastRoute();
+                restorePreviousCapacities();
+
+                _fastRoute->initAuxVar();
                 _fastRoute->run(*_result);
                 addRemainingGuides(*_result);
 
@@ -437,6 +442,72 @@ void FastRouteKernel::setCapacities() {
 
                 int newCapV = _grid->getVerticalEdgesCapacities()[l - 1] * 100;
                 _grid->updateVerticalEdgesCapacities(l-1, newCapV);
+        }
+}
+
+void FastRouteKernel::getPreviousCapacities() {
+        int oldUsage;
+        int xGrids = _grid->getXGrids();
+        int yGrids = _grid->getYGrids();
+
+        oldHUsages = new int**[_grid->getNumLayers()];
+        for (int l = 0; l < _grid->getNumLayers(); l++) {
+                oldHUsages[l] = new int*[yGrids];
+                for (int i = 0; i < yGrids; i++) {
+                        oldHUsages[l][i] = new int[xGrids];
+                }
+        }
+
+        oldVUsages = new int**[_grid->getNumLayers()];
+        for (int l = 0; l < _grid->getNumLayers(); l++) {
+                oldVUsages[l] = new int*[xGrids];
+                for (int i = 0; i < xGrids; i++) {
+                        oldVUsages[l][i] = new int[yGrids];
+                }
+        }
+
+        int oldTotalUsage = 0;
+        for (int layer = 1; layer <= _grid->getNumLayers(); layer++) {
+                for (int y = 1; y < yGrids; y++) {
+                        for (int x = 1; x < xGrids; x++) {
+                                oldUsage = _fastRoute->getEdgeCurrentUsage(x - 1, y - 1, layer, x, y - 1, layer);
+                                oldTotalUsage += oldUsage;
+                                oldHUsages[layer-1][y-1][x-1] = oldUsage;
+                        }
+                }
+
+                for (int x = 1; x < xGrids; x++) {
+                        for (int y = 1; y < yGrids; y++) {
+                                oldUsage = _fastRoute->getEdgeCurrentUsage(x - 1, y - 1, layer, x - 1, y, layer);
+                                oldTotalUsage += oldUsage;
+                                oldVUsages[layer-1][x-1][y-1] = oldUsage;
+                        }
+                }
+        }
+}
+
+void FastRouteKernel::restorePreviousCapacities() {
+        int oldUsage;
+        int xGrids = _grid->getXGrids();
+        int yGrids = _grid->getYGrids();
+
+        int newTotalUsage = 0;
+        for (int layer = 1; layer <= _grid->getNumLayers(); layer++) {
+                for (int y = 1; y < yGrids; y++) {
+                        for (int x = 1; x < xGrids; x++) {
+                                oldUsage = oldHUsages[layer-1][y-1][x-1];
+                                newTotalUsage += oldUsage;
+                                _fastRoute->setEdgeUsage(x - 1, y - 1, layer, x, y - 1, layer, oldUsage);
+                        }
+                }
+
+                for (int x = 1; x < xGrids; x++) {
+                        for (int y = 1; y < yGrids; y++) {
+                                oldUsage = oldVUsages[layer-1][x-1][y-1];
+                                newTotalUsage += oldUsage;
+                                _fastRoute->setEdgeUsage(x - 1, y - 1, layer, x - 1, y, layer, oldUsage);
+                        }
+                }
         }
 }
 

@@ -119,8 +119,8 @@ private:
         float _alpha;
         int _verbose;
         std::map<std::string, float> _netsAlpha;
-        bool _clockNetRouteFlow = true;
-        bool _onlyClockNets = true;
+        bool _clockNetRouteFlow = false;
+        bool _onlyClockNets = false;
         bool _onlySignalNets = false;
 
         // Antenna variables
@@ -128,6 +128,8 @@ private:
         std::map<int, float> _layersMaxLengthMicrons;
         long _maxLengthDBU = -1;
         std::map<int, long> _layersMaxLengthDBU;
+        int ***oldHUsages;
+        int ***oldVUsages;
 
         // temporary for congestion driven replace
         int _numAdjusts = 0;
@@ -173,6 +175,8 @@ private:
         void fixLongSegments();
         SteinerTree createSteinerTree(std::vector<ROUTE> route, std::vector<Pin> pins);
         bool checkSteinerTree(SteinerTree sTree);
+        void getPreviousCapacities();
+        void restorePreviousCapacities();
 
 public:
         struct EST_ {
