@@ -119,6 +119,9 @@ private:
         float _alpha;
         int _verbose;
         std::map<std::string, float> _netsAlpha;
+        bool _clockNetRouteFlow = true;
+        bool _onlyClockNets = true;
+        bool _onlySignalNets = false;
 
         // Antenna variables
         float _maxLengthMicrons = -1;

@@ -330,7 +330,25 @@ void FastRouteKernel::runFastRoute() {
         std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
         
         std::cout << "Running FastRoute...\n\n";
-        _fastRoute->run(*_result);
+        if (_clockNetRouteFlow) {
+                std::vector<FastRoute::NET> clockNetsRoute;
+                _fastRoute->setVerbose(0);
+                _fastRoute->run(clockNetsRoute);
+                addRemainingGuides(clockNetsRoute);
+                
+                resetResources();
+                _onlyClockNets = false;
+                _onlySignalNets = true;
+
+                startFastRoute();
+                _fastRoute->run(*_result);
+                addRemainingGuides(*_result);
+
+                _result->insert(_result->begin(), clockNetsRoute.begin(), clockNetsRoute.end());
+        } else {
+                _fastRoute->run(*_result);
+                addRemainingGuides(*_result);
+        }
         std::cout << "Running FastRoute... Done!\n";
         
         std::cout << " > Fixing long segments...\n";
@@ -354,7 +372,6 @@ void FastRouteKernel::runFastRoute() {
 
 void FastRouteKernel::estimateRC() {
         runFastRoute();
-        addRemainingGuides(*_result);
         for (FastRoute::NET &netRoute : *_result) {
                 mergeSegments(netRoute);
 
@@ -399,7 +416,7 @@ void FastRouteKernel::initRoutingTracks() {
 
 void FastRouteKernel::setCapacities() {
         for (int l = 1; l <= _grid->getNumLayers(); l++) {
-                if (l < _minRoutingLayer || l > _maxRoutingLayer) {
+                if (l < _minRoutingLayer || l > _maxRoutingLayer || (_onlyClockNets && l < 5)) {
                         _fastRoute->addHCapacity(0, l);
                         _fastRoute->addVCapacity(0, l);
 
@@ -460,6 +477,14 @@ void FastRouteKernel::initializeNets() {
                         continue;
                 }
 
+                if (_onlyClockNets && net.getSignalType() != "CLOCK") {
+                        continue;
+                }
+
+                if (_onlySignalNets && net.getSignalType() == "CLOCK") {
+                        continue;
+                }
+
                 validNets++;
         }
 
@@ -480,6 +505,14 @@ void FastRouteKernel::initializeNets() {
 
                 if (net.getNumPins() > maxDegree) {
                         maxDegree = net.getNumPins();
+                }
+
+                if (_onlyClockNets && net.getSignalType() != "CLOCK") {
+                        continue;
+                }
+
+                if (_onlySignalNets && net.getSignalType() == "CLOCK") {
+                        continue;
                 }
 
                 if (net.getNumPins() >= std::numeric_limits<short>::max()) {
@@ -1142,7 +1175,8 @@ void FastRouteKernel::writeGuides() {
                 error("Guides file could not be open\n");
         }
         RoutingLayer phLayerF;
-        addRemainingGuides(*_result);
+        std::cout << "Results size: " << _result->size() << "\n";
+        std::cout << "Results size: " << _result->size() << "\n";
         connectPadPins(*_result);
 
         int offsetX = _gridOrigin->getX();
@@ -1972,7 +2006,6 @@ void FastRouteKernel::fixLongSegments() {
         int fixedSegs = 0;
         int possibleViols = 0;
 
-        addRemainingGuides(*_result);
         for (FastRoute::NET &netRoute : *_result) {
                 mergeSegments(netRoute);
                 bool possibleViolation = false;
