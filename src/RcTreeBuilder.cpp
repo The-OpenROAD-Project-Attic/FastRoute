@@ -38,7 +38,8 @@
 #include "openroad/OpenRoad.hh"
 #include "db_sta/dbSta.hh"
 #include "sta/Corner.hh"
-#include "sta/Network.hh"
+#include "db_sta/dbNetwork.hh"
+#include "sta/Sdc.hh"
 #include "sta/Parasitics.hh"
 #include "sta/ParasiticsClass.hh"
 #include "sta/Units.hh"
@@ -49,26 +50,27 @@ namespace FastRoute {
 RcTreeBuilder::RcTreeBuilder(Net& net, SteinerTree& steinerTree, Grid& grid, DBWrapper& dbWrapper) :
                              _net(&net), _steinerTree(&steinerTree), _grid(&grid),
                              _dbWrapper(&dbWrapper) {
+  //  _debug = true;
 }
 
 void RcTreeBuilder::initStaData() {
-        ord::OpenRoad* openRoad = ord::OpenRoad::openRoad();
+        // references global variable - huge no no - cherry
+	ord::OpenRoad* openRoad = ord::OpenRoad::openRoad();
         sta::dbSta* dbSta = openRoad->getSta();
 
         // Init analysis point
-        sta::Corner* corner = dbSta->corners()->findCorner(0);
-        if (!corner) {
-                std::cout << "[ERROR] Corner not found!\n";
-                std::exit(1);
-        }
+        _corner = dbSta->cmdCorner();
         sta::MinMax* minMax = sta::MinMax::max();
-        _analysisPoint = corner->findParasiticAnalysisPt(minMax);
+        _analysisPoint = _corner->findParasiticAnalysisPt(minMax);
+
+	sta::Sdc *sdc = dbSta->sdc();
+	_op_cond = sdc->operatingConditions(minMax);
 
         // Init parasitics
         _parasitics = dbSta->parasitics();
 
         // Init network
-        _network = dbSta->network();
+        _network = openRoad->getDbNetwork();
 
         // Init units
         _units = dbSta->units();
@@ -79,6 +81,7 @@ void RcTreeBuilder::run() {
         makeParasiticNetwork();
         computeGlobalParasitics();
         computeLocalParasitics();
+	reduceParasiticNetwork();
 
         if (_debug) {
                 reportParasitics();
@@ -87,8 +90,18 @@ void RcTreeBuilder::run() {
 }
 
 void RcTreeBuilder::makeParasiticNetwork() {
+  // This will definitely fail if the net name has escapes.
+  // This SHOULD look more like this. No names! -cherry
+  // _staNet = _network->dbToSta(_net);
         _staNet = _network->findNet(_net->getName().c_str());
         _parasitic = _parasitics->makeParasiticNetwork(_staNet, false, _analysisPoint);
+}
+
+void RcTreeBuilder::reduceParasiticNetwork() {
+  sta::ReduceParasiticsTo reduce_to = sta::ReduceParasiticsTo::pi_elmore;
+  _parasitics->reduceTo(_parasitic, _staNet, reduce_to, _op_cond,
+			_corner, sta::MinMax::max(), _analysisPoint);
+  _parasitics->deleteParasiticNetwork(_staNet, _analysisPoint);
 }
 
 void RcTreeBuilder::createSteinerNodes() {

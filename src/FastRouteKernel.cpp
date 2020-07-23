@@ -55,7 +55,10 @@
 #include "RcTreeBuilder.h"
 #include "include/FastRoute.h"
 
+#include "openroad/OpenRoad.hh"
 #include "openroad/Error.hh"
+#include "sta/Parasitics.hh"
+#include "db_sta/dbSta.hh"
 
 namespace FastRoute {
 
@@ -362,6 +365,13 @@ void FastRouteKernel::runFastRoute() {
 void FastRouteKernel::estimateRC() {
         runFastRoute();
         addRemainingGuides(*_result);
+
+        // references global variable - huge no no - cherry
+	ord::OpenRoad* openRoad = ord::OpenRoad::openRoad();
+        sta::dbSta* dbSta = openRoad->getSta();
+	sta::Parasitics *parasitics = dbSta->parasitics();
+	parasitics->deleteParasitics();
+
         for (FastRoute::NET &netRoute : *_result) {
                 mergeSegments(netRoute);
 
@@ -376,7 +386,8 @@ void FastRouteKernel::estimateRC() {
                         continue;
                 }
 
-                RcTreeBuilder builder(net, sTree, *_grid, *_dbWrapper);
+                // This should be initialized once outside the loop -cherry
+		RcTreeBuilder builder(net, sTree, *_grid, *_dbWrapper);
                 builder.run();
         }
 }
