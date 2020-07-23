@@ -55,7 +55,10 @@
 #include "RcTreeBuilder.h"
 #include "include/FastRoute.h"
 
+#include "openroad/OpenRoad.hh"
 #include "openroad/Error.hh"
+#include "sta/Parasitics.hh"
+#include "db_sta/dbSta.hh"
 
 namespace FastRoute {
 
@@ -63,6 +66,12 @@ using ord::error;
 
 FastRouteKernel::FastRouteKernel() {
         init();
+}
+
+void FastRouteKernel::init(ord::OpenRoad *openroad) {
+  _openroad = openroad;
+  // This should be using a pointer to the db, not an object id -cherry
+  _dbId = openroad->getDb()->getId();
 }
 
 void FastRouteKernel::init() {
@@ -362,6 +371,12 @@ void FastRouteKernel::runFastRoute() {
 void FastRouteKernel::estimateRC() {
         runFastRoute();
         addRemainingGuides(*_result);
+
+        sta::dbSta* dbSta = _openroad->getSta();
+	sta::Parasitics *parasitics = dbSta->parasitics();
+	parasitics->deleteParasitics();
+
+	RcTreeBuilder builder(_openroad, _dbWrapper);
         for (FastRoute::NET &netRoute : *_result) {
                 mergeSegments(netRoute);
 
@@ -370,14 +385,12 @@ void FastRouteKernel::estimateRC() {
                 std::vector<Pin> pins = net.getPins();
                 std::vector<ROUTE> route = netRoute.route;
                 sTree = createSteinerTree(route, pins);
-                if (!checkSteinerTree(sTree)) {
+                if (checkSteinerTree(sTree))
+		  builder.run(net, sTree, *_grid);
+		else {
                         std::cout << " [ERROR] Error on Steiner tree of net "
                                   << netRoute.name << "\n";
-                        continue;
                 }
-
-                RcTreeBuilder builder(net, sTree, *_grid, *_dbWrapper);
-                builder.run();
         }
 }
 
@@ -1079,10 +1092,6 @@ void FastRouteKernel::setOutputFile(const std::string& outfile) {
 
 void FastRouteKernel::setPitchesInTile(const int pitchesInTile) {
         _grid->setPitchesInTile(pitchesInTile);
-}
-
-void FastRouteKernel::setDbId(unsigned idx) {
-        _dbId = idx;
 }
 
 void FastRouteKernel::setSeed(unsigned seed) {

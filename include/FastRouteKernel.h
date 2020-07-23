@@ -48,6 +48,10 @@
 #include <istream>
 #include <map>
 
+namespace ord {
+class OpenRoad;
+}
+
 namespace FastRoute {
 
 class FT;
@@ -72,6 +76,7 @@ protected:
         std::vector<RoutingTracks> *_allRoutingTracks = nullptr;
 
 private:
+        ord::OpenRoad *_openroad;
         // Objects variables
         DBWrapper* _dbWrapper = nullptr;
         FT* _fastRoute = nullptr;
@@ -216,6 +221,7 @@ public:
 
         FastRouteKernel();
         ~FastRouteKernel();
+        void init(ord::OpenRoad *openroad);
         void init();
         void reset();
         void resetResources();
@@ -229,7 +235,6 @@ public:
         void setAlpha(const float alpha);
         void setOutputFile(const std::string& outfile);
         void setPitchesInTile(const int pitchesInTile);
-        void setDbId(unsigned idx);
         void setSeed(unsigned seed);
         unsigned getDbId();
         void addLayerAdjustment(int layer, float reductionPercentage);

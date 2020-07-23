@@ -72,8 +72,7 @@ void initFastRoute(OpenRoad *openroad)
         Fastroute_Init(tcl_interp);
         sta::evalTclInit(tcl_interp, sta::fastroute_tcl_inits);
         
-        unsigned dbId = openroad->getDb()->getId();
-        FastRoute::fastRouteKernel->setDbId(dbId);
+	FastRoute::fastRouteKernel->init(openroad);
 }
 
 }
