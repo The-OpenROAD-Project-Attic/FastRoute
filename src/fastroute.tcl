@@ -55,6 +55,8 @@ sta::define_cmd_args "fastroute" {[-output_file out_file] \
                                            [-seed seed] \
                                            [-report_congestion congest_file] \
                                            [-layers_pitches layers_pitches] \
+                                           [-clock_nets_route_flow] \
+                                           [-min_layer_for_clock_net min_clock_layer] \
 }
 
 proc fastroute { args } {
@@ -62,8 +64,9 @@ proc fastroute { args } {
     keys {-output_file -capacity_adjustment -min_routing_layer -max_routing_layer \
           -tile_size -alpha -verbose -layers_adjustments \
           -regions_adjustments -nets_alphas_priorities -overflow_iterations \
-          -grid_origin -pdrev_for_high_fanout -seed -report_congestion -layers_pitches -max_routing_length -max_length_per_layer} \
-    flags {-unidirectional_routing -allow_overflow -estimateRC} \
+          -grid_origin -pdrev_for_high_fanout -seed -report_congestion -layers_pitches \
+          -max_routing_length -max_length_per_layer -min_layer_for_clock_net} \
+    flags {-unidirectional_routing -allow_overflow -estimateRC -clock_nets_route_flow} \
 
   if { [info exists keys(-output_file)] } {
     set out_file $keys(-output_file)
@@ -224,6 +227,21 @@ proc fastroute { args } {
 
       FastRoute::set_layer_pitch $layer $pitch
     }
+  }
+
+  if { [info exists flags(-clock_nets_route_flow)] } {
+    FastRoute::set_clock_nets_route_flow 1
+  } else {
+    FastRoute::set_clock_nets_route_flow 0
+  }
+
+  set min_clock_layer 6
+  if { [info exists keys(-min_layer_for_clock_net)] } {
+    set min_clock_layer $keys(-min_layer_for_clock_net)
+    FastRoute::set_min_layer_for_clock $min_clock_layer
+  } elseif { [info exists flags(-clock_nets_route_flow)] } {
+    puts "\[WARNING\] Using the default min layer for clock nets routing (layer $min_clock_layer)"
+    FastRoute::set_min_layer_for_clock $min_clock_layer
   }
 
   for {set layer 1} {$layer <= $max_layer} {set layer [expr $layer+1]} {

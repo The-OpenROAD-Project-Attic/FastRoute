@@ -64,6 +64,8 @@ void set_pdrev_for_high_fanout(int pdRevForHighFanout);
 void set_allow_overflow(bool allowOverflow);
 void set_seed(unsigned seed);
 void set_layer_pitch(int layer, float pitch);
+void set_clock_nets_route_flow(bool clock_flow);
+void set_min_layer_for_clock(int minLayer);
 
 // Run
 void start_fastroute();

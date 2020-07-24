@@ -330,7 +330,7 @@ void FastRouteKernel::runFastRoute() {
         
         std::cout << "Running FastRoute...\n\n";
         _fastRoute->initAuxVar();
-        if (_clockNetRouteFlow) {
+        if (_clockNetsRouteFlow) {
                 std::vector<FastRoute::NET> clockNetsRoute;
                 _fastRoute->setVerbose(0);
                 _fastRoute->run(clockNetsRoute);
@@ -421,7 +421,7 @@ void FastRouteKernel::initRoutingTracks() {
 
 void FastRouteKernel::setCapacities() {
         for (int l = 1; l <= _grid->getNumLayers(); l++) {
-                if (l < _minRoutingLayer || l > _maxRoutingLayer || (_onlyClockNets && l < 5)) {
+                if (l < _minRoutingLayer || l > _maxRoutingLayer || (_onlyClockNets && l < _minLayerForClock)) {
                         _fastRoute->addHCapacity(0, l);
                         _fastRoute->addVCapacity(0, l);
 
@@ -1235,6 +1235,16 @@ void FastRouteKernel::setMaxLength(float maxLength) {
 
 void FastRouteKernel::addLayerMaxLength(int layer, float length) {
         _layersMaxLengthMicrons[layer] = length;
+}
+
+void FastRouteKernel::setClockNetsRouteFlow(bool clockFlow) {
+        _clockNetsRouteFlow = clockFlow;
+        _onlyClockNets = clockFlow;
+        _onlySignalNets = false;
+}
+
+void FastRouteKernel::setMinLayerForClock(int minLayer) {
+        _minLayerForClock = minLayer;
 }
 
 void FastRouteKernel::writeGuides() {

@@ -119,9 +119,10 @@ private:
         float _alpha;
         int _verbose;
         std::map<std::string, float> _netsAlpha;
-        bool _clockNetRouteFlow = false;
+        bool _clockNetsRouteFlow = false;
         bool _onlyClockNets = false;
         bool _onlySignalNets = false;
+        int _minLayerForClock;
 
         // Antenna variables
         float _maxLengthMicrons = -1;
@@ -249,6 +250,8 @@ public:
         void printHeader();
         void setMaxLength (float maxLength);
         void addLayerMaxLength (int layer, float length);
+        void setClockNetsRouteFlow(bool clockFlow);
+        void setMinLayerForClock(int minLayer);
         
         // flow functions
         void writeGuides();

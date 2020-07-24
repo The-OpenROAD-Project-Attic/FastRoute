@@ -81,6 +81,10 @@ extern void set_seed(unsigned seed);
 
 extern void set_layer_pitch(int layer, float pitch);
 
+extern void set_clock_nets_route_flow(bool clock_flow);
+
+extern void set_min_layer_for_clock(int minLayer);
+
 extern void estimate_rc();
 
 extern void start_fastroute();

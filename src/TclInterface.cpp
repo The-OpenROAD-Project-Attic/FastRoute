@@ -132,6 +132,14 @@ void set_layer_pitch(int layer, float pitch) {
         fastRouteKernel->setLayerPitch(layer, pitch);
 }
 
+void set_clock_nets_route_flow(bool clock_flow) {
+        fastRouteKernel->setClockNetsRouteFlow(clock_flow);
+}
+
+void set_min_layer_for_clock(int minLayer) {
+        fastRouteKernel->setMinLayerForClock(minLayer);
+}
+
 void start_fastroute() {
         fastRouteKernel->startFastRoute();
 }
