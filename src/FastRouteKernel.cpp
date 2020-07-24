@@ -1256,8 +1256,6 @@ void FastRouteKernel::writeGuides() {
                 error("Guides file could not be open\n");
         }
         RoutingLayer phLayerF;
-        std::cout << "Results size: " << _result->size() << "\n";
-        std::cout << "Results size: " << _result->size() << "\n";
         connectPadPins(*_result);
 
         int offsetX = _gridOrigin->getX();
