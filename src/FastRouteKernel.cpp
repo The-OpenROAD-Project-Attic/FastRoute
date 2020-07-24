@@ -556,7 +556,6 @@ void FastRouteKernel::initializeNets() {
                         }
 
                         if ((pin.isConnectedToPad() || pin.isPort()) && !_estimateRC ) { // If pin is connected to PAD, create a "fake" location in routing grid to avoid PAD obstacles
-                                std::cout << "Creating fake pin\n";
                                 FastRoute::ROUTE pinConnection;
                                 pinConnection.initLayer = topLayer;
                                 pinConnection.finalLayer = topLayer;
@@ -2109,7 +2108,6 @@ SteinerTree FastRouteKernel::createSteinerTree(std::vector<ROUTE> route, std::ve
                 }
 
                 if ((pin.isConnectedToPad() || pin.isPort()) && !_estimateRC) { // If pin is connected to PAD, create a "fake" location in routing grid to avoid PAD obstacles
-                        std::cout << "Creating fake pin\n";
                         FastRoute::ROUTE pinConnection;
                         pinConnection.initLayer = topLayer;
                         pinConnection.finalLayer = topLayer;
