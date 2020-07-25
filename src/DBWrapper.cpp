@@ -1029,6 +1029,9 @@ void DBWrapper::commitGlobalSegmentsToDB(std::vector<FastRoute::NET> routing, in
 }
 
 int DBWrapper::checkAntennaViolations(std::vector<FastRoute::NET> routing, int maxRoutingLayer) {
+        if (!_chip) {
+            _chip = _db->getChip();
+        }
         odb::dbTech* tech = _db->getTech();
         if (!tech) {
                 error("obd::dbTech not initialized\n");

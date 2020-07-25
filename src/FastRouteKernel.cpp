@@ -108,8 +108,6 @@ void FastRouteKernel::resetResources() {
                 delete _dbWrapper;
         if (_fastRoute)
                 delete _fastRoute;
-        if (_reFastRoute)
-                delete _reFastRoute;
         if (_gridOrigin)
                 delete _gridOrigin;
         if (_routingLayers)
@@ -123,7 +121,6 @@ void FastRouteKernel::resetResources() {
         _grid = nullptr;
         _dbWrapper = nullptr;
         _fastRoute = nullptr;
-        _reFastRoute = nullptr;
         _gridOrigin = nullptr;
         _routingLayers = nullptr;
         _allRoutingTracks = nullptr;
@@ -137,7 +134,6 @@ void FastRouteKernel::resetResources() {
         _grid = new Grid;
         _dbWrapper = new DBWrapper;
         _fastRoute = new FT;
-        _reFastRoute = new FT;
         _gridOrigin = new Coordinate(-1, -1);
         _routingLayers = new std::vector<RoutingLayer>;
         _allRoutingTracks = new std::vector<RoutingTracks>;
@@ -155,8 +151,6 @@ void FastRouteKernel::reset() {
                 delete _dbWrapper;
         if (_fastRoute)
                 delete _fastRoute;
-        if (_reFastRoute)
-                delete _reFastRoute;
         if (_gridOrigin)
                 delete _gridOrigin;
         if (_routingLayers)
@@ -170,7 +164,6 @@ void FastRouteKernel::reset() {
         _grid = nullptr;
         _dbWrapper = nullptr;
         _fastRoute = nullptr;
-        _reFastRoute = nullptr;
         _gridOrigin = nullptr;
         _routingLayers = nullptr;
         _allRoutingTracks = nullptr;
@@ -201,8 +194,6 @@ FastRouteKernel::~FastRouteKernel() {
                 delete _dbWrapper;
         if (_fastRoute)
                 delete _fastRoute;
-        if (_reFastRoute)
-                delete _reFastRoute;
         if (_gridOrigin)
                 delete _gridOrigin;
         if (_routingLayers)
@@ -216,7 +207,6 @@ FastRouteKernel::~FastRouteKernel() {
         _grid = nullptr;
         _dbWrapper = nullptr;
         _fastRoute = nullptr;
-        _reFastRoute = nullptr;
         _gridOrigin = nullptr;
         _routingLayers = nullptr;
         _allRoutingTracks = nullptr;
@@ -287,7 +277,7 @@ void FastRouteKernel::startFastRoute() {
         std::cout << "Setting spacings and widths... Done!\n";
         
         std::cout << "Initializing nets...\n";
-        initializeNets(false);
+        initializeNets(_reroute);
         std::cout << "Initializing nets... Done!\n";
         
         std::cout << "Adjusting grid...\n";
@@ -335,53 +325,6 @@ void FastRouteKernel::startFastRoute() {
  
         if (_verbose > 0)       
                 std::cout << "[INFO] Elapsed time: " << (std::chrono::duration_cast<std::chrono::microseconds>(end - begin).count()) /1000000.0 << "\n";
-}
-
-void FastRouteKernel::restartFastRoute() {
-        _reFastRoute = new FT;
-        // Set flags
-        if (_pdRevForHighFanout != -1) {
-                _reFastRoute->setAlpha(_alpha);
-        }
-        _reFastRoute->setVerbose(0);
-        _reFastRoute->setOverflowIterations(_overflowIterations);
-        _reFastRoute->setPDRevForHighFanout(_pdRevForHighFanout);
-        _reFastRoute->setAllowOverflow(_allowOverflow);
-
-        // Set grid
-        _reFastRoute->setLowerLeft(_grid->getLowerLeftX(), _grid->getLowerLeftY());
-        _reFastRoute->setTileSize(_grid->getTileWidth(), _grid->getTileHeight());
-        _reFastRoute->setGridsAndLayers(_grid->getXGrids(), _grid->getYGrids(), _grid->getNumLayers());
-
-        // Set layer orientation
-        RoutingLayer routingLayer = getRoutingLayerByIndex(1);
-        _reFastRoute->setLayerOrientation(routingLayer.getPreferredDirection());
-
-        // Set capacities
-        for (int l = 1; l <= _grid->getNumLayers(); l++) {
-                if (l < _minRoutingLayer || l > _maxRoutingLayer) {
-                        _reFastRoute->addHCapacity(0, l);
-                        _reFastRoute->addVCapacity(0, l);
-                } else {
-                        _reFastRoute->addHCapacity(_grid->getHorizontalEdgesCapacities()[l-1]/100, l);
-                        _reFastRoute->addVCapacity(_grid->getVerticalEdgesCapacities()[l-1]/100, l);
-                }
-        }
-
-        // Set widths/spacings
-        for (int l = 1; l <= _grid->getNumLayers(); l++) {
-                _reFastRoute->addMinSpacing(_grid->getSpacings()[l-1], l);
-                _reFastRoute->addMinWidth(_grid->getMinWidths()[l-1], l);
-                _reFastRoute->addViaSpacing(1, l);
-        }
-
-        getPreviousCapacities(_minRoutingLayer);
-
-        initializeNets(true);
-
-        restorePreviousCapacities(_minRoutingLayer);
-
-        _reFastRoute->initAuxVar();
 }
 
 void FastRouteKernel::runFastRoute() {
@@ -442,25 +385,29 @@ void FastRouteKernel::fixAntennaViolations() {
         std::cout << "Running antenna avoidance flow...\n";
         std::vector<FastRoute::NET> newRoute;
         std::vector<FastRoute::NET> globalRoute = *_result;
-        addRemainingGuides(globalRoute);
+        std::vector<FastRoute::NET> originalRoute = *_result;
         connectPadPins(globalRoute);
 
         for (FastRoute::NET &netRoute : globalRoute) {
                 mergeSegments(netRoute);
         }
 
-        addLocalConnections(globalRoute);
+        getPreviousCapacities(_minRoutingLayer);
+        resetResources();
 
+        addLocalConnections(globalRoute);
         int violationsCnt = _dbWrapper->checkAntennaViolations(globalRoute, _maxRoutingLayer);
         
         if (violationsCnt > 0) {
-                _dbWrapper->fixAntennas(diodeName);
-                _dbWrapper->legalizePlacedCells();
-                _netlist->resetNetlist();
-                // restartFastRoute();
-                // std::cout << "[INFO] #Nets to reroute: " << _reFastRoute->getNets().size() << "\n";
-                // _reFastRoute->run(newRoute);
-                // mergeResults(newRoute);
+                _reroute = true;
+                startFastRoute();
+                std::cout << "[INFO] #Nets to reroute: " << _fastRoute->getNets().size() << "\n";
+
+                restorePreviousCapacities(_minRoutingLayer);
+
+                _fastRoute->initAuxVar();
+                _fastRoute->run(newRoute);;
+                mergeResults(newRoute);
         }
         std::cout << "Running antenna avoidance flow... Done!\n";
 }
@@ -663,13 +610,8 @@ void FastRouteKernel::initializeNets(bool reroute) {
                 validNets++;
         }
 
-        if (reroute) {
-                _reFastRoute->setNumberNets(validNets);
-                _reFastRoute->setMaxNetDegree(_netlist->getMaxNetDegree());
-        } else {
-                _fastRoute->setNumberNets(validNets);
-                _fastRoute->setMaxNetDegree(_netlist->getMaxNetDegree());
-        }
+        _fastRoute->setNumberNets(validNets);
+        _fastRoute->setMaxNetDegree(_netlist->getMaxNetDegree());
         
         for (Net &net : _netlist->getNets()) {
                 float netAlpha = _alpha;
@@ -818,11 +760,7 @@ void FastRouteKernel::initializeNets(bool reroute) {
         std::cout << "[INFO] Minimum degree: " << minDegree << "\n";
         std::cout << "[INFO] Maximum degree: " << maxDegree << "\n";
 
-        if (reroute) {
-                _reFastRoute->initEdges();
-        } else {
-                _fastRoute->initEdges();
-        }
+        _fastRoute->initEdges();
 }
 
 void FastRouteKernel::computeGridAdjustments() {
@@ -1515,12 +1453,6 @@ void FastRouteKernel::addRemainingGuides(std::vector<FastRoute::NET> &globalRout
         std::map<std::string, std::vector<FastRoute::PIN>> allNets;
         allNets = _fastRoute->getNets();
         int localNetsId = allNets.size();
-
-        if (_reFastRoute) {
-                for (auto const& newRoute : _reFastRoute->getNets()) {
-                        allNets[newRoute.first] = newRoute.second;
-                }
-        }
 
         for (FastRoute::NET &netRoute : globalRoute) {
                 std::vector<FastRoute::PIN> &pins = allNets[netRoute.name];

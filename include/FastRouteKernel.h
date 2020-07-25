@@ -129,11 +129,11 @@ private:
         std::map<int, float> _layersMaxLengthMicrons;
         long _maxLengthDBU = -1;
         std::map<int, long> _layersMaxLengthDBU;
-        FT* _reFastRoute = nullptr;
         bool enableAntennaFlow = false;
         std::string diodeName;
         int ***oldHUsages;
         int ***oldVUsages;
+        int _reroute = false;
 
         // temporary for congestion driven replace
         int _numAdjusts = 0;
