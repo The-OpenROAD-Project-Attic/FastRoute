@@ -499,7 +499,7 @@ void FastRouteKernel::restorePreviousCapacities(int previousMinLayer) {
                         for (int x = 1; x < xGrids; x++) {
                                 oldCap = oldHUsages[layer-1][y-1][x-1];
                                 newTotalCap += oldCap;
-                                _fastRoute->setEdgeCapacity(x - 1, y - 1, layer, x, y - 1, layer, oldCap);
+                                _fastRoute->addAdjustment(x - 1, y - 1, layer, x, y - 1, layer, oldCap, true);
                         }
                 }
 
@@ -507,7 +507,7 @@ void FastRouteKernel::restorePreviousCapacities(int previousMinLayer) {
                         for (int y = 1; y < yGrids; y++) {
                                 oldCap = oldVUsages[layer-1][x-1][y-1];
                                 newTotalCap += oldCap;
-                                _fastRoute->setEdgeCapacity(x - 1, y - 1, layer, x - 1, y, layer, oldCap);
+                                _fastRoute->addAdjustment(x - 1, y - 1, layer, x - 1, y, layer, oldCap, true);
                         }
                 }
         }
@@ -552,11 +552,11 @@ void FastRouteKernel::initializeNets() {
                         continue;
                 }
 
-                if (_onlyClockNets && net.getSignalType() != "CLOCK") {
+                if (_onlyClockNets && (net.getSignalType() != "CLOCK" && net.getName() != "clk")) {
                         continue;
                 }
 
-                if (_onlySignalNets && net.getSignalType() == "CLOCK") {
+                if (_onlySignalNets && (net.getSignalType() == "CLOCK" || net.getName() == "clk")) {
                         continue;
                 }
 
@@ -582,11 +582,11 @@ void FastRouteKernel::initializeNets() {
                         maxDegree = net.getNumPins();
                 }
 
-                if (_onlyClockNets && net.getSignalType() != "CLOCK") {
+                if (_onlyClockNets && (net.getSignalType() != "CLOCK" && net.getName() != "clk")) {
                         continue;
                 }
 
-                if (_onlySignalNets && net.getSignalType() == "CLOCK") {
+                if (_onlySignalNets && (net.getSignalType() == "CLOCK" || net.getName() == "clk")) {
                         continue;
                 }
 
