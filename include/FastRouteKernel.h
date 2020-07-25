@@ -86,7 +86,6 @@ private:
         int _maxRoutingLayer;
         bool _unidirectionalRoute;
         int _fixLayer;
-        bool _clockNetRouting;
         unsigned _dbId;
         const int _selectedMetal = 3;
         const float transitionLayerAdjust = 0.6;
@@ -120,6 +119,10 @@ private:
         float _alpha;
         int _verbose;
         std::map<std::string, float> _netsAlpha;
+        bool _clockNetsRouteFlow = false;
+        bool _onlyClockNets = false;
+        bool _onlySignalNets = false;
+        int _minLayerForClock;
 
         // Antenna variables
         float _maxLengthMicrons = -1;
@@ -129,8 +132,8 @@ private:
         FT* _reFastRoute = nullptr;
         bool enableAntennaFlow = false;
         std::string diodeName;
-        int ***oldHCaps;
-        int ***oldVCaps;
+        int ***oldHUsages;
+        int ***oldVUsages;
 
         // temporary for congestion driven replace
         int _numAdjusts = 0;
@@ -180,8 +183,8 @@ private:
         void mergeResults(std::vector<FastRoute::NET> newRoute);
         void fixAntennaViolations();
         void restartFastRoute();
-        void getPreviousCapacities();
-        void restorePreviousCapacities();
+        void getPreviousCapacities(int previousMinLayer);
+        void restorePreviousCapacities(int previousMinLayer);
 
 public:
         struct EST_ {
@@ -234,8 +237,6 @@ public:
         void setMinRoutingLayer(const int minLayer);
         void setMaxRoutingLayer(const int maxLayer);
         void setUnidirectionalRoute(const bool unidirRoute);
-        void setClockNetRouting(const bool clockNetRouting);
-        void setPDRev(const bool pdRev);
         void setAlpha(const float alpha);
         void setOutputFile(const std::string& outfile);
         void setPitchesInTile(const int pitchesInTile);
@@ -256,6 +257,8 @@ public:
         void printHeader();
         void setMaxLength (float maxLength);
         void addLayerMaxLength (int layer, float length);
+        void setClockNetsRouteFlow(bool clockFlow);
+        void setMinLayerForClock(int minLayer);
         
         // flow functions
         void enableAntennaAvoidance(char * diodeCellName);

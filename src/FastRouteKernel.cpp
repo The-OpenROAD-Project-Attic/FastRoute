@@ -87,7 +87,6 @@ void FastRouteKernel::init() {
         _maxRoutingLayer = -1;
         _unidirectionalRoute = 0;
         _fixLayer = 0;
-        _clockNetRouting = 0;
         _overflowIterations = 500;
         _pdRevForHighFanout = -1;
         _allowOverflow = 0;
@@ -243,11 +242,6 @@ void FastRouteKernel::startFastRoute() {
                 _dbWrapper->setSelectedMetal(_maxRoutingLayer);
         }
 
-        if (_clockNetRouting && _pdRev) {
-                _fastRoute->usePdRev();
-                _fastRoute->setAlpha(_alpha);
-        }
-
         if (_pdRevForHighFanout != -1) {
                 _fastRoute->setAlpha(_alpha);
         }
@@ -261,7 +255,6 @@ void FastRouteKernel::startFastRoute() {
         std::cout << "[PARAMS] Max routing layer: " << _maxRoutingLayer << "\n";
         std::cout << "[PARAMS] Global adjustment: " << _adjustment << "\n";
         std::cout << "[PARAMS] Unidirectional routing: " << _unidirectionalRoute << "\n";
-        std::cout << "[PARAMS] Clock net routing: " << _clockNetRouting << "\n";
         std::cout << "[PARAMS] Max routing length: " << _maxLengthMicrons << "um\n";
         std::cout << "[PARAMS] Grid origin: (" << _gridOrigin->getX() << ", " << _gridOrigin->getY() << ")\n";
         if (!_layerPitches.empty()) {
@@ -338,7 +331,6 @@ void FastRouteKernel::startFastRoute() {
                 }
         }
 
-        _fastRoute->initAuxVar();
         std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
  
         if (_verbose > 0)       
@@ -348,10 +340,6 @@ void FastRouteKernel::startFastRoute() {
 void FastRouteKernel::restartFastRoute() {
         _reFastRoute = new FT;
         // Set flags
-        if (_clockNetRouting && _pdRev) {
-                _reFastRoute->usePdRev();
-                _reFastRoute->setAlpha(_alpha);
-        }
         if (_pdRevForHighFanout != -1) {
                 _reFastRoute->setAlpha(_alpha);
         }
@@ -387,11 +375,11 @@ void FastRouteKernel::restartFastRoute() {
                 _reFastRoute->addViaSpacing(1, l);
         }
 
-        getPreviousCapacities();
+        getPreviousCapacities(_minRoutingLayer);
 
         initializeNets(true);
 
-        restorePreviousCapacities();
+        restorePreviousCapacities(_minRoutingLayer);
 
         _reFastRoute->initAuxVar();
 }
@@ -400,7 +388,31 @@ void FastRouteKernel::runFastRoute() {
         std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
         
         std::cout << "Running FastRoute...\n\n";
-        _fastRoute->run(*_result);
+        _fastRoute->initAuxVar();
+        if (_clockNetsRouteFlow) {
+                std::vector<FastRoute::NET> clockNetsRoute;
+                _fastRoute->setVerbose(0);
+                _fastRoute->run(clockNetsRoute);
+                addRemainingGuides(clockNetsRoute);
+
+                getPreviousCapacities(_minLayerForClock);
+                
+                resetResources();
+                _onlyClockNets = false;
+                _onlySignalNets = true;
+
+                startFastRoute();
+                restorePreviousCapacities(_minLayerForClock);
+
+                _fastRoute->initAuxVar();
+                _fastRoute->run(*_result);
+                addRemainingGuides(*_result);
+
+                _result->insert(_result->begin(), clockNetsRoute.begin(), clockNetsRoute.end());
+        } else {
+                _fastRoute->run(*_result);
+                addRemainingGuides(*_result);
+        }
         std::cout << "Running FastRoute... Done!\n";
 
         std::cout << "Fixing long segments...\n";
@@ -455,7 +467,6 @@ void FastRouteKernel::fixAntennaViolations() {
 
 void FastRouteKernel::estimateRC() {
         runFastRoute();
-        addRemainingGuides(*_result);
         for (FastRoute::NET &netRoute : *_result) {
                 mergeSegments(netRoute);
 
@@ -506,7 +517,7 @@ void FastRouteKernel::initRoutingTracks() {
 
 void FastRouteKernel::setCapacities() {
         for (int l = 1; l <= _grid->getNumLayers(); l++) {
-                if (l < _minRoutingLayer || l > _maxRoutingLayer) {
+                if (l < _minRoutingLayer || l > _maxRoutingLayer || (_onlyClockNets && l < _minLayerForClock)) {
                         _fastRoute->addHCapacity(0, l);
                         _fastRoute->addVCapacity(0, l);
 
@@ -530,76 +541,74 @@ void FastRouteKernel::setCapacities() {
         }
 }
 
-void FastRouteKernel::getPreviousCapacities() {
+void FastRouteKernel::getPreviousCapacities(int previousMinLayer) {
         int oldCap;
         int xGrids = _grid->getXGrids();
         int yGrids = _grid->getYGrids();
 
-        oldHCaps = new int**[_grid->getNumLayers()];
+        oldHUsages = new int**[_grid->getNumLayers()];
         for (int l = 0; l < _grid->getNumLayers(); l++) {
-                oldHCaps[l] = new int*[yGrids];
+                oldHUsages[l] = new int*[yGrids];
                 for (int i = 0; i < yGrids; i++) {
-                        oldHCaps[l][i] = new int[xGrids];
+                        oldHUsages[l][i] = new int[xGrids];
                 }
         }
 
-        oldVCaps = new int**[_grid->getNumLayers()];
+        oldVUsages = new int**[_grid->getNumLayers()];
         for (int l = 0; l < _grid->getNumLayers(); l++) {
-                oldVCaps[l] = new int*[xGrids];
+                oldVUsages[l] = new int*[xGrids];
                 for (int i = 0; i < xGrids; i++) {
-                        oldVCaps[l][i] = new int[yGrids];
+                        oldVUsages[l][i] = new int[yGrids];
                 }
         }
 
-        int oldResources = 0;
-        for (int layer = 1; layer <= _grid->getNumLayers(); layer++) {
-                if (_hCapacities[layer - 1] != 0) {
-                        for (int y = 1; y < yGrids; y++) {
-                                for (int x = 1; x < xGrids; x++) {
-                                        oldCap = _fastRoute->getEdgeCurrentResource(x - 1, y - 1, layer, x, y - 1, layer);
-                                        oldResources += oldCap;
-                                        oldHCaps[layer-1][y-1][x-1] = oldCap;
-                                }
-                        }
-                }
-
-                if (_vCapacities[layer - 1] != 0) {
+        int oldTotalCap = 0;
+        for (int layer = previousMinLayer; layer <= _grid->getNumLayers(); layer++) {
+                for (int y = 1; y < yGrids; y++) {
                         for (int x = 1; x < xGrids; x++) {
-                                for (int y = 1; y < yGrids; y++) {
-                                        oldCap = _fastRoute->getEdgeCurrentResource(x - 1, y - 1, layer, x - 1, y, layer);
-                                        oldResources += oldCap;
-                                        oldVCaps[layer-1][x-1][y-1] = oldCap;
-                                }
+                                oldCap = _fastRoute->getEdgeCurrentResource(x - 1, y - 1, layer, x, y - 1, layer);
+                                oldTotalCap += oldCap;
+                                oldHUsages[layer-1][y-1][x-1] = oldCap;
+                        }
+                }
+
+                for (int x = 1; x < xGrids; x++) {
+                        for (int y = 1; y < yGrids; y++) {
+                                oldCap = _fastRoute->getEdgeCurrentResource(x - 1, y - 1, layer, x - 1, y, layer);
+                                oldTotalCap += oldCap;
+                                oldVUsages[layer-1][x-1][y-1] = oldCap;
                         }
                 }
         }
+
+        std::cout << "Old total capacity: " << oldTotalCap << "\n";
 }
 
-void FastRouteKernel::restorePreviousCapacities() {
-        int newCap;
+void FastRouteKernel::restorePreviousCapacities(int previousMinLayer) {
+        int oldCap;
         int xGrids = _grid->getXGrids();
         int yGrids = _grid->getYGrids();
 
-        int newResources = 0;
-        for (int layer = 1; layer <= _grid->getNumLayers(); layer++) {
-                if (_hCapacities[layer - 1] != 0) {
-                        for (int y = 1; y < yGrids; y++) {
-                                for (int x = 1; x < xGrids; x++) {
-                                        newCap = oldHCaps[layer-1][y-1][x-1];
-                                        _reFastRoute->setEdgeCapacity(x - 1, y - 1, layer, x, y - 1, layer, newCap);
-                                }
+        int newTotalCap = 0;
+        for (int layer = previousMinLayer; layer <= _grid->getNumLayers(); layer++) {
+                for (int y = 1; y < yGrids; y++) {
+                        for (int x = 1; x < xGrids; x++) {
+                                oldCap = oldHUsages[layer-1][y-1][x-1];
+                                newTotalCap += oldCap;
+                                _fastRoute->addAdjustment(x - 1, y - 1, layer, x, y - 1, layer, oldCap, true);
                         }
                 }
 
-                if (_vCapacities[layer - 1] != 0) {
-                        for (int x = 1; x < xGrids; x++) {
-                                for (int y = 1; y < yGrids; y++) {
-                                        newCap = oldVCaps[layer-1][x-1][y-1];
-                                        _reFastRoute->setEdgeCapacity(x - 1, y - 1, layer, x - 1, y, layer, newCap);
-                                }
+                for (int x = 1; x < xGrids; x++) {
+                        for (int y = 1; y < yGrids; y++) {
+                                oldCap = oldVUsages[layer-1][x-1][y-1];
+                                newTotalCap += oldCap;
+                                _fastRoute->addAdjustment(x - 1, y - 1, layer, x - 1, y, layer, oldCap, true);
                         }
                 }
         }
+
+        std::cout << "New total capacity: " << newTotalCap << "\n";
 }
 
 void FastRouteKernel::setSpacingsAndMinWidths() {
@@ -611,7 +620,12 @@ void FastRouteKernel::setSpacingsAndMinWidths() {
 }
 
 void FastRouteKernel::initializeNets(bool reroute) {
-        _dbWrapper->initNetlist(reroute);
+        if (reroute) {
+                _dbWrapper->initNetlist(reroute);
+        } else {
+                _dbWrapper->initClockNets();
+                _dbWrapper->initNetlist(false);
+        }
         
         std::cout << "Checking pin placement...\n";
         checkPinPlacement();
@@ -633,12 +647,16 @@ void FastRouteKernel::initializeNets(bool reroute) {
                 if (net.getNumPins() <= 1) {
                         continue;
                 }
-                
-                if (_clockNetRouting && net.getSignalType() != "CLOCK") {
+
+                if (net.getNumPins() >= std::numeric_limits<short>::max()) {
                         continue;
                 }
 
-                if (net.getNumPins() >= std::numeric_limits<short>::max()) {
+                if (_onlyClockNets && (net.getSignalType() != "CLOCK" && net.getName() != "clk")) {
+                        continue;
+                }
+
+                if (_onlySignalNets && (net.getSignalType() == "CLOCK" || net.getName() == "clk")) {
                         continue;
                 }
 
@@ -655,6 +673,7 @@ void FastRouteKernel::initializeNets(bool reroute) {
         
         for (Net &net : _netlist->getNets()) {
                 float netAlpha = _alpha;
+                bool isClock = (net.getSignalType() == "CLOCK") ? true : false;
 
                 if (net.getNumPins() <= 1) {
                         continue;
@@ -667,8 +686,12 @@ void FastRouteKernel::initializeNets(bool reroute) {
                 if (net.getNumPins() > maxDegree) {
                         maxDegree = net.getNumPins();
                 }
-                
-                if (_clockNetRouting && net.getSignalType() != "CLOCK") {
+
+                if (_onlyClockNets && (net.getSignalType() != "CLOCK" && net.getName() != "clk")) {
+                        continue;
+                }
+
+                if (_onlySignalNets && (net.getSignalType() == "CLOCK" || net.getName() == "clk")) {
                         continue;
                 }
 
@@ -786,11 +809,7 @@ void FastRouteKernel::initializeNets(bool reroute) {
                         netAlpha = _netsAlpha[net.getName()];
                 }
                 
-                if (reroute) {
-                        _reFastRoute->addNet(netName, idx, pins.size(), 1, grPins, netAlpha);
-                } else {
-                        _fastRoute->addNet(netName, idx, pins.size(), 1, grPins, netAlpha);
-                }
+                _fastRoute->addNet(netName, idx, pins.size(), 1, grPins, netAlpha, isClock);
                 idx++;
 
                 _netlist->addNetToMap(net);
@@ -825,7 +844,7 @@ void FastRouteKernel::computeGridAdjustments() {
                 RoutingLayer routingLayer = getRoutingLayerByIndex(layer);
                 
                 if (layer < _minRoutingLayer || (layer > _maxRoutingLayer &&
-                    _maxRoutingLayer > 0))
+                    _maxRoutingLayer > 0) || (_onlyClockNets && layer < _minLayerForClock))
                         continue;
 
                 int newVCapacity = 0;
@@ -868,7 +887,8 @@ void FastRouteKernel::computeTrackAdjustments() {
                 int numTracks = 0;
                 
                 if (layer.getIndex() < _minRoutingLayer ||
-                    (layer.getIndex() > _maxRoutingLayer && _maxRoutingLayer > 0))
+                    (layer.getIndex() > _maxRoutingLayer && _maxRoutingLayer > 0) ||
+                    (_onlyClockNets && layer.getIndex() < _minLayerForClock))
                         continue;
                 
                 if (layer.getPreferredDirection() == RoutingLayer::HORIZONTAL) {
@@ -1249,14 +1269,6 @@ void FastRouteKernel::setUnidirectionalRoute(const bool unidirRoute) {
         _unidirectionalRoute = unidirRoute;
 }
 
-void FastRouteKernel::setClockNetRouting(const bool clockNetRouting) {
-        _clockNetRouting = clockNetRouting;
-}
-
-void FastRouteKernel::setPDRev(const bool pdRev) {
-        _pdRev = pdRev;
-}
-
 void FastRouteKernel::setAlpha(const float alpha) {
         _alpha = alpha;
 }
@@ -1343,6 +1355,16 @@ void FastRouteKernel::addLayerMaxLength(int layer, float length) {
         _layersMaxLengthMicrons[layer] = length;
 }
 
+void FastRouteKernel::setClockNetsRouteFlow(bool clockFlow) {
+        _clockNetsRouteFlow = clockFlow;
+        _onlyClockNets = clockFlow;
+        _onlySignalNets = false;
+}
+
+void FastRouteKernel::setMinLayerForClock(int minLayer) {
+        _minLayerForClock = minLayer;
+}
+
 void FastRouteKernel::writeGuides() {
         std::cout << "Writing guides...\n";
         std::ofstream guideFile;
@@ -1352,7 +1374,6 @@ void FastRouteKernel::writeGuides() {
                 error("Guides file could not be open\n");
         }
         RoutingLayer phLayerF;
-        addRemainingGuides(*_result);
         connectPadPins(*_result);
 
         int offsetX = _gridOrigin->getX();
@@ -2188,7 +2209,6 @@ void FastRouteKernel::fixLongSegments() {
         int fixedSegs = 0;
         int possibleViols = 0;
 
-        addRemainingGuides(*_result);
         for (FastRoute::NET &netRoute : *_result) {
                 mergeSegments(netRoute);
                 bool possibleViolation = false;

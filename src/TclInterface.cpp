@@ -88,14 +88,6 @@ void set_unidirectional_routing(bool unidirRouting) {
         fastRouteKernel->setUnidirectionalRoute(unidirRouting);
 }
 
-void set_pdrev(bool pdRev) {
-        fastRouteKernel->setPDRev(pdRev);
-}
-
-void set_clock_net_routing(bool clockNetRouting) {
-        fastRouteKernel->setClockNetRouting(clockNetRouting);
-}
-
 void set_alpha(float alpha) {
         fastRouteKernel->setAlpha(alpha);
 }
@@ -138,6 +130,14 @@ void set_seed(unsigned seed) {
 
 void set_layer_pitch(int layer, float pitch) {
         fastRouteKernel->setLayerPitch(layer, pitch);
+}
+
+void set_clock_nets_route_flow(bool clock_flow) {
+        fastRouteKernel->setClockNetsRouteFlow(clock_flow);
+}
+
+void set_min_layer_for_clock(int minLayer) {
+        fastRouteKernel->setMinLayerForClock(minLayer);
 }
 
 void start_fastroute() {

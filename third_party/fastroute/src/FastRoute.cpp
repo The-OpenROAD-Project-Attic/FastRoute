@@ -540,7 +540,8 @@ void FT::addNet(char* name,
                 int   nPins,
                 int   minWidth,
                 PIN   pins[],
-                float alpha)
+                float alpha,
+                bool isClock)
 {
   // std::cout << "Adding net " << name << "\n";
 
@@ -590,6 +591,7 @@ void FT::addNet(char* name,
     nets[newnetID]->pinY    = new short[pinInd];
     nets[newnetID]->pinL    = new short[pinInd];
     nets[newnetID]->alpha   = alpha;
+    nets[newnetID]->isClock = isClock;
 
     for (int j = 0; j < pinInd; j++) {
       nets[newnetID]->pinX[j] = pinXarray[j];
@@ -700,6 +702,22 @@ int FT::getEdgeCurrentResource(long x1, long y1, int l1, long x2, long y2, int l
 	}
 
 	return resource;
+}
+
+int FT::getEdgeCurrentUsage(long x1, long y1, int l1, long x2, long y2, int l2) {
+  int grid, k;
+  int usage;
+
+  k = l1 - 1;
+  if (y1 == y2) {
+    grid = y1*(xGrid - 1) + x1 + k * (xGrid - 1) * yGrid;
+    usage = h_edges3D[grid].usage;
+  } else if (x1 == x2) {
+    grid = y1 * xGrid + x1 + k * xGrid * (yGrid - 1);
+    usage = v_edges3D[grid].usage;
+  }
+
+  return usage;
 }
 
 void FT::setMaxNetDegree(int deg) {
@@ -819,6 +837,28 @@ void FT::setEdgeCapacity(long x1, long y1, int l1, long x2, long y2, int l2, int
     grid = y1 * xGrid + x1;
     reduce = currCap - newCap;
     v_edges[grid].cap -= reduce;
+  }
+}
+
+void FT::setEdgeUsage(long x1, long y1, int l1, long x2, long y2, int l2, int newUsage) {
+  const int k = l1 - 1;
+  int grid;
+  int reduce;
+
+  if (y1 == y2)  // horizontal edge
+  {
+    grid = y1 * (xGrid - 1) + x1 + k * (xGrid - 1) * yGrid;
+    h_edges3D[grid].usage = newUsage;
+
+    grid = y1 * (xGrid - 1) + x1;
+    h_edges[grid].usage += newUsage;
+  } else if (x1 == x2)  // vertical edge
+  {
+    grid = y1 * xGrid + x1 + k * xGrid * (yGrid - 1);
+    v_edges3D[grid].usage = newUsage;
+
+    grid = y1 * xGrid + x1;
+    v_edges[grid].usage += newUsage;
   }
 }
 
@@ -1444,11 +1484,6 @@ int FT::run(std::vector<NET>& result)
    * this function call for now.> */
   /* freeAllMemory(); */
   return (0);
-}
-
-void FT::usePdRev()
-{
-  pdRev = true;
 }
 
 void FT::setAlpha(float a)
