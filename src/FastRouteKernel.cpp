@@ -216,7 +216,8 @@ FastRouteKernel::~FastRouteKernel() {
 void FastRouteKernel::startFastRoute() {
         std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
         printHeader();
-        _dbWrapper->setDB(_dbId);
+        if (!_reroute)
+                _dbWrapper->setDB(_dbId);
         if (_unidirectionalRoute) {
                 _minRoutingLayer = 2;
                 _fixLayer = 1;
@@ -396,6 +397,7 @@ void FastRouteKernel::fixAntennaViolations() {
         resetResources();
 
         addLocalConnections(globalRoute);
+        _dbWrapper->setDB(_dbId);
         int violationsCnt = _dbWrapper->checkAntennaViolations(globalRoute, _maxRoutingLayer);
         
         if (violationsCnt > 0) {
