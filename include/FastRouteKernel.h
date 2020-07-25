@@ -176,8 +176,8 @@ private:
         void fixLongSegments();
         SteinerTree createSteinerTree(std::vector<ROUTE> route, std::vector<Pin> pins);
         bool checkSteinerTree(SteinerTree sTree);
-        void getPreviousCapacities();
-        void restorePreviousCapacities();
+        void getPreviousCapacities(int previousMinLayer);
+        void restorePreviousCapacities(int previousMinLayer);
 
 public:
         struct EST_ {

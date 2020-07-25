@@ -336,14 +336,14 @@ void FastRouteKernel::runFastRoute() {
                 _fastRoute->run(clockNetsRoute);
                 addRemainingGuides(clockNetsRoute);
 
-                getPreviousCapacities();
+                getPreviousCapacities(_minLayerForClock);
                 
                 resetResources();
                 _onlyClockNets = false;
                 _onlySignalNets = true;
 
                 startFastRoute();
-                restorePreviousCapacities();
+                restorePreviousCapacities(_minLayerForClock);
 
                 _fastRoute->initAuxVar();
                 _fastRoute->run(*_result);
@@ -445,8 +445,8 @@ void FastRouteKernel::setCapacities() {
         }
 }
 
-void FastRouteKernel::getPreviousCapacities() {
-        int oldUsage;
+void FastRouteKernel::getPreviousCapacities(int previousMinLayer) {
+        int oldCap;
         int xGrids = _grid->getXGrids();
         int yGrids = _grid->getYGrids();
 
@@ -466,49 +466,53 @@ void FastRouteKernel::getPreviousCapacities() {
                 }
         }
 
-        int oldTotalUsage = 0;
-        for (int layer = 1; layer <= _grid->getNumLayers(); layer++) {
+        int oldTotalCap = 0;
+        for (int layer = previousMinLayer; layer <= _grid->getNumLayers(); layer++) {
                 for (int y = 1; y < yGrids; y++) {
                         for (int x = 1; x < xGrids; x++) {
-                                oldUsage = _fastRoute->getEdgeCurrentUsage(x - 1, y - 1, layer, x, y - 1, layer);
-                                oldTotalUsage += oldUsage;
-                                oldHUsages[layer-1][y-1][x-1] = oldUsage;
+                                oldCap = _fastRoute->getEdgeCurrentResource(x - 1, y - 1, layer, x, y - 1, layer);
+                                oldTotalCap += oldCap;
+                                oldHUsages[layer-1][y-1][x-1] = oldCap;
                         }
                 }
 
                 for (int x = 1; x < xGrids; x++) {
                         for (int y = 1; y < yGrids; y++) {
-                                oldUsage = _fastRoute->getEdgeCurrentUsage(x - 1, y - 1, layer, x - 1, y, layer);
-                                oldTotalUsage += oldUsage;
-                                oldVUsages[layer-1][x-1][y-1] = oldUsage;
+                                oldCap = _fastRoute->getEdgeCurrentResource(x - 1, y - 1, layer, x - 1, y, layer);
+                                oldTotalCap += oldCap;
+                                oldVUsages[layer-1][x-1][y-1] = oldCap;
                         }
                 }
         }
+
+        std::cout << "Old total capacity: " << oldTotalCap << "\n";
 }
 
-void FastRouteKernel::restorePreviousCapacities() {
-        int oldUsage;
+void FastRouteKernel::restorePreviousCapacities(int previousMinLayer) {
+        int oldCap;
         int xGrids = _grid->getXGrids();
         int yGrids = _grid->getYGrids();
 
-        int newTotalUsage = 0;
-        for (int layer = 1; layer <= _grid->getNumLayers(); layer++) {
+        int newTotalCap = 0;
+        for (int layer = previousMinLayer; layer <= _grid->getNumLayers(); layer++) {
                 for (int y = 1; y < yGrids; y++) {
                         for (int x = 1; x < xGrids; x++) {
-                                oldUsage = oldHUsages[layer-1][y-1][x-1];
-                                newTotalUsage += oldUsage;
-                                _fastRoute->setEdgeUsage(x - 1, y - 1, layer, x, y - 1, layer, oldUsage);
+                                oldCap = oldHUsages[layer-1][y-1][x-1];
+                                newTotalCap += oldCap;
+                                _fastRoute->setEdgeCapacity(x - 1, y - 1, layer, x, y - 1, layer, oldCap);
                         }
                 }
 
                 for (int x = 1; x < xGrids; x++) {
                         for (int y = 1; y < yGrids; y++) {
-                                oldUsage = oldVUsages[layer-1][x-1][y-1];
-                                newTotalUsage += oldUsage;
-                                _fastRoute->setEdgeUsage(x - 1, y - 1, layer, x - 1, y, layer, oldUsage);
+                                oldCap = oldVUsages[layer-1][x-1][y-1];
+                                newTotalCap += oldCap;
+                                _fastRoute->setEdgeCapacity(x - 1, y - 1, layer, x - 1, y, layer, oldCap);
                         }
                 }
         }
+
+        std::cout << "New total capacity: " << newTotalCap << "\n";
 }
 
 void FastRouteKernel::setSpacingsAndMinWidths() {
