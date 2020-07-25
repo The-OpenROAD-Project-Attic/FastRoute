@@ -727,7 +727,7 @@ void FastRouteKernel::computeGridAdjustments() {
                 RoutingLayer routingLayer = getRoutingLayerByIndex(layer);
                 
                 if (layer < _minRoutingLayer || (layer > _maxRoutingLayer &&
-                    _maxRoutingLayer > 0))
+                    _maxRoutingLayer > 0) || (_onlyClockNets && layer < _minLayerForClock))
                         continue;
 
                 int newVCapacity = 0;
@@ -770,7 +770,8 @@ void FastRouteKernel::computeTrackAdjustments() {
                 int numTracks = 0;
                 
                 if (layer.getIndex() < _minRoutingLayer ||
-                    (layer.getIndex() > _maxRoutingLayer && _maxRoutingLayer > 0))
+                    (layer.getIndex() > _maxRoutingLayer && _maxRoutingLayer > 0) ||
+                    (_onlyClockNets && layer.getIndex() < _minLayerForClock))
                         continue;
                 
                 if (layer.getPreferredDirection() == RoutingLayer::HORIZONTAL) {

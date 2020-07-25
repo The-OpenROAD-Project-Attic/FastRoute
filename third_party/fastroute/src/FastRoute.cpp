@@ -742,7 +742,7 @@ void FT::addAdjustment(long x1,
     int reduce;
 
     if (((int) cap - reducedCap) < 0) {
-      if (isReduce && verbose > 1) {
+      if (isReduce) {
         std::cout << "[WARNING] Underflow in reduce\n";
         std::cout << "[WARNING] cap, reducedCap: " << cap << ", " << reducedCap
                   << "\n";
@@ -771,7 +771,7 @@ void FT::addAdjustment(long x1,
     int reduce;
 
     if (((int) cap - reducedCap) < 0) {
-      if (isReduce && verbose > 1) {
+      if (isReduce) {
         std::cout << "[WARNING] Underflow in reduce\n";
         std::cout << "[WARNING] cap, reducedCap: " << cap << ", " << reducedCap
                   << "\n";
