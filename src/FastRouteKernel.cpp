@@ -394,13 +394,16 @@ void FastRouteKernel::fixAntennaViolations() {
         }
 
         getPreviousCapacities(_minRoutingLayer);
+        addLocalConnections(globalRoute);
+
         resetResources();
 
-        addLocalConnections(globalRoute);
         _dbWrapper->setDB(_dbId);
         int violationsCnt = _dbWrapper->checkAntennaViolations(globalRoute, _maxRoutingLayer);
         
         if (violationsCnt > 0) {
+                _dbWrapper->fixAntennas(diodeName);
+                _dbWrapper->legalizePlacedCells();
                 _reroute = true;
                 startFastRoute();
                 _fastRoute->setVerbose(0);
@@ -409,7 +412,8 @@ void FastRouteKernel::fixAntennaViolations() {
                 restorePreviousCapacities(_minRoutingLayer);
 
                 _fastRoute->initAuxVar();
-                _fastRoute->run(newRoute);;
+                enableAntennaFlow = false;
+                _fastRoute->run(newRoute);
                 mergeResults(newRoute);
         }
         std::cout << "Running antenna avoidance flow... Done!\n";
