@@ -403,6 +403,7 @@ void FastRouteKernel::fixAntennaViolations() {
         if (violationsCnt > 0) {
                 _reroute = true;
                 startFastRoute();
+                _fastRoute->setVerbose(0);
                 std::cout << "[INFO] #Nets to reroute: " << _fastRoute->getNets().size() << "\n";
 
                 restorePreviousCapacities(_minRoutingLayer);

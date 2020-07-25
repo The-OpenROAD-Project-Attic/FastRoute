@@ -99,8 +99,8 @@ private:
         std::set<odb::dbNet*> _clockNets;
         int selectedMetal = 3;
         sta::dbSta      *_openSta = nullptr;
-        odb::dbDatabase *_db;
-        odb::dbChip     *_chip;
+        odb::dbDatabase *_db = nullptr;
+        odb::dbChip     *_chip = nullptr;
         Netlist         *_netlist = nullptr;
         Grid            *_grid = nullptr;
         bool            _verbose = false;
