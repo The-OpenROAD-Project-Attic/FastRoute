@@ -182,6 +182,7 @@ private:
         void addLocalConnections(std::vector<FastRoute::NET> &globalRoute);
         void mergeResults(std::vector<FastRoute::NET> newRoute);
         void fixAntennaViolations();
+        void runClockNetsRouteFlow();
         void restartFastRoute();
         void getPreviousCapacities(int previousMinLayer);
         void restorePreviousCapacities(int previousMinLayer);

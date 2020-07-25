@@ -334,25 +334,7 @@ void FastRouteKernel::runFastRoute() {
         std::cout << "Running FastRoute...\n\n";
         _fastRoute->initAuxVar();
         if (_clockNetsRouteFlow) {
-                std::vector<FastRoute::NET> clockNetsRoute;
-                _fastRoute->setVerbose(0);
-                _fastRoute->run(clockNetsRoute);
-                addRemainingGuides(clockNetsRoute);
-
-                getPreviousCapacities(_minLayerForClock);
-                
-                resetResources();
-                _onlyClockNets = false;
-                _onlySignalNets = true;
-
-                startFastRoute();
-                restorePreviousCapacities(_minLayerForClock);
-
-                _fastRoute->initAuxVar();
-                _fastRoute->run(*_result);
-                addRemainingGuides(*_result);
-
-                _result->insert(_result->begin(), clockNetsRoute.begin(), clockNetsRoute.end());
+                runClockNetsRouteFlow();
         } else {
                 _fastRoute->run(*_result);
                 addRemainingGuides(*_result);
@@ -417,6 +399,28 @@ void FastRouteKernel::fixAntennaViolations() {
                 mergeResults(newRoute);
         }
         std::cout << "Running antenna avoidance flow... Done!\n";
+}
+
+void FastRouteKernel::runClockNetsRouteFlow() {
+        std::vector<FastRoute::NET> clockNetsRoute;
+        _fastRoute->setVerbose(0);
+        _fastRoute->run(clockNetsRoute);
+        addRemainingGuides(clockNetsRoute);
+
+        getPreviousCapacities(_minLayerForClock);
+        
+        resetResources();
+        _onlyClockNets = false;
+        _onlySignalNets = true;
+
+        startFastRoute();
+        restorePreviousCapacities(_minLayerForClock);
+
+        _fastRoute->initAuxVar();
+        _fastRoute->run(*_result);
+        addRemainingGuides(*_result);
+
+        _result->insert(_result->begin(), clockNetsRoute.begin(), clockNetsRoute.end());
 }
 
 void FastRouteKernel::estimateRC() {
