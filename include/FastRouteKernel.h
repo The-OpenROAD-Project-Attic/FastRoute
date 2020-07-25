@@ -129,7 +129,7 @@ private:
         std::map<int, float> _layersMaxLengthMicrons;
         long _maxLengthDBU = -1;
         std::map<int, long> _layersMaxLengthDBU;
-        bool enableAntennaFlow = false;
+        bool _enableAntennaFlow = false;
         std::string diodeName;
         int ***oldHUsages;
         int ***oldVUsages;
@@ -181,7 +181,7 @@ private:
         bool checkSteinerTree(SteinerTree sTree);
         void addLocalConnections(std::vector<FastRoute::NET> &globalRoute);
         void mergeResults(std::vector<FastRoute::NET> newRoute);
-        void fixAntennaViolations();
+        void runAntennaAvoidanceFlow();
         void runClockNetsRouteFlow();
         void restartFastRoute();
         void getPreviousCapacities(int previousMinLayer);

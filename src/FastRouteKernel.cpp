@@ -333,7 +333,9 @@ void FastRouteKernel::runFastRoute() {
         
         std::cout << "Running FastRoute...\n\n";
         _fastRoute->initAuxVar();
-        if (_clockNetsRouteFlow) {
+        if (_enableAntennaFlow) {
+                runAntennaAvoidanceFlow();
+        } else if (_clockNetsRouteFlow) {
                 runClockNetsRouteFlow();
         } else {
                 _fastRoute->run(*_result);
@@ -342,16 +344,11 @@ void FastRouteKernel::runFastRoute() {
         std::cout << "Running FastRoute... Done!\n";
 
         std::cout << "Fixing long segments...\n";
-        if (_maxLengthDBU == -1) {
-                std::cout << "[WARNING] Max routing length not defined. Skipping...\n";
-        } else {
+        if (_maxLengthDBU != -1) {
                 fixLongSegments();
                 std::cout << "Fixing long segments... Done!\n";
         }
 
-        if (enableAntennaFlow) {
-                fixAntennaViolations();
-        }
         computeWirelength();
 
         if (_reportCongest) {
@@ -364,11 +361,15 @@ void FastRouteKernel::runFastRoute() {
                 std::cout << "[INFO] Elapsed time: " << (std::chrono::duration_cast<std::chrono::microseconds>(end - begin).count()) /1000000.0 << "\n";
 }
 
-void FastRouteKernel::fixAntennaViolations() {
+void FastRouteKernel::runAntennaAvoidanceFlow() {
         std::cout << "Running antenna avoidance flow...\n";
         std::vector<FastRoute::NET> newRoute;
-        std::vector<FastRoute::NET> globalRoute = *_result;
-        std::vector<FastRoute::NET> originalRoute = *_result;
+        std::vector<FastRoute::NET> globalRoute;
+        
+        _fastRoute->run(globalRoute);
+        *_result = globalRoute;
+        
+        addRemainingGuides(globalRoute);
         connectPadPins(globalRoute);
 
         for (FastRoute::NET &netRoute : globalRoute) {
@@ -394,7 +395,6 @@ void FastRouteKernel::fixAntennaViolations() {
                 restorePreviousCapacities(_minRoutingLayer);
 
                 _fastRoute->initAuxVar();
-                enableAntennaFlow = false;
                 _fastRoute->run(newRoute);
                 mergeResults(newRoute);
         }
@@ -445,7 +445,7 @@ void FastRouteKernel::estimateRC() {
 }
 
 void FastRouteKernel::enableAntennaAvoidance(char * diodeCellName) {
-        enableAntennaFlow = true;
+        _enableAntennaFlow = true;
         std::string cellName(diodeCellName);
         diodeName = cellName;
 }
