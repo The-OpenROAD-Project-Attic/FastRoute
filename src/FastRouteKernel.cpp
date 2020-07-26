@@ -363,13 +363,15 @@ void FastRouteKernel::runFastRoute() {
 
 void FastRouteKernel::runAntennaAvoidanceFlow() {
         std::cout << "Running antenna avoidance flow...\n";
-        std::vector<FastRoute::NET> newRoute;
         std::vector<FastRoute::NET> globalRoute;
-        
+        std::vector<FastRoute::NET> newRoute;
+        std::vector<FastRoute::NET> originalRoute;
+
         _fastRoute->run(globalRoute);
-        *_result = globalRoute;
-        
+
         addRemainingGuides(globalRoute);
+        originalRoute = globalRoute;
+        
         connectPadPins(globalRoute);
 
         for (FastRoute::NET &netRoute : globalRoute) {
@@ -381,9 +383,13 @@ void FastRouteKernel::runAntennaAvoidanceFlow() {
 
         resetResources();
 
+        for (FastRoute::NET gr : originalRoute) {
+                _result->push_back(gr);
+        }
+
         _dbWrapper->setDB(_dbId);
         int violationsCnt = _dbWrapper->checkAntennaViolations(globalRoute, _maxRoutingLayer);
-        
+
         if (violationsCnt > 0) {
                 _dbWrapper->fixAntennas(diodeName);
                 _dbWrapper->legalizePlacedCells();
@@ -396,9 +402,9 @@ void FastRouteKernel::runAntennaAvoidanceFlow() {
 
                 _fastRoute->initAuxVar();
                 _fastRoute->run(newRoute);
+                addRemainingGuides(newRoute);
                 mergeResults(newRoute);
         }
-        std::cout << "Running antenna avoidance flow... Done!\n";
 }
 
 void FastRouteKernel::runClockNetsRouteFlow() {
