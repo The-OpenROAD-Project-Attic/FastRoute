@@ -515,7 +515,7 @@ void FT::setNumberNets(int nNets)
   nets    = new Net*[numNets];
   for (int i = 0; i < numNets; i++)
     nets[i] = new Net;
-  seglistIndex = new int[numNets];
+  seglistIndex = new int[numNets + 1];
 }
 
 void FT::setLowerLeft(int x, int y)
