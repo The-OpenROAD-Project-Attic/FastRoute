@@ -1096,8 +1096,8 @@ void FastRouteKernel::computeObstaclesAdjustments() {
                         int lastTileReduce = _grid->computeTileReduce(obs, lastTileBox, trackSpace, false, direction);
                         
                         if (direction == RoutingLayer::HORIZONTAL) {
-                                for (int x = firstTile._x; x <= lastTile._x; x++) {  // Setting capacities of completely blocked edges to zero
-                                        for (int y = firstTile._y; y <= lastTile._y; y++) {
+                                for (int x = firstTile._x-1; x < lastTile._x; x++) {  // Setting capacities of completely blocked edges to zero
+                                        for (int y = firstTile._y-1; y < lastTile._y; y++) {
                                                 if (y == firstTile._y) {
                                                         int edgeCap = _fastRoute->getEdgeCapacity(x, y, layer, x + 1, y, layer);
                                                         edgeCap -= firstTileReduce;
@@ -1116,8 +1116,8 @@ void FastRouteKernel::computeObstaclesAdjustments() {
                                         }
                                 }
                         } else {
-                                for (int x = firstTile._x; x <= lastTile._x; x++) {  // Setting capacities of completely blocked edges to zero
-                                        for (int y = firstTile._y; y <= lastTile._y; y++) {
+                                for (int x = firstTile._x-1; x < lastTile._x; x++) {  // Setting capacities of completely blocked edges to zero
+                                        for (int y = firstTile._y-1; y < lastTile._y; y++) {
                                                 if (x == firstTile._x) {
                                                         int edgeCap = _fastRoute->getEdgeCapacity(x, y, layer, x, y + 1, layer);
                                                         edgeCap -= firstTileReduce;
