@@ -552,11 +552,11 @@ void FastRouteKernel::initializeNets() {
                         continue;
                 }
 
-                if (_onlyClockNets && (net.getSignalType() != "CLOCK" && net.getName() != "clk")) {
+                if (_onlyClockNets && net.getSignalType() != "CLOCK") {
                         continue;
                 }
 
-                if (_onlySignalNets && (net.getSignalType() == "CLOCK" || net.getName() == "clk")) {
+                if (_onlySignalNets && net.getSignalType() == "CLOCK") {
                         continue;
                 }
 
@@ -582,11 +582,11 @@ void FastRouteKernel::initializeNets() {
                         maxDegree = net.getNumPins();
                 }
 
-                if (_onlyClockNets && (net.getSignalType() != "CLOCK" && net.getName() != "clk")) {
+                if (_onlyClockNets && net.getSignalType() != "CLOCK") {
                         continue;
                 }
 
-                if (_onlySignalNets && (net.getSignalType() == "CLOCK" || net.getName() == "clk")) {
+                if (_onlySignalNets && net.getSignalType() == "CLOCK") {
                         continue;
                 }
 
