@@ -130,7 +130,8 @@ private:
         long _maxLengthDBU = -1;
         std::map<int, long> _layersMaxLengthDBU;
         bool _enableAntennaFlow = false;
-        std::string diodeName;
+        std::string _diodeCellName;
+        std::string _diodePinName;
         int ***oldHUsages;
         int ***oldVUsages;
         int _reroute = false;
@@ -262,7 +263,7 @@ public:
         void setMinLayerForClock(int minLayer);
         
         // flow functions
-        void enableAntennaAvoidance(char * diodeCellName);
+        void enableAntennaAvoidance(char * diodeCellName, char * diodePinName);
         void writeGuides();
         void startFastRoute();
         void estimateRC();

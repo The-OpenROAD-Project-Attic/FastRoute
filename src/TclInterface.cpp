@@ -152,8 +152,8 @@ void estimate_rc() {
         fastRouteKernel->estimateRC();
 }
 
-void enable_antenna_avoidance_flow(char * diodeCellName) {
-        fastRouteKernel->enableAntennaAvoidance(diodeCellName);
+void enable_antenna_avoidance_flow(char * diodeCellName, char * diodePinName) {
+        fastRouteKernel->enableAntennaAvoidance(diodeCellName, diodePinName);
 }
 
 void reset_fastroute() {

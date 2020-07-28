@@ -69,7 +69,7 @@ void set_min_layer_for_clock(int minLayer);
 
 // Run
 void estimate_rc();
-void enable_antenna_avoidance_flow(char * diodeCellName);
+void enable_antenna_avoidance_flow(char * diodeCellName, char * diodePinName);
 void start_fastroute();
 void run_fastroute();
 void reset_fastroute();

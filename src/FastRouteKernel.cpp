@@ -391,7 +391,7 @@ void FastRouteKernel::runAntennaAvoidanceFlow() {
         int violationsCnt = _dbWrapper->checkAntennaViolations(globalRoute, _maxRoutingLayer);
 
         if (violationsCnt > 0) {
-                _dbWrapper->fixAntennas(diodeName);
+                _dbWrapper->fixAntennas(_diodeCellName, _diodePinName);
                 _dbWrapper->legalizePlacedCells();
                 _reroute = true;
                 startFastRoute();
@@ -450,10 +450,12 @@ void FastRouteKernel::estimateRC() {
         }
 }
 
-void FastRouteKernel::enableAntennaAvoidance(char * diodeCellName) {
+void FastRouteKernel::enableAntennaAvoidance(char * diodeCellName, char * diodePinName) {
         _enableAntennaFlow = true;
         std::string cellName(diodeCellName);
-        diodeName = cellName;
+        std::string pinName(diodePinName);
+        _diodeCellName = cellName;
+        _diodePinName = pinName;
 }
 
 void FastRouteKernel::initGrid() {        

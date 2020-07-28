@@ -55,7 +55,9 @@ sta::define_cmd_args "fastroute" {[-output_file out_file] \
                                            [-seed seed] \
                                            [-report_congestion congest_file] \
                                            [-layers_pitches layers_pitches] \
-                                           [-antenna_avoidance_flow diode_cell_name] \
+                                           [-antenna_avoidance_flow] \
+                                           [-antenna_cell_name antenna_cell_name] \
+                                           [-antenna_pin_name antenna_pin_name] \
                                            [-clock_nets_route_flow] \
                                            [-min_layer_for_clock_net min_clock_layer] \
 }
@@ -66,8 +68,8 @@ proc fastroute { args } {
           -tile_size -alpha -verbose -layers_adjustments \
           -regions_adjustments -nets_alphas_priorities -overflow_iterations \
           -grid_origin -pdrev_for_high_fanout -seed -report_congestion -layers_pitches \
-          -max_routing_length -max_length_per_layer -min_layer_for_clock_net -antenna_avoidance_flow} \
-    flags {-unidirectional_routing -allow_overflow -estimateRC -clock_nets_route_flow} \
+          -max_routing_length -max_length_per_layer -min_layer_for_clock_net -antenna_cell_name -antenna_pin_name} \
+    flags {-unidirectional_routing -allow_overflow -estimateRC -clock_nets_route_flow -antenna_avoidance_flow} \
 
   if { [info exists keys(-output_file)] } {
     set out_file $keys(-output_file)
@@ -230,9 +232,22 @@ proc fastroute { args } {
     }
   }
 
-  if { [info exists keys(-antenna_avoidance_flow)] } {
-    set diode_cell_name $keys(-antenna_avoidance_flow)
-    FastRoute::enable_antenna_avoidance_flow $diode_cell_name
+  if { [info exists flags(-antenna_avoidance_flow)] } {
+    set diode_cell_name "INVALID"
+    if { [info exists keys(-antenna_cell_name)] } {
+      set diode_cell_name $keys(-antenna_cell_name)
+    } else {
+      ord::error "Missing antenna cell name"
+    }
+
+    set diode_pin_name "INVALID"
+    if { [info exists keys(-antenna_pin_name)] } {
+      set diode_pin_name $keys(-antenna_pin_name)
+    } else {
+      ord::error "Missing antenna cell pin name"
+    }
+
+    FastRoute::enable_antenna_avoidance_flow $diode_cell_name $diode_pin_name
   }
 
   if { [info exists flags(-clock_nets_route_flow)] } {

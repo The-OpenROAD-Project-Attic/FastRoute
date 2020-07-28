@@ -87,7 +87,7 @@ extern void set_min_layer_for_clock(int minLayer);
 
 extern void estimate_rc();
 
-extern void enable_antenna_avoidance_flow(char * diodeCellName);
+extern void enable_antenna_avoidance_flow(char * diodeCellName, char * diodePinName);
 
 extern void start_fastroute();
 

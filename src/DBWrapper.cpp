@@ -1116,6 +1116,7 @@ int DBWrapper::checkAntennaViolations(std::vector<FastRoute::NET> routing, int m
 
 void DBWrapper::insertDiode(odb::dbNet* net, 
                   std::string antennaCellName,
+                  std::string antennaPinName,
                   odb::dbInst* sinkInst,
                   odb::dbITerm* sinkITerm,
                   std::string antennaInstName) {
@@ -1132,7 +1133,7 @@ void DBWrapper::insertDiode(odb::dbNet* net,
         odb::dbOrientType instOrient = sinkInst->getOrient();
 
         odb::dbInst* antennaInst = odb::dbInst::create(block, antennaMaster, antennaInstName.c_str());
-        odb::dbITerm* antennaITerm = antennaInst->findITerm("A");
+        odb::dbITerm* antennaITerm = antennaInst->findITerm(antennaPinName.c_str());
 
         odb::dbBox* antennaBBox = antennaInst->getBBox();
         int antennaWidth = antennaBBox->xMax() - antennaBBox->xMin();
@@ -1144,7 +1145,7 @@ void DBWrapper::insertDiode(odb::dbNet* net,
         odb::dbITerm::connect(antennaITerm, net);
 }
 
-void DBWrapper::fixAntennas(std::string antennaCellName) {
+void DBWrapper::fixAntennas(std::string antennaCellName, std::string antennaPinName) {
         int cnt = 0;
         for (auto const& violation : antennaViolations) {
                 odb::dbNet* net = dbNets[violation.first];
@@ -1152,7 +1153,7 @@ void DBWrapper::fixAntennas(std::string antennaCellName) {
                         for (odb::dbITerm * sinkITerm : std::get<1>(violation.second[i])) {
                                 odb::dbInst* sinkInst = sinkITerm->getInst();
                                 std::string antennaInstName = "ANTENNA_" + std::to_string(cnt);
-                                insertDiode(net, antennaCellName, sinkInst, sinkITerm, antennaInstName);
+                                insertDiode(net, antennaCellName, antennaPinName, sinkInst, sinkITerm, antennaInstName);
                                 cnt++;
                         }
                 }

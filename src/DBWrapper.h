@@ -89,8 +89,8 @@ public:
         std::map<int, odb::dbTechVia*> getDefaultVias(int maxRoutingLayer);
         void commitGlobalSegmentsToDB(std::vector<FastRoute::NET> routing, int maxRoutingLayer);
         int checkAntennaViolations(std::vector<FastRoute::NET> routing, int maxRoutingLayer);
-        void insertDiode(odb::dbNet* net, std::string antennaCellName, odb::dbInst* sinkInst, odb::dbITerm* sinkITerm, std::string antennaInstName);
-        void fixAntennas(std::string antennaCellName);
+        void insertDiode(odb::dbNet* net, std::string antennaCellName, std::string antennaPinName, odb::dbInst* sinkInst, odb::dbITerm* sinkITerm, std::string antennaInstName);
+        void fixAntennas(std::string antennaCellName, std::string antennaPinName);
         void legalizePlacedCells();
         
         void setDB(unsigned idx) { _db = odb::dbDatabase::getDatabase(idx); }
