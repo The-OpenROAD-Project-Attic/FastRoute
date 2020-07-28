@@ -468,9 +468,8 @@ void FastRouteKernel::initializeNets() {
         int minDegree = std::numeric_limits<int>::max();
         int maxDegree = std::numeric_limits<int>::min();
 
-        _netlist->randomizeNetsOrder(_seed);
-
-        for (Net net : _netlist->getNets()) {
+        for (auto const& n : _netlist->getNets()) {
+                Net net = n.second;
                 if (net.getNumPins() <= 1) {
                         continue;
                 }
@@ -489,7 +488,8 @@ void FastRouteKernel::initializeNets() {
         _fastRoute->setNumberNets(validNets);
         _fastRoute->setMaxNetDegree(_netlist->getMaxNetDegree());
         
-        for (Net net : _netlist->getNets()) {
+        for (auto const& n : _netlist->getNets()) {
+                Net net = n.second;
                 float netAlpha = _alpha;
 
                 if (net.getNumPins() <= 1) {
@@ -1724,7 +1724,8 @@ std::vector<FastRouteKernel::EST_> FastRouteKernel::getEst() {
 void FastRouteKernel::checkSinksAndSource() {
         bool invalid = false;
 
-        for (Net net : _netlist->getNets()) {
+        for (auto const& n : _netlist->getNets()) {
+                Net net = n.second;
                 if (net.getNumPins() < 2) {
                         continue;
                 }
