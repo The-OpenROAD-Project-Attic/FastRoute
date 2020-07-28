@@ -556,46 +556,7 @@ void FastRouteKernel::initializeNets() {
                         }
 
                         if ((pin.isConnectedToPad() || pin.isPort()) && !_estimateRC ) { // If pin is connected to PAD, create a "fake" location in routing grid to avoid PAD obstacles
-                                FastRoute::ROUTE pinConnection;
-                                pinConnection.initLayer = topLayer;
-                                pinConnection.finalLayer = topLayer;
-
-                                if (layer.getPreferredDirection() == RoutingLayer::HORIZONTAL) {
-                                        pinConnection.finalX = pinPosition.getX();
-                                        pinConnection.initY = pinPosition.getY();
-                                        pinConnection.finalY = pinPosition.getY();
-
-                                        DBU newXPosition;
-                                        if (pin.getOrientation() == Orientation::ORIENT_WEST) {
-                                                newXPosition = pinPosition.getX() + (_gcellsOffset * _grid->getTileWidth());
-                                                pinConnection.initX = newXPosition;
-                                                pinPosition.setX(newXPosition);
-                                        } else if (pin.getOrientation() == Orientation::ORIENT_EAST) {
-                                                newXPosition = pinPosition.getX() - (_gcellsOffset * _grid->getTileWidth());
-                                                pinConnection.initX = newXPosition;
-                                                pinPosition.setX(newXPosition);
-                                        } else {
-                                                std::cout << "[WARNING] Pin " << pin.getName() << " has invalid orientation\n";
-                                        }
-                                } else {
-                                        pinConnection.initX = pinPosition.getX();
-                                        pinConnection.finalX = pinPosition.getX();
-                                        pinConnection.finalY = pinPosition.getY();
-
-                                        DBU newYPosition;
-                                        if (pin.getOrientation() == Orientation::ORIENT_SOUTH) {
-                                                newYPosition = pinPosition.getY() + (_gcellsOffset * _grid->getTileHeight());
-                                                pinConnection.initY = newYPosition;
-                                                pinPosition.setY(newYPosition);
-                                        } else if (pin.getOrientation() == Orientation::ORIENT_NORTH) {
-                                                newYPosition = pinPosition.getY() - (_gcellsOffset * _grid->getTileHeight());
-                                                pinConnection.initY = newYPosition;
-                                                pinPosition.setY(newYPosition);
-                                        } else {
-                                                std::cout << "[WARNING] Pin " << pin.getName() << " has invalid orientation\n";
-                                        }
-                                }
-
+                                FastRoute::ROUTE pinConnection = createFakePin(pin, pinPosition, layer);
                                 _padPinsConnections[net.getName()].push_back(pinConnection);
                         }
                         
@@ -2109,45 +2070,7 @@ SteinerTree FastRouteKernel::createSteinerTree(std::vector<ROUTE> route, std::ve
                 }
 
                 if ((pin.isConnectedToPad() || pin.isPort()) && !_estimateRC) { // If pin is connected to PAD, create a "fake" location in routing grid to avoid PAD obstacles
-                        FastRoute::ROUTE pinConnection;
-                        pinConnection.initLayer = topLayer;
-                        pinConnection.finalLayer = topLayer;
-
-                        if (layer.getPreferredDirection() == RoutingLayer::HORIZONTAL) {
-                                pinConnection.finalX = pinPosition.getX();
-                                pinConnection.initY = pinPosition.getY();
-                                pinConnection.finalY = pinPosition.getY();
-
-                                DBU newXPosition;
-                                if (pin.getOrientation() == Orientation::ORIENT_WEST) {
-                                        newXPosition = pinPosition.getX() + (_gcellsOffset * _grid->getTileWidth());
-                                        pinConnection.initX = newXPosition;
-                                        pinPosition.setX(newXPosition);
-                                } else if (pin.getOrientation() == Orientation::ORIENT_EAST) {
-                                        newXPosition = pinPosition.getX() - (_gcellsOffset * _grid->getTileWidth());
-                                        pinConnection.initX = newXPosition;
-                                        pinPosition.setX(newXPosition);
-                                } else {
-                                        std::cout << "[WARNING] Pin " << pin.getName() << " has invalid orientation\n";
-                                }
-                        } else {
-                                pinConnection.initX = pinPosition.getX();
-                                pinConnection.finalX = pinPosition.getX();
-                                pinConnection.finalY = pinPosition.getY();
-
-                                DBU newYPosition;
-                                if (pin.getOrientation() == Orientation::ORIENT_SOUTH) {
-                                        newYPosition = pinPosition.getY() + (_gcellsOffset * _grid->getTileHeight());
-                                        pinConnection.initY = newYPosition;
-                                        pinPosition.setY(newYPosition);
-                                } else if (pin.getOrientation() == Orientation::ORIENT_NORTH) {
-                                        newYPosition = pinPosition.getY() - (_gcellsOffset * _grid->getTileHeight());
-                                        pinConnection.initY = newYPosition;
-                                        pinPosition.setY(newYPosition);
-                                } else {
-                                        std::cout << "[WARNING] Pin " << pin.getName() << " has invalid orientation\n";
-                                }
-                        }
+                        FastRoute::ROUTE pinConnection = createFakePin(pin, pinPosition, layer);
                 }
 
                 Node node;
@@ -2344,6 +2267,51 @@ bool FastRouteKernel::pinOverlapsWithSingleTrack(const Pin& pin, Coordinate &tra
         }
 
         return false;
+}
+
+FastRoute::ROUTE FastRouteKernel::createFakePin(Pin pin, Coordinate &pinPosition, RoutingLayer layer) {
+        int topLayer = layer.getIndex();
+        FastRoute::ROUTE pinConnection;
+        pinConnection.initLayer = topLayer;
+        pinConnection.finalLayer = topLayer;
+
+        if (layer.getPreferredDirection() == RoutingLayer::HORIZONTAL) {
+                pinConnection.finalX = pinPosition.getX();
+                pinConnection.initY = pinPosition.getY();
+                pinConnection.finalY = pinPosition.getY();
+
+                DBU newXPosition;
+                if (pin.getOrientation() == Orientation::ORIENT_WEST) {
+                        newXPosition = pinPosition.getX() + (_gcellsOffset * _grid->getTileWidth());
+                        pinConnection.initX = newXPosition;
+                        pinPosition.setX(newXPosition);
+                } else if (pin.getOrientation() == Orientation::ORIENT_EAST) {
+                        newXPosition = pinPosition.getX() - (_gcellsOffset * _grid->getTileWidth());
+                        pinConnection.initX = newXPosition;
+                        pinPosition.setX(newXPosition);
+                } else {
+                        std::cout << "[WARNING] Pin " << pin.getName() << " has invalid orientation\n";
+                }
+        } else {
+                pinConnection.initX = pinPosition.getX();
+                pinConnection.finalX = pinPosition.getX();
+                pinConnection.finalY = pinPosition.getY();
+
+                DBU newYPosition;
+                if (pin.getOrientation() == Orientation::ORIENT_SOUTH) {
+                        newYPosition = pinPosition.getY() + (_gcellsOffset * _grid->getTileHeight());
+                        pinConnection.initY = newYPosition;
+                        pinPosition.setY(newYPosition);
+                } else if (pin.getOrientation() == Orientation::ORIENT_NORTH) {
+                        newYPosition = pinPosition.getY() - (_gcellsOffset * _grid->getTileHeight());
+                        pinConnection.initY = newYPosition;
+                        pinPosition.setY(newYPosition);
+                } else {
+                        std::cout << "[WARNING] Pin " << pin.getName() << " has invalid orientation\n";
+                }
+        }
+
+        return pinConnection;
 }
 
 }

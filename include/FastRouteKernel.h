@@ -166,6 +166,7 @@ private:
                               const std::map<Point, int>& segsAtPoint);
         void mergeSegments(FastRoute::NET &net);
         bool pinOverlapsWithSingleTrack(const Pin& pin, Coordinate &trackPosition);
+        ROUTE createFakePin(Pin pin, Coordinate &pinPosition, RoutingLayer layer);
         
         // check functions
         void checkPinPlacement();
