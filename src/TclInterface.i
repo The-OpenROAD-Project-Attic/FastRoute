@@ -85,6 +85,8 @@ extern void set_clock_nets_route_flow(bool clock_flow);
 
 extern void set_min_layer_for_clock(int minLayer);
 
+extern void set_estimate_rc();
+
 extern void estimate_rc();
 
 extern void enable_antenna_avoidance_flow(char * diodeCellName, char * diodePinName);

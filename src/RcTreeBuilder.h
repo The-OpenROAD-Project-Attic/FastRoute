@@ -43,20 +43,25 @@
 
 namespace sta {
         class Net;
-        class Network;
+        class dbNetwork;
         class Parasitics;
         class Parasitic;
+        class Corner;
+        class OperatingConditions;
         class ParasiticAnalysisPt;
         class Units;
+}
+
+namespace ord {
+class OpenRoad;
 }
 
 namespace FastRoute {
 
 class RcTreeBuilder {
 public:
-        RcTreeBuilder(Net& net, SteinerTree& steinerTree, Grid &grid,
-                      DBWrapper& dbWrapper);
-        void run();
+        RcTreeBuilder(ord::OpenRoad *openroad, DBWrapper* dbWrapper);
+        void run(Net& net, SteinerTree& steinerTree, Grid &grid);
         void reportParasitics();
 
 protected:
@@ -65,6 +70,7 @@ protected:
         void createSteinerNodes();
         void computeGlobalParasitics();
         void computeLocalParasitics();
+        void reduceParasiticNetwork();
 
         int findNodeToConnect(const Pin& pin,
                               const std::vector<unsigned>& pinNodes) const;
@@ -79,8 +85,10 @@ protected:
         SteinerTree*              _steinerTree   = nullptr;
         sta::Parasitic*           _parasitic     = nullptr;
         sta::Parasitics*          _parasitics    = nullptr;
+        sta::Corner*              _corner        = nullptr;
+        sta::OperatingConditions* _op_cond       = nullptr;
         sta::ParasiticAnalysisPt* _analysisPoint = nullptr;
-        sta::Network*             _network       = nullptr;
+        sta::dbNetwork*            _network      = nullptr;
         sta::Units*               _units         = nullptr;
         bool                      _debug         = false;
 };

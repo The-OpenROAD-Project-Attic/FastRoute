@@ -48,6 +48,10 @@
 #include <istream>
 #include <map>
 
+namespace ord {
+class OpenRoad;
+}
+
 namespace FastRoute {
 
 class FT;
@@ -72,6 +76,7 @@ protected:
         std::vector<RoutingTracks> *_allRoutingTracks = nullptr;
 
 private:
+        ord::OpenRoad *_openroad;
         // Objects variables
         DBWrapper* _dbWrapper = nullptr;
         FT* _fastRoute = nullptr;
@@ -93,6 +98,7 @@ private:
         int _overflowIterations = 50;
         int _pdRevForHighFanout = -1;
         bool _allowOverflow = false;
+        bool _estimateRC = false;
         bool _reportCongest;
         std::vector<int> _vCapacities;
         std::vector<int> _hCapacities;
@@ -169,6 +175,7 @@ private:
                               const std::map<Point, int>& segsAtPoint);
         void mergeSegments(FastRoute::NET &net);
         bool pinOverlapsWithSingleTrack(const Pin& pin, Coordinate &trackPosition);
+        ROUTE createFakePin(Pin pin, Coordinate &pinPosition, RoutingLayer layer);
         
         // check functions
         void checkPinPlacement();
@@ -231,6 +238,7 @@ public:
 
         FastRouteKernel();
         ~FastRouteKernel();
+        void init(ord::OpenRoad *openroad);
         void init();
         void reset();
         void resetResources();
@@ -242,7 +250,6 @@ public:
         void setAlpha(const float alpha);
         void setOutputFile(const std::string& outfile);
         void setPitchesInTile(const int pitchesInTile);
-        void setDbId(unsigned idx);
         void setSeed(unsigned seed);
         unsigned getDbId();
         void addLayerAdjustment(int layer, float reductionPercentage);
@@ -254,6 +261,7 @@ public:
         void setGridOrigin(long x, long y);
         void setPDRevForHighFanout(int pdRevForHighFanout);
         void setAllowOverflow(bool allowOverflow);
+        void setEstimateRC(bool estimateRC);
         void setReportCongestion(char * congestFile);
         void printGrid();
         void printHeader();

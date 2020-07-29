@@ -56,7 +56,10 @@
 #include "include/FastRoute.h"
 #include "boost/multi_array.hpp"
 
+#include "openroad/OpenRoad.hh"
 #include "openroad/Error.hh"
+#include "sta/Parasitics.hh"
+#include "db_sta/dbSta.hh"
 
 namespace FastRoute {
 
@@ -65,6 +68,12 @@ using boost::multi_array;
 
 FastRouteKernel::FastRouteKernel() {
         init();
+}
+
+void FastRouteKernel::init(ord::OpenRoad *openroad) {
+  _openroad = openroad;
+  // This should be using a pointer to the db, not an object id -cherry
+  _dbId = openroad->getDb()->getId();
 }
 
 void FastRouteKernel::init() {
@@ -431,6 +440,13 @@ void FastRouteKernel::runClockNetsRouteFlow() {
 
 void FastRouteKernel::estimateRC() {
         runFastRoute();
+        addRemainingGuides(*_result);
+
+        sta::dbSta* dbSta = _openroad->getSta();
+	sta::Parasitics *parasitics = dbSta->parasitics();
+	parasitics->deleteParasitics();
+
+	RcTreeBuilder builder(_openroad, _dbWrapper);
         for (FastRoute::NET &netRoute : *_result) {
                 mergeSegments(netRoute);
 
@@ -439,14 +455,12 @@ void FastRouteKernel::estimateRC() {
                 std::vector<Pin> pins = net.getPins();
                 std::vector<ROUTE> route = netRoute.route;
                 sTree = createSteinerTree(route, pins);
-                if (!checkSteinerTree(sTree)) {
+                if (checkSteinerTree(sTree))
+		  builder.run(net, sTree, *_grid);
+		else {
                         std::cout << " [ERROR] Error on Steiner tree of net "
                                   << netRoute.name << "\n";
-                        continue;
                 }
-
-                RcTreeBuilder builder(net, sTree, *_grid, *_dbWrapper);
-                builder.run();
         }
 }
 
@@ -607,9 +621,8 @@ void FastRouteKernel::initializeNets(bool reroute) {
         int minDegree = std::numeric_limits<int>::max();
         int maxDegree = std::numeric_limits<int>::min();
 
-        _netlist->randomizeNetsOrder(_seed);
-
-        for (Net net : _netlist->getNets()) {
+        for (auto const& n : _netlist->getNets()) {
+                Net net = n.second;
                 if (net.getNumPins() <= 1) {
                         continue;
                 }
@@ -632,7 +645,8 @@ void FastRouteKernel::initializeNets(bool reroute) {
         _fastRoute->setNumberNets(validNets);
         _fastRoute->setMaxNetDegree(_netlist->getMaxNetDegree());
         
-        for (Net &net : _netlist->getNets()) {
+        for (auto const& n : _netlist->getNets()) {
+                Net net = n.second;
                 float netAlpha = _alpha;
                 bool isClock = (net.getSignalType() == "CLOCK") ? true : false;
 
@@ -703,49 +717,8 @@ void FastRouteKernel::initializeNets(bool reroute) {
                                 }
                         }
 
-                        pin.setOnGridPosition(pinPosition);
-
-                        if (pin.isConnectedToPad()) { // If pin is connected to PAD, create a "fake" location in routing grid to avoid PAD obstacles
-                                FastRoute::ROUTE pinConnection;
-                                pinConnection.initLayer = topLayer;
-                                pinConnection.finalLayer = topLayer;
-
-                                if (layer.getPreferredDirection() == RoutingLayer::HORIZONTAL) {
-                                        pinConnection.finalX = pinPosition.getX();
-                                        pinConnection.initY = pinPosition.getY();
-                                        pinConnection.finalY = pinPosition.getY();
-
-                                        DBU newXPosition;
-                                        if (pin.getOrientation() == Orientation::ORIENT_WEST) {
-                                                newXPosition = pinPosition.getX() + (_gcellsOffset * _grid->getTileWidth());
-                                                pinConnection.initX = newXPosition;
-                                                pinPosition.setX(newXPosition);
-                                        } else if (pin.getOrientation() == Orientation::ORIENT_EAST) {
-                                                newXPosition = pinPosition.getX() - (_gcellsOffset * _grid->getTileWidth());
-                                                pinConnection.initX = newXPosition;
-                                                pinPosition.setX(newXPosition);
-                                        } else {
-                                                std::cout << "[WARNING] Pin " << pin.getName() << " has invalid orientation\n";
-                                        }
-                                } else {
-                                        pinConnection.initX = pinPosition.getX();
-                                        pinConnection.finalX = pinPosition.getX();
-                                        pinConnection.finalY = pinPosition.getY();
-
-                                        DBU newYPosition;
-                                        if (pin.getOrientation() == Orientation::ORIENT_SOUTH) {
-                                                newYPosition = pinPosition.getY() + (_gcellsOffset * _grid->getTileHeight());
-                                                pinConnection.initY = newYPosition;
-                                                pinPosition.setY(newYPosition);
-                                        } else if (pin.getOrientation() == Orientation::ORIENT_NORTH) {
-                                                newYPosition = pinPosition.getY() - (_gcellsOffset * _grid->getTileHeight());
-                                                pinConnection.initY = newYPosition;
-                                                pinPosition.setY(newYPosition);
-                                        } else {
-                                                std::cout << "[WARNING] Pin " << pin.getName() << " has invalid orientation\n";
-                                        }
-                                }
-
+                        if ((pin.isConnectedToPad() || pin.isPort()) && !_estimateRC) { // If pin is connected to PAD, create a "fake" location in routing grid to avoid PAD obstacles
+                                FastRoute::ROUTE pinConnection = createFakePin(pin, pinPosition, layer);
                                 _padPinsConnections[net.getName()].push_back(pinConnection);
                         }
                         
@@ -772,8 +745,6 @@ void FastRouteKernel::initializeNets(bool reroute) {
                 
                 _fastRoute->addNet(netName, idx, pins.size(), 1, grPins, netAlpha, isClock);
                 idx++;
-
-                _netlist->addNetToMap(net);
         }
 
         std::cout << "[INFO] Minimum degree: " << minDegree << "\n";
@@ -1238,10 +1209,6 @@ void FastRouteKernel::setPitchesInTile(const int pitchesInTile) {
         _grid->setPitchesInTile(pitchesInTile);
 }
 
-void FastRouteKernel::setDbId(unsigned idx) {
-        _dbId = idx;
-}
-
 void FastRouteKernel::setSeed(unsigned seed) {
         _seed = seed;
 }
@@ -1296,6 +1263,10 @@ void FastRouteKernel::setPDRevForHighFanout(int pdRevForHighFanout) {
 
 void FastRouteKernel::setAllowOverflow(bool allowOverflow) {
         _allowOverflow = allowOverflow;
+}
+
+void FastRouteKernel::setEstimateRC(bool estimateRC) {
+        _estimateRC = estimateRC;
 }
 
 void FastRouteKernel::setReportCongestion(char * congestFile) {
@@ -1878,7 +1849,8 @@ std::vector<FastRouteKernel::EST_> FastRouteKernel::getEst() {
 void FastRouteKernel::checkSinksAndSource() {
         bool invalid = false;
 
-        for (Net net : _netlist->getNets()) {
+        for (auto const& n : _netlist->getNets()) {
+                Net net = n.second;
                 if (net.getNumPins() < 2) {
                         continue;
                 }
@@ -2237,6 +2209,7 @@ SteinerTree FastRouteKernel::createSteinerTree(std::vector<ROUTE> route, std::ve
         for (Pin pin : pins) {
                 Coordinate pinPosition;
                 int topLayer = pin.getTopLayer();
+                RoutingLayer layer = getRoutingLayerByIndex(topLayer);
 
                 std::vector<Box> pinBoxes = pin.getBoxes().at(topLayer);
                 std::vector<Coordinate> pinPositionsOnGrid;
@@ -2257,6 +2230,10 @@ SteinerTree FastRouteKernel::createSteinerTree(std::vector<ROUTE> route, std::ve
                                 pinPosition = pos;
                                 votes = equals;
                         }
+                }
+
+                if ((pin.isConnectedToPad() || pin.isPort()) && !_estimateRC) { // If pin is connected to PAD, create a "fake" location in routing grid to avoid PAD obstacles
+                        FastRoute::ROUTE pinConnection = createFakePin(pin, pinPosition, layer);
                 }
 
                 Node node;
@@ -2502,6 +2479,51 @@ bool FastRouteKernel::pinOverlapsWithSingleTrack(const Pin& pin, Coordinate &tra
         }
 
         return false;
+}
+
+FastRoute::ROUTE FastRouteKernel::createFakePin(Pin pin, Coordinate &pinPosition, RoutingLayer layer) {
+        int topLayer = layer.getIndex();
+        FastRoute::ROUTE pinConnection;
+        pinConnection.initLayer = topLayer;
+        pinConnection.finalLayer = topLayer;
+
+        if (layer.getPreferredDirection() == RoutingLayer::HORIZONTAL) {
+                pinConnection.finalX = pinPosition.getX();
+                pinConnection.initY = pinPosition.getY();
+                pinConnection.finalY = pinPosition.getY();
+
+                DBU newXPosition;
+                if (pin.getOrientation() == Orientation::ORIENT_WEST) {
+                        newXPosition = pinPosition.getX() + (_gcellsOffset * _grid->getTileWidth());
+                        pinConnection.initX = newXPosition;
+                        pinPosition.setX(newXPosition);
+                } else if (pin.getOrientation() == Orientation::ORIENT_EAST) {
+                        newXPosition = pinPosition.getX() - (_gcellsOffset * _grid->getTileWidth());
+                        pinConnection.initX = newXPosition;
+                        pinPosition.setX(newXPosition);
+                } else {
+                        std::cout << "[WARNING] Pin " << pin.getName() << " has invalid orientation\n";
+                }
+        } else {
+                pinConnection.initX = pinPosition.getX();
+                pinConnection.finalX = pinPosition.getX();
+                pinConnection.finalY = pinPosition.getY();
+
+                DBU newYPosition;
+                if (pin.getOrientation() == Orientation::ORIENT_SOUTH) {
+                        newYPosition = pinPosition.getY() + (_gcellsOffset * _grid->getTileHeight());
+                        pinConnection.initY = newYPosition;
+                        pinPosition.setY(newYPosition);
+                } else if (pin.getOrientation() == Orientation::ORIENT_NORTH) {
+                        newYPosition = pinPosition.getY() - (_gcellsOffset * _grid->getTileHeight());
+                        pinConnection.initY = newYPosition;
+                        pinPosition.setY(newYPosition);
+                } else {
+                        std::cout << "[WARNING] Pin " << pin.getName() << " has invalid orientation\n";
+                }
+        }
+
+        return pinConnection;
 }
 
 }

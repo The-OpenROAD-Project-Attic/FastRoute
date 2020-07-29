@@ -463,6 +463,7 @@ void DBWrapper::addNet(odb::dbNet* net, Box dieArea, bool isClock) {
                 odb::dbMaster* master;
                 bool connectedToPad = false;
                 bool connectedToMacro = false;
+                bool isPort = true;
                 odb::dbInst* inst;
                 odb::dbBox* instBox;
                 Coordinate instMiddle = Coordinate(-1, -1);
@@ -525,7 +526,7 @@ void DBWrapper::addNet(odb::dbNet* net, Box dieArea, bool isClock) {
                         pinLayers.push_back(layer_boxes.first);
                 }
                 
-                Pin pin = Pin(pinName, pinPos, pinLayers, Orientation::INVALID, pinBoxes, netName, true, (connectedToPad || connectedToMacro), type);
+                Pin pin = Pin(pinName, pinPos, pinLayers, Orientation::INVALID, pinBoxes, netName, isPort, (connectedToPad || connectedToMacro), type);
 
                 if (connectedToPad) {
                         Coordinate pinPosition = pin.getPosition();
@@ -544,6 +545,25 @@ void DBWrapper::addNet(odb::dbNet* net, Box dieArea, bool isClock) {
                                         pin.setOrientation(Orientation::ORIENT_NORTH);
                                 } else {
                                         pin.setOrientation(Orientation::ORIENT_SOUTH);
+                                }
+                        } else if (isPort) {
+                                Coordinate pinPosition = pin.getPosition();
+                                odb::dbTechLayer* techLayer = tech->findRoutingLayer(pin.getTopLayer());
+                                
+                                if (techLayer->getDirection().getValue() == odb::dbTechLayerDir::HORIZONTAL) {
+                                        DBU instToDie = pinPosition.getX() - dieArea.getMiddle().getX();
+                                        if (instToDie < 0) {
+                                                pin.setOrientation(Orientation::ORIENT_WEST);
+                                        } else {
+                                                pin.setOrientation(Orientation::ORIENT_EAST);
+                                        }
+                                } else if (techLayer->getDirection().getValue() == odb::dbTechLayerDir::VERTICAL) {
+                                        DBU instToDie = pinPosition.getY() - dieArea.getMiddle().getY();
+                                        if (instToDie < 0) {
+                                                pin.setOrientation(Orientation::ORIENT_SOUTH);
+                                        } else {
+                                                pin.setOrientation(Orientation::ORIENT_NORTH);
+                                        }
                                 }
                         }
                 }

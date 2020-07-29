@@ -272,6 +272,9 @@ proc fastroute { args } {
     }
   }
 
+  if {[info exists flags(-estimateRC)]} {
+    FastRoute::set_estimate_rc
+  }
   FastRoute::start_fastroute
   if {[info exists flags(-estimateRC)]} {
     FastRoute::estimate_rc

@@ -41,20 +41,10 @@ namespace FastRoute {
 
 using ord::error;
 
-Net Netlist::getNetByName(std::string name) {
-        return _netsPerName[name];
-}
-
 void Netlist::addNet(const std::string& name, const std::string& signalType, const std::vector<Pin>& pins) {
         Net net = Net(name, signalType, pins);
-        _nets.push_back(net);
+        _nets[name] = net;
         _netCount++;
-}
-
-void Netlist::resetNetlist() {
-        _nets.clear();
-        _netsPerName.clear();
-        _netCount = 0;
 }
         
 int Netlist::getMaxNetDegree() {
@@ -64,8 +54,8 @@ int Netlist::getMaxNetDegree() {
     
         int maxDegree = -1;
         
-        for (Net net : _nets) {
-                int netDegree = net.getNumPins();
+        for (auto const& net : _nets) {
+                int netDegree = net.second.getNumPins();
                 if (netDegree > maxDegree) {
                         maxDegree = netDegree;
                 }
@@ -76,8 +66,8 @@ int Netlist::getMaxNetDegree() {
 
 std::vector<Pin> Netlist::getAllPorts() {
         std::vector<Pin> ports; 
-        for (Net net : _nets) {
-                for (Pin pin : net.getPins()) {
+        for (auto &net : _nets) {
+                for (Pin pin : net.second.getPins()) {
                         if (pin.isPort()) {
                                 ports.push_back(pin);
                         }
@@ -85,11 +75,6 @@ std::vector<Pin> Netlist::getAllPorts() {
         }
         
         return ports;
-}
-
-void Netlist::randomizeNetsOrder(unsigned seed) {
-        if (seed != 0)
-                std::shuffle(_nets.begin(), _nets.end(), std::default_random_engine(seed));
 }
 
 }
