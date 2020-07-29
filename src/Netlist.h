@@ -60,7 +60,7 @@ public:
         Netlist()
             : _netCount(0) {};
         
-        std::map<std::string, Net> getNets() { return _nets; }
+        std::map<std::string, Net>& getNets() { return _nets; }
         int getNetCount() const { return _netCount; }
         Net getNetByName(std::string name) { return _nets[name]; }
         

@@ -645,8 +645,8 @@ void FastRouteKernel::initializeNets(bool reroute) {
         _fastRoute->setNumberNets(validNets);
         _fastRoute->setMaxNetDegree(_netlist->getMaxNetDegree());
         
-        for (auto const& n : _netlist->getNets()) {
-                Net net = n.second;
+        for (auto &n : _netlist->getNets()) {
+                Net &net = n.second;
                 float netAlpha = _alpha;
                 bool isClock = (net.getSignalType() == "CLOCK") ? true : false;
 
@@ -716,6 +716,8 @@ void FastRouteKernel::initializeNets(bool reroute) {
                                         }
                                 }
                         }
+
+                        pin.setOnGridPosition(pinPosition);
 
                         if ((pin.isConnectedToPad() || pin.isPort()) && !_estimateRC) { // If pin is connected to PAD, create a "fake" location in routing grid to avoid PAD obstacles
                                 FastRoute::ROUTE pinConnection = createFakePin(pin, pinPosition, layer);
