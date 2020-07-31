@@ -54,6 +54,10 @@
 #include "sta/Clock.hh"
 #include "sta/Set.hh"
 
+#include <boost/function_output_iterator.hpp>
+#include <boost/geometry.hpp>
+#include <boost/geometry/index/rtree.hpp>
+
 // Forward declaration protects FastRoute code from any
 // header file from the DB. FastRoute code keeps independent.
 namespace odb{
@@ -62,9 +66,19 @@ class dbChip;
 class dbTech;
 }
 
+namespace bg = boost::geometry;
+namespace bgi = boost::geometry::index;
+
 namespace FastRoute {
 
 class DBWrapper {
+private:
+        typedef int coord_type;
+        typedef bg::cs::cartesian coord_sys_type;
+        typedef bg::model::point<coord_type, 2, coord_sys_type> point;
+        typedef bg::model::box<point> box;
+        typedef std::pair<box, int> value;
+        typedef bgi::rtree<value, bgi::quadratic<8,4>> r_tree;
 public:        
         DBWrapper() = default;
         DBWrapper(Netlist *netlist, Grid *grid) 
@@ -89,9 +103,11 @@ public:
         std::map<int, odb::dbTechVia*> getDefaultVias(int maxRoutingLayer);
         void commitGlobalSegmentsToDB(std::vector<FastRoute::NET> routing, int maxRoutingLayer);
         int checkAntennaViolations(std::vector<FastRoute::NET> routing, int maxRoutingLayer);
-        void insertDiode(odb::dbNet* net, std::string antennaCellName, std::string antennaPinName, odb::dbInst* sinkInst, odb::dbITerm* sinkITerm, std::string antennaInstName);
+        void insertDiode(odb::dbNet* net, std::string antennaCellName, std::string antennaPinName, odb::dbInst* sinkInst,
+                         odb::dbITerm* sinkITerm, std::string antennaInstName, int siteWidth, r_tree& fixedInsts);
         void fixAntennas(std::string antennaCellName, std::string antennaPinName);
         void legalizePlacedCells();
+        void getFixedInstances(r_tree& fixedInsts);
         
         void setDB(unsigned idx) { _db = odb::dbDatabase::getDatabase(idx); }
         void setSelectedMetal (int metal) { selectedMetal = metal; }

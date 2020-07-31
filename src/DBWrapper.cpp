@@ -1160,41 +1160,124 @@ void DBWrapper::insertDiode(odb::dbNet* net,
                   std::string antennaPinName,
                   odb::dbInst* sinkInst,
                   odb::dbITerm* sinkITerm,
-                  std::string antennaInstName) {
+                  std::string antennaInstName,
+                  int siteWidth,
+                  r_tree& fixedInsts) {
+        bool legallyPlaced = false;
+        bool placeAtLeft = true;
+        int leftOffset = 0;
+        int rightOffset = 0;
+        int offset;
+
         odb::dbBlock* block = _chip->getBlock();
         std::string netName = net->getConstName();
 
         odb::dbMaster* antennaMaster = _db->findMaster(antennaCellName.c_str());
         odb::dbSet<odb::dbMTerm> antennaMTerms = antennaMaster->getMTerms();
 
-        int instLocX, instLocY;
+        int instLocX, instLocY, instWidth;
         odb::dbBox* sinkBBox = sinkInst->getBBox();
         instLocX = sinkBBox->xMin();
         instLocY = sinkBBox->yMin();
+        instWidth = sinkBBox->xMax() - sinkBBox->xMin();
         odb::dbOrientType instOrient = sinkInst->getOrient();
 
         odb::dbInst* antennaInst = odb::dbInst::create(block, antennaMaster, antennaInstName.c_str());
         odb::dbITerm* antennaITerm = antennaInst->findITerm(antennaPinName.c_str());
-
         odb::dbBox* antennaBBox = antennaInst->getBBox();
         int antennaWidth = antennaBBox->xMax() - antennaBBox->xMin();
-        antennaInst->setOrient(instOrient);
-        antennaInst->setLocation(instLocX - antennaWidth, instLocY);
-        antennaInst->setPlacementStatus(odb::dbPlacementStatus::LOCKED);
-        sinkInst->setPlacementStatus(odb::dbPlacementStatus::LOCKED);
 
+        // Use R-tree to check if diode will not overlap or cause 1-site spacing with other cells
+        std::vector<value> overlapInsts;
+        while(!legallyPlaced) {
+                if (placeAtLeft) {
+                        offset = -(antennaWidth + leftOffset*siteWidth);
+                        leftOffset++;
+                        placeAtLeft = false;
+                } else {
+                        offset = instWidth + rightOffset*siteWidth;
+                        rightOffset++;
+                        placeAtLeft = true;
+                }
+
+                antennaInst->setOrient(instOrient);
+                antennaInst->setLocation(instLocX + offset, instLocY);
+
+                odb::dbBox* instBox = antennaInst->getBBox();
+                box box(point(instBox->xMin() - (2*siteWidth) + 1, instBox->yMin() + 1), point(instBox->xMax() + (2*siteWidth) - 1, instBox->yMax() - 1));
+                fixedInsts.query(bgi::intersects(box), std::back_inserter(overlapInsts));
+
+                if (overlapInsts.size() == 0) {
+                        legallyPlaced = true;
+                }
+                overlapInsts.clear();
+        }
+
+        antennaInst->setPlacementStatus(odb::dbPlacementStatus::FIRM);
+        sinkInst->setPlacementStatus(odb::dbPlacementStatus::FIRM);
         odb::dbITerm::connect(antennaITerm, net);
+
+        // Add diode to the R-tree of fixed instances
+        int fixedInstId = fixedInsts.size();
+        odb::dbBox* instBox = antennaInst->getBBox();
+        box b(point(instBox->xMin(), instBox->yMin()), point(instBox->xMax(), instBox->yMax()));
+        value v(b, fixedInstId);
+        fixedInsts.insert(v);
+        fixedInstId++;
+}
+
+void DBWrapper::getFixedInstances(r_tree& fixedInsts) {
+        odb::dbTech* tech = _db->getTech();
+        if (!tech) {
+                error("obd::dbTech not initialized\n");
+        }
+
+        odb::dbBlock* block = _chip->getBlock();
+        if (!block) {
+                error("odb::dbBlock not found\n");
+        }
+
+        int fixedInstId = 0;
+        for (odb::dbInst* inst : block->getInsts()) {
+                if (inst->getPlacementStatus() == odb::dbPlacementStatus::FIRM) {
+                        odb::dbBox* instBox = inst->getBBox();
+                        box b(point(instBox->xMin(), instBox->yMin()), point(instBox->xMax(), instBox->yMax()));
+                        value v(b, fixedInstId);
+                        fixedInsts.insert(v);
+                        fixedInstId++;
+                }
+        }
 }
 
 void DBWrapper::fixAntennas(std::string antennaCellName, std::string antennaPinName) {
+        odb::dbBlock* block = _chip->getBlock();
+        int siteWidth = -1;
         int cnt = 0;
+        r_tree fixedInsts;
+        getFixedInstances(fixedInsts);
+
+        auto rows = block->getRows();
+        if (!rows.empty()) {
+                for (odb::dbRow *db_row : rows) {
+                        odb::dbSite *site = db_row->getSite();
+                        int site_width = site->getWidth();
+                        if (siteWidth == -1) {
+                                siteWidth = site_width;
+                        }
+
+                        if (siteWidth != site_width) {
+                                std::cout << "[WARNING] Design has rows with different site width\n";
+                        }
+                }
+        }
+
         for (auto const& violation : antennaViolations) {
                 odb::dbNet* net = dbNets[violation.first];
                 for (int i = 0; i < violation.second.size(); i++) {
                         for (odb::dbITerm * sinkITerm : std::get<1>(violation.second[i])) {
                                 odb::dbInst* sinkInst = sinkITerm->getInst();
                                 std::string antennaInstName = "ANTENNA_" + std::to_string(cnt);
-                                insertDiode(net, antennaCellName, antennaPinName, sinkInst, sinkITerm, antennaInstName);
+                                insertDiode(net, antennaCellName, antennaPinName, sinkInst, sinkITerm, antennaInstName, siteWidth, fixedInsts);
                                 cnt++;
                         }
                 }
