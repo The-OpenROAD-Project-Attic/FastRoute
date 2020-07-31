@@ -45,6 +45,9 @@ namespace FastRoute {
 
 enum class NodeType {SOURCE, SINK, STEINER, INVALID};
 
+const char *
+nodeTypeString(NodeType type);
+
 class Node {
 private:
         Coordinate _position;

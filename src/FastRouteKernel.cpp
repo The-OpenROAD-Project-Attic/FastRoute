@@ -2073,15 +2073,16 @@ SteinerTree FastRouteKernel::createSteinerTree(std::vector<ROUTE> route, std::ve
                         FastRoute::ROUTE pinConnection = createFakePin(pin, pinPosition, layer);
                 }
 
-                Node node;
-                if (pin.getType() == Pin::SINK) {
-                        node = Node(pinPosition, pin.getTopLayer(), NodeType::SINK);
+		int node_layer = pin.getTopLayer();
+		NodeType node_type;
+		if (pin.getType() == Pin::SINK) {
+                        node_type = NodeType::SINK;
                 } else if (pin.getType() == Pin::SOURCE) {
-                        node = Node(pinPosition, pin.getTopLayer(), NodeType::SOURCE);
+                        node_type = NodeType::SOURCE;
                 } else {
-                        std::cout << "[ERROR] Pin is not assigned with type\n";
+		  ord::error("Pin is not assigned with type");
                 }
-
+		Node node(pinPosition, node_layer, node_type);
                 sTree.addNode(node);
         }
 
@@ -2170,11 +2171,16 @@ SteinerTree FastRouteKernel::createSteinerTree(std::vector<ROUTE> route, std::ve
 bool FastRouteKernel::checkSteinerTree(SteinerTree sTree) {
         std::vector<Node> sinks = sTree.getSinks();
         for (Node sink : sinks) {
-                std::vector<Segment> segments = sTree.getNodeSegments(sink);
+	  std::vector<Segment> segments = sTree.getNodeSegments(sink);
+	  // Route guides are like horseshoes and hand-granades.
+	  // If the sink is not on layer 1 it may have
+	  // extra segments while fast route flails to get there.
+	  // So this error check is worthless. -cherry
+#if 0
                 if (segments.size() != 1) {
                         return false;
                 }
-
+#endif
                 int cnt = 0;
                 Segment seg = segments[0];
                 while (seg.getParent() != -1) {
@@ -2312,6 +2318,21 @@ FastRoute::ROUTE FastRouteKernel::createFakePin(Pin pin, Coordinate &pinPosition
         }
 
         return pinConnection;
+}
+
+const char *
+nodeTypeString(NodeType type)
+{
+  switch (type) {
+  case NodeType::SOURCE:
+    return "source";
+  case NodeType::SINK:
+    return "sink";
+  case NodeType::STEINER:
+    return "steiner";
+  case NodeType::INVALID:
+    return "invalid";
+  }
 }
 
 }

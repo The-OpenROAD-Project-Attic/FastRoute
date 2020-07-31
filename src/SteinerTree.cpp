@@ -42,12 +42,16 @@ namespace FastRoute {
 
 void SteinerTree::printSegments() {
         for (Segment seg : _segments) {
-                std::cout << "(" << seg.getFirstNode().getPosition().getX() << ", " <<
-                             seg.getFirstNode().getPosition().getY() << ", " <<
-                             seg.getFirstNode().getLayer() << "); (" <<
-                             seg.getLastNode().getPosition().getX() << ", " <<
-                             seg.getLastNode().getPosition().getY() << ", " <<
-                             seg.getLastNode().getLayer() << ")\n";
+	  Node node1 = seg.getFirstNode();
+	  Node node2 = seg.getLastNode();
+	  std::cout << "(" << nodeTypeString(node1.getType()) << " "
+		    << node1.getPosition().getX() << ", "
+		    << node1.getPosition().getY() << ", "
+		    << node1.getLayer() << "); ("
+		    << nodeTypeString(node2.getType()) << " "
+		    << node2.getPosition().getX() << ", "
+		    << node2.getPosition().getY() << ", "
+		    << node2.getLayer() << ")\n";
         }
 }
 
