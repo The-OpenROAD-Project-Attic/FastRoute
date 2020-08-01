@@ -51,6 +51,7 @@ public:
         Net(odb::dbNet* net,
             const std::vector<Pin>& pins);
         const std::string getName() const;
+        const char *getConstName() const;
 	odb::dbSigType getSignalType() const;
         const std::vector<Pin>& getPins() const { return _pins; }
         int getNumPins() const { return _pins.size(); }

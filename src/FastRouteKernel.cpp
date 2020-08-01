@@ -382,8 +382,8 @@ void FastRouteKernel::estimateRC() {
 
                 SteinerTree sTree;
                 Net *net = _netlist->getNetByName(netRoute.name.c_str());
-                std::vector<Pin> pins = net->getPins();
-                std::vector<ROUTE> route = netRoute.route;
+                const std::vector<Pin> &pins = net->getPins();
+                std::vector<ROUTE> &route = netRoute.route;
                 sTree = createSteinerTree(route, pins);
                 if (checkSteinerTree(sTree))
 		  builder.run(net, &sTree, _grid);
@@ -577,7 +577,7 @@ void FastRouteKernel::initializeNets() {
                 }
                 
 		// name is copied by FR
-		char *net_name = const_cast<char *>(net.getName().c_str());
+		char *net_name = const_cast<char *>(net.getConstName());
 		// id arg is ignored by fastroute
 		_fastRoute->addNet(net_name, 0, pins.size(), 1, grPins, netAlpha);
         }

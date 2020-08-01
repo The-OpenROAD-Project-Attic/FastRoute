@@ -48,6 +48,10 @@ const std::string Net::getName() const {
 	return _net->getName();
 }
 
+const char *Net::getConstName() const {
+	return _net->getConstName();
+}
+
 odb::dbSigType Net::getSignalType() const {
 	return _net->getSigType().getString();
 }
