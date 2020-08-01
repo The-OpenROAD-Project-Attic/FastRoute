@@ -354,9 +354,18 @@ void DBWrapper::initNetlist() {
                 error("Design without nets");
         }
         
-	// Prevent nets from growing because pointers to nets become invalid.
+	// Sort nets so guide file net order is consistent.
+	std::vector<odb::dbNet*> sorted_nets;
+	for (odb::dbNet* net : nets)
+	  sorted_nets.push_back(net);
+	std::sort(sorted_nets.begin(), sorted_nets.end(),
+		  [](odb::dbNet* net1,
+		     odb::dbNet* net2) {
+		    return strcmp(net1->getConstName(), net2->getConstName()) < 0;
+		  });
+	// Prevent _netlist->_nets from growing because pointers to nets become invalid.
 	_netlist->reserveNets(nets.size());
-        for (odb::dbNet* currNet : nets) {
+        for (odb::dbNet* currNet : sorted_nets) {
                 std::vector<Pin> netPins;
                 
                 if (currNet->getSigType().getValue() == odb::dbSigType::POWER ||
