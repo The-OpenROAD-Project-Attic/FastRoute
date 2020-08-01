@@ -41,21 +41,28 @@ namespace FastRoute {
 
 using ord::error;
 
-void Netlist::addNet(const std::string& name, const std::string& signalType, const std::vector<Pin>& pins) {
-        Net net = Net(name, signalType, pins);
-        _nets[name] = net;
-        _netCount++;
+Netlist::Netlist()
+{
+}
+
+void Netlist::addNet(odb::dbNet* net, const std::vector<Pin>& pins) {
+        _nets.push_back(Net(net, pins));
 }
         
+void Netlist::recordNetId(Net *net, int id) {
+  _frnet_id_to_net.resize(_nets.size());
+  _frnet_id_to_net[id] = net;
+}
+
 int Netlist::getMaxNetDegree() {
-        if (_nets.size() < 1) {
+        if (_nets.empty()) {
                 error("Netlist not initialized yet\n");
         }
     
         int maxDegree = -1;
         
-        for (auto const& net : _nets) {
-                int netDegree = net.second.getNumPins();
+        for (Net &net : _nets) {
+                int netDegree = net.getNumPins();
                 if (netDegree > maxDegree) {
                         maxDegree = netDegree;
                 }
@@ -66,8 +73,8 @@ int Netlist::getMaxNetDegree() {
 
 std::vector<Pin> Netlist::getAllPorts() {
         std::vector<Pin> ports; 
-        for (auto const& net : _nets) {
-                for (Pin pin : net.second.getPins()) {
+        for (Net &net : _nets) {
+                for (Pin pin : net.getPins()) {
                         if (pin.isPort()) {
                                 ports.push_back(pin);
                         }

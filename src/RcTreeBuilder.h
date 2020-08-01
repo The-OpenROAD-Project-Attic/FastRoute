@@ -61,7 +61,7 @@ namespace FastRoute {
 class RcTreeBuilder {
 public:
         RcTreeBuilder(ord::OpenRoad *openroad, DBWrapper* dbWrapper);
-        void run(Net& net, SteinerTree& steinerTree, Grid &grid);
+        void run(Net* net, SteinerTree* steinerTree, Grid* grid);
         void reportParasitics();
 
 protected:

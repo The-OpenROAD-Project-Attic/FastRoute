@@ -33,42 +33,23 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-
-#pragma once
-
-#include <string>
-#include <vector>
-#include <functional>
-#include <limits>
-#include <iostream>
-#include <random>
-
-#include "Coordinate.h"
-#include "Box.h"
-#include "Pin.h"
 #include "Net.h"
 
 namespace FastRoute {
 
-class Netlist {
-public:
-        Netlist();
-
-        std::vector<Net> &getNets() { return _nets; }
-        int getNetCount() const { return _nets.size(); }
-        Net* getNetById(int id) { return _frnet_id_to_net[id]; }
-
-        void addNet(odb::dbNet* net, const std::vector<Pin>& pins);
-        void recordNetId(Net *net, int id);
-        int getMaxNetDegree();
-        
-        std::vector<Pin> getAllPorts();
-
-private:
-        std::vector<Net> _nets;
-        // Fastroute::NET->id to Net*
-	std::vector<Net*> _frnet_id_to_net;
-};
-
+Net::Net(odb::dbNet* net, 
+	 const std::vector<Pin>& pins) :
+	_net(net),
+	_pins(pins)
+{
 }
 
+const std::string Net::getName() const {
+	return _net->getName();
+}
+
+odb::dbSigType Net::getSignalType() const {
+	return _net->getSigType().getString();
+}
+
+}

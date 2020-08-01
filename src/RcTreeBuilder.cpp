@@ -68,19 +68,16 @@ RcTreeBuilder::RcTreeBuilder(ord::OpenRoad *openroad, DBWrapper* dbWrapper) {
         _units = dbSta->units();
 }
 
-void RcTreeBuilder::run(Net& net, SteinerTree& steinerTree, Grid& grid) {
-    _net = &net;
-    _steinerTree = &steinerTree;
-    _grid = &grid;
+void RcTreeBuilder::run(Net* net, SteinerTree* steinerTree, Grid* grid) {
+    _net = net;
+    _steinerTree = steinerTree;
+    _grid = grid;
         makeParasiticNetwork();
         computeGlobalParasitics();
         computeLocalParasitics();
-	reduceParasiticNetwork();
-
-        if (_debug) {
+        if (_debug)
                 reportParasitics();
-        }
-
+	reduceParasiticNetwork();
 }
 
 void RcTreeBuilder::makeParasiticNetwork() {
@@ -120,8 +117,7 @@ void RcTreeBuilder::computeGlobalParasitics() {
                 sta::ParasiticNode *n1 =  _parasitics->ensureParasiticNode(_parasitic, _staNet, idx1);
                 sta::ParasiticNode *n2 =  _parasitics->ensureParasiticNode(_parasitic, _staNet, idx2);
 
-                float cap = 1.0;
-                float res = 1.0;
+                float cap, res;
                 if (node1.getPosition() == node2.getPosition()) { // Via
                         int lower_layer = std::min(node1.getLayer(), node2.getLayer());
                         _dbWrapper->getCutLayerRes(lower_layer, res);
@@ -133,7 +129,7 @@ void RcTreeBuilder::computeGlobalParasitics() {
 
                         // Then get layer r/c-unit from the DB
                         unsigned layerId = node1.getLayer();
-                        float rUnit = 0.0, cUnit = 0.0;
+                        float rUnit, cUnit;
                         _dbWrapper->getLayerRC(layerId, rUnit, cUnit);
 
                         // Finally multiply
@@ -217,6 +213,7 @@ void RcTreeBuilder::computeLocalParasitics() {
         }
 }
 
+// This should use dbITerm::getAvgXY -cherry
 Coordinate RcTreeBuilder::computePinCoordinate(const Pin pin) const {
         unsigned topLayer = pin.getTopLayer();
         std::vector<Box> pinBoxes = pin.getBoxes().at(topLayer);

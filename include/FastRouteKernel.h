@@ -176,7 +176,8 @@ private:
         bool checkResource(ROUTE segment);
         bool breakSegment(ROUTE segment, long maxLength, std::vector<ROUTE> &newSegments);
         void fixLongSegments();
-        SteinerTree createSteinerTree(std::vector<ROUTE> route, std::vector<Pin> pins);
+        SteinerTree createSteinerTree(std::vector<ROUTE> &route,
+				      const std::vector<Pin> &pins);
         bool checkSteinerTree(SteinerTree sTree);
 
 public:

@@ -381,12 +381,14 @@ void FastRouteKernel::estimateRC() {
                 mergeSegments(netRoute);
 
                 SteinerTree sTree;
-                Net net = _netlist->getNetByName(netRoute.name);
-                std::vector<Pin> pins = net.getPins();
+                Net *net = _netlist->getNetById(netRoute.id);
+                std::vector<Pin> pins = net->getPins();
                 std::vector<ROUTE> route = netRoute.route;
+		if (net->getName() == "_003_")
+			printf("luse\n");
                 sTree = createSteinerTree(route, pins);
                 if (checkSteinerTree(sTree))
-		  builder.run(net, sTree, *_grid);
+		  builder.run(net, &sTree, _grid);
 		else {
                         std::cout << " [ERROR] Error on Steiner tree of net "
                                   << netRoute.name << "\n";
@@ -468,13 +470,12 @@ void FastRouteKernel::initializeNets() {
         int minDegree = std::numeric_limits<int>::max();
         int maxDegree = std::numeric_limits<int>::min();
 
-        for (auto const& n : _netlist->getNets()) {
-                Net net = n.second;
+        for (Net &net : _netlist->getNets()) {
                 if (net.getNumPins() <= 1) {
                         continue;
                 }
                 
-                if (_clockNetRouting && net.getSignalType() != "CLOCK") {
+                if (_clockNetRouting && net.getSignalType() != odb::dbSigType::CLOCK) {
                         continue;
                 }
 
@@ -488,8 +489,7 @@ void FastRouteKernel::initializeNets() {
         _fastRoute->setNumberNets(validNets);
         _fastRoute->setMaxNetDegree(_netlist->getMaxNetDegree());
         
-        for (auto const& n : _netlist->getNets()) {
-                Net net = n.second;
+        for (Net &net : _netlist->getNets()) {
                 float netAlpha = _alpha;
 
                 if (net.getNumPins() <= 1) {
@@ -504,7 +504,7 @@ void FastRouteKernel::initializeNets() {
                         maxDegree = net.getNumPins();
                 }
                 
-                if (_clockNetRouting && net.getSignalType() != "CLOCK") {
+                if (_clockNetRouting && net.getSignalType() != odb::dbSigType::CLOCK) {
                         continue;
                 }
 
@@ -582,7 +582,9 @@ void FastRouteKernel::initializeNets() {
                 }
                 
                 _fastRoute->addNet(netName, idx, pins.size(), 1, grPins, netAlpha);
-                idx++;
+                printf("%d %s\n",  idx, netName);
+		_netlist->recordNetId(&net, idx);
+		idx++;
         }
 
         std::cout << "[INFO] Minimum degree: " << minDegree << "\n";
@@ -1685,8 +1687,7 @@ std::vector<FastRouteKernel::EST_> FastRouteKernel::getEst() {
 void FastRouteKernel::checkSinksAndSource() {
         bool invalid = false;
 
-        for (auto const& n : _netlist->getNets()) {
-                Net net = n.second;
+        for (Net &net : _netlist->getNets()) {
                 if (net.getNumPins() < 2) {
                         continue;
                 }
@@ -1986,9 +1987,9 @@ void FastRouteKernel::fixLongSegments() {
                         continue;
 
                 SteinerTree sTree;
-                Net net = _netlist->getNetByName(netRoute.name);
-                std::vector<Pin> pins = net.getPins();
-                std::vector<ROUTE> route = netRoute.route;
+                Net *net = _netlist->getNetById(netRoute.id);
+                const std::vector<Pin> &pins = net->getPins();
+                std::vector<ROUTE> &route = netRoute.route;
                 sTree = createSteinerTree(route, pins);
                 if (checkSteinerTree(sTree) != true) {
                         // std::cout << "Invalid Steiner tree for net " << netRoute.name << "\n";
@@ -2039,7 +2040,8 @@ void FastRouteKernel::fixLongSegments() {
         std::cout << "[INFO] #Modified segments: " << fixedSegs << "\n";
 }
 
-SteinerTree FastRouteKernel::createSteinerTree(std::vector<ROUTE> route, std::vector<Pin> pins) {
+SteinerTree FastRouteKernel::createSteinerTree(std::vector<ROUTE> &route,
+					       const std::vector<Pin> &pins) {
         SteinerTree sTree;
 
         // Add pin nodes
@@ -2089,7 +2091,7 @@ SteinerTree FastRouteKernel::createSteinerTree(std::vector<ROUTE> route, std::ve
         int indexCnt = 0;
 
         // Add steiner nodes and segments
-        for (ROUTE wire : route) {
+        for (ROUTE &wire : route) {
                 Segment segment;
                 Node node0 = Node(wire.initX, wire.initY, wire.initLayer, NodeType::STEINER);
                 Node node1 = Node(wire.finalX, wire.finalY, wire.finalLayer, NodeType::STEINER);
@@ -2333,6 +2335,8 @@ nodeTypeString(NodeType type)
   case NodeType::INVALID:
     return "invalid";
   }
+  // Suppress gcc warning.
+  return "illegal";
 }
 
 }

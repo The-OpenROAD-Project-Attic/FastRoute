@@ -362,9 +362,8 @@ void DBWrapper::initNetlist() {
                     currNet->isSpecial() || currNet->getSWires().size() > 0) {
                         continue;
                 }
-                std::string netName = currNet->getConstName();
-                std::string signalType = currNet->getSigType().getString();
-                
+
+		std::string netName = currNet->getConstName();
                 for (odb::dbITerm* currITerm : currNet->getITerms()) {
                         int pX, pY;
                         std::string pinName;
@@ -583,7 +582,7 @@ void DBWrapper::initNetlist() {
 
                         netPins.push_back(pin);
                 }
-                _netlist->addNet(netName, signalType, netPins);
+                _netlist->addNet(currNet, netPins);
         }
 }
 

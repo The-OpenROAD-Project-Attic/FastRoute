@@ -33,40 +33,32 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-
-#ifndef __NET_H_
-#define __NET_H_
+#pragma once
 
 #include <string>
 #include <vector>
-#include <functional>
-#include <limits>
-#include <iostream>
 
 #include "Coordinate.h"
 #include "Box.h"
 #include "Pin.h"
+#include "opendb/db.h"
 
 namespace FastRoute {
 
 class Net {
-private:
-        std::string _name;
-        std::string _signalType;
-        std::vector<Pin> _pins;
-        
 public:
-        Net() = default;
-        Net(const std::string& name, const std::string& signalType,
-            const std::vector<Pin>& pins)
-            : _name(name), _signalType(signalType), _pins(pins) {}
-        
-        const std::string& getName() const { return _name; }
-        const std::string& getSignalType() const { return _signalType; }
+	Net() = default;
+        Net(odb::dbNet* net,
+            const std::vector<Pin>& pins);
+        const std::string getName() const;
+	odb::dbSigType getSignalType() const;
         const std::vector<Pin>& getPins() const { return _pins; }
         int getNumPins() const { return _pins.size(); }
+
+private:
+	odb::dbNet* _net;
+        std::vector<Pin> _pins;
 };
 
 }
 
-#endif /* __NET_H_ */
