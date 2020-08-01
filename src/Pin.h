@@ -33,9 +33,7 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-
-#ifndef __PIN_H_
-#define __PIN_H_
+#pragma once
 
 #include <string>
 #include <vector>
@@ -59,20 +57,6 @@ public:
                    OTHER
         };
 
-private:
-        std::string _name;
-        Coordinate _position;
-        std::vector<int> _layers;
-        Orientation _orientation;
-        std::map<int, std::vector<Box>> _boxesPerLayer;
-        std::string _netName;
-        bool _isPort;
-        Type _type;
-        bool _connectedToPad;
-        
-        void sortLayers() { std::sort(_layers.begin(), _layers.end()); }
-        
-public:
         Pin() = default;
         Pin(const std::string& name, const Coordinate& position,
             const std::vector<int>& layers, const Orientation orientation,
@@ -95,8 +79,19 @@ public:
         bool isPort() const { return _isPort; }
         Type getType() const { return _type; }
         bool isConnectedToPad() const { return _connectedToPad; }
+
+private:
+        std::string _name;
+        Coordinate _position;
+        std::vector<int> _layers;
+        Orientation _orientation;
+        std::map<int, std::vector<Box>> _boxesPerLayer;
+        std::string _netName;
+        bool _isPort;
+        Type _type;
+        bool _connectedToPad;
+        
+        void sortLayers() { std::sort(_layers.begin(), _layers.end()); }
 };
 
 }
-
-#endif /* __PIN_H_ */

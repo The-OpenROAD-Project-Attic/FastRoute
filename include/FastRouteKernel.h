@@ -103,7 +103,7 @@ private:
         bool _reportCongest;
         std::vector<int> _vCapacities;
         std::vector<int> _hCapacities;
-        std::map<std::string, int> _netsDegree;
+        std::map<std::string, int> _netsDegree; // yet another string map to flush -cherry
         unsigned _seed;
 
         // Layer adjustment variables
@@ -125,7 +125,7 @@ private:
         bool _pdRev;
         float _alpha;
         int _verbose;
-        std::map<std::string, float> _netsAlpha;
+        std::map<std::string, float> _netsAlpha; // yet another string map to flush -cherry
 
         // Antenna variables
         float _maxLengthMicrons = -1;
@@ -137,7 +137,7 @@ private:
         int _numAdjusts = 0;
 
         // Variables for PADs obstacles handling
-        std::map<std::string, std::vector<FastRoute::ROUTE>> _padPinsConnections;
+        std::map<std::string, std::vector<FastRoute::ROUTE>> _padPinsConnections; // yet another string map to flush -cherry
         
         // main functions
         void initGrid();

@@ -47,11 +47,19 @@ Netlist::Netlist()
 
 void Netlist::addNet(odb::dbNet* net, const std::vector<Pin>& pins) {
         _nets.push_back(Net(net, pins));
+	_net_name_map[net->getName()] = &_nets.back();
 }
         
-void Netlist::recordNetId(Net *net, int id) {
-  _frnet_id_to_net.resize(_nets.size());
-  _frnet_id_to_net[id] = net;
+void Netlist::reserveNets(size_t net_count) {
+	_nets.reserve(net_count);
+}
+
+Net* Netlist::getNetByName(std::string name) {
+	auto itr = _net_name_map.find(name);
+	if (itr == _net_name_map.end())
+		return nullptr;
+	else
+		return itr->second;
 }
 
 int Netlist::getMaxNetDegree() {

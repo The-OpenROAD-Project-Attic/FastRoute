@@ -354,6 +354,8 @@ void DBWrapper::initNetlist() {
                 error("Design without nets");
         }
         
+	// Prevent nets from growing because pointers to nets become invalid.
+	_netlist->reserveNets(nets.size());
         for (odb::dbNet* currNet : nets) {
                 std::vector<Pin> netPins;
                 

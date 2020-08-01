@@ -381,11 +381,9 @@ void FastRouteKernel::estimateRC() {
                 mergeSegments(netRoute);
 
                 SteinerTree sTree;
-                Net *net = _netlist->getNetById(netRoute.id);
+                Net *net = _netlist->getNetByName(netRoute.name.c_str());
                 std::vector<Pin> pins = net->getPins();
                 std::vector<ROUTE> route = netRoute.route;
-		if (net->getName() == "_003_")
-			printf("luse\n");
                 sTree = createSteinerTree(route, pins);
                 if (checkSteinerTree(sTree))
 		  builder.run(net, &sTree, _grid);
@@ -455,7 +453,7 @@ void FastRouteKernel::setSpacingsAndMinWidths() {
 
 void FastRouteKernel::initializeNets() {
         _dbWrapper->initNetlist();
-        
+
         std::cout << "Checking pin placement...\n";
         checkPinPlacement();
         std::cout << "Checking pin placement... Done!\n";
@@ -464,13 +462,12 @@ void FastRouteKernel::initializeNets() {
         checkSinksAndSource();
         std::cout << " > ----Checking sinks/source... Done!\n";
 
-        int idx = 0;
         int validNets = 0;
 
         int minDegree = std::numeric_limits<int>::max();
         int maxDegree = std::numeric_limits<int>::min();
 
-        for (Net &net : _netlist->getNets()) {
+        for (const Net &net : _netlist->getNets()) {
                 if (net.getNumPins() <= 1) {
                         continue;
                 }
@@ -489,7 +486,7 @@ void FastRouteKernel::initializeNets() {
         _fastRoute->setNumberNets(validNets);
         _fastRoute->setMaxNetDegree(_netlist->getMaxNetDegree());
         
-        for (Net &net : _netlist->getNets()) {
+        for (const Net &net : _netlist->getNets()) {
                 float netAlpha = _alpha;
 
                 if (net.getNumPins() <= 1) {
@@ -568,8 +565,6 @@ void FastRouteKernel::initializeNets() {
                 }
                 
                 FastRoute::PIN grPins[pins.size()];
-                char netName[net.getName().size() + 1];
-                strcpy(netName, net.getName().c_str());
                 int count = 0;
                 
                 for (FastRoute::PIN pin : pins) {
@@ -581,10 +576,10 @@ void FastRouteKernel::initializeNets() {
                         netAlpha = _netsAlpha[net.getName()];
                 }
                 
-                _fastRoute->addNet(netName, idx, pins.size(), 1, grPins, netAlpha);
-                printf("%d %s\n",  idx, netName);
-		_netlist->recordNetId(&net, idx);
-		idx++;
+		// name is copied by FR
+		char *net_name = const_cast<char *>(net.getName().c_str());
+		// id arg is ignored by fastroute
+		_fastRoute->addNet(net_name, 0, pins.size(), 1, grPins, netAlpha);
         }
 
         std::cout << "[INFO] Minimum degree: " << minDegree << "\n";
@@ -1278,15 +1273,14 @@ RoutingTracks FastRouteKernel::getRoutingTracksByIndex(int layer) {
 }
 
 void FastRouteKernel::addRemainingGuides(std::vector<FastRoute::NET> &globalRoute) {
-        std::map<std::string, std::vector<FastRoute::PIN>> allNets;
-        allNets = _fastRoute->getNets();
+        std::map<std::string, std::vector<FastRoute::PIN>> allNets =  _fastRoute->getNets();
         int localNetsId = allNets.size();
 
         for (FastRoute::NET &netRoute : globalRoute) {
                 std::vector<FastRoute::PIN> &pins = allNets[netRoute.name];
 
                 if (_netsDegree[netRoute.name] < 2) { // Skip nets with 1 pin or less
-                        continue;
+			continue;
                 }
 
                 if (netRoute.route.size() == 0) { // Try to add local guides for net with no output of FR core
@@ -1687,7 +1681,7 @@ std::vector<FastRouteKernel::EST_> FastRouteKernel::getEst() {
 void FastRouteKernel::checkSinksAndSource() {
         bool invalid = false;
 
-        for (Net &net : _netlist->getNets()) {
+        for (const Net &net : _netlist->getNets()) {
                 if (net.getNumPins() < 2) {
                         continue;
                 }
@@ -1715,7 +1709,7 @@ void FastRouteKernel::checkSinksAndSource() {
 
 void FastRouteKernel::computeWirelength() {
         DBU totalWirelength = 0;
-        for (FastRoute::NET netRoute : *_result) {
+        for (FastRoute::NET &netRoute : *_result) {
                 for (ROUTE route : netRoute.route) {
                         DBU routeWl = std::abs(route.finalX - route.initX) +
                                       std::abs(route.finalY - route.initY);
@@ -1987,7 +1981,7 @@ void FastRouteKernel::fixLongSegments() {
                         continue;
 
                 SteinerTree sTree;
-                Net *net = _netlist->getNetById(netRoute.id);
+                Net *net = _netlist->getNetByName(netRoute.name.c_str());
                 const std::vector<Pin> &pins = net->getPins();
                 std::vector<ROUTE> &route = netRoute.route;
                 sTree = createSteinerTree(route, pins);

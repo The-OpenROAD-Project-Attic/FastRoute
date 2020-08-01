@@ -54,21 +54,21 @@ class Netlist {
 public:
         Netlist();
 
-        std::vector<Net> &getNets() { return _nets; }
+	void foo();
+        const std::vector<Net> &getNets() { return _nets; }
         int getNetCount() const { return _nets.size(); }
-        Net* getNetById(int id) { return _frnet_id_to_net[id]; }
+        Net* getNetByName(std:: string name);
 
+	void reserveNets(size_t net_count);
         void addNet(odb::dbNet* net, const std::vector<Pin>& pins);
-        void recordNetId(Net *net, int id);
         int getMaxNetDegree();
         
         std::vector<Pin> getAllPorts();
 
 private:
         std::vector<Net> _nets;
-        // Fastroute::NET->id to Net*
-	std::vector<Net*> _frnet_id_to_net;
+        // temporary until FR is updated to use IDs instead of names.
+	std::map<std::string, Net*> _net_name_map;
 };
 
 }
-
