@@ -83,4 +83,3 @@ public:
 }
 
 #endif /* __SEGMENT_H_ */
-

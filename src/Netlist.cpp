@@ -62,6 +62,10 @@ Net* Netlist::getNetByName(std::string name) {
 		return itr->second;
 }
 
+Net* Netlist::getNetByIdx(int idx) {
+	return &_nets[idx];
+}
+
 int Netlist::getMaxNetDegree() {
         if (_nets.empty()) {
                 error("Netlist not initialized yet\n");

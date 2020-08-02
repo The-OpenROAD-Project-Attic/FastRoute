@@ -381,7 +381,7 @@ void FastRouteKernel::estimateRC() {
                 mergeSegments(netRoute);
 
                 SteinerTree sTree;
-                Net *net = _netlist->getNetByName(netRoute.name.c_str());
+                Net* net = _netlist->getNetByIdx(netRoute.idx);
                 const std::vector<Pin> &pins = net->getPins();
                 std::vector<ROUTE> &route = netRoute.route;
                 sTree = createSteinerTree(route, pins);
@@ -486,101 +486,98 @@ void FastRouteKernel::initializeNets() {
         _fastRoute->setNumberNets(validNets);
         _fastRoute->setMaxNetDegree(_netlist->getMaxNetDegree());
         
-        for (const Net &net : _netlist->getNets()) {
+        int idx = 0;
+	for (const Net &net : _netlist->getNets()) {
                 float netAlpha = _alpha;
 
-                if (net.getNumPins() <= 1) {
-                        continue;
-                }
+                int pin_count = net.getNumPins();
+		if (pin_count > 1) {
+			if (pin_count < minDegree) {
+				minDegree = net.getNumPins();
+			}
 
-                if (net.getNumPins() < minDegree) {
-                        minDegree = net.getNumPins();
-                }
-
-                if (net.getNumPins() > maxDegree) {
-                        maxDegree = net.getNumPins();
-                }
+			if (pin_count > maxDegree) {
+				maxDegree = net.getNumPins();
+			}
                 
-                if (_clockNetRouting && net.getSignalType() != odb::dbSigType::CLOCK) {
-                        continue;
-                }
+			if (_clockNetRouting && net.getSignalType() != odb::dbSigType::CLOCK) {
+				if (pin_count >= std::numeric_limits<short>::max()) {
+					std::cout << "[WARNING] FastRoute cannot handle net " << net.getName() << " due to large number of pins\n";
+					std::cout << "[WARNING] Net " << net.getName() << " has " << net.getNumPins() << " pins\n";
+				}
+				else {
+					_netsDegree[net.getName()] = pin_count;
+					std::vector<FastRoute::PIN> pins;
+					for (Pin pin : net.getPins()) {
+						Coordinate pinPosition;
+						int topLayer = pin.getTopLayer();
+						RoutingLayer layer = getRoutingLayerByIndex(topLayer);
 
-                if (net.getNumPins() >= std::numeric_limits<short>::max()) {
-                        std::cout << "[WARNING] FastRoute cannot handle net " << net.getName() << " due to large number of pins\n";
-                        std::cout << "[WARNING] Net " << net.getName() << " has " << net.getNumPins() << " pins\n";
-                        continue;
-                }
-                
-                _netsDegree[net.getName()] = net.getNumPins();
-                
-                std::vector<FastRoute::PIN> pins;
-                for (Pin pin : net.getPins()) {
-                        Coordinate pinPosition;
-                        int topLayer = pin.getTopLayer();
-                        RoutingLayer layer = getRoutingLayerByIndex(topLayer);
-
-                        std::vector<Box> pinBoxes = pin.getBoxes().at(topLayer);
-                        std::vector<Coordinate> pinPositionsOnGrid;
-                        Coordinate posOnGrid;
-                        Coordinate trackPos;
+						std::vector<Box> pinBoxes = pin.getBoxes().at(topLayer);
+						std::vector<Coordinate> pinPositionsOnGrid;
+						Coordinate posOnGrid;
+						Coordinate trackPos;
                                 
-                        for (Box pinBox : pinBoxes) {
-                                posOnGrid = _grid->getPositionOnGrid(pinBox.getMiddle());
-                                pinPositionsOnGrid.push_back(posOnGrid);
-                        }
+						for (Box pinBox : pinBoxes) {
+							posOnGrid = _grid->getPositionOnGrid(pinBox.getMiddle());
+							pinPositionsOnGrid.push_back(posOnGrid);
+						}
                         
-                        int votes = -1;
+						int votes = -1;
                         
-                        for (Coordinate pos : pinPositionsOnGrid) {
-                                int equals = std::count(pinPositionsOnGrid.begin(),
-                                                        pinPositionsOnGrid.end(),
-                                                        pos);
-                                if (equals > votes) {
-                                        pinPosition = pos;
-                                        votes = equals;
-                                }
-                        }
+						for (Coordinate pos : pinPositionsOnGrid) {
+							int equals = std::count(pinPositionsOnGrid.begin(),
+										pinPositionsOnGrid.end(),
+										pos);
+							if (equals > votes) {
+								pinPosition = pos;
+								votes = equals;
+							}
+						}
 
-                        if (pinOverlapsWithSingleTrack(pin, trackPos)) {
-                                posOnGrid = _grid->getPositionOnGrid(trackPos);
+						if (pinOverlapsWithSingleTrack(pin, trackPos)) {
+							posOnGrid = _grid->getPositionOnGrid(trackPos);
 
-                                if (!(posOnGrid == pinPosition)) {
-                                        if ((layer.getPreferredDirection() == RoutingLayer::HORIZONTAL && posOnGrid.getY() != pinPosition.getY()) ||
-                                             (layer.getPreferredDirection() == RoutingLayer::VERTICAL && posOnGrid.getX() != pinPosition.getX())) {
-                                                pinPosition = posOnGrid;
-                                        }
-                                }
-                        }
+							if (!(posOnGrid == pinPosition)) {
+								if ((layer.getPreferredDirection() == RoutingLayer::HORIZONTAL && posOnGrid.getY() != pinPosition.getY()) ||
+								    (layer.getPreferredDirection() == RoutingLayer::VERTICAL && posOnGrid.getX() != pinPosition.getX())) {
+									pinPosition = posOnGrid;
+								}
+							}
+						}
 
-                        if ((pin.isConnectedToPad() || pin.isPort()) && !_estimateRC ) { // If pin is connected to PAD, create a "fake" location in routing grid to avoid PAD obstacles
-                                FastRoute::ROUTE pinConnection = createFakePin(pin, pinPosition, layer);
-                                _padPinsConnections[net.getName()].push_back(pinConnection);
-                        }
+						if ((pin.isConnectedToPad() || pin.isPort()) && !_estimateRC ) { // If pin is connected to PAD, create a "fake" location in routing grid to avoid PAD obstacles
+							FastRoute::ROUTE pinConnection = createFakePin(pin, pinPosition, layer);
+							_padPinsConnections[net.getName()].push_back(pinConnection);
+						}
                         
-                        FastRoute::PIN grPin;
-                        grPin.x = pinPosition.getX();
-                        grPin.y = pinPosition.getY();
-                        grPin.layer = topLayer;
-                        pins.push_back(grPin);
-                }
+						FastRoute::PIN grPin;
+						grPin.x = pinPosition.getX();
+						grPin.y = pinPosition.getY();
+						grPin.layer = topLayer;
+						pins.push_back(grPin);
+					}
                 
-                FastRoute::PIN grPins[pins.size()];
-                int count = 0;
+					FastRoute::PIN grPins[pins.size()];
+					int count = 0;
                 
-                for (FastRoute::PIN pin : pins) {
-                        grPins[count] = pin;
-                        count++;
-                }
+					for (FastRoute::PIN pin : pins) {
+						grPins[count] = pin;
+						count++;
+					}
                 
-                if (_netsAlpha.find(net.getName()) != _netsAlpha.end()) {
-                        netAlpha = _netsAlpha[net.getName()];
-                }
+					if (_netsAlpha.find(net.getName()) != _netsAlpha.end()) {
+						netAlpha = _netsAlpha[net.getName()];
+					}
                 
-		// name is copied by FR
-		char *net_name = const_cast<char *>(net.getConstName());
-		// id arg is ignored by fastroute
-		_fastRoute->addNet(net_name, 0, pins.size(), 1, grPins, netAlpha);
-        }
+					// name is copied by FR
+					char *net_name = const_cast<char *>(net.getConstName());
+					_fastRoute->addNet(net_name, idx, pins.size(), 1, grPins, netAlpha);
+				}
+			}
+		}
+		idx++;
+	}
 
         std::cout << "[INFO] Minimum degree: " << minDegree << "\n";
         std::cout << "[INFO] Maximum degree: " << maxDegree << "\n";
@@ -1273,11 +1270,10 @@ RoutingTracks FastRouteKernel::getRoutingTracksByIndex(int layer) {
 }
 
 void FastRouteKernel::addRemainingGuides(std::vector<FastRoute::NET> &globalRoute) {
-        std::map<std::string, std::vector<FastRoute::PIN>> allNets =  _fastRoute->getNets();
-        int localNetsId = allNets.size();
+        std::map<int, std::vector<FastRoute::PIN>> allNets =  _fastRoute->getNets();
 
         for (FastRoute::NET &netRoute : globalRoute) {
-                std::vector<FastRoute::PIN> &pins = allNets[netRoute.name];
+                std::vector<FastRoute::PIN> &pins = allNets[netRoute.idx];
 
                 if (_netsDegree[netRoute.name] < 2) { // Skip nets with 1 pin or less
 			continue;
@@ -1393,17 +1389,17 @@ void FastRouteKernel::addRemainingGuides(std::vector<FastRoute::NET> &globalRout
                                 }
                         }
                 }
-                allNets.erase(netRoute.name);
+                allNets.erase(netRoute.idx);
         }
 
         if (allNets.size() > 0) { // If some net still with no routing, add local guides
-                for (auto& name_pins : allNets) {
-                        std::vector<FastRoute::PIN> &pins = name_pins.second;
+                for (auto& idx_pins : allNets) {
+                        std::vector<FastRoute::PIN> &pins = idx_pins.second;
 
                         FastRoute::NET localNet;
-                        localNet.id = localNetsId;
-                        localNetsId++;
-                        localNet.name = name_pins.first;
+			int net_idx = idx_pins.first;
+                        localNet.idx = net_idx;
+                        localNet.name = _netlist->getNetByIdx(net_idx)->getConstName();
                         for (FastRoute::PIN pin : pins) {
                                 FastRoute::ROUTE route;
                                 route.initLayer = pin.layer;
@@ -1420,8 +1416,7 @@ void FastRouteKernel::addRemainingGuides(std::vector<FastRoute::NET> &globalRout
 }
 
 void FastRouteKernel::connectPadPins(std::vector<FastRoute::NET> &globalRoute) {
-        std::map<std::string, std::vector<FastRoute::PIN>> allNets;
-        allNets = _fastRoute->getNets();
+        std::map<int, std::vector<FastRoute::PIN>> allNets = _fastRoute->getNets();
         int localNetsId = allNets.size();
 
         for (FastRoute::NET &netRoute : globalRoute) {
@@ -1655,13 +1650,13 @@ std::vector<FastRouteKernel::EST_> FastRouteKernel::getEst() {
 
                 if (validTiles == 0) {
                         netEst.netName = netRoute.name;
-                        netEst.netId = netRoute.id;
+                        netEst.netId = netRoute.idx;
                         netEst.numSegments = validTiles;
                         continue;
                 }
 
                 netEst.netName = netRoute.name;
-                netEst.netId = netRoute.id;
+                netEst.netId = netRoute.idx;
                 netEst.numSegments = netRoute.route.size();
                 for (FastRoute::ROUTE route : netRoute.route) {
                         netEst.initX.push_back(route.initX);
@@ -1981,11 +1976,11 @@ void FastRouteKernel::fixLongSegments() {
                         continue;
 
                 SteinerTree sTree;
-                Net *net = _netlist->getNetByName(netRoute.name.c_str());
+                Net* net = _netlist->getNetByIdx(netRoute.idx);
                 const std::vector<Pin> &pins = net->getPins();
                 std::vector<ROUTE> &route = netRoute.route;
                 sTree = createSteinerTree(route, pins);
-                if (checkSteinerTree(sTree) != true) {
+                if (!checkSteinerTree(sTree)) {
                         // std::cout << "Invalid Steiner tree for net " << netRoute.name << "\n";
                   continue;
                 }

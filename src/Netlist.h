@@ -58,6 +58,7 @@ public:
         const std::vector<Net> &getNets() { return _nets; }
         int getNetCount() const { return _nets.size(); }
         Net* getNetByName(std:: string name);
+        Net* getNetByIdx(int idx);
 
 	void reserveNets(size_t net_count);
         void addNet(odb::dbNet* net, const std::vector<Pin>& pins);

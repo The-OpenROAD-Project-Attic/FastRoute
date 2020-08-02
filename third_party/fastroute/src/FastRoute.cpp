@@ -549,7 +549,7 @@ void FT::addNet(char* name,
   int pinYarray[nPins];
   int pinLarray[nPins];
 
-  allNets[name] = std::vector<PIN>(&pins[0], &pins[nPins]);
+  allNets[netIdx] = std::vector<PIN>(&pins[0], &pins[nPins]);
 
   // TODO: check this, there was an if pinInd < 2000
   pinInd = 0;
@@ -584,6 +584,7 @@ void FT::addNet(char* name,
     // std::cout << "Net name: " << nets[newnetID]->name << "; num pins: " <<
     // nets[newnetID]->nPins << "\n";
     strcpy(nets[newnetID]->name, name);
+    nets[newnetID]->idx = netIdx;
     nets[newnetID]->numPins = nPins;
     nets[newnetID]->deg     = pinInd;
     nets[newnetID]->pinX    = new short[pinInd];
@@ -605,7 +606,7 @@ void FT::addNet(char* name,
   }
 }
 
-std::map<std::string, std::vector<PIN>> FT::getNets()
+std::map<int, std::vector<PIN>> FT::getNets()
 {
   return allNets;
 }
@@ -847,7 +848,7 @@ std::vector<NET> FT::getResults()
     NET         currentNet;
     std::string netName(nets[netID]->name);
     currentNet.name     = netName;
-    currentNet.id       = netID;
+    currentNet.idx      = nets[netID]->idx;
     TreeEdge* treeedges = sttrees[netID].edges;
     int       deg       = sttrees[netID].deg;
 

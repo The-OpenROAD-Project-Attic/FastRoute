@@ -59,7 +59,7 @@ struct ROUTE {
 
 struct NET {
         std::string name;
-        int id;
+        int idx;
         std::vector<ROUTE> route;
 };
 
@@ -68,7 +68,7 @@ class FT {
         FT();
         ~FT();
 
-        std::map<std::string, std::vector<PIN>> allNets;
+        std::map<int, std::vector<PIN>> allNets;
         int maxNetDegree;
 
         void setGridsAndLayers(int x, int y, int nLayers);
@@ -93,7 +93,7 @@ class FT {
 
         int getEdgeCapacity(long x1, long y1, int l1, long x2, long y2, int l2);
 	int getEdgeCurrentResource(long x1, long y1, int l1, long x2, long y2, int l2);
-        std::map<std::string, std::vector<PIN>> getNets();
+        std::map<int, std::vector<PIN>> getNets();
         void setMaxNetDegree(int);
         void usePdRev();
         void setAlpha(float a);
