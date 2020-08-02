@@ -488,19 +488,17 @@ void FastRouteKernel::initializeNets() {
         
         int idx = 0;
 	for (const Net &net : _netlist->getNets()) {
-                float netAlpha = _alpha;
-
                 int pin_count = net.getNumPins();
 		if (pin_count > 1) {
 			if (pin_count < minDegree) {
-				minDegree = net.getNumPins();
+				minDegree = pin_count;
 			}
 
 			if (pin_count > maxDegree) {
-				maxDegree = net.getNumPins();
+				maxDegree = pin_count;
 			}
                 
-			if (_clockNetRouting && net.getSignalType() != odb::dbSigType::CLOCK) {
+			if (!_clockNetRouting || net.getSignalType() == odb::dbSigType::CLOCK) {
 				if (pin_count >= std::numeric_limits<short>::max()) {
 					std::cout << "[WARNING] FastRoute cannot handle net " << net.getName() << " due to large number of pins\n";
 					std::cout << "[WARNING] Net " << net.getName() << " has " << net.getNumPins() << " pins\n";
@@ -566,7 +564,9 @@ void FastRouteKernel::initializeNets() {
 						count++;
 					}
                 
+					float netAlpha = _alpha;
 					if (_netsAlpha.find(net.getName()) != _netsAlpha.end()) {
+
 						netAlpha = _netsAlpha[net.getName()];
 					}
                 
