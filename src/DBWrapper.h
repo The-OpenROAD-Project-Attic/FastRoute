@@ -77,16 +77,25 @@ public:
         float dbuToMeters(unsigned dbu);
         std::set<int> findTransitionLayers(int maxRoutingLayer);
         
-        void setDB(unsigned idx) { _db = odb::dbDatabase::getDatabase(idx); }
+        void setDB(odb::dbDatabase *db);
         void setSelectedMetal (int metal) { selectedMetal = metal; }
 private:
+	void makeItermPins(Net* net,
+			   odb::dbNet *db_net,
+			   Box &dieArea);
+	void makeBtermPins(Net* net,
+			   odb::dbNet *db_net,
+			   Box &dieArea);
+
         int selectedMetal = 3;
         odb::dbDatabase *_db;
         odb::dbChip     *_chip;
-        Netlist         *_netlist = nullptr;
-        Grid            *_grid = nullptr;
+        Netlist         *_netlist;
+        Grid            *_grid;
         bool            _verbose = false;
 };
+
+std::string getITermName(odb::dbITerm* iterm);
 
 }
 

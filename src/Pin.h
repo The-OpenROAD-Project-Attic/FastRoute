@@ -42,6 +42,7 @@
 #include <iostream>
 #include <map>
 
+#include "opendb/db.h"
 #include "Coordinate.h"
 #include "Box.h"
 
@@ -60,13 +61,21 @@ public:
         };
 
         Pin() = default;
-        Pin(const std::string& name, const Coordinate& position,
+        Pin(odb::dbITerm *iterm,
+	    const Coordinate& position,
             const std::vector<int>& layers, const Orientation orientation,
             const std::map<int, std::vector<Box>>& boxesPerLayer,
-            bool isPort, bool connectedToPad, Type type);
+            bool connectedToPad, Type type);
+        Pin(odb::dbBTerm *bterm,
+	    const Coordinate& position,
+            const std::vector<int>& layers, const Orientation orientation,
+            const std::map<int, std::vector<Box>>& boxesPerLayer,
+            bool connectedToPad, Type type);
         
-        const std::string& getName() const { return _name; }
-        const Coordinate& getPosition() const { return _position; }
+	odb::dbITerm* getITerm() const;
+	odb::dbBTerm* getBTerm() const;
+	std::string getName() const;
+	const Coordinate& getPosition() const { return _position; }
         const std::vector<int>& getLayers() const { return _layers; }
         int getNumLayers() const { return _layers.size(); }
         int getTopLayer() const { return _layers.back(); }
@@ -78,7 +87,9 @@ public:
         bool isConnectedToPad() const { return _connectedToPad; }
 
 private:
-        std::string _name;
+	union { odb::dbITerm *_iterm;
+		odb::dbBTerm *_bterm;
+	};
         Coordinate _position;
         std::vector<int> _layers;
         Orientation _orientation;

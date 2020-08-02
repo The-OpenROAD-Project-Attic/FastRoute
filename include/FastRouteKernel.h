@@ -35,8 +35,7 @@
 //// POSSIBILITY OF SUCH DAMAGE.
 //////////////////////////////////////////////////////////////////////////////////
 
-#ifndef __FASTROUTEKERNEL_H_
-#define __FASTROUTEKERNEL_H_
+#pragma once
 
 #include <iostream>
 #include <vector>
@@ -178,7 +177,6 @@ private:
         bool _unidirectionalRoute;
         int _fixLayer;
         bool _clockNetRouting;
-        unsigned _dbId;
         const int _selectedMetal = 3;
         const float transitionLayerAdjust = 0.6;
         const int _gcellsOffset = 2;
@@ -268,4 +266,3 @@ private:
 
 }
 
-#endif /* __FASTROUTEKERNEL_H_ */

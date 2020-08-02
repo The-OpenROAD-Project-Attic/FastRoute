@@ -70,8 +70,7 @@ FastRouteKernel::FastRouteKernel() {
 
 void FastRouteKernel::init(ord::OpenRoad *openroad) {
   _openroad = openroad;
-  // This should be using a pointer to the db, not an object id -cherry
-  _dbId = openroad->getDb()->getId();
+  _dbWrapper->setDB(openroad->getDb());
 }
 
 void FastRouteKernel::init() {
@@ -222,7 +221,6 @@ FastRouteKernel::~FastRouteKernel() {
 void FastRouteKernel::startFastRoute() {
         std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
         printHeader();
-        _dbWrapper->setDB(_dbId);
         if (_unidirectionalRoute) {
                 _minRoutingLayer = 2;
                 _fixLayer = 1;
@@ -1048,10 +1046,6 @@ void FastRouteKernel::setPitchesInTile(const int pitchesInTile) {
 
 void FastRouteKernel::setSeed(unsigned seed) {
         _seed = seed;
-}
-
-unsigned FastRouteKernel::getDbId() {
-        return _dbId;
 }
 
 void FastRouteKernel::addLayerAdjustment(int layer, float reductionPercentage) {
