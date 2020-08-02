@@ -55,7 +55,7 @@ public:
         Netlist();
 
 	void foo();
-        const std::vector<Net> &getNets() { return _nets; }
+        std::vector<Net> &getNets() { return _nets; }
         int getNetCount() const { return _nets.size(); }
         Net* getNetByName(std:: string name);
         Net* getNetByIdx(int idx);

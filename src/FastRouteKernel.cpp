@@ -485,7 +485,7 @@ void FastRouteKernel::initializeNets() {
         _fastRoute->setMaxNetDegree(_netlist->getMaxNetDegree());
         
         int idx = 0;
-	for (const Net &net : _netlist->getNets()) {
+	for (Net &net : _netlist->getNets()) {
                 int pin_count = net.getNumPins();
 		if (pin_count > 1) {
 			if (pin_count < minDegree) {
@@ -541,9 +541,10 @@ void FastRouteKernel::initializeNets() {
 							}
 						}
 
-						if ((pin.isConnectedToPad() || pin.isPort()) && !_estimateRC ) { // If pin is connected to PAD, create a "fake" location in routing grid to avoid PAD obstacles
+						// If pin is connected to PAD, create a "fake" location in routing grid to avoid PAD obstacles
+						if ((pin.isConnectedToPad() || pin.isPort()) && !_estimateRC ) {
 							FastRoute::ROUTE pinConnection = createFakePin(pin, pinPosition, layer);
-							_padPinsConnections[net.getName()].push_back(pinConnection);
+							_padPinsConnections[&net].push_back(pinConnection);
 						}
                         
 						FastRoute::PIN grPin;
@@ -1412,12 +1413,11 @@ void FastRouteKernel::addRemainingGuides(std::vector<FastRoute::NET> &globalRout
 }
 
 void FastRouteKernel::connectPadPins(std::vector<FastRoute::NET> &globalRoute) {
-        std::map<int, std::vector<FastRoute::PIN>> allNets = _fastRoute->getNets();
         for (FastRoute::NET &netRoute : globalRoute) {
 		Net* net = _netlist->getNetByIdx(netRoute.idx);
-                if (_padPinsConnections.find(netRoute.name) != _padPinsConnections.end() ||
+                if (_padPinsConnections.find(net) != _padPinsConnections.end() ||
                     net->getNumPins() > 1) {
-                        for (FastRoute::ROUTE route : _padPinsConnections[netRoute.name]) {
+                        for (FastRoute::ROUTE route : _padPinsConnections[net]) {
                                 netRoute.route.push_back(route);
                         }
                 }
@@ -2053,10 +2053,6 @@ SteinerTree FastRouteKernel::createSteinerTree(std::vector<ROUTE> &route,
                                 pinPosition = pos;
                                 votes = equals;
                         }
-                }
-
-                if ((pin.isConnectedToPad() || pin.isPort()) && !_estimateRC) { // If pin is connected to PAD, create a "fake" location in routing grid to avoid PAD obstacles
-                        FastRoute::ROUTE pinConnection = createFakePin(pin, pinPosition, layer);
                 }
 
 		int node_layer = pin.getTopLayer();

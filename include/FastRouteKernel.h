@@ -60,6 +60,7 @@ class Coordinate;
 class DBWrapper;
 class Grid;
 class Pin;
+class Net;
 class Netlist;
 class RoutingTracks;
 class RoutingLayer;
@@ -221,7 +222,7 @@ private:
         int _numAdjusts = 0;
 
         // Variables for PADs obstacles handling
-        std::map<std::string, std::vector<FastRoute::ROUTE>> _padPinsConnections; // yet another string map to flush -cherry
+        std::map<Net*, std::vector<FastRoute::ROUTE>> _padPinsConnections;
         
         // main functions
         void initGrid();
