@@ -146,6 +146,7 @@ void FastRouteKernel::resetResources() {
         _result = new std::vector<FastRoute::NET>;
 
         *_dbWrapper = DBWrapper(_netlist, _grid);
+	_dbWrapper->setDB(_openroad->getDb());
 }
 
 void FastRouteKernel::reset() {
@@ -188,6 +189,7 @@ void FastRouteKernel::reset() {
         _netsAlpha.clear();
 
         init();
+	_dbWrapper->setDB(_openroad->getDb());
 }
 
 FastRouteKernel::~FastRouteKernel() {
