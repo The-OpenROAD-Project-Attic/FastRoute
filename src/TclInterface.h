@@ -33,9 +33,7 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-
-#ifndef _TCL_INTERFACE_
-#define _TCL_INTERFACE_
+#pragma once
 
 namespace FastRoute {
 
@@ -77,5 +75,3 @@ void write_guides();
 void report_congestion(char * congest_file);
 
 }
-#endif
-

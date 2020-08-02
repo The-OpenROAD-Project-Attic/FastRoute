@@ -34,8 +34,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 
-#ifndef __NODE_H_
-#define __NODE_H_
+#pragma once
 
 #include <string>
 #include <vector>
@@ -80,5 +79,3 @@ public:
 };
 
 }
-
-#endif /* __NODE_H_ */

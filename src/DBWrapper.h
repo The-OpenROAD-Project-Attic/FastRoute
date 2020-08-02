@@ -33,9 +33,7 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-
-#ifndef DBWRAPPER_h
-#define DBWRAPPER_h
+#pragma once
 
 #include <string>
 #include "Netlist.h"
@@ -95,5 +93,3 @@ private:
 std::string getITermName(odb::dbITerm* iterm);
 
 }
-
-#endif

@@ -33,9 +33,7 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-
-#ifndef __STEINERTREE_H_
-#define __STEINERTREE_H_
+#pragma once
 
 #include <string>
 #include <vector>
@@ -74,6 +72,3 @@ public:
 };
 
 }
-
-#endif /* __STEINERTREE_H_ */
-

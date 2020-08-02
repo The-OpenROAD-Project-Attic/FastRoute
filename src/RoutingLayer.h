@@ -33,9 +33,7 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-
-#ifndef __ROUTINGLAYER_H_
-#define __ROUTINGLAYER_H_
+#pragma once
 
 #include <string>
 #include <vector>
@@ -71,5 +69,3 @@ public:
 };
 
 }
-
-#endif /* __ROUTINGLAYER_H_ */

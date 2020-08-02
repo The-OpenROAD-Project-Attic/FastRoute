@@ -33,9 +33,7 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-
-#ifndef __SEGMENT_H_
-#define __SEGMENT_H_
+#pragma once
 
 #include <string>
 #include <vector>
@@ -81,5 +79,3 @@ public:
 };
 
 }
-
-#endif /* __SEGMENT_H_ */

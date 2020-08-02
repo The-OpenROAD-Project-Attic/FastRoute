@@ -33,9 +33,7 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-
-#ifndef __BOX_H_
-#define __BOX_H_
+#pragma once
 
 #include <algorithm>
 #include <limits>
@@ -75,5 +73,3 @@ public:
 };
 
 }
-
-#endif /* __BOX_H_ */

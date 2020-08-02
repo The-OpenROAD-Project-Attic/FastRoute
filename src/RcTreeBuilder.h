@@ -33,8 +33,7 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef RCTREEBUILDER_H
-#define RCTREEBUILDER_H
+#pragma once
 
 #include "DBWrapper.h"
 #include "Grid.h"
@@ -92,5 +91,3 @@ protected:
 };
 
 }
-
-#endif

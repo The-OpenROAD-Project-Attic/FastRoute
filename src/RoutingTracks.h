@@ -33,9 +33,7 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-
-#ifndef __ROUTINGTRACKS_H_
-#define __ROUTINGTRACKS_H_
+#pragma once
 
 #include <string>
 #include <vector>
@@ -76,5 +74,3 @@ public:
 };
 
 }
-
-#endif /* __ROUTINGTRACKS_H_ */
