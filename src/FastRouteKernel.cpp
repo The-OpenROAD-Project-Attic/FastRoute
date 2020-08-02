@@ -133,15 +133,6 @@ void FastRouteKernel::reset() {
 	delete _allRoutingTracks;
 	delete _result;
 
-        _netlist = nullptr;
-        _grid = nullptr;
-        _dbWrapper = nullptr;
-        _fastRoute = nullptr;
-        _gridOrigin = nullptr;
-        _routingLayers = nullptr;
-        _allRoutingTracks = nullptr;
-        _result = nullptr;
-
         _vCapacities.clear();
         _hCapacities.clear();
         _layersToAdjust.clear();
@@ -296,11 +287,11 @@ void FastRouteKernel::runFastRoute() {
         
         std::cout << " > Fixing long segments...\n";
         if (_maxLengthDBU == -1) {
-                        std::cout << "[WARNING] Max routing length not defined. Skipping...\n";
-            } else {
-                    fixLongSegments();
-                    std::cout << " > Fixing long segments... Done!\n";
-            }
+		std::cout << "[WARNING] Max routing length not defined. Skipping...\n";
+	} else {
+		fixLongSegments();
+		std::cout << " > Fixing long segments... Done!\n";
+	}
         computeWirelength();
 
         if (_reportCongest) {
