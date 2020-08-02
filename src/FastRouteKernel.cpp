@@ -70,16 +70,7 @@ void FastRouteKernel::init(ord::OpenRoad *openroad) {
 }
 
 void FastRouteKernel::init() {
-        // Allocate memory for objects
-        _netlist = new Netlist;
-        _grid = new Grid;
-        _dbWrapper = new DBWrapper(_openroad->getDb(), _netlist, _grid);
-        _fastRoute = new FT;
-        _gridOrigin = new Coordinate(-1, -1);
-        _routingLayers = new std::vector<RoutingLayer>;
-        _allRoutingTracks = new std::vector<RoutingTracks>;
-        _result = new std::vector<FastRoute::NET>;
-
+	makeComponents();
         // Initialize variables
         _outfile = "out.guide";
         _adjustment = 0.0;
@@ -100,19 +91,8 @@ void FastRouteKernel::init() {
         _verbose = 0;
 }
 
-void FastRouteKernel::resetResources() {
-	delete _netlist;
-	delete _grid;
-	delete _dbWrapper;
-	delete _fastRoute;
-	delete _gridOrigin;
-	delete _routingLayers;
-	delete _allRoutingTracks;
-	delete _result;
-
-        _vCapacities.clear();
-        _hCapacities.clear();
-
+void FastRouteKernel::makeComponents() {
+        // Allocate memory for objects
         _netlist = new Netlist;
         _grid = new Grid;
         _dbWrapper = new DBWrapper(_openroad->getDb(), _netlist, _grid);
@@ -123,7 +103,7 @@ void FastRouteKernel::resetResources() {
         _result = new std::vector<FastRoute::NET>;
 }
 
-void FastRouteKernel::reset() {
+void FastRouteKernel::deleteComponents() {
 	delete _netlist;
 	delete _grid;
 	delete _dbWrapper;
@@ -131,7 +111,19 @@ void FastRouteKernel::reset() {
 	delete _gridOrigin;
 	delete _routingLayers;
 	delete _allRoutingTracks;
-	delete _result;
+}
+
+void FastRouteKernel::resetResources() {
+	deleteComponents();
+
+        _vCapacities.clear();
+        _hCapacities.clear();
+
+	makeComponents();
+}
+
+void FastRouteKernel::reset() {
+	deleteComponents();
 
         _vCapacities.clear();
         _hCapacities.clear();
@@ -149,13 +141,7 @@ void FastRouteKernel::reset() {
 }
 
 FastRouteKernel::~FastRouteKernel() {
-	delete _netlist;
-	delete _grid;
-	delete _dbWrapper;
-	delete _fastRoute;
-	delete _gridOrigin;
-	delete _routingLayers;
-	delete _allRoutingTracks;
+	deleteComponents();
 }
 
 void FastRouteKernel::startFastRoute() {

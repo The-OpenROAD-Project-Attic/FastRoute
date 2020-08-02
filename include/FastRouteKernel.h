@@ -156,13 +156,55 @@ public:
         ROUTE_ getRoute();
         std::vector<EST_> getEst();
 
-protected:
+private:
+	void makeComponents();
+	void deleteComponents();
+        // main functions
+        void initGrid();
+        void initRoutingLayers();
+        void initRoutingTracks();
+        void setCapacities();
+        void setSpacingsAndMinWidths();
+        void initializeNets();
+        void computeGridAdjustments();
+        void computeTrackAdjustments();
+        void computeUserGlobalAdjustments();
+        void computeUserLayerAdjustments();
+        void computeRegionAdjustments(const Coordinate& lowerBound, const Coordinate& upperBound, int layer, float reductionPercentage);
+        void computeObstaclesAdjustments();
+        void computeWirelength();
+        
+        // aux functions
+        RoutingLayer getRoutingLayerByIndex(int index);
+        RoutingTracks getRoutingTracksByIndex(int layer);
+        void addRemainingGuides(std::vector<FastRoute::NET> &globalRoute);
+        void connectPadPins(std::vector<FastRoute::NET> &globalRoute);
+        void mergeBox(std::vector<Box>& guideBox);
+        Box globalRoutingToBox(const FastRoute::ROUTE &route);
+        using Point = std::tuple<long, long, int>; // x, y, layer
+        bool segmentsConnect(const ROUTE& seg0, const ROUTE& seg1, ROUTE &newSeg,
+                              const std::map<Point, int>& segsAtPoint);
+        void mergeSegments(FastRoute::NET &net);
+        bool pinOverlapsWithSingleTrack(const Pin& pin, Coordinate &trackPosition);
+        ROUTE createFakePin(Pin pin, Coordinate &pinPosition, RoutingLayer layer);
+        
+        // check functions
+        void checkPinPlacement();
+        void checkSinksAndSource();
+
+        // antenna functions
+        bool checkResource(ROUTE segment);
+        bool breakSegment(ROUTE segment, long maxLength, std::vector<ROUTE> &newSegments);
+        void fixLongSegments();
+        SteinerTree createSteinerTree(std::vector<ROUTE> &route,
+				      const std::vector<Pin> &pins);
+        bool checkSteinerTree(SteinerTree sTree);
+
         Netlist* _netlist = nullptr;
         Grid* _grid = nullptr;
         std::vector<RoutingLayer> *_routingLayers = nullptr;
         std::vector<RoutingTracks> *_allRoutingTracks = nullptr;
 
-private:
         ord::OpenRoad *_openroad;
         // Objects variables
         DBWrapper* _dbWrapper = nullptr;
@@ -223,47 +265,6 @@ private:
 
         // Variables for PADs obstacles handling
         std::map<Net*, std::vector<FastRoute::ROUTE>> _padPinsConnections;
-        
-        // main functions
-        void initGrid();
-        void initRoutingLayers();
-        void initRoutingTracks();
-        void setCapacities();
-        void setSpacingsAndMinWidths();
-        void initializeNets();
-        void computeGridAdjustments();
-        void computeTrackAdjustments();
-        void computeUserGlobalAdjustments();
-        void computeUserLayerAdjustments();
-        void computeRegionAdjustments(const Coordinate& lowerBound, const Coordinate& upperBound, int layer, float reductionPercentage);
-        void computeObstaclesAdjustments();
-        void computeWirelength();
-        
-        // aux functions
-        RoutingLayer getRoutingLayerByIndex(int index);
-        RoutingTracks getRoutingTracksByIndex(int layer);
-        void addRemainingGuides(std::vector<FastRoute::NET> &globalRoute);
-        void connectPadPins(std::vector<FastRoute::NET> &globalRoute);
-        void mergeBox(std::vector<Box>& guideBox);
-        Box globalRoutingToBox(const FastRoute::ROUTE &route);
-        using Point = std::tuple<long, long, int>; // x, y, layer
-        bool segmentsConnect(const ROUTE& seg0, const ROUTE& seg1, ROUTE &newSeg,
-                              const std::map<Point, int>& segsAtPoint);
-        void mergeSegments(FastRoute::NET &net);
-        bool pinOverlapsWithSingleTrack(const Pin& pin, Coordinate &trackPosition);
-        ROUTE createFakePin(Pin pin, Coordinate &pinPosition, RoutingLayer layer);
-        
-        // check functions
-        void checkPinPlacement();
-        void checkSinksAndSource();
-
-        // antenna functions
-        bool checkResource(ROUTE segment);
-        bool breakSegment(ROUTE segment, long maxLength, std::vector<ROUTE> &newSegments);
-        void fixLongSegments();
-        SteinerTree createSteinerTree(std::vector<ROUTE> &route,
-				      const std::vector<Pin> &pins);
-        bool checkSteinerTree(SteinerTree sTree);
 };
 
 }
