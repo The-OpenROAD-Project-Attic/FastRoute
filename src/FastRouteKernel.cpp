@@ -481,6 +481,7 @@ void FastRouteKernel::initializeNets() {
 
 						// If pin is connected to PAD, create a "fake" location in routing grid to avoid PAD obstacles
 						if ((pin.isConnectedToPad() || pin.isPort()) && !_estimateRC ) {
+							printf("connect save %s\n", net.getConstName());
 							FastRoute::ROUTE pinConnection = createFakePin(pin, pinPosition, layer);
 							_padPinsConnections[&net].push_back(pinConnection);
 						}
@@ -1349,7 +1350,8 @@ void FastRouteKernel::addRemainingGuides(std::vector<FastRoute::NET> &globalRout
 void FastRouteKernel::connectPadPins(std::vector<FastRoute::NET> &globalRoute) {
         for (FastRoute::NET &netRoute : globalRoute) {
 		Net* net = _netlist->getNetByIdx(netRoute.idx);
-                if (_padPinsConnections.find(net) != _padPinsConnections.end() ||
+		printf("connect %s\n", net->getConstName());
+		if (_padPinsConnections.find(net) != _padPinsConnections.end() ||
                     net->getNumPins() > 1) {
                         for (FastRoute::ROUTE route : _padPinsConnections[net]) {
                                 netRoute.route.push_back(route);
@@ -1888,6 +1890,7 @@ void FastRouteKernel::fixLongSegments() {
         int possibleViols = 0;
 
         addRemainingGuides(*_result);
+	connectPadPins(*_result);
         for (FastRoute::NET &netRoute : *_result) {
                 mergeSegments(netRoute);
                 bool possibleViolation = false;
@@ -1937,8 +1940,8 @@ void FastRouteKernel::fixLongSegments() {
                         int cnt = 0;
                         for (ROUTE seg : netRoute.route) {
                                 if (s.getLastNode().getPosition().getX() == seg.finalX && s.getLastNode().getPosition().getY() == seg.finalY &&
-                                        s.getFirstNode().getPosition().getX() == seg.initX && s.getFirstNode().getPosition().getY() == seg.initY &&
-                                        s.getFirstNode().getLayer() == seg.initLayer && s.getLastNode().getLayer() == seg.finalLayer) {
+				    s.getFirstNode().getPosition().getX() == seg.initX && s.getFirstNode().getPosition().getY() == seg.initY &&
+				    s.getFirstNode().getLayer() == seg.initLayer && s.getLastNode().getLayer() == seg.finalLayer) {
                                         segment = seg;
                                         std::vector<ROUTE> newSegs;
                                         bool success = breakSegment(segment, _layersMaxLengthDBU[seg.finalLayer], newSegs);
@@ -2045,7 +2048,9 @@ SteinerTree FastRouteKernel::createSteinerTree(std::vector<ROUTE> &route,
                 int newSegsAttached = 0;
                 for (Segment & seg : segsAttachedToSource) {
                         bool parentExists = false;
-                        for (Segment parent : parents) {
+                        // Linear search inside linear search -> N^2.
+			// Should use std::set -cherry
+			for (Segment parent : parents) {
                                 if (parent == seg) {
                                         parentExists = true;
                                 }
