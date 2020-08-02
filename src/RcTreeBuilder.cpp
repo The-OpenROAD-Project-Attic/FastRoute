@@ -179,7 +179,9 @@ void RcTreeBuilder::computeLocalParasitics() {
         const std::vector<Pin>& pins = _net->getPins();
         for (const Pin &pin : pins) {
                 // Sta pin
-                sta::Pin* staPin = _network->findPin(pin.getName().c_str());
+		odb::dbITerm *iterm = pin.getITerm();
+		odb::dbBTerm *bterm = pin.getBTerm();
+		sta::Pin* staPin = iterm ? _network->dbToSta(iterm) : _network->dbToSta(bterm);
                 sta::ParasiticNode* n1 = _parasitics->ensureParasiticNode(_parasitic, staPin);
 
                 int nodeToConnect = findNodeToConnect(pin, pinNodes);
