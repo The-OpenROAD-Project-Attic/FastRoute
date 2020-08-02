@@ -67,21 +67,18 @@ using ord::error;
 void FastRouteKernel::init(ord::OpenRoad *openroad) {
   _openroad = openroad;
   init();
-  _dbWrapper->setDB(openroad->getDb());
 }
 
 void FastRouteKernel::init() {
         // Allocate memory for objects
         _netlist = new Netlist;
         _grid = new Grid;
-        _dbWrapper = new DBWrapper;
+        _dbWrapper = new DBWrapper(_openroad->getDb(), _netlist, _grid);
         _fastRoute = new FT;
         _gridOrigin = new Coordinate(-1, -1);
         _routingLayers = new std::vector<RoutingLayer>;
         _allRoutingTracks = new std::vector<RoutingTracks>;
         _result = new std::vector<FastRoute::NET>;
-
-        *_dbWrapper = DBWrapper(_netlist, _grid);
 
         // Initialize variables
         _outfile = "out.guide";
@@ -118,15 +115,12 @@ void FastRouteKernel::resetResources() {
 
         _netlist = new Netlist;
         _grid = new Grid;
-        _dbWrapper = new DBWrapper;
+        _dbWrapper = new DBWrapper(_openroad->getDb(), _netlist, _grid);
         _fastRoute = new FT;
         _gridOrigin = new Coordinate(-1, -1);
         _routingLayers = new std::vector<RoutingLayer>;
         _allRoutingTracks = new std::vector<RoutingTracks>;
         _result = new std::vector<FastRoute::NET>;
-
-        *_dbWrapper = DBWrapper(_netlist, _grid);
-	_dbWrapper->setDB(_openroad->getDb());
 }
 
 void FastRouteKernel::reset() {
@@ -161,7 +155,6 @@ void FastRouteKernel::reset() {
         _netsAlpha.clear();
 
         init();
-	_dbWrapper->setDB(_openroad->getDb());
 }
 
 FastRouteKernel::~FastRouteKernel() {

@@ -53,8 +53,12 @@ namespace FastRoute {
 
 using ord::error;
 
-void DBWrapper::setDB(odb::dbDatabase *db) {
-	_db = db;
+DBWrapper::DBWrapper(odb::dbDatabase *db,
+		     Netlist *netlist,
+		     Grid *grid) :
+	_db(db),
+	_netlist(netlist),
+	_grid(grid) {
 }
 
 void DBWrapper::initGrid(int maxLayer) {

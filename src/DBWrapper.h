@@ -58,11 +58,9 @@ namespace FastRoute {
 
 class DBWrapper {
 public:        
-        DBWrapper() = default;
-        DBWrapper(Netlist *netlist, Grid *grid) 
-                  : _netlist(netlist),
-                  _grid(grid) {
-        }
+        DBWrapper(odb::dbDatabase *db,
+		  Netlist *netlist,
+		  Grid *grid);
         
         void initGrid(int maxLayer);
         void initRoutingLayers(std::vector<RoutingLayer>& routingLayers);
@@ -76,9 +74,8 @@ public:
         void getCutLayerRes(unsigned belowLayerId, float& r);
         float dbuToMeters(unsigned dbu);
         std::set<int> findTransitionLayers(int maxRoutingLayer);
-        
-        void setDB(odb::dbDatabase *db);
         void setSelectedMetal (int metal) { selectedMetal = metal; }
+
 private:
 	void makeItermPins(Net* net,
 			   odb::dbNet *db_net,
