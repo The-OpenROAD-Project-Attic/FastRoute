@@ -41,7 +41,10 @@ set(LIB_NAME "pdrev")
 
 set(CMAKE_CXX_STANDARD 11)
 
-file(GLOB_RECURSE SRC_FILES ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp)
+set(SRC_FILES
+  src/graph.cpp
+  src/pdrev.cpp
+)
 
 add_definitions(-DLIBRARY_MODE)
 add_LIBRARY(${LIB_NAME} STATIC ${SRC_FILES})

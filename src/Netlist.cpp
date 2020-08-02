@@ -45,9 +45,12 @@ Netlist::Netlist()
 {
 }
 
-void Netlist::addNet(odb::dbNet* net, const std::vector<Pin>& pins) {
-        _nets.push_back(Net(net, pins));
-	_net_name_map[net->getName()] = &_nets.back();
+Net* Netlist::addNet(odb::dbNet* db_net) {
+        _nets.push_back(Net(db_net));
+	Net* net = &_nets.back();
+	_net_name_map[net->getName()] = net;
+	return net;
+
 }
         
 void Netlist::reserveNets(size_t net_count) {

@@ -365,17 +365,15 @@ void DBWrapper::initNetlist() {
 		  });
 	// Prevent _netlist->_nets from growing because pointers to nets become invalid.
 	_netlist->reserveNets(nets.size());
-        for (odb::dbNet* currNet : sorted_nets) {
-                std::vector<Pin> netPins;
-                
-                if (currNet->getSigType().getValue() == odb::dbSigType::POWER ||
-                    currNet->getSigType().getValue() == odb::dbSigType::GROUND ||
-                    currNet->isSpecial() || currNet->getSWires().size() > 0) {
+        for (odb::dbNet* db_net : sorted_nets) {
+                if (db_net->getSigType().getValue() == odb::dbSigType::POWER ||
+                    db_net->getSigType().getValue() == odb::dbSigType::GROUND ||
+                    db_net->isSpecial() || db_net->getSWires().size() > 0) {
                         continue;
                 }
 
-		std::string netName = currNet->getConstName();
-                for (odb::dbITerm* currITerm : currNet->getITerms()) {
+		Net* net = _netlist->addNet(db_net);
+                for (odb::dbITerm* currITerm : db_net->getITerms()) {
                         int pX, pY;
                         std::string pinName;
                         std::vector<int> pinLayers;
@@ -450,7 +448,7 @@ void DBWrapper::initNetlist() {
                                 pinLayers.push_back(layer_boxes.first);
                         }
 
-                        Pin pin = Pin(pinName, pinPos, pinLayers, Orientation::INVALID, pinBoxes, netName, false, (connectedToPad || connectedToMacro), type);
+                        Pin pin = Pin(pinName, pinPos, pinLayers, Orientation::INVALID, pinBoxes, net, false, (connectedToPad || connectedToMacro), type);
 
                         if (connectedToPad || connectedToMacro) {
                                 Coordinate pinPosition = pin.getPosition();
@@ -473,10 +471,10 @@ void DBWrapper::initNetlist() {
                                 }
                         }
 
-                        netPins.push_back(pin);
+                        net->addPin(pin);
                 }
                 
-                for (odb::dbBTerm* currBTerm : currNet->getBTerms()) {
+                for (odb::dbBTerm* currBTerm : db_net->getBTerms()) {
                         int posX, posY;
                         std::string pinName;
                         
@@ -549,7 +547,8 @@ void DBWrapper::initNetlist() {
                                 pinLayers.push_back(layer_boxes.first);
                         }
                         
-                        Pin pin = Pin(pinName, pinPos, pinLayers, Orientation::INVALID, pinBoxes, netName, isPort, (connectedToPad || connectedToMacro), type);
+                        Pin pin = Pin(pinName, pinPos, pinLayers, Orientation::INVALID, pinBoxes,
+				      net, isPort, (connectedToPad || connectedToMacro), type);
 
                         if (connectedToPad) {
                                 Coordinate pinPosition = pin.getPosition();
@@ -590,10 +589,9 @@ void DBWrapper::initNetlist() {
                                         }
                                 }
                         }
-
-                        netPins.push_back(pin);
+                        net->addPin(pin);
                 }
-                _netlist->addNet(currNet, netPins);
+                
         }
 }
 
@@ -761,15 +759,15 @@ void DBWrapper::initObstacles() {
                 error("Design without nets\n");
         }
         
-        for (odb::dbNet* currNet : nets) {
+        for (odb::dbNet* db_net : nets) {
                 uint wireCnt = 0, viaCnt = 0;
-                currNet->getWireCount(wireCnt, viaCnt);
+                db_net->getWireCount(wireCnt, viaCnt);
                 if (wireCnt < 1)
                         continue;
                 
-                if (currNet->getSigType() == odb::dbSigType::POWER ||
-                    currNet->getSigType() == odb::dbSigType::GROUND) {
-                        for (odb::dbSWire* swire : currNet->getSWires()) {
+                if (db_net->getSigType() == odb::dbSigType::POWER ||
+                    db_net->getSigType() == odb::dbSigType::GROUND) {
+                        for (odb::dbSWire* swire : db_net->getSWires()) {
                                 for (odb::dbSBox* s : swire->getWires()) {
                                         if (s->isVia()) {
                                                 continue;
@@ -782,7 +780,7 @@ void DBWrapper::initObstacles() {
                                                 Coordinate upperBound = Coordinate(wireRect.xMax(), wireRect.yMax());
                                                 Box obstacleBox = Box(lowerBound, upperBound, l);
                                                 if (!dieArea.inside(obstacleBox)) {
-                                                        std::cout << "[WARNING] Net " << currNet->getConstName()
+                                                        std::cout << "[WARNING] Net " << db_net->getConstName()
                                                                   << " has wires outside die area\n";
                                                 }
                                                 _grid->addObstacle(l, obstacleBox);
@@ -792,7 +790,7 @@ void DBWrapper::initObstacles() {
                 } else {
                         odb::dbWirePath path;
                         odb::dbWirePathShape pshape;
-                        odb::dbWire* wire = currNet->getWire();
+                        odb::dbWire* wire = db_net->getWire();
                         
                         odb::dbWirePathItr pitr;
                         for (pitr.begin(wire); pitr.getNextPath(path);) {
@@ -808,7 +806,7 @@ void DBWrapper::initObstacles() {
                                                 Coordinate upperBound = Coordinate(wireRect.xMax(), wireRect.yMax());
                                                 Box obstacleBox = Box(lowerBound, upperBound, l);
                                                 if (!dieArea.inside(obstacleBox)) {
-                                                        std::cout << "[WARNING] Net " << currNet->getConstName()
+                                                        std::cout << "[WARNING] Net " << db_net->getConstName()
                                                                   << " has wires outside die area\n";
                                                 }
                                                 _grid->addObstacle(l, obstacleBox);

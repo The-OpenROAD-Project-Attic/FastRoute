@@ -1,5 +1,3 @@
-#include "mystring.h"
-#include "mymeasure.h"
 #include "graph.h"
 #include <stdio.h>
 #include <stdlib.h>
@@ -26,4 +24,3 @@ float beta = 1.4;
 bool runOneNet = false;
 unsigned net_num = 0;
 vector<Graph*> my_graphs;
-CMeasure measure;

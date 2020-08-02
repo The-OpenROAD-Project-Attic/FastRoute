@@ -33,33 +33,25 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#pragma once
-
-#include <string>
-#include <vector>
-
-#include "Coordinate.h"
-#include "Box.h"
 #include "Pin.h"
-#include "opendb/db.h"
 
 namespace FastRoute {
 
-class Net {
-public:
-	Net() = default;
-        Net(odb::dbNet* net);
-        const std::string getName() const;
-        const char *getConstName() const;
-	odb::dbSigType getSignalType() const;
-        void addPin(Pin &pin);
-	const std::vector<Pin>& getPins() const { return _pins; }
-        int getNumPins() const { return _pins.size(); }
-
-private:
-	odb::dbNet* _net;
-        std::vector<Pin> _pins;
-};
-
+Pin::Pin(const std::string& name, const Coordinate& position,
+	 const std::vector<int>& layers, const Orientation orientation,
+	 const std::map<int, std::vector<Box>>& boxesPerLayer,
+	 Net *net, bool isPort, bool connectedToPad, Type type) :
+	_name(name),
+	_position(position),
+	_layers(layers),
+	_orientation(orientation),
+	_boxesPerLayer(boxesPerLayer),
+	_net(net),
+	_isPort(isPort),
+	_connectedToPad(connectedToPad),
+	_type(type)
+{
+        std::sort(_layers.begin(), _layers.end());
 }
 
+}

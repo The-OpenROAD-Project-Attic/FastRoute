@@ -61,7 +61,7 @@ public:
         Net* getNetByIdx(int idx);
 
 	void reserveNets(size_t net_count);
-        void addNet(odb::dbNet* net, const std::vector<Pin>& pins);
+        Net* addNet(odb::dbNet* net);
         int getMaxNetDegree();
         
         std::vector<Pin> getAllPorts();

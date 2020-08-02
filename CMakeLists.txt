@@ -75,12 +75,21 @@ add_custom_command(OUTPUT ${FASTROUTE_TCL_INIT}
         DEPENDS ${FASTROUTE_HOME}/src/fastroute.tcl ${OPENSTA_HOME}/etc/TclEncode.tcl
 )
 
-# Glob should not be used in cmake -cherry
-file(GLOB_RECURSE SRC_FILES ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp)
 
-list(REMOVE_ITEM SRC_FILES ${CMAKE_CURRENT_SOURCE_DIR}/src/Main.cpp)
-list(REMOVE_ITEM SRC_FILES ${CMAKE_CURRENT_SOURCE_DIR}/src/Parameters.h)
-list(REMOVE_ITEM SRC_FILES ${CMAKE_CURRENT_SOURCE_DIR}/src/Parameters.cpp)
+set(SRC_FILES
+  src/Box.cpp
+  src/Coordinate.cpp
+  src/DBWrapper.cpp
+  src/FastRouteKernel.cpp
+  src/Grid.cpp
+  src/MakeFastRoute.cpp
+  src/Net.cpp
+  src/Netlist.cpp
+  src/Pin.cpp
+  src/RcTreeBuilder.cpp
+  src/SteinerTree.cpp
+  src/TclInterface.cpp
+  )
 
 add_library(${LIB_NAME} 
         ${SRC_FILES}

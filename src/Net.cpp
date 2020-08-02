@@ -37,10 +37,8 @@
 
 namespace FastRoute {
 
-Net::Net(odb::dbNet* net, 
-	 const std::vector<Pin>& pins) :
-	_net(net),
-	_pins(pins)
+Net::Net(odb::dbNet* net) :
+	_net(net)
 {
 }
 
@@ -54,6 +52,10 @@ const char *Net::getConstName() const {
 
 odb::dbSigType Net::getSignalType() const {
 	return _net->getSigType().getString();
+}
+
+void Net::addPin(Pin &pin) {
+	_pins.push_back(pin);
 }
 
 }
