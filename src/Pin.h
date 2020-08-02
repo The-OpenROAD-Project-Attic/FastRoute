@@ -63,7 +63,7 @@ public:
         Pin(const std::string& name, const Coordinate& position,
             const std::vector<int>& layers, const Orientation orientation,
             const std::map<int, std::vector<Box>>& boxesPerLayer,
-            Net* net, bool isPort, bool connectedToPad, Type type);
+            bool isPort, bool connectedToPad, Type type);
         
         const std::string& getName() const { return _name; }
         const Coordinate& getPosition() const { return _position; }
@@ -73,7 +73,6 @@ public:
         Orientation getOrientation() const { return _orientation; }
         void setOrientation(Orientation orientation) { _orientation = orientation; }
         const std::map<int, std::vector<Box>>& getBoxes() const { return _boxesPerLayer; }
-        Net *getNet() const { return _net; }
         bool isPort() const { return _isPort; }
         Type getType() const { return _type; }
         bool isConnectedToPad() const { return _connectedToPad; }
@@ -84,7 +83,6 @@ private:
         std::vector<int> _layers;
         Orientation _orientation;
         std::map<int, std::vector<Box>> _boxesPerLayer;
-        Net* _net;
         bool _isPort;
         Type _type;
         bool _connectedToPad;

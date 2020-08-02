@@ -40,13 +40,12 @@ namespace FastRoute {
 Pin::Pin(const std::string& name, const Coordinate& position,
 	 const std::vector<int>& layers, const Orientation orientation,
 	 const std::map<int, std::vector<Box>>& boxesPerLayer,
-	 Net *net, bool isPort, bool connectedToPad, Type type) :
+	 bool isPort, bool connectedToPad, Type type) :
 	_name(name),
 	_position(position),
 	_layers(layers),
 	_orientation(orientation),
 	_boxesPerLayer(boxesPerLayer),
-	_net(net),
 	_isPort(isPort),
 	_connectedToPad(connectedToPad),
 	_type(type)
