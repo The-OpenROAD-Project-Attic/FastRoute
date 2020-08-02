@@ -33,6 +33,7 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
+#include "FastRouteKernel.h"
 
 #include <iostream>
 #include <vector>
@@ -51,9 +52,8 @@
 #include "Netlist.h"
 #include "RoutingLayer.h"
 #include "RoutingTracks.h"
-#include "FastRouteKernel.h"
 #include "RcTreeBuilder.h"
-#include "include/FastRoute.h"
+#include "FastRoute.h"
 
 #include "openroad/OpenRoad.hh"
 #include "openroad/Error.hh"
@@ -64,12 +64,9 @@ namespace FastRoute {
 
 using ord::error;
 
-FastRouteKernel::FastRouteKernel() {
-        init();
-}
-
 void FastRouteKernel::init(ord::OpenRoad *openroad) {
   _openroad = openroad;
+  init();
   _dbWrapper->setDB(openroad->getDb());
 }
 

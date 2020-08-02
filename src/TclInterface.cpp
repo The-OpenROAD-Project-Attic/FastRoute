@@ -33,14 +33,19 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-
 #include <iostream>
 #include "TclInterface.h"
 #include "FastRouteKernel.h"
 
+namespace ord {
+// Defined in OpenRoad.i
+FastRoute::FastRouteKernel*
+getFastRoute();
+}
+
 namespace FastRoute {
 
-FastRouteKernel* fastRouteKernel = new FastRouteKernel();
+using ord::getFastRoute;
 
 void help() {
         std::cout << "Set output file name:                    set_output_file \"path/to/output.guide\"\n";
@@ -56,116 +61,116 @@ void help() {
 }
 
 void set_output_file(const char * file) {
-        fastRouteKernel->setOutputFile(file);
+        getFastRoute()->setOutputFile(file);
 }
 
 void set_tile_size(int tileSize) {
-        fastRouteKernel->setPitchesInTile(tileSize);
+        getFastRoute()->setPitchesInTile(tileSize);
 }
 
 void set_capacity_adjustment(float adjustment) {
-        fastRouteKernel->setAdjustment(adjustment);
+        getFastRoute()->setAdjustment(adjustment);
 }
 
 void add_layer_adjustment(int layer, float reductionPercentage) {
-        fastRouteKernel->addLayerAdjustment(layer, reductionPercentage);
+        getFastRoute()->addLayerAdjustment(layer, reductionPercentage);
 }
 
 void add_region_adjustment(int minX, int minY, int maxX, int maxY, int layer, float reductionPercentage) {
-        fastRouteKernel->addRegionAdjustment(minX, minY, maxX, maxY,
+        getFastRoute()->addRegionAdjustment(minX, minY, maxX, maxY,
                                              layer, reductionPercentage);
 }
 
 void set_min_layer(int minLayer) {
-        fastRouteKernel->setMinRoutingLayer(minLayer);
+        getFastRoute()->setMinRoutingLayer(minLayer);
 }
 
 void set_max_layer(int maxLayer) {
-        fastRouteKernel->setMaxRoutingLayer(maxLayer);
+        getFastRoute()->setMaxRoutingLayer(maxLayer);
 }
 
 void set_unidirectional_routing(bool unidirRouting) {
-        fastRouteKernel->setUnidirectionalRoute(unidirRouting);
+        getFastRoute()->setUnidirectionalRoute(unidirRouting);
 }
 
 void set_pdrev(bool pdRev) {
-        fastRouteKernel->setPDRev(pdRev);
+        getFastRoute()->setPDRev(pdRev);
 }
 
 void set_clock_net_routing(bool clockNetRouting) {
-        fastRouteKernel->setClockNetRouting(clockNetRouting);
+        getFastRoute()->setClockNetRouting(clockNetRouting);
 }
 
 void set_alpha(float alpha) {
-        fastRouteKernel->setAlpha(alpha);
+        getFastRoute()->setAlpha(alpha);
 }
 
 void set_alpha_for_net(char * netName, float alpha) {
-    fastRouteKernel->addAlphaForNet(netName, alpha);
+    getFastRoute()->addAlphaForNet(netName, alpha);
 }
 
 void set_verbose(int v) {
-        fastRouteKernel->setVerbose(v);
+        getFastRoute()->setVerbose(v);
 }
 
 void set_overflow_iterations(int iterations) {
-        fastRouteKernel->setOverflowIterations(iterations);
+        getFastRoute()->setOverflowIterations(iterations);
 }
 
 void set_max_routing_length(float maxLength) {
-           fastRouteKernel->setMaxLength(maxLength);
+           getFastRoute()->setMaxLength(maxLength);
 }
 
 void add_layer_max_length(int layer, float length) {
-        fastRouteKernel->addLayerMaxLength(layer, length);
+        getFastRoute()->addLayerMaxLength(layer, length);
 }
 
 void set_grid_origin(long x, long y) {
-        fastRouteKernel->setGridOrigin(x, y);
+        getFastRoute()->setGridOrigin(x, y);
 }
 
 void set_pdrev_for_high_fanout(int pdRevForHighFanout) {
-        fastRouteKernel->setPDRevForHighFanout(pdRevForHighFanout);
+        getFastRoute()->setPDRevForHighFanout(pdRevForHighFanout);
 }
 
 void set_allow_overflow(bool allowOverflow) {
-        fastRouteKernel->setAllowOverflow(allowOverflow);
+        getFastRoute()->setAllowOverflow(allowOverflow);
 }
 
 void set_seed(unsigned seed) {
-        fastRouteKernel->setSeed(seed);
+        getFastRoute()->setSeed(seed);
 }
 
 void set_layer_pitch(int layer, float pitch) {
-        fastRouteKernel->setLayerPitch(layer, pitch);
+        getFastRoute()->setLayerPitch(layer, pitch);
 }
 
 void start_fastroute() {
-        fastRouteKernel->startFastRoute();
+        getFastRoute()->startFastRoute();
 }
 
 void run_fastroute() {
-        fastRouteKernel->runFastRoute();
+        getFastRoute()->runFastRoute();
 }
 
 void set_estimate_rc() {
-        fastRouteKernel->setEstimateRC(true);
+        getFastRoute()->setEstimateRC(true);
 }
 
 void estimate_rc() {
-        fastRouteKernel->estimateRC();
+        getFastRoute()->estimateRC();
 }
 
 void reset_fastroute() {
-        fastRouteKernel->reset();
+        getFastRoute()->reset();
 }
 
 void write_guides() {
-        fastRouteKernel->writeGuides();
+        getFastRoute()->writeGuides();
 }
 
 void report_congestion(char * congest_file) {
-        fastRouteKernel->setReportCongestion(congest_file);
+        getFastRoute()->setReportCongestion(congest_file);
 }
 
 }

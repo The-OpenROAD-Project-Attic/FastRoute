@@ -33,9 +33,7 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-
-#ifndef MAKEFASTROUTE_H
-#define MAKEFASTROUTE_H
+#pragma once
 
 namespace FastRoute {
        class FastRouteKernel;
@@ -49,9 +47,6 @@ FastRoute::FastRouteKernel* makeFastRoute();
 
 void initFastRoute(OpenRoad *openroad);
 
-void deleteFastRoute(void *fastroute);
+void deleteFastRoute(FastRoute::FastRouteKernel *fastroute);
 
 }
-
-#endif /* MAKEFASTROUTE_H */
-

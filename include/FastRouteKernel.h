@@ -47,6 +47,8 @@
 #include <istream>
 #include <map>
 
+#include "FastRoute.h"
+
 namespace ord {
 class OpenRoad;
 }
@@ -110,7 +112,7 @@ public:
                 std::vector<ADJUSTMENT_> adjustments;
         };
 
-        FastRouteKernel();
+        FastRouteKernel() = default;
         ~FastRouteKernel();
         void init(ord::OpenRoad *openroad);
         void init();
