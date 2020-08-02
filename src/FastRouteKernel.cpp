@@ -136,7 +136,6 @@ void FastRouteKernel::resetResources() {
 
         _vCapacities.clear();
         _hCapacities.clear();
-        _netsDegree.clear();
 
         _netlist = new Netlist;
         _grid = new Grid;
@@ -179,7 +178,6 @@ void FastRouteKernel::reset() {
 
         _vCapacities.clear();
         _hCapacities.clear();
-        _netsDegree.clear();
         _layersToAdjust.clear();
         _layersReductionPercentage.clear();
         regionsMinX.clear();
@@ -504,7 +502,6 @@ void FastRouteKernel::initializeNets() {
 					std::cout << "[WARNING] Net " << net.getName() << " has " << net.getNumPins() << " pins\n";
 				}
 				else {
-					_netsDegree[net.getName()] = pin_count;
 					std::vector<FastRoute::PIN> pins;
 					for (Pin pin : net.getPins()) {
 						Coordinate pinPosition;
@@ -1270,127 +1267,126 @@ RoutingTracks FastRouteKernel::getRoutingTracksByIndex(int layer) {
 }
 
 void FastRouteKernel::addRemainingGuides(std::vector<FastRoute::NET> &globalRoute) {
-        std::map<int, std::vector<FastRoute::PIN>> allNets =  _fastRoute->getNets();
+        auto allNets =  _fastRoute->getNets();
 
         for (FastRoute::NET &netRoute : globalRoute) {
-                std::vector<FastRoute::PIN> &pins = allNets[netRoute.idx];
+                Net* net = _netlist->getNetByIdx(netRoute.idx);
+		// Skip nets with 1 pin or less
+		if (net->getNumPins() > 1) {
+			std::vector<FastRoute::PIN> &pins = allNets[netRoute.idx];
+			if (netRoute.route.size() == 0) { // Try to add local guides for net with no output of FR core
+				int lastLayer = -1;
+				for (uint p = 0; p < pins.size(); p++){
+					if (p > 0){
+						if (pins[p].x != pins[p-1].x || pins[p].y != pins[p-1].y) { // If the net is not local, FR core result is invalid
+							error("Net %s not properly covered\n", netRoute.name.c_str());
+						}
+					}
 
-                if (_netsDegree[netRoute.name] < 2) { // Skip nets with 1 pin or less
-			continue;
-                }
+					if (pins[p].layer > lastLayer)
+						lastLayer = pins[p].layer;
+				}
 
-                if (netRoute.route.size() == 0) { // Try to add local guides for net with no output of FR core
-                        int lastLayer = -1;
-                        for (uint p = 0; p < pins.size(); p++){
-                                if (p > 0){
-                                        if (pins[p].x != pins[p-1].x || pins[p].y != pins[p-1].y) { // If the net is not local, FR core result is invalid
-                                                error("Net %s not properly covered\n", netRoute.name.c_str());
-                                        }
-                                }
+				for (int l = _minRoutingLayer - _fixLayer; l <= lastLayer; l++) {
+					FastRoute::ROUTE route;
+					route.initLayer = l;
+					route.initX = pins[0].x;
+					route.initY = pins[0].y;
+					route.finalLayer = l + 1;
+					route.finalX = pins[0].x;
+					route.finalY = pins[0].y;
+					netRoute.route.push_back(route);
+				}
+			} else { // For nets with routing, add guides for pin acess at upper layers
+				for (FastRoute::PIN pin : pins) {
+					if (pin.layer > 1) {
+						// for each pin placed at upper layers, get all segments that potentially covers it
+						std::vector<FastRoute::ROUTE> &segments = netRoute.route;
+						std::vector<FastRoute::ROUTE> coverSegs;
 
-                                if (pins[p].layer > lastLayer)
-                                        lastLayer = pins[p].layer;
-                        }
+						int wireViaLayer = std::numeric_limits<int>::max();
+						for (uint i = 0; i < segments.size(); i++) {
+							if ((pin.x == segments[i].initX && pin.y == segments[i].initY) ||
+							    (pin.x == segments[i].finalX && pin.y == segments[i].finalY)) {
+								if (!(segments[i].initX == segments[i].finalX &&
+								      segments[i].initY == segments[i].finalY)) {
+									coverSegs.push_back(segments[i]);
+									if (segments[i].initLayer < wireViaLayer) {
+										wireViaLayer = segments[i].initLayer;
+									}
+								}
+							}
+						}
 
-                        for (int l = _minRoutingLayer - _fixLayer; l <= lastLayer; l++) {
-                                FastRoute::ROUTE route;
-                                route.initLayer = l;
-                                route.initX = pins[0].x;
-                                route.initY = pins[0].y;
-                                route.finalLayer = l + 1;
-                                route.finalX = pins[0].x;
-                                route.finalY = pins[0].y;
-                                netRoute.route.push_back(route);
-                        }
-                } else { // For nets with routing, add guides for pin acess at upper layers
-                        for (FastRoute::PIN pin : pins) {
-                                if (pin.layer > 1) {
-                                        // for each pin placed at upper layers, get all segments that potentially covers it
-                                        std::vector<FastRoute::ROUTE> &segments = netRoute.route;
-                                        std::vector<FastRoute::ROUTE> coverSegs;
+						bool bottomLayerPin = false;
+						for (FastRoute::PIN pin2 : pins) {
+							if (pin.x == pin2.x && pin.y == pin2.y && pin.layer > pin2.layer) {
+								bottomLayerPin = true;
+							}
+						}
 
-                                        int wireViaLayer = std::numeric_limits<int>::max();
-                                        for (uint i = 0; i < segments.size(); i++) {
-                                                if ((pin.x == segments[i].initX && pin.y == segments[i].initY) ||
-                                                    (pin.x == segments[i].finalX && pin.y == segments[i].finalY)) {
-                                                        if (!(segments[i].initX == segments[i].finalX &&
-                                                            segments[i].initY == segments[i].finalY)) {
-                                                                coverSegs.push_back(segments[i]);
-                                                                if (segments[i].initLayer < wireViaLayer) {
-                                                                        wireViaLayer = segments[i].initLayer;
-                                                                }
-                                                        }
-                                                }
-                                        }
+						if (!bottomLayerPin) {
+							for (uint i = 0; i < segments.size(); i++) {
+								if ((pin.x == segments[i].initX && pin.y == segments[i].initY) || 
+								    (pin.x == segments[i].finalX && pin.y == segments[i].finalY)) {
+									// remove all vias to this pin that doesn't connects two wires
+									if (segments[i].initX == segments[i].finalX &&
+									    segments[i].initY == segments[i].finalY &&
+									    (segments[i].initLayer < wireViaLayer ||
+									     segments[i].finalLayer < wireViaLayer)) {
+										segments.erase(segments.begin()+i);
+										i = 0;
+									}
+								}
+							}
+						}
 
-                                        bool bottomLayerPin = false;
-                                        for (FastRoute::PIN pin2 : pins) {
-                                                if (pin.x == pin2.x && pin.y == pin2.y && pin.layer > pin2.layer) {
-                                                        bottomLayerPin = true;
-                                                }
-                                        }
+						int closestLayer = -1;
+						int minorDiff = std::numeric_limits<int>::max();
 
-                                        if (!bottomLayerPin) {
-                                                for (uint i = 0; i < segments.size(); i++) {
-                                                        if ((pin.x == segments[i].initX && pin.y == segments[i].initY) || 
-                                                            (pin.x == segments[i].finalX && pin.y == segments[i].finalY)) {
-                                                                // remove all vias to this pin that doesn't connects two wires
-                                                                if (segments[i].initX == segments[i].finalX &&
-                                                                    segments[i].initY == segments[i].finalY &&
-                                                                    (segments[i].initLayer < wireViaLayer ||
-                                                                     segments[i].finalLayer < wireViaLayer)) {
-                                                                        segments.erase(segments.begin()+i);
-                                                                        i = 0;
-                                                                }
-                                                        }
-                                                }
-                                        }
+						for (FastRoute::ROUTE seg : coverSegs) {
+							if (seg.initLayer != seg.finalLayer) {
+								error("Segment has invalid layer assignment\n");
+							}
 
-                                        int closestLayer = -1;
-                                        int minorDiff = std::numeric_limits<int>::max();
+							int diffLayers = std::abs(pin.layer - seg.initLayer);
+							if (diffLayers < minorDiff && seg.initLayer > closestLayer) {
+								minorDiff = seg.initLayer;
+								closestLayer = seg.initLayer;
+							}
+						}
 
-                                        for (FastRoute::ROUTE seg : coverSegs) {
-                                                if (seg.initLayer != seg.finalLayer) {
-                                                        error("Segment has invalid layer assignment\n");
-                                                }
-
-                                                int diffLayers = std::abs(pin.layer - seg.initLayer);
-                                                if (diffLayers < minorDiff && seg.initLayer > closestLayer) {
-                                                        minorDiff = seg.initLayer;
-                                                        closestLayer = seg.initLayer;
-                                                }
-                                        }
-
-                                        if (closestLayer > pin.layer) {
-                                                for (int l = closestLayer; l > pin.layer; l--) {
-                                                        FastRoute::ROUTE route;
-                                                        route.initLayer = l;
-                                                        route.initX = pin.x;
-                                                        route.initY = pin.y;
-                                                        route.finalLayer = l - 1;
-                                                        route.finalX = pin.x;
-                                                        route.finalY = pin.y;
-                                                        netRoute.route.push_back(route);
-                                                }
-                                        } else if (closestLayer < pin.layer) {
-                                                for (int l = closestLayer; l < pin.layer; l++) {
-                                                        FastRoute::ROUTE route;
-                                                        route.initLayer = l;
-                                                        route.initX = pin.x;
-                                                        route.initY = pin.y;
-                                                        route.finalLayer = l + 1;
-                                                        route.finalX = pin.x;
-                                                        route.finalY = pin.y;
-                                                        netRoute.route.push_back(route);
-                                                }
-                                        } else {
-                                                continue;
-                                        }
-                                }
-                        }
-                }
-                allNets.erase(netRoute.idx);
-        }
+						if (closestLayer > pin.layer) {
+							for (int l = closestLayer; l > pin.layer; l--) {
+								FastRoute::ROUTE route;
+								route.initLayer = l;
+								route.initX = pin.x;
+								route.initY = pin.y;
+								route.finalLayer = l - 1;
+								route.finalX = pin.x;
+								route.finalY = pin.y;
+								netRoute.route.push_back(route);
+							}
+						} else if (closestLayer < pin.layer) {
+							for (int l = closestLayer; l < pin.layer; l++) {
+								FastRoute::ROUTE route;
+								route.initLayer = l;
+								route.initX = pin.x;
+								route.initY = pin.y;
+								route.finalLayer = l + 1;
+								route.finalX = pin.x;
+								route.finalY = pin.y;
+								netRoute.route.push_back(route);
+							}
+						} else {
+							continue;
+						}
+					}
+				}
+			}
+			allNets.erase(netRoute.idx);
+		}
+	}
 
         if (allNets.size() > 0) { // If some net still with no routing, add local guides
                 for (auto& idx_pins : allNets) {
@@ -1417,11 +1413,10 @@ void FastRouteKernel::addRemainingGuides(std::vector<FastRoute::NET> &globalRout
 
 void FastRouteKernel::connectPadPins(std::vector<FastRoute::NET> &globalRoute) {
         std::map<int, std::vector<FastRoute::PIN>> allNets = _fastRoute->getNets();
-        int localNetsId = allNets.size();
-
         for (FastRoute::NET &netRoute : globalRoute) {
+		Net* net = _netlist->getNetByIdx(netRoute.idx);
                 if (_padPinsConnections.find(netRoute.name) != _padPinsConnections.end() ||
-                    _netsDegree[netRoute.name] > 1) {
+                    net->getNumPins() > 1) {
                         for (FastRoute::ROUTE route : _padPinsConnections[netRoute.name]) {
                                 netRoute.route.push_back(route);
                         }
