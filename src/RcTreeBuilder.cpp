@@ -37,8 +37,8 @@
 
 #include "openroad/OpenRoad.hh"
 #include "db_sta/dbSta.hh"
-#include "sta/Corner.hh"
 #include "db_sta/dbNetwork.hh"
+#include "sta/Corner.hh"
 #include "sta/Sdc.hh"
 #include "sta/Parasitics.hh"
 #include "sta/ParasiticsClass.hh"
@@ -157,9 +157,9 @@ unsigned RcTreeBuilder::computeDist(const Node& n1, const Node& n2) const {
                std::abs(n1.getPosition().getY() - n2.getPosition().getY());
 }
 
-unsigned RcTreeBuilder::computeDist(const Coordinate& coord, const Node& n) const {
-        return std::abs(coord.getX() - n.getPosition().getX()) +
-               std::abs(coord.getY() - n.getPosition().getY());
+unsigned RcTreeBuilder::computeDist(const odb::Point &pt, const Node& n) const {
+        return std::abs(pt.getX() - n.getPosition().getX()) +
+               std::abs(pt.getY() - n.getPosition().getY());
 }
 
 void RcTreeBuilder::computeLocalParasitics() {
@@ -187,9 +187,9 @@ void RcTreeBuilder::computeLocalParasitics() {
                 int nodeToConnect = findNodeToConnect(pin, pinNodes);
                 sta::ParasiticNode* n2 = _parasitics->ensureParasiticNode(_parasitic, _staNet, nodeToConnect);
 
-                Coordinate pinCoord = computePinCoordinate(pin);
+		odb::Point pin_loc = _network->location(staPin);
 
-                unsigned dbuWirelength = computeDist(pinCoord, nodes[nodeToConnect]);
+                unsigned dbuWirelength = computeDist(pin_loc, nodes[nodeToConnect]);
                 float wirelength = _dbWrapper->dbuToMeters(dbuWirelength);
 
                 // Then get layer r/c-unit from the DB
@@ -213,22 +213,6 @@ void RcTreeBuilder::computeLocalParasitics() {
                 _parasitics->makeResistor(nullptr, n1, n2, res, _analysisPoint);
                 _parasitics->incrCap(n2, cap/2.0, _analysisPoint);
         }
-}
-
-// This should use dbITerm::getAvgXY -cherry
-Coordinate RcTreeBuilder::computePinCoordinate(const Pin pin) const {
-        unsigned topLayer = pin.getTopLayer();
-        std::vector<Box> pinBoxes = pin.getBoxes().at(topLayer);
-        unsigned x = 0;
-        unsigned y = 0;
-        for (Box pinBox : pinBoxes) {
-               x += pinBox.getMiddle().getX();
-               y += pinBox.getMiddle().getY();
-        }
-        x /= pinBoxes.size();
-        y /= pinBoxes.size();
-
-        return Coordinate(x, y);
 }
 
 int RcTreeBuilder::findNodeToConnect(const Pin& pin, const std::vector<unsigned>& pinNodes) const {

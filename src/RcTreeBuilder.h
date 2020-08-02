@@ -71,12 +71,10 @@ protected:
         void computeGlobalParasitics();
         void computeLocalParasitics();
         void reduceParasiticNetwork();
-
         int findNodeToConnect(const Pin& pin,
                               const std::vector<unsigned>& pinNodes) const;
         unsigned computeDist(const Node& n1, const Node& n2) const;
-        unsigned computeDist(const Coordinate& coord, const Node& n) const;
-        Coordinate computePinCoordinate(const Pin pin) const;
+	unsigned computeDist(const odb::Point &pt, const Node& n) const;
 
         Net*                      _net           = nullptr;
         Grid*                     _grid          = nullptr;
