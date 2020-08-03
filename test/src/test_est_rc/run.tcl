@@ -8,4 +8,4 @@ fastroute -output_file "route.guide" \
 
 set_cmd_units -capacitance ff
 report_net -connections -verbose clk
-
+exit
