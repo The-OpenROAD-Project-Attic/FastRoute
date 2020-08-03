@@ -284,10 +284,12 @@ void FastRouteKernel::runFastRoute() {
                 _fastRoute->writeCongestionReport2D(_congestFile+"2D.log");
                 _fastRoute->writeCongestionReport3D(_congestFile+"3D.log");
         }
-        
-        std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
-        if (_verbose > 0)
-                std::cout << "[INFO] Elapsed time: " << (std::chrono::duration_cast<std::chrono::microseconds>(end - begin).count()) /1000000.0 << "\n";
+
+        if (_verbose > 0) {
+                std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
+		double elapsed = (std::chrono::duration_cast<std::chrono::microseconds>(end - begin).count()) /1000000.0;
+                std::cout << "[INFO] Elapsed time: " << elapsed << "\n";
+	}
 }
 
 void FastRouteKernel::estimateRC() {
@@ -414,8 +416,10 @@ void FastRouteKernel::initializeNets() {
                 
 			if (!_clockNetRouting || net.getSignalType() == odb::dbSigType::CLOCK) {
 				if (pin_count >= std::numeric_limits<short>::max()) {
-					std::cout << "[WARNING] FastRoute cannot handle net " << net.getName() << " due to large number of pins\n";
-					std::cout << "[WARNING] Net " << net.getName() << " has " << net.getNumPins() << " pins\n";
+					std::cout << "[WARNING] FastRoute cannot handle net " << net.getName()
+						  << " due to large number of pins\n";
+					std::cout << "[WARNING] Net " << net.getName() << " has "
+						  << net.getNumPins() << " pins\n";
 				}
 				else {
 					std::vector<FastRoute::PIN> pins;
@@ -450,8 +454,10 @@ void FastRouteKernel::initializeNets() {
 							posOnGrid = _grid->getPositionOnGrid(trackPos);
 
 							if (!(posOnGrid == pinPosition)) {
-								if ((layer.getPreferredDirection() == RoutingLayer::HORIZONTAL && posOnGrid.getY() != pinPosition.getY()) ||
-								    (layer.getPreferredDirection() == RoutingLayer::VERTICAL && posOnGrid.getX() != pinPosition.getX())) {
+								if ((layer.getPreferredDirection() == RoutingLayer::HORIZONTAL &&
+								     posOnGrid.getY() != pinPosition.getY()) ||
+								    (layer.getPreferredDirection() == RoutingLayer::VERTICAL &&
+								     posOnGrid.getX() != pinPosition.getX())) {
 									pinPosition = posOnGrid;
 								}
 							}
@@ -539,12 +545,14 @@ void FastRouteKernel::computeGridAdjustments() {
 
                 if (!_grid->isPerfectRegularX()) {
                         for (int i = 1; i < yGrids; i++) {
-                                _fastRoute->addAdjustment(xGrids - 1, i - 1, layer, xGrids - 1, i, layer, newVCapacity, false);
+                                _fastRoute->addAdjustment(xGrids - 1, i - 1, layer, xGrids - 1, i,
+							  layer, newVCapacity, false);
                         }
                 }
                 if (!_grid->isPerfectRegularY()) {
                         for (int i = 1; i < xGrids; i++) {
-                                _fastRoute->addAdjustment(i - 1, yGrids - 1, layer, i, yGrids - 1, layer, newHCapacity, false);
+                                _fastRoute->addAdjustment(i - 1, yGrids - 1, layer, i, yGrids - 1,
+							  layer, newHCapacity, false);
                         }
                 }
         }
@@ -622,7 +630,8 @@ void FastRouteKernel::computeTrackAdjustments() {
                                         DBU remainingTile = (_grid->getTileHeight() + extraSpace) - remainingFinalSpace;
                                         int newCapacity = std::floor((float)remainingTile/trackSpace);
                                         for (int x = 1; x < _grid->getXGrids(); x++){
-                                                _fastRoute->addAdjustment(x - 1, y, layer.getIndex(), x, y, layer.getIndex(), newCapacity);
+                                                _fastRoute->addAdjustment(x - 1, y, layer.getIndex(), x, y,
+									  layer.getIndex(), newCapacity);
                                         }
                                 }
                         }
@@ -667,7 +676,8 @@ void FastRouteKernel::computeTrackAdjustments() {
                                         DBU remainingTile = _grid->getTileWidth() - trackLocation;
                                         int newCapacity = std::floor((float)remainingTile/trackSpace);
                                         for (int y = 1; y < _grid->getYGrids(); y++) {
-                                                _fastRoute->addAdjustment(x, y - 1, layer.getIndex(), x, y, layer.getIndex(), newCapacity);
+                                                _fastRoute->addAdjustment(x, y - 1, layer.getIndex(), x, y,
+									  layer.getIndex(), newCapacity);
                                         }
                                 }
                                 
@@ -684,7 +694,8 @@ void FastRouteKernel::computeTrackAdjustments() {
                                         DBU remainingTile = (_grid->getTileWidth() + extraSpace) - remainingFinalSpace;
                                         int newCapacity = std::floor((float)remainingTile/trackSpace);
                                         for (int y = 1; y < _grid->getYGrids(); y++){
-                                                _fastRoute->addAdjustment(x, y - 1, layer.getIndex(), x, y, layer.getIndex(), newCapacity);
+                                                _fastRoute->addAdjustment(x, y - 1, layer.getIndex(), x, y,
+									  layer.getIndex(), newCapacity);
                                         }
                                 }
                         }
@@ -803,8 +814,10 @@ void FastRouteKernel::computeRegionAdjustments(const Coordinate& lowerBound, con
 
         int lastTileReduce = _grid->computeTileReduce(regionToAdjust, lastTileBox, trackSpace, false, direction);
         
-        if (direction == RoutingLayer::HORIZONTAL) {                                          // If preferred direction is horizontal, only first and the last line will have specific adjustments
-                for (int x = firstTile._x; x <= lastTile._x; x++) {  // Setting capacities of edges completely inside the adjust region according the percentage of reduction
+	// If preferred direction is horizontal, only first and the last line will have specific adjustments
+        if (direction == RoutingLayer::HORIZONTAL) {
+		// Setting capacities of edges completely inside the adjust region according the percentage of reduction
+                for (int x = firstTile._x; x <= lastTile._x; x++) {
                         for (int y = firstTile._y; y <= lastTile._y; y++) {
                                 int edgeCap = _fastRoute->getEdgeCapacity(x, y, layer, x + 1, y, layer);
                                 
@@ -824,8 +837,10 @@ void FastRouteKernel::computeRegionAdjustments(const Coordinate& lowerBound, con
                                 }
                         }
                 }
-        } else {                                                   // If preferred direction is vertical, only first and last columns will have specific adjustments
-                for (int x = firstTile._x; x <= lastTile._x; x++) {  // Setting capacities of edges completely inside the adjust region according the percentage of reduction
+        } else {
+		// If preferred direction is vertical, only first and last columns will have specific adjustments
+                for (int x = firstTile._x; x <= lastTile._x; x++) {
+			// Setting capacities of edges completely inside the adjust region according the percentage of reduction
                         for (int y = firstTile._y; y <= lastTile._y; y++) {
                                 int edgeCap = _fastRoute->getEdgeCapacity(x, y, layer, x, y + 1, layer);
                                 
@@ -880,7 +895,8 @@ void FastRouteKernel::computeObstaclesAdjustments() {
 				int lastTileReduce = _grid->computeTileReduce(obs, lastTileBox, trackSpace, false, direction);
                         
 				if (direction == RoutingLayer::HORIZONTAL) {
-					for (int x = firstTile._x; x <= lastTile._x; x++) {  // Setting capacities of completely blocked edges to zero
+					for (int x = firstTile._x; x <= lastTile._x; x++) {
+						// Setting capacities of completely blocked edges to zero
 						for (int y = firstTile._y; y <= lastTile._y; y++) {
 							if (y == firstTile._y) {
 								int edgeCap = _fastRoute->getEdgeCapacity(x, y, layer, x + 1, y, layer);
@@ -900,7 +916,8 @@ void FastRouteKernel::computeObstaclesAdjustments() {
 						}
 					}
 				} else {
-					for (int x = firstTile._x; x <= lastTile._x; x++) {  // Setting capacities of completely blocked edges to zero
+					for (int x = firstTile._x; x <= lastTile._x; x++) {
+						// Setting capacities of completely blocked edges to zero
 						for (int y = firstTile._y; y <= lastTile._y; y++) {
 							if (x == firstTile._x) {
 								int edgeCap = _fastRoute->getEdgeCapacity(x, y, layer, x, y + 1, layer);
@@ -967,7 +984,9 @@ void FastRouteKernel::setSeed(unsigned seed) {
 
 void FastRouteKernel::addLayerAdjustment(int layer, float reductionPercentage) {
         if (layer > _maxRoutingLayer && _maxRoutingLayer > 0) {
-                std::cout << "[ERROR] Specified layer " << layer << " for adjustment is greater than max routing layer " << _maxRoutingLayer << " and will be ignored" << std::endl;
+                std::cout << "[ERROR] Specified layer " << layer
+			  << " for adjustment is greater than max routing layer "
+			  << _maxRoutingLayer << " and will be ignored" << std::endl;
                 return;
         }
         _layersToAdjust.push_back(layer);
@@ -1088,12 +1107,14 @@ void FastRouteKernel::writeGuides() {
                                 } else {
                                         RoutingLayer phLayerI;
                                         if (route.initLayer < _minRoutingLayer && !_unidirectionalRoute) {
-                                                phLayerI = getRoutingLayerByIndex((route.initLayer + (_minRoutingLayer - route.initLayer)));
+                                                phLayerI = getRoutingLayerByIndex(route.initLayer
+										  + _minRoutingLayer - route.initLayer);
                                         } else {
                                                 phLayerI = getRoutingLayerByIndex(route.initLayer);
                                         }
                                         if (route.finalLayer < _minRoutingLayer && !_unidirectionalRoute) {
-                                                phLayerF = getRoutingLayerByIndex((route.finalLayer + (_minRoutingLayer - route.finalLayer)));
+                                                phLayerF = getRoutingLayerByIndex(route.finalLayer
+										  + _minRoutingLayer - route.finalLayer);
                                         } else {
                                                 phLayerF = getRoutingLayerByIndex(route.finalLayer);
                                         }
@@ -1186,11 +1207,13 @@ void FastRouteKernel::addRemainingGuides(std::vector<FastRoute::NET> &globalRout
 		// Skip nets with 1 pin or less
 		if (net->getNumPins() > 1) {
 			std::vector<FastRoute::PIN> &pins = allNets[netRoute.idx];
-			if (netRoute.route.size() == 0) { // Try to add local guides for net with no output of FR core
+			// Try to add local guides for net with no output of FR core
+			if (netRoute.route.size() == 0) {
 				int lastLayer = -1;
 				for (uint p = 0; p < pins.size(); p++){
 					if (p > 0){
-						if (pins[p].x != pins[p-1].x || pins[p].y != pins[p-1].y) { // If the net is not local, FR core result is invalid
+						// If the net is not local, FR core result is invalid
+						if (pins[p].x != pins[p-1].x || pins[p].y != pins[p-1].y) {
 							error("Net %s not properly covered\n", netRoute.name.c_str());
 						}
 					}
@@ -1840,7 +1863,8 @@ bool FastRouteKernel::breakSegment(ROUTE actualSegment, long maxLength, std::vec
 
                 if (segmentsTotalLen != segmentLength) {
                         std::cout << "[ERROR] New segments does not sum the original segment length\n";
-                        std::cout << "    Original length: " << segmentLength << "; new segments length: " << segmentsTotalLen << "\n";
+                        std::cout << "    Original length: " << segmentLength << "; new segments length: "
+				  << segmentsTotalLen << "\n";
                         std::cout << "    Horizontal: " << horizontal << "\n";
                         return false;
                 }
@@ -1914,15 +1938,20 @@ void FastRouteKernel::fixLongSegments() {
 			for (Segment s : segsToFix) {
 				int cnt = 0;
 				for (ROUTE seg : netRoute.route) {
-					if (s.getLastNode().getPosition().getX() == seg.finalX && s.getLastNode().getPosition().getY() == seg.finalY &&
-					    s.getFirstNode().getPosition().getX() == seg.initX && s.getFirstNode().getPosition().getY() == seg.initY &&
-					    s.getFirstNode().getLayer() == seg.initLayer && s.getLastNode().getLayer() == seg.finalLayer) {
+					if (s.getLastNode().getPosition().getX() == seg.finalX &&
+					    s.getLastNode().getPosition().getY() == seg.finalY &&
+					    s.getFirstNode().getPosition().getX() == seg.initX &&
+					    s.getFirstNode().getPosition().getY() == seg.initY &&
+					    s.getFirstNode().getLayer() == seg.initLayer &&
+					    s.getLastNode().getLayer() == seg.finalLayer) {
 						segment = seg;
 						std::vector<ROUTE> newSegs;
-						bool success = breakSegment(segment, _layersMaxLengthDBU[seg.finalLayer], newSegs);
+						bool success = breakSegment(segment, _layersMaxLengthDBU[seg.finalLayer],
+									    newSegs);
 						if (success) {
 							netRoute.route.erase(netRoute.route.begin() + cnt);
-							netRoute.route.insert(netRoute.route.begin() + cnt, newSegs.begin(), newSegs.end());
+							netRoute.route.insert(netRoute.route.begin() + cnt,
+									      newSegs.begin(), newSegs.end());
 							fixedSegs++;
 						}
 					}
@@ -2125,8 +2154,10 @@ bool FastRouteKernel::pinOverlapsWithSingleTrack(const Pin& pin, Coordinate &tra
                 max = maxY;
 
                 if ((float)(max - min)/tracks.getTrackPitch() <= 3) {
-                        DBU nearestTrack = std::floor((float)(max - tracks.getLocation())/tracks.getTrackPitch()) * tracks.getTrackPitch() + tracks.getLocation();
-                        DBU nearestTrack2 = std::floor((float)(max - tracks.getLocation())/tracks.getTrackPitch() - 1) * tracks.getTrackPitch() + tracks.getLocation();
+                        DBU nearestTrack = std::floor((float)(max - tracks.getLocation())/tracks.getTrackPitch())
+				* tracks.getTrackPitch() + tracks.getLocation();
+                        DBU nearestTrack2 = std::floor((float)(max - tracks.getLocation())/tracks.getTrackPitch() - 1)
+				* tracks.getTrackPitch() + tracks.getLocation();
 
                         if ((nearestTrack >= min && nearestTrack <= max) && (nearestTrack2 >= min && nearestTrack2 <= max)) {
                                 return false;
@@ -2147,8 +2178,11 @@ bool FastRouteKernel::pinOverlapsWithSingleTrack(const Pin& pin, Coordinate &tra
                 max = maxX;
 
                 if ((float)(max - min)/tracks.getTrackPitch() <= 3) {
-                        DBU nearestTrack = std::floor((float)(max - tracks.getLocation())/tracks.getTrackPitch()) * tracks.getTrackPitch() + tracks.getLocation();
-                        DBU nearestTrack2 = std::floor((float)(max - tracks.getLocation())/tracks.getTrackPitch() - 1) * tracks.getTrackPitch() + tracks.getLocation();
+                        // begging for subexpression factoring -cherry
+			DBU nearestTrack = std::floor((float)(max - tracks.getLocation())/tracks.getTrackPitch())
+				* tracks.getTrackPitch() + tracks.getLocation();
+                        DBU nearestTrack2 = std::floor((float)(max - tracks.getLocation())/tracks.getTrackPitch() - 1)
+				* tracks.getTrackPitch() + tracks.getLocation();
                         
                         if ((nearestTrack >= min && nearestTrack <= max) && (nearestTrack2 >= min && nearestTrack2 <= max)) {
                                 return false;
