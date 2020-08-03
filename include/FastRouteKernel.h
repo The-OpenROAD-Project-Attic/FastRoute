@@ -170,15 +170,18 @@ private:
         void computeTrackAdjustments();
         void computeUserGlobalAdjustments();
         void computeUserLayerAdjustments();
-        void computeRegionAdjustments(const Coordinate& lowerBound, const Coordinate& upperBound, int layer, float reductionPercentage);
+        void computeRegionAdjustments(const Coordinate& lowerBound,
+				      const Coordinate& upperBound,
+				      int layer,
+				      float reductionPercentage);
         void computeObstaclesAdjustments();
         void computeWirelength();
         
         // aux functions
         RoutingLayer getRoutingLayerByIndex(int index);
         RoutingTracks getRoutingTracksByIndex(int layer);
-        void addRemainingGuides(std::vector<FastRoute::NET> &globalRoute);
-        void connectPadPins(std::vector<FastRoute::NET> &globalRoute);
+        void addRemainingGuides(std::vector<FastRoute::NET> *globalRoute);
+        void connectPadPins(std::vector<FastRoute::NET> *globalRoute);
         void mergeBox(std::vector<Box>& guideBox);
         Box globalRoutingToBox(const FastRoute::ROUTE &route);
         using Point = std::tuple<long, long, int>; // x, y, layer

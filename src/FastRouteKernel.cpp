@@ -294,7 +294,7 @@ void FastRouteKernel::runFastRoute() {
 
 void FastRouteKernel::estimateRC() {
         runFastRoute();
-        addRemainingGuides(*_result);
+        addRemainingGuides(_result);
 
         sta::dbSta* dbSta = _openroad->getSta();
 	sta::Parasitics *parasitics = dbSta->parasitics();
@@ -1059,8 +1059,8 @@ void FastRouteKernel::writeGuides() {
                 error("Guides file could not be open\n");
         }
         RoutingLayer phLayerF;
-        addRemainingGuides(*_result);
-        connectPadPins(*_result);
+        addRemainingGuides(_result);
+        connectPadPins(_result);
 
         int offsetX = _gridOrigin->getX();
         int offsetY = _gridOrigin->getY();
@@ -1199,10 +1199,10 @@ RoutingTracks FastRouteKernel::getRoutingTracksByIndex(int layer) {
         return selectedRoutingTracks;
 }
 
-void FastRouteKernel::addRemainingGuides(std::vector<FastRoute::NET> &globalRoute) {
+void FastRouteKernel::addRemainingGuides(std::vector<FastRoute::NET> *globalRoute) {
         auto allNets =  _fastRoute->getNets();
 
-        for (FastRoute::NET &netRoute : globalRoute) {
+        for (FastRoute::NET &netRoute : *globalRoute) {
                 Net* net = _netlist->getNetByIdx(netRoute.idx);
 		// Skip nets with 1 pin or less
 		if (net->getNumPins() > 1) {
@@ -1341,13 +1341,13 @@ void FastRouteKernel::addRemainingGuides(std::vector<FastRoute::NET> &globalRout
                                 route.finalY = pin.y;
                                 localNet.route.push_back(route);
                         }
-                        globalRoute.push_back(localNet);
+                        globalRoute->push_back(localNet);
                 }
         }
 }
 
-void FastRouteKernel::connectPadPins(std::vector<FastRoute::NET> &globalRoute) {
-        for (FastRoute::NET &netRoute : globalRoute) {
+void FastRouteKernel::connectPadPins(std::vector<FastRoute::NET> *globalRoute) {
+        for (FastRoute::NET &netRoute : *globalRoute) {
 		Net* net = _netlist->getNetByIdx(netRoute.idx);
 		if (_padPinsConnections.find(net) != _padPinsConnections.end() ||
                     net->getNumPins() > 1) {
@@ -1890,8 +1890,8 @@ void FastRouteKernel::fixLongSegments() {
         int fixedSegs = 0;
         int possibleViols = 0;
 
-        addRemainingGuides(*_result);
-	connectPadPins(*_result);
+        addRemainingGuides(_result);
+	connectPadPins(_result);
         for (FastRoute::NET &netRoute : *_result) {
                 mergeSegments(netRoute);
                 bool possibleViolation = false;
