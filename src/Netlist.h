@@ -38,14 +38,7 @@
 
 #include <string>
 #include <vector>
-#include <functional>
-#include <limits>
-#include <iostream>
-#include <random>
 
-#include "Coordinate.h"
-#include "Box.h"
-#include "Pin.h"
 #include "Net.h"
 
 namespace FastRoute {
@@ -54,7 +47,6 @@ class Netlist {
 public:
         Netlist();
 
-	void foo();
         std::vector<Net> &getNets() { return _nets; }
         int getNetCount() const { return _nets.size(); }
         int getNetIdx(Net* net);
