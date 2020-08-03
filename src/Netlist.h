@@ -57,7 +57,6 @@ public:
 	void foo();
         std::vector<Net> &getNets() { return _nets; }
         int getNetCount() const { return _nets.size(); }
-        Net* getNetByName(std:: string name);
         int getNetIdx(Net* net);
         Net* getNetByIdx(int idx);
 
@@ -69,8 +68,6 @@ public:
 
 private:
         std::vector<Net> _nets;
-        // temporary until FR is updated to use IDs instead of names.
-	std::map<std::string, Net*> _net_name_map;
 };
 
 }

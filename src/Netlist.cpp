@@ -48,21 +48,11 @@ Netlist::Netlist()
 Net* Netlist::addNet(odb::dbNet* db_net) {
         _nets.push_back(Net(db_net));
 	Net* net = &_nets.back();
-	_net_name_map[net->getName()] = net;
 	return net;
-
 }
         
 void Netlist::reserveNets(size_t net_count) {
 	_nets.reserve(net_count);
-}
-
-Net* Netlist::getNetByName(std::string name) {
-	auto itr = _net_name_map.find(name);
-	if (itr == _net_name_map.end())
-		return nullptr;
-	else
-		return itr->second;
 }
 
 int Netlist::getNetIdx(Net* net) {
