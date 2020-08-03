@@ -58,6 +58,7 @@ public:
         std::vector<Net> &getNets() { return _nets; }
         int getNetCount() const { return _nets.size(); }
         Net* getNetByName(std:: string name);
+        int getNetIdx(Net* net);
         Net* getNetByIdx(int idx);
 
 	void reserveNets(size_t net_count);

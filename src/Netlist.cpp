@@ -65,6 +65,10 @@ Net* Netlist::getNetByName(std::string name) {
 		return itr->second;
 }
 
+int Netlist::getNetIdx(Net* net) {
+	return net - &_nets[0];
+}
+
 Net* Netlist::getNetByIdx(int idx) {
 	return &_nets[idx];
 }

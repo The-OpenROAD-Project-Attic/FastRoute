@@ -44,6 +44,7 @@
 #include <fstream>
 #include <istream>
 #include <chrono>
+#include <unordered_set>
 
 #include "Coordinate.h"
 #include "Box.h"
@@ -1200,13 +1201,15 @@ RoutingTracks FastRouteKernel::getRoutingTracksByIndex(int layer) {
 }
 
 void FastRouteKernel::addRemainingGuides(std::vector<FastRoute::NET> *globalRoute) {
-        auto allNets =  _fastRoute->getNets();
+        auto net_pins =  _fastRoute->getNets();
+	std::unordered_set<Net*> routed_nets;
 
         for (FastRoute::NET &netRoute : *globalRoute) {
                 Net* net = _netlist->getNetByIdx(netRoute.idx);
+		routed_nets.insert(net);
 		// Skip nets with 1 pin or less
 		if (net->getNumPins() > 1) {
-			std::vector<FastRoute::PIN> &pins = allNets[netRoute.idx];
+			std::vector<FastRoute::PIN> &pins = net_pins[netRoute.idx];
 			// Try to add local guides for net with no output of FR core
 			if (netRoute.route.size() == 0) {
 				int lastLayer = -1;
@@ -1313,37 +1316,36 @@ void FastRouteKernel::addRemainingGuides(std::vector<FastRoute::NET> *globalRout
 								route.finalY = pin.y;
 								netRoute.route.push_back(route);
 							}
-						} else {
-							continue;
 						}
 					}
 				}
 			}
-			allNets.erase(netRoute.idx);
 		}
 	}
 
-        if (allNets.size() > 0) { // If some net still with no routing, add local guides
-                for (auto& idx_pins : allNets) {
-                        std::vector<FastRoute::PIN> &pins = idx_pins.second;
+	// Add local guides for nets with no routing.
+	for (Net &net : _netlist->getNets()) {
+		if (net.getNumPins() > 1
+		    && routed_nets.find(&net) == routed_nets.end()) {
+			int net_idx = _netlist->getNetIdx(&net);
+			std::vector<FastRoute::PIN> &pins = net_pins[net_idx];
 
-                        FastRoute::NET localNet;
-			int net_idx = idx_pins.first;
-                        localNet.idx = net_idx;
-                        localNet.name = _netlist->getNetByIdx(net_idx)->getConstName();
-                        for (FastRoute::PIN pin : pins) {
-                                FastRoute::ROUTE route;
-                                route.initLayer = pin.layer;
-                                route.initX = pin.x;
-                                route.initY = pin.y;
-                                route.finalLayer = pin.layer;
-                                route.finalX = pin.x;
-                                route.finalY = pin.y;
-                                localNet.route.push_back(route);
-                        }
-                        globalRoute->push_back(localNet);
-                }
-        }
+			FastRoute::NET localNet;
+			localNet.idx = net_idx;
+			localNet.name = net.getConstName();
+			for (FastRoute::PIN pin : pins) {
+				FastRoute::ROUTE route;
+				route.initLayer = pin.layer;
+				route.initX = pin.x;
+				route.initY = pin.y;
+				route.finalLayer = pin.layer;
+				route.finalX = pin.x;
+				route.finalY = pin.y;
+				localNet.route.push_back(route);
+			}
+			globalRoute->push_back(localNet);
+		}
+	}
 }
 
 void FastRouteKernel::connectPadPins(std::vector<FastRoute::NET> *globalRoute) {
