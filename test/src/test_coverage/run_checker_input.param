@@ -1,8 +1,0 @@
-lef:input.lef
-def:input.def
-guide:out.guide
-output:output.flex.out.def
-threads:8
-cpxthreads:1
-verbose:1
-timeout:36000
