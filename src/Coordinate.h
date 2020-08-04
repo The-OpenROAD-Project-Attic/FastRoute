@@ -39,30 +39,34 @@ namespace FastRoute {
 
 typedef long long int DBU;
 
-class Coordinate {
-        DBU _x, _y;
+class Coordinate
+{
+  DBU _x, _y;
 
-public:
-        Coordinate() = default;
-        Coordinate(const DBU x, const DBU y) : _x(x), _y(y) {}
-        void init(const DBU x, const DBU y) {
-                _x = x;
-                _y = y;
-        }
-        
-        bool operator==(const Coordinate& coord) const {
-                return (_x == coord._x && _y == coord._y);
-        }
-        
-        bool operator!=(const Coordinate& coord) const {
-                return (_x != coord._x || _y != coord._y);
-        }
+ public:
+  Coordinate() = default;
+  Coordinate(const DBU x, const DBU y) : _x(x), _y(y) {}
+  void init(const DBU x, const DBU y)
+  {
+    _x = x;
+    _y = y;
+  }
 
-        void setX(const DBU x) { _x = x; }
-        void setY(const DBU y) { _y = y; }
-        DBU getX() const { return _x; }
-        DBU getY() const { return _y; }
-        DBU dst(const Coordinate& a);
+  bool operator==(const Coordinate& coord) const
+  {
+    return (_x == coord._x && _y == coord._y);
+  }
+
+  bool operator!=(const Coordinate& coord) const
+  {
+    return (_x != coord._x || _y != coord._y);
+  }
+
+  void setX(const DBU x) { _x = x; }
+  void setY(const DBU y) { _y = y; }
+  DBU getX() const { return _x; }
+  DBU getY() const { return _y; }
+  DBU dst(const Coordinate& a);
 };
 
-}
+}  // namespace FastRoute

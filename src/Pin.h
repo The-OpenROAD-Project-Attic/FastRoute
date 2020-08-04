@@ -35,71 +35,89 @@
 
 #pragma once
 
+#include <functional>
+#include <iostream>
+#include <limits>
+#include <map>
 #include <string>
 #include <vector>
-#include <functional>
-#include <limits>
-#include <iostream>
-#include <map>
 
-#include "opendb/db.h"
-#include "Coordinate.h"
 #include "Box.h"
+#include "Coordinate.h"
+#include "opendb/db.h"
 
 namespace FastRoute {
 
 class Net;
 
-enum Orientation { ORIENT_NORTH, ORIENT_SOUTH, ORIENT_EAST, ORIENT_WEST, INVALID };
-
-class Pin {
-public:
-        enum Type {
-                   SINK,
-                   SOURCE,
-                   OTHER
-        };
-
-        Pin() = default;
-        Pin(odb::dbITerm *iterm,
-    	    const Coordinate& position,
-            const std::vector<int>& layers, const Orientation orientation,
-            const std::map<int, std::vector<Box>>& boxesPerLayer,
-            bool connectedToPad, Type type);
-        Pin(odb::dbBTerm *bterm,
-    	    const Coordinate& position,
-            const std::vector<int>& layers, const Orientation orientation,
-            const std::map<int, std::vector<Box>>& boxesPerLayer,
-            bool connectedToPad, Type type);
-        
-    	odb::dbITerm* getITerm() const;
-    	odb::dbBTerm* getBTerm() const;
-    	std::string getName() const;
-    	const Coordinate& getPosition() const { return _position; }
-        const std::vector<int>& getLayers() const { return _layers; }
-        int getNumLayers() const { return _layers.size(); }
-        int getTopLayer() const { return _layers.back(); }
-        Orientation getOrientation() const { return _orientation; }
-        void setOrientation(Orientation orientation) { _orientation = orientation; }
-        const std::map<int, std::vector<Box>>& getBoxes() const { return _boxesPerLayer; }
-        bool isPort() const { return _isPort; }
-        Type getType() const { return _type; }
-        bool isConnectedToPad() const { return _connectedToPad; }
-        const Coordinate& getOnGridPosition() const { return _onGridPosition; }
-        void setOnGridPosition(Coordinate onGridPos) { _onGridPosition = onGridPos; }
-
-private:
-    	union { odb::dbITerm *_iterm;
-    		odb::dbBTerm *_bterm;
-    	};
-        Coordinate _position;
-        Coordinate _onGridPosition;
-        std::vector<int> _layers;
-        Orientation _orientation;
-        std::map<int, std::vector<Box>> _boxesPerLayer;
-        bool _isPort;
-        Type _type;
-        bool _connectedToPad;
+enum Orientation
+{
+  ORIENT_NORTH,
+  ORIENT_SOUTH,
+  ORIENT_EAST,
+  ORIENT_WEST,
+  INVALID
 };
 
-}
+class Pin
+{
+ public:
+  enum Type
+  {
+    SINK,
+    SOURCE,
+    OTHER
+  };
+
+  Pin() = default;
+  Pin(odb::dbITerm* iterm,
+      const Coordinate& position,
+      const std::vector<int>& layers,
+      const Orientation orientation,
+      const std::map<int, std::vector<Box>>& boxesPerLayer,
+      bool connectedToPad,
+      Type type);
+  Pin(odb::dbBTerm* bterm,
+      const Coordinate& position,
+      const std::vector<int>& layers,
+      const Orientation orientation,
+      const std::map<int, std::vector<Box>>& boxesPerLayer,
+      bool connectedToPad,
+      Type type);
+
+  odb::dbITerm* getITerm() const;
+  odb::dbBTerm* getBTerm() const;
+  std::string getName() const;
+  const Coordinate& getPosition() const { return _position; }
+  const std::vector<int>& getLayers() const { return _layers; }
+  int getNumLayers() const { return _layers.size(); }
+  int getTopLayer() const { return _layers.back(); }
+  Orientation getOrientation() const { return _orientation; }
+  void setOrientation(Orientation orientation) { _orientation = orientation; }
+  const std::map<int, std::vector<Box>>& getBoxes() const
+  {
+    return _boxesPerLayer;
+  }
+  bool isPort() const { return _isPort; }
+  Type getType() const { return _type; }
+  bool isConnectedToPad() const { return _connectedToPad; }
+  const Coordinate& getOnGridPosition() const { return _onGridPosition; }
+  void setOnGridPosition(Coordinate onGridPos) { _onGridPosition = onGridPos; }
+
+ private:
+  union
+  {
+    odb::dbITerm* _iterm;
+    odb::dbBTerm* _bterm;
+  };
+  Coordinate _position;
+  Coordinate _onGridPosition;
+  std::vector<int> _layers;
+  Orientation _orientation;
+  std::map<int, std::vector<Box>> _boxesPerLayer;
+  bool _isPort;
+  Type _type;
+  bool _connectedToPad;
+};
+
+}  // namespace FastRoute

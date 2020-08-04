@@ -33,50 +33,54 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-
 #include "Box.h"
 
 namespace FastRoute {
 
-Coordinate Box::getMiddle() {
-        DBU lowerX = _lowerBound.getX();
-        DBU lowerY = _lowerBound.getY();
-        DBU upperX = _upperBound.getX();
-        DBU upperY = _upperBound.getY();
+Coordinate Box::getMiddle()
+{
+  DBU lowerX = _lowerBound.getX();
+  DBU lowerY = _lowerBound.getY();
+  DBU upperX = _upperBound.getX();
+  DBU upperY = _upperBound.getY();
 
-        return Coordinate((lowerX + (upperX - lowerX)/ 2.0) , (lowerY + (upperY - lowerY)/ 2.0));
+  return Coordinate((lowerX + (upperX - lowerX) / 2.0),
+                    (lowerY + (upperY - lowerY) / 2.0));
 }
 
-DBU Box::getHalfPerimeter() {
-        DBU lowerX = _lowerBound.getX();
-        DBU lowerY = _lowerBound.getY();
-        DBU upperX = _upperBound.getX();
-        DBU upperY = _upperBound.getY();
+DBU Box::getHalfPerimeter()
+{
+  DBU lowerX = _lowerBound.getX();
+  DBU lowerY = _lowerBound.getY();
+  DBU upperX = _upperBound.getX();
+  DBU upperY = _upperBound.getY();
 
-        DBU x = upperX - lowerX;
-        DBU y = upperY - lowerY;
+  DBU x = upperX - lowerX;
+  DBU y = upperY - lowerY;
 
-        return (x + y);
+  return (x + y);
 }
 
-bool Box::overlap(Box box) {
-        const DBU dx = std::max(_lowerBound.getX(), box.getLowerBound().getX()) -
-                       std::min(_upperBound.getX(), box.getUpperBound().getX());
-        const DBU dy = std::max(_lowerBound.getY(), box.getLowerBound().getY()) -
-                       std::min(_upperBound.getY(), box.getUpperBound().getY());
+bool Box::overlap(Box box)
+{
+  const DBU dx = std::max(_lowerBound.getX(), box.getLowerBound().getX())
+                 - std::min(_upperBound.getX(), box.getUpperBound().getX());
+  const DBU dy = std::max(_lowerBound.getY(), box.getLowerBound().getY())
+                 - std::min(_upperBound.getY(), box.getUpperBound().getY());
 
-        return (dx < 0 && dy < 0);
+  return (dx < 0 && dy < 0);
 }
 
-bool Box::inside(Box box) {
-        return (box.getLowerBound().getX() >= _lowerBound.getX()) &&
-               (box.getLowerBound().getX() <= _upperBound.getX()) &&
-               (box.getLowerBound().getY() >= _lowerBound.getY()) &&
-               (box.getLowerBound().getY() <= _upperBound.getY()) &&
-               (box.getUpperBound().getX() >= _lowerBound.getX()) &&
-               (box.getUpperBound().getX() <= _upperBound.getX()) &&
-               (box.getUpperBound().getY() >= _lowerBound.getY()) &&
-               (box.getUpperBound().getY() <= _upperBound.getY());
+bool Box::inside(Box box)
+{
+  return (box.getLowerBound().getX() >= _lowerBound.getX())
+         && (box.getLowerBound().getX() <= _upperBound.getX())
+         && (box.getLowerBound().getY() >= _lowerBound.getY())
+         && (box.getLowerBound().getY() <= _upperBound.getY())
+         && (box.getUpperBound().getX() >= _lowerBound.getX())
+         && (box.getUpperBound().getX() <= _upperBound.getX())
+         && (box.getUpperBound().getY() >= _lowerBound.getY())
+         && (box.getUpperBound().getY() <= _upperBound.getY());
 }
 
-}
+}  // namespace FastRoute

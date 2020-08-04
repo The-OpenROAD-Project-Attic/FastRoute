@@ -37,25 +37,28 @@
 
 namespace FastRoute {
 
-Net::Net(odb::dbNet* net) :
-	_net(net)
+Net::Net(odb::dbNet* net) : _net(net)
 {
 }
 
-const std::string Net::getName() const {
-	return _net->getName();
+const std::string Net::getName() const
+{
+  return _net->getName();
 }
 
-const char *Net::getConstName() const {
-	return _net->getConstName();
+const char* Net::getConstName() const
+{
+  return _net->getConstName();
 }
 
-odb::dbSigType Net::getSignalType() const {
-	return _net->getSigType().getString();
+odb::dbSigType Net::getSignalType() const
+{
+  return _net->getSigType().getString();
 }
 
-void Net::addPin(Pin &pin) {
-	_pins.push_back(pin);
+void Net::addPin(Pin& pin)
+{
+  _pins.push_back(pin);
 }
 
-}
+}  // namespace FastRoute

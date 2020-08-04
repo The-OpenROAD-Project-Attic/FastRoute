@@ -36,7 +36,7 @@
 #pragma once
 
 namespace FastRoute {
-       class FastRouteKernel;
+class FastRouteKernel;
 }
 
 namespace ord {
@@ -45,8 +45,8 @@ class OpenRoad;
 
 FastRoute::FastRouteKernel* makeFastRoute();
 
-void initFastRoute(OpenRoad *openroad);
+void initFastRoute(OpenRoad* openroad);
 
-void deleteFastRoute(FastRoute::FastRouteKernel *fastroute);
+void deleteFastRoute(FastRoute::FastRouteKernel* fastroute);
 
-}
+}  // namespace ord

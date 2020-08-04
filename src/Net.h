@@ -38,28 +38,28 @@
 #include <string>
 #include <vector>
 
-#include "Coordinate.h"
 #include "Box.h"
+#include "Coordinate.h"
 #include "Pin.h"
 #include "opendb/db.h"
 
 namespace FastRoute {
 
-class Net {
-public:
-    	Net() = default;
-        Net(odb::dbNet* net);
-        const std::string getName() const;
-        const char *getConstName() const;
-    	odb::dbSigType getSignalType() const;
-        void addPin(Pin &pin);
-    	std::vector<Pin>& getPins() { return _pins; }
-        int getNumPins() const { return _pins.size(); }
+class Net
+{
+ public:
+  Net() = default;
+  Net(odb::dbNet* net);
+  const std::string getName() const;
+  const char* getConstName() const;
+  odb::dbSigType getSignalType() const;
+  void addPin(Pin& pin);
+  std::vector<Pin>& getPins() { return _pins; }
+  int getNumPins() const { return _pins.size(); }
 
-private:
-	   odb::dbNet* _net;
-       std::vector<Pin> _pins;
+ private:
+  odb::dbNet* _net;
+  std::vector<Pin> _pins;
 };
 
-}
-
+}  // namespace FastRoute

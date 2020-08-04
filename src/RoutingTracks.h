@@ -35,42 +35,51 @@
 
 #pragma once
 
+#include <functional>
+#include <iostream>
+#include <limits>
 #include <string>
 #include <vector>
-#include <functional>
-#include <limits>
-#include <iostream>
 
-#include "Coordinate.h"
 #include "Box.h"
+#include "Coordinate.h"
 #include "Pin.h"
 
 namespace FastRoute {
 
-class RoutingTracks {
-private:
-        int _layerIndex;
-        DBU _trackPitch;
-        DBU _line2ViaPitch;
-        DBU _location;
-        int _numTracks;
-        bool _orientation;
-        
-public:
-        RoutingTracks() = default;
-        RoutingTracks(const int layerIndex, const DBU trackPitch,
-                      const DBU line2ViaPitch, const DBU location,
-                      const int numTracks, const bool orientation)
-            : _layerIndex(layerIndex), _trackPitch(trackPitch),
-              _line2ViaPitch(line2ViaPitch), _location(location),
-              _numTracks(numTracks), _orientation(orientation) {}
-        
-        int getLayerIndex() const { return _layerIndex; }
-        DBU getTrackPitch() const { return _trackPitch; }
-        DBU getLine2ViaPitch() const { return _line2ViaPitch; }
-        DBU getLocation() const { return _location; }
-        int getNumTracks() const { return _numTracks; }
-        bool getOrientation() const { return _orientation; }
+class RoutingTracks
+{
+ private:
+  int _layerIndex;
+  DBU _trackPitch;
+  DBU _line2ViaPitch;
+  DBU _location;
+  int _numTracks;
+  bool _orientation;
+
+ public:
+  RoutingTracks() = default;
+  RoutingTracks(const int layerIndex,
+                const DBU trackPitch,
+                const DBU line2ViaPitch,
+                const DBU location,
+                const int numTracks,
+                const bool orientation)
+      : _layerIndex(layerIndex),
+        _trackPitch(trackPitch),
+        _line2ViaPitch(line2ViaPitch),
+        _location(location),
+        _numTracks(numTracks),
+        _orientation(orientation)
+  {
+  }
+
+  int getLayerIndex() const { return _layerIndex; }
+  DBU getTrackPitch() const { return _trackPitch; }
+  DBU getLine2ViaPitch() const { return _line2ViaPitch; }
+  DBU getLocation() const { return _location; }
+  int getNumTracks() const { return _numTracks; }
+  bool getOrientation() const { return _orientation; }
 };
 
-}
+}  // namespace FastRoute

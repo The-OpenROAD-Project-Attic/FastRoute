@@ -35,40 +35,42 @@
 
 #pragma once
 
+#include <iostream>
 #include <string>
 #include <vector>
-#include <iostream>
+
 #include "Coordinate.h"
 #include "Node.h"
 #include "Segment.h"
 
 namespace FastRoute {
 
-class SteinerTree {
-private:
-        std::vector<Node> _nodes;
-        std::vector<Segment> _segments;
+class SteinerTree
+{
+ private:
+  std::vector<Node> _nodes;
+  std::vector<Segment> _segments;
 
-public:
-        SteinerTree() = default;
+ public:
+  SteinerTree() = default;
 
-        const std::vector<Node>& getNodes() const { return _nodes; }
-        const std::vector<Segment>& getSegments() const { return _segments; }
+  const std::vector<Node>& getNodes() const { return _nodes; }
+  const std::vector<Segment>& getSegments() const { return _segments; }
 
-        void addSegment(Segment segment);
-        void addNode(Node node);
+  void addSegment(Segment segment);
+  void addNode(Node node);
 
-        void printSegments();
+  void printSegments();
 
-        void setSegments(std::vector<Segment> segments) { _segments = segments; }
+  void setSegments(std::vector<Segment> segments) { _segments = segments; }
 
-        bool nodeExists(Node node);
-        bool getNodeIfExists(Node node, Node &requestedNode);
-        std::vector<Segment> getNodeSegments(Node node);
+  bool nodeExists(Node node);
+  bool getNodeIfExists(Node node, Node& requestedNode);
+  std::vector<Segment> getNodeSegments(Node node);
 
-        Node getSource();
-        std::vector<Node> getSinks();
-        Segment getSegmentByIndex(int index);
+  Node getSource();
+  std::vector<Node> getSinks();
+  Segment getSegmentByIndex(int index);
 };
 
-}
+}  // namespace FastRoute

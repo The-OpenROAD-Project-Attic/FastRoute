@@ -35,39 +35,39 @@
 
 #include "MakeFastRoute.h"
 
-#include "sta/StaMain.hh"
-#include "openroad/OpenRoad.hh"
 #include "FastRouteKernel.h"
 #include "opendb/db.h"
+#include "openroad/OpenRoad.hh"
+#include "sta/StaMain.hh"
 
 namespace sta {
 // Tcl files encoded into strings.
-extern const char *fastroute_tcl_inits[];
-}
+extern const char* fastroute_tcl_inits[];
+}  // namespace sta
 
 extern "C" {
-extern int Fastroute_Init(Tcl_Interp *interp);
+extern int Fastroute_Init(Tcl_Interp* interp);
 }
 
 namespace ord {
 
 FastRoute::FastRouteKernel* makeFastRoute()
 {
-        return new FastRoute::FastRouteKernel;
+  return new FastRoute::FastRouteKernel;
 }
 
-void deleteFastRoute(FastRoute::FastRouteKernel *fastroute)
+void deleteFastRoute(FastRoute::FastRouteKernel* fastroute)
 {
-        delete fastroute;
+  delete fastroute;
 }
 
-void initFastRoute(OpenRoad *openroad)
+void initFastRoute(OpenRoad* openroad)
 {
-        Tcl_Interp *tcl_interp = openroad->tclInterp();
-        // Define swig TCL commands.
-        Fastroute_Init(tcl_interp);
-        sta::evalTclInit(tcl_interp, sta::fastroute_tcl_inits);
-        openroad->getFastRoute()->init(openroad);
+  Tcl_Interp* tcl_interp = openroad->tclInterp();
+  // Define swig TCL commands.
+  Fastroute_Init(tcl_interp);
+  sta::evalTclInit(tcl_interp, sta::fastroute_tcl_inits);
+  openroad->getFastRoute()->init(openroad);
 }
 
-}
+}  // namespace ord

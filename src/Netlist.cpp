@@ -45,52 +45,58 @@ Netlist::Netlist()
 {
 }
 
-Net* Netlist::addNet(odb::dbNet* db_net) {
-        _nets.push_back(Net(db_net));
-	Net* net = &_nets.back();
-	return net;
-}
-        
-void Netlist::reserveNets(size_t net_count) {
-	_nets.reserve(net_count);
+Net* Netlist::addNet(odb::dbNet* db_net)
+{
+  _nets.push_back(Net(db_net));
+  Net* net = &_nets.back();
+  return net;
 }
 
-int Netlist::getNetIdx(Net* net) {
-	return net - &_nets[0];
+void Netlist::reserveNets(size_t net_count)
+{
+  _nets.reserve(net_count);
 }
 
-Net* Netlist::getNetByIdx(int idx) {
-	return &_nets[idx];
+int Netlist::getNetIdx(Net* net)
+{
+  return net - &_nets[0];
 }
 
-int Netlist::getMaxNetDegree() {
-        if (_nets.empty()) {
-                error("Netlist not initialized yet\n");
-        }
-    
-        int maxDegree = -1;
-        
-        for (Net &net : _nets) {
-                int netDegree = net.getNumPins();
-                if (netDegree > maxDegree) {
-                        maxDegree = netDegree;
-                }
-        }
-        
-        return maxDegree;
+Net* Netlist::getNetByIdx(int idx)
+{
+  return &_nets[idx];
 }
 
-std::vector<Pin> Netlist::getAllPorts() {
-        std::vector<Pin> ports; 
-        for (Net &net : _nets) {
-                for (Pin pin : net.getPins()) {
-                        if (pin.isPort()) {
-                                ports.push_back(pin);
-                        }
-                }
-        }
-        
-        return ports;
+int Netlist::getMaxNetDegree()
+{
+  if (_nets.empty()) {
+    error("Netlist not initialized yet\n");
+  }
+
+  int maxDegree = -1;
+
+  for (Net& net : _nets) {
+    int netDegree = net.getNumPins();
+    if (netDegree > maxDegree) {
+      maxDegree = netDegree;
+    }
+  }
+
+  return maxDegree;
 }
 
+std::vector<Pin> Netlist::getAllPorts()
+{
+  std::vector<Pin> ports;
+  for (Net& net : _nets) {
+    for (Pin pin : net.getPins()) {
+      if (pin.isPort()) {
+        ports.push_back(pin);
+      }
+    }
+  }
+
+  return ports;
 }
+
+}  // namespace FastRoute

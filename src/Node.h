@@ -33,49 +33,60 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-
 #pragma once
 
 #include <string>
 #include <vector>
+
 #include "Coordinate.h"
 
 namespace FastRoute {
 
-enum class NodeType {SOURCE, SINK, STEINER, INVALID};
-
-const char *
-nodeTypeString(NodeType type);
-
-class Node {
-private:
-        Coordinate _position;
-        int _layer;
-        NodeType _type;
-
-
-public:
-        Node() : _position(Coordinate(0, 0)), _layer(-1), _type(NodeType::INVALID) {}
-
-        Node(const Coordinate& position, const int layer, const NodeType type)
-            : _position(position), _layer(layer), _type(type) {}
-
-        Node(const DBU x, const DBU y, const int layer, const NodeType type)
-            : _position(Coordinate(x, y)), _layer(layer), _type(type) {}
-
-        bool operator==(const Node& node) const {
-                return (_position == node._position && _layer == node._layer);
-        }
-
-        bool operator!=(const Node& node) const {
-                return (_position != node._position || _layer != node._layer);
-        }
-
-        Coordinate getPosition() const { return _position; }
-        int getLayer() const { return _layer; }
-        NodeType getType() const { return _type; }
-
-	void setType(NodeType type) { _type = type; }
+enum class NodeType
+{
+  SOURCE,
+  SINK,
+  STEINER,
+  INVALID
 };
 
-}
+const char* nodeTypeString(NodeType type);
+
+class Node
+{
+ private:
+  Coordinate _position;
+  int _layer;
+  NodeType _type;
+
+ public:
+  Node() : _position(Coordinate(0, 0)), _layer(-1), _type(NodeType::INVALID) {}
+
+  Node(const Coordinate& position, const int layer, const NodeType type)
+      : _position(position), _layer(layer), _type(type)
+  {
+  }
+
+  Node(const DBU x, const DBU y, const int layer, const NodeType type)
+      : _position(Coordinate(x, y)), _layer(layer), _type(type)
+  {
+  }
+
+  bool operator==(const Node& node) const
+  {
+    return (_position == node._position && _layer == node._layer);
+  }
+
+  bool operator!=(const Node& node) const
+  {
+    return (_position != node._position || _layer != node._layer);
+  }
+
+  Coordinate getPosition() const { return _position; }
+  int getLayer() const { return _layer; }
+  NodeType getType() const { return _type; }
+
+  void setType(NodeType type) { _type = type; }
+};
+
+}  // namespace FastRoute

@@ -37,45 +37,56 @@
 
 #include <string>
 #include <vector>
+
 #include "Coordinate.h"
 #include "Node.h"
 
 namespace FastRoute {
 
-class Segment {
-private:
-        int _index;
-        Node _firstNode;
-        Node _lastNode;
-        int _parent;
+class Segment
+{
+ private:
+  int _index;
+  Node _firstNode;
+  Node _lastNode;
+  int _parent;
 
-public:
-        Segment() = default;
+ public:
+  Segment() = default;
 
-        Segment(int index, Node firstNode, Node lastNode, int parent)
-            : _index(index), _firstNode(firstNode), _lastNode(lastNode), _parent(parent) {}
+  Segment(int index, Node firstNode, Node lastNode, int parent)
+      : _index(index),
+        _firstNode(firstNode),
+        _lastNode(lastNode),
+        _parent(parent)
+  {
+  }
 
-        bool operator==(const Segment& segment) {
-                return (((_firstNode == segment._firstNode && _lastNode == segment._lastNode) ||
-                        (_firstNode == segment._lastNode && _lastNode == segment._firstNode)) &&
-                        _index == segment.getIndex());
-        }
+  bool operator==(const Segment& segment)
+  {
+    return (
+        ((_firstNode == segment._firstNode && _lastNode == segment._lastNode)
+         || (_firstNode == segment._lastNode
+             && _lastNode == segment._firstNode))
+        && _index == segment.getIndex());
+  }
 
-        int getIndex() const { return _index; }
-        Node getFirstNode() const { return _firstNode; }
-        Node getLastNode() const { return _lastNode; }
-        int getParent() const { return _parent; }
+  int getIndex() const { return _index; }
+  Node getFirstNode() const { return _firstNode; }
+  Node getLastNode() const { return _lastNode; }
+  int getParent() const { return _parent; }
 
-        void setParent(int parent) { _parent = parent; }
+  void setParent(int parent) { _parent = parent; }
 
-        void printSegment() {
-                std::cout << "----(" << _firstNode.getPosition().getX() << ", " <<
-                            _firstNode.getPosition().getY() << ", " <<
-                            _firstNode.getLayer() << "); (" <<
-                            _lastNode.getPosition().getX() << ", " <<
-                            _lastNode.getPosition().getY() << ", " <<
-                            _lastNode.getLayer() << ")\n";
-        };
+  void printSegment()
+  {
+    std::cout << "----(" << _firstNode.getPosition().getX() << ", "
+              << _firstNode.getPosition().getY() << ", "
+              << _firstNode.getLayer() << "); ("
+              << _lastNode.getPosition().getX() << ", "
+              << _lastNode.getPosition().getY() << ", " << _lastNode.getLayer()
+              << ")\n";
+  };
 };
 
-}
+}  // namespace FastRoute

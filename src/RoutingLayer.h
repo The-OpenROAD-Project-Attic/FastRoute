@@ -35,37 +35,40 @@
 
 #pragma once
 
+#include <functional>
+#include <iostream>
+#include <limits>
 #include <string>
 #include <vector>
-#include <functional>
-#include <limits>
-#include <iostream>
 
-#include "Coordinate.h"
 #include "Box.h"
+#include "Coordinate.h"
 #include "Pin.h"
 
 namespace FastRoute {
 
-class RoutingLayer {
-private:
-        int _index;
-        std::string _name;
-        bool _preferredDirection;
-        
-public:
-        RoutingLayer() = default;
-        RoutingLayer(const int index, const std::string& name,
-                     const bool preferredDirection)
-            : _index(index), _name(name),
-              _preferredDirection(preferredDirection) {}
-        
-        const static bool HORIZONTAL = 0;
-        const static bool VERTICAL = 1;
-        
-        int getIndex() const { return _index; }
-        const std::string& getName() const { return _name; }
-        bool getPreferredDirection() const { return _preferredDirection; }
+class RoutingLayer
+{
+ private:
+  int _index;
+  std::string _name;
+  bool _preferredDirection;
+
+ public:
+  RoutingLayer() = default;
+  RoutingLayer(const int index,
+               const std::string& name,
+               const bool preferredDirection)
+      : _index(index), _name(name), _preferredDirection(preferredDirection)
+  {
+  }
+
+  const static bool HORIZONTAL = 0;
+  const static bool VERTICAL = 1;
+
+  int getIndex() const { return _index; }
+  const std::string& getName() const { return _name; }
+  bool getPreferredDirection() const { return _preferredDirection; }
 };
 
-}
+}  // namespace FastRoute

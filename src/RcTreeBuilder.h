@@ -41,15 +41,15 @@
 #include "SteinerTree.h"
 
 namespace sta {
-        class Net;
-        class dbNetwork;
-        class Parasitics;
-        class Parasitic;
-        class Corner;
-        class OperatingConditions;
-        class ParasiticAnalysisPt;
-        class Units;
-}
+class Net;
+class dbNetwork;
+class Parasitics;
+class Parasitic;
+class Corner;
+class OperatingConditions;
+class ParasiticAnalysisPt;
+class Units;
+}  // namespace sta
 
 namespace ord {
 class OpenRoad;
@@ -57,37 +57,38 @@ class OpenRoad;
 
 namespace FastRoute {
 
-class RcTreeBuilder {
-public:
-        RcTreeBuilder(ord::OpenRoad *openroad, DBWrapper* dbWrapper);
-        void run(Net* net, SteinerTree* steinerTree, Grid* grid);
-        void reportParasitics();
+class RcTreeBuilder
+{
+ public:
+  RcTreeBuilder(ord::OpenRoad* openroad, DBWrapper* dbWrapper);
+  void run(Net* net, SteinerTree* steinerTree, Grid* grid);
+  void reportParasitics();
 
-protected:
-        void initStaData();
-        void makeParasiticNetwork();
-        void createSteinerNodes();
-        void computeGlobalParasitics();
-        void computeLocalParasitics();
-        void reduceParasiticNetwork();
-        int findNodeToConnect(const Pin& pin,
-                              const std::vector<unsigned>& pinNodes) const;
-        unsigned computeDist(const Node& n1, const Node& n2) const;
-	unsigned computeDist(const odb::Point &pt, const Node& n) const;
+ protected:
+  void initStaData();
+  void makeParasiticNetwork();
+  void createSteinerNodes();
+  void computeGlobalParasitics();
+  void computeLocalParasitics();
+  void reduceParasiticNetwork();
+  int findNodeToConnect(const Pin& pin,
+                        const std::vector<unsigned>& pinNodes) const;
+  unsigned computeDist(const Node& n1, const Node& n2) const;
+  unsigned computeDist(const odb::Point& pt, const Node& n) const;
 
-        Net*                      _net           = nullptr;
-        Grid*                     _grid          = nullptr;
-        DBWrapper*                _dbWrapper     = nullptr;
-        sta::Net*                 _staNet        = nullptr;
-        SteinerTree*              _steinerTree   = nullptr;
-        sta::Parasitic*           _parasitic     = nullptr;
-        sta::Parasitics*          _parasitics    = nullptr;
-        sta::Corner*              _corner        = nullptr;
-        sta::OperatingConditions* _op_cond       = nullptr;
-        sta::ParasiticAnalysisPt* _analysisPoint = nullptr;
-        sta::dbNetwork*            _network      = nullptr;
-        sta::Units*               _units         = nullptr;
-        bool                      _debug         = false;
+  Net* _net = nullptr;
+  Grid* _grid = nullptr;
+  DBWrapper* _dbWrapper = nullptr;
+  sta::Net* _staNet = nullptr;
+  SteinerTree* _steinerTree = nullptr;
+  sta::Parasitic* _parasitic = nullptr;
+  sta::Parasitics* _parasitics = nullptr;
+  sta::Corner* _corner = nullptr;
+  sta::OperatingConditions* _op_cond = nullptr;
+  sta::ParasiticAnalysisPt* _analysisPoint = nullptr;
+  sta::dbNetwork* _network = nullptr;
+  sta::Units* _units = nullptr;
+  bool _debug = false;
 };
 
-}
+}  // namespace FastRoute

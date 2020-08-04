@@ -33,7 +33,6 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-
 #pragma once
 
 #include <string>
@@ -43,23 +42,24 @@
 
 namespace FastRoute {
 
-class Netlist {
-public:
-        Netlist();
+class Netlist
+{
+ public:
+  Netlist();
 
-        std::vector<Net> &getNets() { return _nets; }
-        int getNetCount() const { return _nets.size(); }
-        int getNetIdx(Net* net);
-        Net* getNetByIdx(int idx);
+  std::vector<Net>& getNets() { return _nets; }
+  int getNetCount() const { return _nets.size(); }
+  int getNetIdx(Net* net);
+  Net* getNetByIdx(int idx);
 
-        void reserveNets(size_t net_count);
-        Net* addNet(odb::dbNet* net);
-        int getMaxNetDegree();
-        
-        std::vector<Pin> getAllPorts();
+  void reserveNets(size_t net_count);
+  Net* addNet(odb::dbNet* net);
+  int getMaxNetDegree();
 
-private:
-        std::vector<Net> _nets;
+  std::vector<Pin> getAllPorts();
+
+ private:
+  std::vector<Net> _nets;
 };
 
-}
+}  // namespace FastRoute

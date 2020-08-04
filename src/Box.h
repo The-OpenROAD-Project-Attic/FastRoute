@@ -37,39 +37,51 @@
 
 #include <algorithm>
 #include <limits>
+
 #include "Coordinate.h"
 
 namespace FastRoute {
 
-class Box {
-private:
-        Coordinate _lowerBound;
-        Coordinate _upperBound;
-        int _layer;
+class Box
+{
+ private:
+  Coordinate _lowerBound;
+  Coordinate _upperBound;
+  int _layer;
 
-public:
-        Box() : _lowerBound(Coordinate(0, 0)), _upperBound(Coordinate(0, 0)), 
-                _layer(-1) {};
+ public:
+  Box()
+      : _lowerBound(Coordinate(0, 0)),
+        _upperBound(Coordinate(0, 0)),
+        _layer(-1){};
 
-        Box(const Coordinate& lowerBound, const Coordinate& upperBound,
-            const int layer)
-            : _lowerBound(lowerBound), _upperBound(upperBound), _layer(layer) {}
-        
-        Box(const DBU lowerX, const DBU lowerY, const DBU upperX, const DBU upperY,
-            const int layer)
-            : _lowerBound(Coordinate(lowerX, lowerY)),
-              _upperBound(Coordinate(upperX, upperY)),
-              _layer(layer) {}
+  Box(const Coordinate& lowerBound,
+      const Coordinate& upperBound,
+      const int layer)
+      : _lowerBound(lowerBound), _upperBound(upperBound), _layer(layer)
+  {
+  }
 
-        Coordinate getLowerBound() const { return _lowerBound; }
-        Coordinate getUpperBound() const { return _upperBound; }
-        int getLayer() const { return _layer; }
+  Box(const DBU lowerX,
+      const DBU lowerY,
+      const DBU upperX,
+      const DBU upperY,
+      const int layer)
+      : _lowerBound(Coordinate(lowerX, lowerY)),
+        _upperBound(Coordinate(upperX, upperY)),
+        _layer(layer)
+  {
+  }
 
-        DBU getHalfPerimeter();
-        Coordinate getMiddle();
-        
-        bool overlap(Box box);
-        bool inside(Box box);
+  Coordinate getLowerBound() const { return _lowerBound; }
+  Coordinate getUpperBound() const { return _upperBound; }
+  int getLayer() const { return _layer; }
+
+  DBU getHalfPerimeter();
+  Coordinate getMiddle();
+
+  bool overlap(Box box);
+  bool inside(Box box);
 };
 
-}
+}  // namespace FastRoute

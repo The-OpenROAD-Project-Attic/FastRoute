@@ -39,63 +39,66 @@
 
 namespace FastRoute {
 
-Pin::Pin(odb::dbITerm *iterm,
-	 const Coordinate& position,
-	 const std::vector<int>& layers,
-	 const Orientation orientation,
-	 const std::map<int, std::vector<Box>>& boxesPerLayer,
-	 bool connectedToPad,
-	 Type type) :
-	_iterm(iterm),
-	_position(position),
-	_layers(layers),
-	_orientation(orientation),
-	_boxesPerLayer(boxesPerLayer),
-	_isPort(false),
-	_connectedToPad(connectedToPad),
-	_type(type)
+Pin::Pin(odb::dbITerm* iterm,
+         const Coordinate& position,
+         const std::vector<int>& layers,
+         const Orientation orientation,
+         const std::map<int, std::vector<Box>>& boxesPerLayer,
+         bool connectedToPad,
+         Type type)
+    : _iterm(iterm),
+      _position(position),
+      _layers(layers),
+      _orientation(orientation),
+      _boxesPerLayer(boxesPerLayer),
+      _isPort(false),
+      _connectedToPad(connectedToPad),
+      _type(type)
 {
-        std::sort(_layers.begin(), _layers.end());
+  std::sort(_layers.begin(), _layers.end());
 }
 
-Pin::Pin(odb::dbBTerm *bterm,
-	 const Coordinate& position,
-	 const std::vector<int>& layers,
-	 const Orientation orientation,
-	 const std::map<int, std::vector<Box>>& boxesPerLayer,
-	 bool connectedToPad,
-	 Type type) :
-	_bterm(bterm),
-	_position(position),
-	_layers(layers),
-	_orientation(orientation),
-	_boxesPerLayer(boxesPerLayer),
-	_isPort(true),
-	_connectedToPad(connectedToPad),
-	_type(type)
+Pin::Pin(odb::dbBTerm* bterm,
+         const Coordinate& position,
+         const std::vector<int>& layers,
+         const Orientation orientation,
+         const std::map<int, std::vector<Box>>& boxesPerLayer,
+         bool connectedToPad,
+         Type type)
+    : _bterm(bterm),
+      _position(position),
+      _layers(layers),
+      _orientation(orientation),
+      _boxesPerLayer(boxesPerLayer),
+      _isPort(true),
+      _connectedToPad(connectedToPad),
+      _type(type)
 {
-        std::sort(_layers.begin(), _layers.end());
+  std::sort(_layers.begin(), _layers.end());
 }
 
-odb::dbITerm* Pin::getITerm() const {
-	if (_isPort)
-		return nullptr;
-	else
-		return _iterm;
+odb::dbITerm* Pin::getITerm() const
+{
+  if (_isPort)
+    return nullptr;
+  else
+    return _iterm;
 }
 
-odb::dbBTerm* Pin::getBTerm() const {
-	if (_isPort)
-		return _bterm;
-	else
-		return nullptr;
+odb::dbBTerm* Pin::getBTerm() const
+{
+  if (_isPort)
+    return _bterm;
+  else
+    return nullptr;
 }
 
-std::string Pin::getName() const {
-	if (_isPort)
-		return _bterm->getName();
-	else
-		return getITermName(_iterm);
+std::string Pin::getName() const
+{
+  if (_isPort)
+    return _bterm->getName();
+  else
+    return getITermName(_iterm);
 }
 
-}
+}  // namespace FastRoute

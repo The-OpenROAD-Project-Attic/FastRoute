@@ -41,18 +41,23 @@ namespace FastRoute {
 void help();
 
 // Guides interface
-void set_output_file(const char * file);
+void set_output_file(const char* file);
 
 // Parms interface
 void set_tile_size(int tileSize);
 void set_capacity_adjustment(float adjustment);
 void add_layer_adjustment(int layer, float reductionPercentage);
-void add_region_adjustment(int minX, int minY, int maxX, int maxY, int layer, float reductionPercentage);
+void add_region_adjustment(int minX,
+                           int minY,
+                           int maxX,
+                           int maxY,
+                           int layer,
+                           float reductionPercentage);
 void set_min_layer(int minLayer);
 void set_max_layer(int maxLayer);
 void set_unidirectional_routing(bool unidirRouting);
 void set_alpha(float alpha);
-void set_alpha_for_net(char * netName, float alpha);
+void set_alpha_for_net(char* netName, float alpha);
 void set_verbose(int v);
 void set_overflow_iterations(int iterations);
 void set_max_routing_length(float maxLength);
@@ -68,11 +73,11 @@ void set_estimate_rc();
 
 // Run
 void estimate_rc();
-void enable_antenna_avoidance_flow(char * diodeCellName, char * diodePinName);
+void enable_antenna_avoidance_flow(char* diodeCellName, char* diodePinName);
 void start_fastroute();
 void run_fastroute();
 void reset_fastroute();
 void write_guides();
-void report_congestion(char * congest_file);
+void report_congestion(char* congest_file);
 
-}
+}  // namespace FastRoute

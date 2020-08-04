@@ -33,124 +33,131 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
+#include "SteinerTree.h"
 
 #include <vector>
 
-#include "SteinerTree.h"
-
 namespace FastRoute {
 
-void SteinerTree::printSegments() {
-        for (Segment seg : _segments) {
-	  Node node1 = seg.getFirstNode();
-	  Node node2 = seg.getLastNode();
-	  std::cout << "(" << nodeTypeString(node1.getType()) << " "
-		    << node1.getPosition().getX() << ", "
-		    << node1.getPosition().getY() << ", "
-		    << node1.getLayer() << "); ("
-		    << nodeTypeString(node2.getType()) << " "
-		    << node2.getPosition().getX() << ", "
-		    << node2.getPosition().getY() << ", "
-		    << node2.getLayer() << ")\n";
-        }
+void SteinerTree::printSegments()
+{
+  for (Segment seg : _segments) {
+    Node node1 = seg.getFirstNode();
+    Node node2 = seg.getLastNode();
+    std::cout << "(" << nodeTypeString(node1.getType()) << " "
+              << node1.getPosition().getX() << ", "
+              << node1.getPosition().getY() << ", " << node1.getLayer()
+              << "); (" << nodeTypeString(node2.getType()) << " "
+              << node2.getPosition().getX() << ", "
+              << node2.getPosition().getY() << ", " << node2.getLayer()
+              << ")\n";
+  }
 }
 
-void SteinerTree::addNode(Node node) {
-        if (!nodeExists(node)) {
-                _nodes.push_back(node);
-        } else if(node.getType() == NodeType::SOURCE) {
-                for (Node &n : _nodes) {
-                        if (n == node) {
-                                n.setType(NodeType::SOURCE);
-                        }
-                }
-        }
+void SteinerTree::addNode(Node node)
+{
+  if (!nodeExists(node)) {
+    _nodes.push_back(node);
+  } else if (node.getType() == NodeType::SOURCE) {
+    for (Node& n : _nodes) {
+      if (n == node) {
+        n.setType(NodeType::SOURCE);
+      }
+    }
+  }
 }
 
-void SteinerTree::addSegment(Segment segment) {
-        for (Segment seg : _segments) {
-                if ((seg.getFirstNode() == segment.getFirstNode() &&
-                     seg.getLastNode() == segment.getLastNode()) ||
-                    (seg.getFirstNode() == segment.getLastNode() &&
-                     seg.getLastNode() == segment.getFirstNode())) {
-                       return;
-                }
-        }
+void SteinerTree::addSegment(Segment segment)
+{
+  for (Segment seg : _segments) {
+    if ((seg.getFirstNode() == segment.getFirstNode()
+         && seg.getLastNode() == segment.getLastNode())
+        || (seg.getFirstNode() == segment.getLastNode()
+            && seg.getLastNode() == segment.getFirstNode())) {
+      return;
+    }
+  }
 
-        _segments.push_back(segment);
+  _segments.push_back(segment);
 }
 
-bool SteinerTree::nodeExists(Node node) {
-        for (Node n : _nodes) {
-                if (n == node) {
-                        return true;
-                }
-        }
-        return false;
+bool SteinerTree::nodeExists(Node node)
+{
+  for (Node n : _nodes) {
+    if (n == node) {
+      return true;
+    }
+  }
+  return false;
 }
 
-bool SteinerTree::getNodeIfExists(Node node, Node &requestedNode) {
-        for (Node n : _nodes) {
-                if (n == node) {
-                        requestedNode = n;
-                        return true;
-                }
-        }
+bool SteinerTree::getNodeIfExists(Node node, Node& requestedNode)
+{
+  for (Node n : _nodes) {
+    if (n == node) {
+      requestedNode = n;
+      return true;
+    }
+  }
 
-        return false;
+  return false;
 }
 
-std::vector<Segment> SteinerTree::getNodeSegments(Node node) {
-        std::vector<Segment> nodeSegments;
-        for (Segment seg : _segments) {
-                if (seg.getFirstNode() == node || seg.getLastNode() == node) {
-                        nodeSegments.push_back(seg);
-                }
-        }
+std::vector<Segment> SteinerTree::getNodeSegments(Node node)
+{
+  std::vector<Segment> nodeSegments;
+  for (Segment seg : _segments) {
+    if (seg.getFirstNode() == node || seg.getLastNode() == node) {
+      nodeSegments.push_back(seg);
+    }
+  }
 
-        return nodeSegments;
+  return nodeSegments;
 }
 
-Node SteinerTree::getSource() {
-        Node source;
-        bool found = false;
-        for (Node node : _nodes) {
-                if (node.getType() == NodeType::SOURCE) {
-                        source = node;
-                        found = true;
-                }
-        }
+Node SteinerTree::getSource()
+{
+  Node source;
+  bool found = false;
+  for (Node node : _nodes) {
+    if (node.getType() == NodeType::SOURCE) {
+      source = node;
+      found = true;
+    }
+  }
 
-        if (!found) {
-                std::cout << "[ERROR] Source not found\n";
-                std::exit(0);
-        }
+  if (!found) {
+    std::cout << "[ERROR] Source not found\n";
+    std::exit(0);
+  }
 
-        return source;
+  return source;
 }
 
-std::vector<Node> SteinerTree::getSinks() {
-        std::vector<Node> sinks;
+std::vector<Node> SteinerTree::getSinks()
+{
+  std::vector<Node> sinks;
 
-        for (Node node : _nodes) {
-                if (node.getType() == NodeType::SINK) {
-                        sinks.push_back(node);
-                }
-        }
+  for (Node node : _nodes) {
+    if (node.getType() == NodeType::SINK) {
+      sinks.push_back(node);
+    }
+  }
 
-        return sinks;
+  return sinks;
 }
 
-Segment SteinerTree::getSegmentByIndex(int index) {
-        Segment idxSeg;
-        for (Segment seg : _segments) {
-                if (seg.getIndex() == index) {
-                        idxSeg = seg;
-                        break;
-                }
-        }
+Segment SteinerTree::getSegmentByIndex(int index)
+{
+  Segment idxSeg;
+  for (Segment seg : _segments) {
+    if (seg.getIndex() == index) {
+      idxSeg = seg;
+      break;
+    }
+  }
 
-        return idxSeg;
+  return idxSeg;
 }
 
-}
+}  // namespace FastRoute
