@@ -49,8 +49,12 @@ $binary -no_init run.tcl > test.log 2>&1
 
 if [ $? -eq 0 ];
 then
+    mkdir -p ../../results/test_multiple_calls
+    cp test.log ../../results/test_multiple_calls/test.log
 	exit $GREEN
 else
+    mkdir -p ../../results/test_multiple_calls
+    cp test.log ../../results/test_multiple_calls/test.log
     echo "     - [ERROR] Test failed. Wirelength difference of $difference%"
 	exit $RED
 fi

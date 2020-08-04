@@ -47,10 +47,13 @@ testdir=$2
 
 $binary -no_init run.tcl > test.log 2>&1
 
+mkdir -p ../../results/test_antenna
+cp test.log ../../results/test_antenna/test.log
+
 if grep -q -e "#Modified segments: 62" ./test.log;
 then
 	exit $GREEN
 else
-        echo "     - [ERROR] Test failed. Check $testdir/src/test_wl/test.log and Check $testdir/src/test_wl/golden.wl"
+        echo "     - [ERROR] Test failed. Check $testdir/src/test_antenna/test.log and Check $testdir/src/test_antenna/golden.wl"
 	exit $RED
 fi

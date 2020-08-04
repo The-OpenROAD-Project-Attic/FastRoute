@@ -47,6 +47,9 @@ testdir=$2
 
 $binary -no_init run.tcl > test.log 2>&1
 
+mkdir -p ../../results/test_est_rc
+cp test.log ../../results/test_est_rc/test.log
+
 if grep -q -e "Total capacitance: 17.58" ./test.log;
 then
 	exit $GREEN
