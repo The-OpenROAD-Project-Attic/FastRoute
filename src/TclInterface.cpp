@@ -93,12 +93,8 @@ void set_unidirectional_routing(bool unidirRouting) {
         getFastRoute()->setUnidirectionalRoute(unidirRouting);
 }
 
-void set_pdrev(bool pdRev) {
-        getFastRoute()->setPDRev(pdRev);
-}
-
 void set_clock_net_routing(bool clockNetRouting) {
-        getFastRoute()->setClockNetRouting(clockNetRouting);
+        getFastRoute()->setClockNetsRouteFlow(clockNetRouting);
 }
 
 void set_alpha(float alpha) {
@@ -145,6 +141,14 @@ void set_layer_pitch(int layer, float pitch) {
         getFastRoute()->setLayerPitch(layer, pitch);
 }
 
+void set_clock_nets_route_flow(bool clock_flow) {
+        getFastRoute()->setClockNetsRouteFlow(clock_flow);
+}
+
+void set_min_layer_for_clock(int minLayer) {
+        getFastRoute()->setMinLayerForClock(minLayer);
+}
+
 void start_fastroute() {
         getFastRoute()->startFastRoute();
 }
@@ -159,6 +163,10 @@ void set_estimate_rc() {
 
 void estimate_rc() {
         getFastRoute()->estimateRC();
+}
+
+void enable_antenna_avoidance_flow(char * diodeCellName, char * diodePinName) {
+        getFastRoute()->enableAntennaAvoidance(diodeCellName, diodePinName);
 }
 
 void reset_fastroute() {

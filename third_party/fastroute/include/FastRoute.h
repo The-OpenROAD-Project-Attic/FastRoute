@@ -81,7 +81,7 @@ class FT {
         void setLowerLeft(int x, int y);
         void setTileSize(int width, int height);
         void setLayerOrientation(int x);
-        void addNet(char *name, int netIdx, int nPIns, int minWIdth, PIN pins[], float alpha);
+        void addNet(char *name, int netIdx, int nPIns, int minWIdth, PIN pins[], float alpha, bool isClock);
         void initEdges();
         void setNumAdjustments(int nAdjustements);
         void addAdjustment(long x1, long y1, int l1, long x2, long y2, int l2, int reducedCap, bool isReduce = true);
@@ -92,10 +92,12 @@ class FT {
         void writeCongestionReport3D(std::string fileName);
 
         int getEdgeCapacity(long x1, long y1, int l1, long x2, long y2, int l2);
-	int getEdgeCurrentResource(long x1, long y1, int l1, long x2, long y2, int l2);
+    	int getEdgeCurrentResource(long x1, long y1, int l1, long x2, long y2, int l2);
+        int getEdgeCurrentUsage(long x1, long y1, int l1, long x2, long y2, int l2);
         std::map<int, std::vector<PIN>> getNets();
+        void setEdgeUsage(long x1, long y1, int l1, long x2, long y2, int l2, int newUsage);
+        void setEdgeCapacity(long x1, long y1, int l1, long x2, long y2, int l2, int newCap);
         void setMaxNetDegree(int);
-        void usePdRev();
         void setAlpha(float a);
         void setVerbose(int v);
         void setOverflowIterations(int iterations);

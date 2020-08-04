@@ -52,7 +52,7 @@ public:
         int getNetIdx(Net* net);
         Net* getNetByIdx(int idx);
 
-	void reserveNets(size_t net_count);
+        void reserveNets(size_t net_count);
         Net* addNet(odb::dbNet* net);
         int getMaxNetDegree();
         

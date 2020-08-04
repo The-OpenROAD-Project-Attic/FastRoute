@@ -1,11 +1,8 @@
-//////////////////////////////////////////////////////////////////////////////
-// Authors: Vitor Bandeira, Mateus Fogaça, Eder Matheus Monteiro e Isadora
-// Oliveira
-//          (Advisor: Ricardo Reis)
+/////////////////////////////////////////////////////////////////////////////
 //
 // BSD 3-Clause License
 //
-// Copyright (c) 2019, Federal University of Rio Grande do Sul (UFRGS)
+// Copyright (c) 2019, University of California, San Diego.
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -33,7 +30,8 @@
 // CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 // ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
-////////////////////////////////////////////////////////////////////////////////
+//
+///////////////////////////////////////////////////////////////////////////////
 
 #pragma once
 
@@ -123,8 +121,6 @@ public:
         void setMinRoutingLayer(const int minLayer);
         void setMaxRoutingLayer(const int maxLayer);
         void setUnidirectionalRoute(const bool unidirRoute);
-        void setClockNetRouting(const bool clockNetRouting);
-        void setPDRev(const bool pdRev);
         void setAlpha(const float alpha);
         void setOutputFile(const std::string& outfile);
         void setPitchesInTile(const int pitchesInTile);
@@ -145,8 +141,11 @@ public:
         void printHeader();
         void setMaxLength (float maxLength);
         void addLayerMaxLength (int layer, float length);
+        void setClockNetsRouteFlow(bool clockFlow);
+        void setMinLayerForClock(int minLayer);
         
         // flow functions
+        void enableAntennaAvoidance(char * diodeCellName, char * diodePinName);
         void writeGuides();
         void startFastRoute();
         void estimateRC();
@@ -157,15 +156,15 @@ public:
         std::vector<EST_> getEst();
 
 private:
-	void makeComponents();
-	void deleteComponents();
+    	void makeComponents();
+    	void deleteComponents();
         // main functions
         void initGrid();
         void initRoutingLayers();
         void initRoutingTracks();
         void setCapacities();
         void setSpacingsAndMinWidths();
-        void initializeNets();
+        void initializeNets(bool reroute);
         void computeGridAdjustments();
         void computeTrackAdjustments();
         void computeUserGlobalAdjustments();
@@ -202,6 +201,13 @@ private:
         SteinerTree createSteinerTree(std::vector<ROUTE> &route,
 				      const std::vector<Pin> &pins);
         bool checkSteinerTree(SteinerTree sTree);
+        void addLocalConnections(std::vector<FastRoute::NET> &globalRoute);
+        void mergeResults(std::vector<FastRoute::NET> newRoute);
+        void runAntennaAvoidanceFlow();
+        void runClockNetsRouteFlow();
+        void restartFastRoute();
+        void getPreviousCapacities(int previousMinLayer);
+        void restorePreviousCapacities(int previousMinLayer);
 
         Netlist* _netlist = nullptr;
         Grid* _grid = nullptr;
@@ -256,12 +262,22 @@ private:
         float _alpha;
         int _verbose;
         std::map<std::string, float> _netsAlpha;
+        bool _clockNetsRouteFlow = false;
+        bool _onlyClockNets = false;
+        bool _onlySignalNets = false;
+        int _minLayerForClock;
 
         // Antenna variables
         float _maxLengthMicrons = -1;
         std::map<int, float> _layersMaxLengthMicrons;
         long _maxLengthDBU = -1;
         std::map<int, long> _layersMaxLengthDBU;
+        bool _enableAntennaFlow = false;
+        std::string _diodeCellName;
+        std::string _diodePinName;
+        int ***oldHUsages;
+        int ***oldVUsages;
+        int _reroute = false;
 
         // temporary for congestion driven replace
         int _numAdjusts = 0;

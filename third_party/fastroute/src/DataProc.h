@@ -52,7 +52,6 @@ extern int   xGrid, yGrid, numGrids, numNets, invalidNets, vCapacity, hCapacity;
 extern int * vCapacity3D, *hCapacity3D;
 extern float vCapacity_lb, hCapacity_lb, vCapacity_ub, hCapacity_ub;
 extern int   layerOrientation;
-extern bool  pdRev;
 extern float alpha;
 extern int   verbose;
 extern int   overflowIterations;

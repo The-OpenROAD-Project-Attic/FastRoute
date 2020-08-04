@@ -59,10 +59,6 @@ extern void set_max_layer(int maxLayer);
 
 extern void set_unidirectional_routing(bool unidirRouting);
 
-extern void set_pdrev(bool pdRev);
-
-extern void set_clock_net_routing(bool clockNetRouting);
-
 extern void set_alpha(float alpha);
 
 extern void set_alpha_for_net(char * netName, float alpha);
@@ -85,9 +81,15 @@ extern void set_seed(unsigned seed);
 
 extern void set_layer_pitch(int layer, float pitch);
 
+extern void set_clock_nets_route_flow(bool clock_flow);
+
+extern void set_min_layer_for_clock(int minLayer);
+
 extern void set_estimate_rc();
 
 extern void estimate_rc();
+
+extern void enable_antenna_avoidance_flow(char * diodeCellName, char * diodePinName);
 
 extern void start_fastroute();
 

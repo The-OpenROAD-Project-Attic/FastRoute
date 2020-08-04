@@ -54,11 +54,11 @@ namespace FastRoute {
 using ord::error;
 
 DBWrapper::DBWrapper(odb::dbDatabase *db,
-		     Netlist *netlist,
-		     Grid *grid) :
-	_db(db),
-	_netlist(netlist),
-	_grid(grid) {
+             Netlist *netlist,
+             Grid *grid) :
+    _db(db),
+    _netlist(netlist),
+    _grid(grid) {
 }
 
 void DBWrapper::initGrid(int maxLayer) {
@@ -346,7 +346,7 @@ void DBWrapper::computeSpacingsAndMinWidth(int maxLayer) {
         }
 }
 
-void DBWrapper::initNetlist() {
+void DBWrapper::initNetlist(bool reroute) {
         Box dieArea(_grid->getLowerLeftX(), _grid->getLowerLeftY(),
                     _grid->getUpperRightX(), _grid->getUpperRightY(), -1);
         
@@ -356,264 +356,272 @@ void DBWrapper::initNetlist() {
                 error("odb::dbBlock not found\n");
         }
         
-        odb::dbSet<odb::dbNet> nets = block->getNets();
+        std::vector<odb::dbNet*> nets;
+
+        for (odb::dbNet* net : block->getNets()) {
+                nets.push_back(net);
+        }
         
         if (nets.size() == 0) {
                 error("Design without nets");
         }
+
+        if (reroute) {
+                nets = dirtyNets;
+        }
         
-	// Sort nets so guide file net order is consistent.
-	std::vector<odb::dbNet*> sorted_nets;
-	for (odb::dbNet* net : nets)
-	  sorted_nets.push_back(net);
-	std::sort(sorted_nets.begin(), sorted_nets.end(),
-		  [](odb::dbNet* net1,
-		     odb::dbNet* net2) {
-		    return strcmp(net1->getConstName(), net2->getConstName()) < 0;
-		  });
-	// Prevent _netlist->_nets from growing because pointers to nets become invalid.
-	_netlist->reserveNets(nets.size());
+    // Sort nets so guide file net order is consistent.
+    std::vector<odb::dbNet*> sorted_nets;
+    for (odb::dbNet* net : nets)
+      sorted_nets.push_back(net);
+    std::sort(sorted_nets.begin(), sorted_nets.end(),
+          [](odb::dbNet* net1,
+             odb::dbNet* net2) {
+            return strcmp(net1->getConstName(), net2->getConstName()) < 0;
+          });
+    // Prevent _netlist->_nets from growing because pointers to nets become invalid.
+    _netlist->reserveNets(nets.size());
         for (odb::dbNet* db_net : sorted_nets) {
                 if (db_net->getSigType().getValue() != odb::dbSigType::POWER
-		    && db_net->getSigType().getValue() != odb::dbSigType::GROUND
+            && db_net->getSigType().getValue() != odb::dbSigType::GROUND
                     && !db_net->isSpecial()
-		    && db_net->getSWires().size() == 0) {
-			Net* net = _netlist->addNet(db_net);
-			makeItermPins(net, db_net, dieArea);
-			makeBtermPins(net, db_net, dieArea);
-		}
-	}
+            && db_net->getSWires().size() == 0) {
+            Net* net = _netlist->addNet(db_net);
+            makeItermPins(net, db_net, dieArea);
+            makeBtermPins(net, db_net, dieArea);
+        }
+    }
 }
 
 void DBWrapper::makeItermPins(Net* net,
-			      odb::dbNet *db_net,
-			      Box &dieArea) {
+                  odb::dbNet *db_net,
+                  Box &dieArea) {
         odb::dbTech* tech = _db->getTech();
-	for (odb::dbITerm* iterm : db_net->getITerms()) {
-		int pX, pY;
-		std::vector<int> pinLayers;
-		std::map<int, std::vector<Box>> pinBoxes;
+    for (odb::dbITerm* iterm : db_net->getITerms()) {
+        int pX, pY;
+        std::vector<int> pinLayers;
+        std::map<int, std::vector<Box>> pinBoxes;
                         
-		odb::dbMTerm* mTerm = iterm->getMTerm();
-		odb::dbMaster* master = mTerm->getMaster();
+        odb::dbMTerm* mTerm = iterm->getMTerm();
+        odb::dbMaster* master = mTerm->getMaster();
                         
-		if (master->getType() == odb::dbMasterType::COVER || 
-		    master->getType() == odb::dbMasterType::COVER_BUMP) {
-			std::cout << "[WARNING] Net connected with instance of class COVER added for routing\n";
-		}
+        if (master->getType() == odb::dbMasterType::COVER || 
+            master->getType() == odb::dbMasterType::COVER_BUMP) {
+            std::cout << "[WARNING] Net connected with instance of class COVER added for routing\n";
+        }
 
-		bool connectedToPad = master->getType().isPad();
-		bool connectedToMacro = master->isBlock();
+        bool connectedToPad = master->getType().isPad();
+        bool connectedToMacro = master->isBlock();
                         
-		Coordinate pinPos;
+        Coordinate pinPos;
 
-		Pin::Type type(Pin::Type::OTHER);
-		if (mTerm->getIoType() == odb::dbIoType::INPUT) {
-			type = Pin::SINK;
-		} else if (mTerm->getIoType() == odb::dbIoType::OUTPUT) {
-			type = Pin::SOURCE;
-		}
+        Pin::Type type(Pin::Type::OTHER);
+        if (mTerm->getIoType() == odb::dbIoType::INPUT) {
+            type = Pin::SINK;
+        } else if (mTerm->getIoType() == odb::dbIoType::OUTPUT) {
+            type = Pin::SOURCE;
+        }
                         
-		odb::dbInst* inst = iterm->getInst();
-		inst->getOrigin(pX, pY);
-		odb::Point origin = odb::Point(pX, pY);
-		odb::dbTransform transform(inst->getOrient(), origin);
+        odb::dbInst* inst = iterm->getInst();
+        inst->getOrigin(pX, pY);
+        odb::Point origin = odb::Point(pX, pY);
+        odb::dbTransform transform(inst->getOrient(), origin);
 
-		odb::dbBox* instBox = inst->getBBox();
-		Coordinate instMiddle = Coordinate((instBox->xMin() + (instBox->xMax() - instBox->xMin()) / 2.0),
-						   (instBox->yMin() + (instBox->yMax() - instBox->yMin()) / 2.0));
+        odb::dbBox* instBox = inst->getBBox();
+        Coordinate instMiddle = Coordinate((instBox->xMin() + (instBox->xMax() - instBox->xMin()) / 2.0),
+                           (instBox->yMin() + (instBox->yMax() - instBox->yMin()) / 2.0));
                         
-		for (odb::dbMPin* mterm : mTerm->getMPins()) {
-			Coordinate lowerBound;
-			Coordinate upperBound;
-			Box pinBox;
-			int pinLayer;
-			int lastLayer = -1;
+        for (odb::dbMPin* mterm : mTerm->getMPins()) {
+            Coordinate lowerBound;
+            Coordinate upperBound;
+            Box pinBox;
+            int pinLayer;
+            int lastLayer = -1;
 
-			for (odb::dbBox* box : mterm->getGeometry()) {
-				odb::Rect rect;
-				box->getBox(rect);
-				transform.apply(rect);
+            for (odb::dbBox* box : mterm->getGeometry()) {
+                odb::Rect rect;
+                box->getBox(rect);
+                transform.apply(rect);
                                         
-				odb::dbTechLayer* techLayer = box->getTechLayer();
-				if (techLayer->getType().getValue() != odb::dbTechLayerType::ROUTING) {
-					continue;
-				}
+                odb::dbTechLayer* techLayer = box->getTechLayer();
+                if (techLayer->getType().getValue() != odb::dbTechLayerType::ROUTING) {
+                    continue;
+                }
                                         
-				pinLayer = techLayer->getRoutingLevel();
-				lowerBound = Coordinate(rect.xMin(), 
-							rect.yMin());
-				upperBound = Coordinate(rect.xMax(), 
-							rect.yMax());
-				pinBox = Box(lowerBound, upperBound, pinLayer);
-				if (!dieArea.inside(pinBox)) {
+                pinLayer = techLayer->getRoutingLevel();
+                lowerBound = Coordinate(rect.xMin(), 
+                            rect.yMin());
+                upperBound = Coordinate(rect.xMax(), 
+                            rect.yMax());
+                pinBox = Box(lowerBound, upperBound, pinLayer);
+                if (!dieArea.inside(pinBox)) {
 
-					std::cout << "[WARNING] Pin " << getITermName(iterm) << " is outside die area\n";
-				}
-				pinBoxes[pinLayer].push_back(pinBox);
-				if (pinLayer > lastLayer) {
-					pinPos = lowerBound;
-				}
-			}
-		}
+                    std::cout << "[WARNING] Pin " << getITermName(iterm) << " is outside die area\n";
+                }
+                pinBoxes[pinLayer].push_back(pinBox);
+                if (pinLayer > lastLayer) {
+                    pinPos = lowerBound;
+                }
+            }
+        }
 
-		for (auto& layer_boxes : pinBoxes) {
-			pinLayers.push_back(layer_boxes.first);
-		}
+        for (auto& layer_boxes : pinBoxes) {
+            pinLayers.push_back(layer_boxes.first);
+        }
 
-		Pin pin(iterm, pinPos, pinLayers, Orientation::INVALID, pinBoxes,
-			(connectedToPad || connectedToMacro), type);
+        Pin pin(iterm, pinPos, pinLayers, Orientation::INVALID, pinBoxes,
+            (connectedToPad || connectedToMacro), type);
 
-		if (connectedToPad || connectedToMacro) {
-			Coordinate pinPosition = pin.getPosition();
-			odb::dbTechLayer* techLayer = tech->findRoutingLayer(pin.getTopLayer());
+        if (connectedToPad || connectedToMacro) {
+            Coordinate pinPosition = pin.getPosition();
+            odb::dbTechLayer* techLayer = tech->findRoutingLayer(pin.getTopLayer());
 
-			if (techLayer->getDirection().getValue() == odb::dbTechLayerDir::HORIZONTAL) {
-				DBU instToPin = pinPosition.getX() - instMiddle.getX();
-				if (instToPin < 0) {
-					pin.setOrientation(Orientation::ORIENT_EAST);
-				} else {
-					pin.setOrientation(Orientation::ORIENT_WEST);
-				}
-			} else if (techLayer->getDirection().getValue() == odb::dbTechLayerDir::VERTICAL) {
-				DBU instToPin = pinPosition.getY() - instMiddle.getY();
-				if (instToPin < 0) {
-					pin.setOrientation(Orientation::ORIENT_NORTH);
-				} else {
-					pin.setOrientation(Orientation::ORIENT_SOUTH);
-				}
-			}
-		}
+            if (techLayer->getDirection().getValue() == odb::dbTechLayerDir::HORIZONTAL) {
+                DBU instToPin = pinPosition.getX() - instMiddle.getX();
+                if (instToPin < 0) {
+                    pin.setOrientation(Orientation::ORIENT_EAST);
+                } else {
+                    pin.setOrientation(Orientation::ORIENT_WEST);
+                }
+            } else if (techLayer->getDirection().getValue() == odb::dbTechLayerDir::VERTICAL) {
+                DBU instToPin = pinPosition.getY() - instMiddle.getY();
+                if (instToPin < 0) {
+                    pin.setOrientation(Orientation::ORIENT_NORTH);
+                } else {
+                    pin.setOrientation(Orientation::ORIENT_SOUTH);
+                }
+            }
+        }
 
-		net->addPin(pin);
-	}
+        net->addPin(pin);
+    }
 }
 
 void DBWrapper::makeBtermPins(Net* net,
-			      odb::dbNet *db_net,
-			      Box &dieArea) {
+                  odb::dbNet *db_net,
+                  Box &dieArea) {
         odb::dbTech* tech = _db->getTech();
-	for (odb::dbBTerm* bterm : db_net->getBTerms()) {
-		int posX, posY;
-		std::string pinName;
+    for (odb::dbBTerm* bterm : db_net->getBTerms()) {
+        int posX, posY;
+        std::string pinName;
                         
-		bterm->getFirstPinLocation(posX, posY);
-		odb::dbITerm* iterm = bterm->getITerm();
-		bool connectedToPad = false;
-		bool connectedToMacro = false;
-		Coordinate instMiddle = Coordinate(-1, -1);
+        bterm->getFirstPinLocation(posX, posY);
+        odb::dbITerm* iterm = bterm->getITerm();
+        bool connectedToPad = false;
+        bool connectedToMacro = false;
+        Coordinate instMiddle = Coordinate(-1, -1);
 
-		if (iterm != nullptr) {
-			odb::dbMTerm* mterm = iterm->getMTerm();
-			odb::dbMaster* master = mterm->getMaster();
-			connectedToPad = master->getType().isPad();
-			connectedToMacro = master->isBlock();
+        if (iterm != nullptr) {
+            odb::dbMTerm* mterm = iterm->getMTerm();
+            odb::dbMaster* master = mterm->getMaster();
+            connectedToPad = master->getType().isPad();
+            connectedToMacro = master->isBlock();
 
-			odb::dbInst *inst = iterm->getInst();
-			odb::dbBox* instBox = inst->getBBox();
-			instMiddle = Coordinate((instBox->xMin() + (instBox->xMax() - instBox->xMin()) / 2.0),
-						(instBox->yMin() + (instBox->yMax() - instBox->yMin()) / 2.0));
-		}
+            odb::dbInst *inst = iterm->getInst();
+            odb::dbBox* instBox = inst->getBBox();
+            instMiddle = Coordinate((instBox->xMin() + (instBox->xMax() - instBox->xMin()) / 2.0),
+                        (instBox->yMin() + (instBox->yMax() - instBox->yMin()) / 2.0));
+        }
                         
-		std::vector<int> pinLayers;
-		std::map<int, std::vector<Box>> pinBoxes;
+        std::vector<int> pinLayers;
+        std::map<int, std::vector<Box>> pinBoxes;
                                                 
-		pinName = bterm->getConstName();
-		Coordinate pinPos;
+        pinName = bterm->getConstName();
+        Coordinate pinPos;
 
-		Pin::Type type(Pin::Type::OTHER);
-		if (bterm->getIoType() == odb::dbIoType::INPUT) {
-			type = Pin::SOURCE;
-		} else if (bterm->getIoType() == odb::dbIoType::OUTPUT) {
-			type = Pin::SINK;
-		}
+        Pin::Type type(Pin::Type::OTHER);
+        if (bterm->getIoType() == odb::dbIoType::INPUT) {
+            type = Pin::SOURCE;
+        } else if (bterm->getIoType() == odb::dbIoType::OUTPUT) {
+            type = Pin::SINK;
+        }
 
-		for (odb::dbBPin* bterm_pin : bterm->getBPins()) {
-			Coordinate lowerBound;
-			Coordinate upperBound;
-			Box pinBox;
-			int pinLayer;
-			int lastLayer = -1;
+        for (odb::dbBPin* bterm_pin : bterm->getBPins()) {
+            Coordinate lowerBound;
+            Coordinate upperBound;
+            Box pinBox;
+            int pinLayer;
+            int lastLayer = -1;
                                 
-			odb::dbBox* currBTermBox = bterm_pin->getBox();
-			odb::dbTechLayer* techLayer = currBTermBox->getTechLayer();
-			if (techLayer->getType().getValue() != odb::dbTechLayerType::ROUTING) {
-				continue;
-			}
+            odb::dbBox* currBTermBox = bterm_pin->getBox();
+            odb::dbTechLayer* techLayer = currBTermBox->getTechLayer();
+            if (techLayer->getType().getValue() != odb::dbTechLayerType::ROUTING) {
+                continue;
+            }
                                 
-			pinLayer = techLayer->getRoutingLevel();
-			lowerBound = Coordinate(currBTermBox->xMin(), 
-						currBTermBox->yMin());
-			upperBound = Coordinate(currBTermBox->xMax(), 
-						currBTermBox->yMax());
-			pinBox = Box(lowerBound, upperBound, pinLayer);
-			if (!dieArea.inside(pinBox)) {
-				std::cout << "[WARNING] Pin " << pinName << " is outside die area\n";
-			}
-			pinBoxes[pinLayer].push_back(pinBox);
+            pinLayer = techLayer->getRoutingLevel();
+            lowerBound = Coordinate(currBTermBox->xMin(), 
+                        currBTermBox->yMin());
+            upperBound = Coordinate(currBTermBox->xMax(), 
+                        currBTermBox->yMax());
+            pinBox = Box(lowerBound, upperBound, pinLayer);
+            if (!dieArea.inside(pinBox)) {
+                std::cout << "[WARNING] Pin " << pinName << " is outside die area\n";
+            }
+            pinBoxes[pinLayer].push_back(pinBox);
 
-			if (pinLayer > lastLayer) {
-				pinPos = lowerBound;
-			}
-		}
+            if (pinLayer > lastLayer) {
+                pinPos = lowerBound;
+            }
+        }
                         
-		for (auto& layer_boxes : pinBoxes) {
-			pinLayers.push_back(layer_boxes.first);
-		}
+        for (auto& layer_boxes : pinBoxes) {
+            pinLayers.push_back(layer_boxes.first);
+        }
                         
-		Pin pin(bterm, pinPos, pinLayers, Orientation::INVALID, pinBoxes,
-			(connectedToPad || connectedToMacro), type);
+        Pin pin(bterm, pinPos, pinLayers, Orientation::INVALID, pinBoxes,
+            (connectedToPad || connectedToMacro), type);
 
-		if (connectedToPad) {
-			Coordinate pinPosition = pin.getPosition();
-			odb::dbTechLayer* techLayer = tech->findRoutingLayer(pin.getTopLayer());
+        if (connectedToPad) {
+            Coordinate pinPosition = pin.getPosition();
+            odb::dbTechLayer* techLayer = tech->findRoutingLayer(pin.getTopLayer());
                                 
-			if (techLayer->getDirection().getValue() == odb::dbTechLayerDir::HORIZONTAL) {
-				DBU instToPin = pinPosition.getX() - instMiddle.getX();
-				if (instToPin < 0) {
-					pin.setOrientation(Orientation::ORIENT_EAST);
-				} else {
-					pin.setOrientation(Orientation::ORIENT_WEST);
-				}
-			} else if (techLayer->getDirection().getValue() == odb::dbTechLayerDir::VERTICAL) {
-				DBU instToPin = pinPosition.getY() - instMiddle.getY();
-				if (instToPin < 0) {
-					pin.setOrientation(Orientation::ORIENT_NORTH);
-				} else {
-					pin.setOrientation(Orientation::ORIENT_SOUTH);
-				}
-			}
-		} else {
-			Coordinate pinPosition = pin.getPosition();
-			odb::dbTechLayer* techLayer = tech->findRoutingLayer(pin.getTopLayer());
+            if (techLayer->getDirection().getValue() == odb::dbTechLayerDir::HORIZONTAL) {
+                DBU instToPin = pinPosition.getX() - instMiddle.getX();
+                if (instToPin < 0) {
+                    pin.setOrientation(Orientation::ORIENT_EAST);
+                } else {
+                    pin.setOrientation(Orientation::ORIENT_WEST);
+                }
+            } else if (techLayer->getDirection().getValue() == odb::dbTechLayerDir::VERTICAL) {
+                DBU instToPin = pinPosition.getY() - instMiddle.getY();
+                if (instToPin < 0) {
+                    pin.setOrientation(Orientation::ORIENT_NORTH);
+                } else {
+                    pin.setOrientation(Orientation::ORIENT_SOUTH);
+                }
+            }
+        } else {
+            Coordinate pinPosition = pin.getPosition();
+            odb::dbTechLayer* techLayer = tech->findRoutingLayer(pin.getTopLayer());
                                 
-			if (techLayer->getDirection().getValue() == odb::dbTechLayerDir::HORIZONTAL) {
-				DBU instToDie = pinPosition.getX() - dieArea.getMiddle().getX();
-				if (instToDie < 0) {
-					pin.setOrientation(Orientation::ORIENT_WEST);
-				} else {
-					pin.setOrientation(Orientation::ORIENT_EAST);
-				}
-			} else if (techLayer->getDirection().getValue() == odb::dbTechLayerDir::VERTICAL) {
-				DBU instToDie = pinPosition.getY() - dieArea.getMiddle().getY();
-				if (instToDie < 0) {
-					pin.setOrientation(Orientation::ORIENT_SOUTH);
-				} else {
-					pin.setOrientation(Orientation::ORIENT_NORTH);
-				}
-			}
-		}
-		net->addPin(pin);
-	}
+            if (techLayer->getDirection().getValue() == odb::dbTechLayerDir::HORIZONTAL) {
+                DBU instToDie = pinPosition.getX() - dieArea.getMiddle().getX();
+                if (instToDie < 0) {
+                    pin.setOrientation(Orientation::ORIENT_WEST);
+                } else {
+                    pin.setOrientation(Orientation::ORIENT_EAST);
+                }
+            } else if (techLayer->getDirection().getValue() == odb::dbTechLayerDir::VERTICAL) {
+                DBU instToDie = pinPosition.getY() - dieArea.getMiddle().getY();
+                if (instToDie < 0) {
+                    pin.setOrientation(Orientation::ORIENT_SOUTH);
+                } else {
+                    pin.setOrientation(Orientation::ORIENT_NORTH);
+                }
+            }
+        }
+        net->addPin(pin);
+    }
 }
 
 std::string getITermName(odb::dbITerm* iterm) {
-	odb::dbMTerm* mTerm = iterm->getMTerm();
-	odb::dbMaster* master = mTerm->getMaster();
-	std::string pin_name = iterm->getInst()->getConstName();
-	pin_name += "/";
-	pin_name += mTerm->getConstName();
-	return pin_name;
+    odb::dbMTerm* mTerm = iterm->getMTerm();
+    odb::dbMaster* master = mTerm->getMaster();
+    std::string pin_name = iterm->getInst()->getConstName();
+    pin_name += "/";
+    pin_name += mTerm->getConstName();
+    return pin_name;
 }
 
 void DBWrapper::initObstacles() {
@@ -962,6 +970,311 @@ std::set<int> DBWrapper::findTransitionLayers(int maxRoutingLayer) {
         }
 
         return transitionLayers;
+}
+
+std::map<int, odb::dbTechVia*> DBWrapper::getDefaultVias(int maxRoutingLayer) {
+        odb::dbTech* tech = _db->getTech();
+        odb::dbSet<odb::dbTechVia> vias = tech->getVias();
+        std::map<int, odb::dbTechVia*> defaultVias;
+
+        for (odb::dbTechVia* currVia : vias) {
+                odb::dbStringProperty* prop = odb::dbStringProperty::find(currVia, "OR_DEFAULT");
+                
+                if (prop == nullptr) {
+                        continue;
+                } else {
+                        std::cout << "[INFO] Default via: " << currVia->getConstName() << "\n";
+                        defaultVias[currVia->getBottomLayer()->getRoutingLevel()] = currVia;
+                }
+        }
+
+        if (defaultVias.size() == 0) {
+                std::cout << "[WARNING]No OR_DEFAULT vias defined\n";
+                for (int i = 1; i <= maxRoutingLayer; i++) {
+                        for (odb::dbTechVia* currVia : vias) {
+                                if (currVia->getBottomLayer()->getRoutingLevel() == i) {
+                                        defaultVias[i] = currVia;
+                                        break;
+                                }
+                        }
+                }
+        }
+
+        return defaultVias;
+}
+
+void DBWrapper::commitGlobalSegmentsToDB(std::vector<FastRoute::NET> routing, int maxRoutingLayer) {
+        odb::dbTech* tech = _db->getTech();
+        if (!tech) {
+                error("obd::dbTech not initialized\n");
+        }
+
+        odb::dbBlock* block = _chip->getBlock();
+        if (!block) {
+                error("odb::dbBlock not found\n");
+        }
+
+        std::map<int, odb::dbTechVia*> defaultVias = getDefaultVias(maxRoutingLayer);
+
+        for (FastRoute::NET netRoute : routing) {
+                std::string netName = netRoute.name;
+                odb::dbWire* wire = odb::dbWire::create(dbNets[netName]);
+                odb::dbWireEncoder wireEncoder;
+                wireEncoder.begin(wire);
+                odb::dbWireType wireType = odb::dbWireType::ROUTED;
+
+                for (FastRoute::ROUTE seg : netRoute.route) {
+                        if (std::abs(seg.initLayer - seg.finalLayer) > 1) {
+                                error("Global route segment not valid\n");
+                        }
+                        int x1 = seg.initX;
+                        int y1 = seg.initY;
+                        int x2 = seg.finalX;
+                        int y2 = seg.finalY;
+                        int l1 = seg.initLayer;
+                        int l2 = seg.finalLayer;
+
+                        odb::dbTechLayer* currLayer = tech->findRoutingLayer(l1);
+
+                        if (l1 == l2) { // Add wire
+                                if (x1 == x2 && y1 == y2)
+                                        continue;
+                                wireEncoder.newPath(currLayer, wireType);
+                                wireEncoder.addPoint(x1, y1);
+                                wireEncoder.addPoint(x2, y2);
+                        } else { // Add via
+                                int bottomLayer = (l1 < l2) ? l1 : l2;
+                                wireEncoder.newPath(currLayer, wireType);
+                                wireEncoder.addPoint(x1, y1);
+                                wireEncoder.addTechVia(defaultVias[bottomLayer]);
+                        }
+                }
+                wireEncoder.end();
+        }
+}
+
+int DBWrapper::checkAntennaViolations(std::vector<FastRoute::NET> routing, int maxRoutingLayer) {
+        if (!_chip) {
+            _chip = _db->getChip();
+        }
+        odb::dbTech* tech = _db->getTech();
+        if (!tech) {
+                error("obd::dbTech not initialized\n");
+        }
+
+        odb::dbBlock* block = _chip->getBlock();
+        if (!block) {
+                error("odb::dbBlock not found\n");
+        }
+
+        _arc = new antenna_checker::AntennaChecker;
+        _arc->setDb(_db);
+        _arc->load_antenna_rules();
+
+        std::map<int, odb::dbTechVia*> defaultVias = getDefaultVias(maxRoutingLayer);
+
+        odb::dbSet<odb::dbNet> nets = block->getNets();
+
+        for (odb::dbNet* currNet : nets) {
+                std::string netName = currNet->getConstName();
+                
+                if (currNet->getSigType().getValue() == odb::dbSigType::POWER ||
+                    currNet->getSigType().getValue() == odb::dbSigType::GROUND ||
+                    currNet->isSpecial() || currNet->getSWires().size() > 0) {
+                        continue;
+                }
+
+                dbNets[netName] = currNet;
+        }
+
+        for (FastRoute::NET netRoute : routing) {
+                std::string netName = netRoute.name;
+
+                odb::dbWire* wire = odb::dbWire::create(dbNets[netName]);
+                odb::dbWireEncoder wireEncoder;
+                wireEncoder.begin(wire);
+                odb::dbWireType wireType = odb::dbWireType::ROUTED;
+
+                for (FastRoute::ROUTE seg : netRoute.route) {
+                        if (std::abs(seg.initLayer - seg.finalLayer) > 1) {
+                                error("Global route segment not valid\n");
+                        }
+                        int x1 = seg.initX;
+                        int y1 = seg.initY;
+                        int x2 = seg.finalX;
+                        int y2 = seg.finalY;
+                        int l1 = seg.initLayer;
+                        int l2 = seg.finalLayer;
+
+                        odb::dbTechLayer* currLayer = tech->findRoutingLayer(l1);
+
+                        if (l1 == l2) { // Add wire
+                                if (x1 == x2 && y1 == y2)
+                                        continue;
+                                wireEncoder.newPath(currLayer, wireType);
+                                wireEncoder.addPoint(x1, y1);
+                                wireEncoder.addPoint(x2, y2);
+                        } else { // Add via
+                                int bottomLayer = (l1 < l2) ? l1 : l2;
+                                wireEncoder.newPath(currLayer, wireType);
+                                wireEncoder.addPoint(x1, y1);
+                                wireEncoder.addTechVia(defaultVias[bottomLayer]);
+                        }
+                }
+                wireEncoder.end();
+
+                odb::orderWires(dbNets[netName], false, false);
+
+                std::vector<std::pair<int, std::vector<odb::dbITerm *>>> netViol = _arc->get_net_antenna_violations(dbNets[netName]);
+                if (netViol.size() > 0) {
+                        antennaViolations[dbNets[netName]->getConstName()] = netViol;
+                        dirtyNets.push_back(dbNets[netName]);
+                }
+                if (wire != nullptr) {
+                        odb::dbWire::destroy(wire);
+                }
+        }
+
+        std::cout << "[INFO] #Antenna violations: " << antennaViolations.size() << "\n";
+        return antennaViolations.size();
+}
+
+void DBWrapper::insertDiode(odb::dbNet* net, 
+                  std::string antennaCellName,
+                  std::string antennaPinName,
+                  odb::dbInst* sinkInst,
+                  odb::dbITerm* sinkITerm,
+                  std::string antennaInstName,
+                  int siteWidth,
+                  r_tree& fixedInsts) {
+        bool legallyPlaced = false;
+        bool placeAtLeft = true;
+        int leftOffset = 0;
+        int rightOffset = 0;
+        int offset;
+
+        odb::dbBlock* block = _chip->getBlock();
+        std::string netName = net->getConstName();
+
+        odb::dbMaster* antennaMaster = _db->findMaster(antennaCellName.c_str());
+        odb::dbSet<odb::dbMTerm> antennaMTerms = antennaMaster->getMTerms();
+
+        int instLocX, instLocY, instWidth;
+        odb::dbBox* sinkBBox = sinkInst->getBBox();
+        instLocX = sinkBBox->xMin();
+        instLocY = sinkBBox->yMin();
+        instWidth = sinkBBox->xMax() - sinkBBox->xMin();
+        odb::dbOrientType instOrient = sinkInst->getOrient();
+
+        odb::dbInst* antennaInst = odb::dbInst::create(block, antennaMaster, antennaInstName.c_str());
+        odb::dbITerm* antennaITerm = antennaInst->findITerm(antennaPinName.c_str());
+        odb::dbBox* antennaBBox = antennaInst->getBBox();
+        int antennaWidth = antennaBBox->xMax() - antennaBBox->xMin();
+
+        // Use R-tree to check if diode will not overlap or cause 1-site spacing with other cells
+        std::vector<value> overlapInsts;
+        while(!legallyPlaced) {
+                if (placeAtLeft) {
+                        offset = -(antennaWidth + leftOffset*siteWidth);
+                        leftOffset++;
+                        placeAtLeft = false;
+                } else {
+                        offset = instWidth + rightOffset*siteWidth;
+                        rightOffset++;
+                        placeAtLeft = true;
+                }
+
+                antennaInst->setOrient(instOrient);
+                antennaInst->setLocation(instLocX + offset, instLocY);
+
+                odb::dbBox* instBox = antennaInst->getBBox();
+                box box(point(instBox->xMin() - (2*siteWidth) + 1, instBox->yMin() + 1), point(instBox->xMax() + (2*siteWidth) - 1, instBox->yMax() - 1));
+                fixedInsts.query(bgi::intersects(box), std::back_inserter(overlapInsts));
+
+                if (overlapInsts.size() == 0) {
+                        legallyPlaced = true;
+                }
+                overlapInsts.clear();
+        }
+
+        antennaInst->setPlacementStatus(odb::dbPlacementStatus::FIRM);
+        sinkInst->setPlacementStatus(odb::dbPlacementStatus::FIRM);
+        odb::dbITerm::connect(antennaITerm, net);
+
+        // Add diode to the R-tree of fixed instances
+        int fixedInstId = fixedInsts.size();
+        odb::dbBox* instBox = antennaInst->getBBox();
+        box b(point(instBox->xMin(), instBox->yMin()), point(instBox->xMax(), instBox->yMax()));
+        value v(b, fixedInstId);
+        fixedInsts.insert(v);
+        fixedInstId++;
+}
+
+void DBWrapper::getFixedInstances(r_tree& fixedInsts) {
+        odb::dbTech* tech = _db->getTech();
+        if (!tech) {
+                error("obd::dbTech not initialized\n");
+        }
+
+        odb::dbBlock* block = _chip->getBlock();
+        if (!block) {
+                error("odb::dbBlock not found\n");
+        }
+
+        int fixedInstId = 0;
+        for (odb::dbInst* inst : block->getInsts()) {
+                if (inst->getPlacementStatus() == odb::dbPlacementStatus::FIRM) {
+                        odb::dbBox* instBox = inst->getBBox();
+                        box b(point(instBox->xMin(), instBox->yMin()), point(instBox->xMax(), instBox->yMax()));
+                        value v(b, fixedInstId);
+                        fixedInsts.insert(v);
+                        fixedInstId++;
+                }
+        }
+}
+
+void DBWrapper::fixAntennas(std::string antennaCellName, std::string antennaPinName) {
+        odb::dbBlock* block = _chip->getBlock();
+        int siteWidth = -1;
+        int cnt = 0;
+        r_tree fixedInsts;
+        getFixedInstances(fixedInsts);
+
+        auto rows = block->getRows();
+        if (!rows.empty()) {
+                for (odb::dbRow *db_row : rows) {
+                        odb::dbSite *site = db_row->getSite();
+                        int site_width = site->getWidth();
+                        if (siteWidth == -1) {
+                                siteWidth = site_width;
+                        }
+
+                        if (siteWidth != site_width) {
+                                std::cout << "[WARNING] Design has rows with different site width\n";
+                        }
+                }
+        }
+
+        for (auto const& violation : antennaViolations) {
+                odb::dbNet* net = dbNets[violation.first];
+                for (int i = 0; i < violation.second.size(); i++) {
+                        for (odb::dbITerm * sinkITerm : std::get<1>(violation.second[i])) {
+                                odb::dbInst* sinkInst = sinkITerm->getInst();
+                                std::string antennaInstName = "ANTENNA_" + std::to_string(cnt);
+                                insertDiode(net, antennaCellName, antennaPinName, sinkInst, sinkITerm, antennaInstName, siteWidth, fixedInsts);
+                                cnt++;
+                        }
+                }
+        }
+}
+
+void DBWrapper::legalizePlacedCells() {
+        _opendp = new opendp::Opendp();
+        _opendp->init(_db);
+        _opendp->setPaddingGlobal(2, 2);
+        _opendp->detailedPlacement(0);
+        _opendp->checkPlacement(false);
+        delete _opendp;
 }
 
 }

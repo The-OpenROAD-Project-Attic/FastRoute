@@ -47,18 +47,18 @@ namespace FastRoute {
 
 class Net {
 public:
-	Net() = default;
+    	Net() = default;
         Net(odb::dbNet* net);
         const std::string getName() const;
         const char *getConstName() const;
-	odb::dbSigType getSignalType() const;
+    	odb::dbSigType getSignalType() const;
         void addPin(Pin &pin);
-	const std::vector<Pin>& getPins() const { return _pins; }
+    	std::vector<Pin>& getPins() { return _pins; }
         int getNumPins() const { return _pins.size(); }
 
 private:
-	odb::dbNet* _net;
-        std::vector<Pin> _pins;
+	   odb::dbNet* _net;
+       std::vector<Pin> _pins;
 };
 
 }

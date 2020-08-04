@@ -43,7 +43,6 @@ sta::define_cmd_args "fastroute" {[-output_file out_file] \
                                            [-layers_adjustments layers_adjustments] \
                                            [-regions_adjustments regions_adjustments] \
                                            [-nets_alphas_priorities nets_alphas] \
-                                           [-clock_net_routing] \
                                            [-alpha alpha] \
                                            [-verbose verbose] \
                                            [-overflow_iterations iterations] \
@@ -56,6 +55,11 @@ sta::define_cmd_args "fastroute" {[-output_file out_file] \
                                            [-seed seed] \
                                            [-report_congestion congest_file] \
                                            [-layers_pitches layers_pitches] \
+                                           [-antenna_avoidance_flow] \
+                                           [-antenna_cell_name antenna_cell_name] \
+                                           [-antenna_pin_name antenna_pin_name] \
+                                           [-clock_nets_route_flow] \
+                                           [-min_layer_for_clock_net min_clock_layer] \
 }
 
 proc fastroute { args } {
@@ -63,8 +67,9 @@ proc fastroute { args } {
     keys {-output_file -capacity_adjustment -min_routing_layer -max_routing_layer \
           -tile_size -alpha -verbose -layers_adjustments \
           -regions_adjustments -nets_alphas_priorities -overflow_iterations \
-          -grid_origin -pdrev_for_high_fanout -seed -report_congestion -layers_pitches -max_routing_length -max_length_per_layer} \
-    flags {-unidirectional_routing -clock_net_routing -allow_overflow -estimateRC} \
+          -grid_origin -pdrev_for_high_fanout -seed -report_congestion -layers_pitches \
+          -max_routing_length -max_length_per_layer -min_layer_for_clock_net -antenna_cell_name -antenna_pin_name} \
+    flags {-unidirectional_routing -allow_overflow -estimateRC -clock_nets_route_flow -antenna_avoidance_flow} \
 
   if { [info exists keys(-output_file)] } {
     set out_file $keys(-output_file)
@@ -164,14 +169,6 @@ proc fastroute { args } {
     FastRoute::set_overflow_iterations 50
   }
 
-  if { [info exists flags(-clock_net_routing)] } {
-    FastRoute::set_clock_net_routing 1
-    FastRoute::set_pdrev 1
-  } else {
-    FastRoute::set_clock_net_routing 0
-    FastRoute::set_pdrev 0
-  }
-
   if { [info exists keys(-max_routing_length)] } {
           set max_length $keys(-max_routing_length)
           FastRoute::set_max_routing_length $max_length
@@ -233,6 +230,39 @@ proc fastroute { args } {
 
       FastRoute::set_layer_pitch $layer $pitch
     }
+  }
+
+  if { [info exists flags(-antenna_avoidance_flow)] } {
+    set diode_cell_name "INVALID"
+    if { [info exists keys(-antenna_cell_name)] } {
+      set diode_cell_name $keys(-antenna_cell_name)
+    } else {
+      ord::error "Missing antenna cell name"
+    }
+
+    set diode_pin_name "INVALID"
+    if { [info exists keys(-antenna_pin_name)] } {
+      set diode_pin_name $keys(-antenna_pin_name)
+    } else {
+      ord::error "Missing antenna cell pin name"
+    }
+
+    FastRoute::enable_antenna_avoidance_flow $diode_cell_name $diode_pin_name
+  }
+
+  if { [info exists flags(-clock_nets_route_flow)] } {
+    FastRoute::set_clock_nets_route_flow 1
+  } else {
+    FastRoute::set_clock_nets_route_flow 0
+  }
+
+  set min_clock_layer 6
+  if { [info exists keys(-min_layer_for_clock_net)] } {
+    set min_clock_layer $keys(-min_layer_for_clock_net)
+    FastRoute::set_min_layer_for_clock $min_clock_layer
+  } elseif { [info exists flags(-clock_nets_route_flow)] } {
+    puts "\[WARNING\] Using the default min layer for clock nets routing (layer $min_clock_layer)"
+    FastRoute::set_min_layer_for_clock $min_clock_layer
   }
 
   for {set layer 1} {$layer <= $max_layer} {set layer [expr $layer+1]} {

@@ -51,8 +51,6 @@ void add_region_adjustment(int minX, int minY, int maxX, int maxY, int layer, fl
 void set_min_layer(int minLayer);
 void set_max_layer(int maxLayer);
 void set_unidirectional_routing(bool unidirRouting);
-void set_pdrev(bool pdRev);
-void set_clock_net_routing(bool clockNetRouting);
 void set_alpha(float alpha);
 void set_alpha_for_net(char * netName, float alpha);
 void set_verbose(int v);
@@ -64,11 +62,14 @@ void set_pdrev_for_high_fanout(int pdRevForHighFanout);
 void set_allow_overflow(bool allowOverflow);
 void set_seed(unsigned seed);
 void set_layer_pitch(int layer, float pitch);
+void set_clock_nets_route_flow(bool clock_flow);
+void set_min_layer_for_clock(int minLayer);
 void set_estimate_rc();
 
 // Run
-void start_fastroute();
 void estimate_rc();
+void enable_antenna_avoidance_flow(char * diodeCellName, char * diodePinName);
+void start_fastroute();
 void run_fastroute();
 void reset_fastroute();
 void write_guides();

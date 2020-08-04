@@ -55,7 +55,6 @@
 #include "RoutingTracks.h"
 #include "RcTreeBuilder.h"
 #include "FastRoute.h"
-
 #include "openroad/OpenRoad.hh"
 #include "openroad/Error.hh"
 #include "sta/Parasitics.hh"
@@ -79,7 +78,6 @@ void FastRouteKernel::init() {
         _maxRoutingLayer = -1;
         _unidirectionalRoute = 0;
         _fixLayer = 0;
-        _clockNetRouting = 0;
         _overflowIterations = 500;
         _pdRevForHighFanout = -1;
         _allowOverflow = 0;
@@ -163,11 +161,6 @@ void FastRouteKernel::startFastRoute() {
                 _dbWrapper->setSelectedMetal(_maxRoutingLayer);
         }
 
-        if (_clockNetRouting && _pdRev) {
-                _fastRoute->usePdRev();
-                _fastRoute->setAlpha(_alpha);
-        }
-
         if (_pdRevForHighFanout != -1) {
                 _fastRoute->setAlpha(_alpha);
         }
@@ -181,7 +174,6 @@ void FastRouteKernel::startFastRoute() {
         std::cout << "[PARAMS] Max routing layer: " << _maxRoutingLayer << "\n";
         std::cout << "[PARAMS] Global adjustment: " << _adjustment << "\n";
         std::cout << "[PARAMS] Unidirectional routing: " << _unidirectionalRoute << "\n";
-        std::cout << "[PARAMS] Clock net routing: " << _clockNetRouting << "\n";
         std::cout << "[PARAMS] Max routing length: " << _maxLengthMicrons << "um\n";
         std::cout << "[PARAMS] Grid origin: (" << _gridOrigin->getX() << ", " << _gridOrigin->getY() << ")\n";
         if (!_layerPitches.empty()) {
@@ -214,7 +206,7 @@ void FastRouteKernel::startFastRoute() {
         std::cout << "Setting spacings and widths... Done!\n";
         
         std::cout << "Initializing nets...\n";
-        initializeNets();
+        initializeNets(_reroute);
         std::cout << "Initializing nets... Done!\n";
         
         std::cout << "Adjusting grid...\n";
@@ -258,7 +250,6 @@ void FastRouteKernel::startFastRoute() {
                 }
         }
 
-        _fastRoute->initAuxVar();
         std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
  
         if (_verbose > 0)       
@@ -269,7 +260,15 @@ void FastRouteKernel::runFastRoute() {
         std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
         
         std::cout << "Running FastRoute...\n\n";
-        _fastRoute->run(*_result);
+        _fastRoute->initAuxVar();
+        if (_enableAntennaFlow) {
+                runAntennaAvoidanceFlow();
+        } else if (_clockNetsRouteFlow) {
+                runClockNetsRouteFlow();
+        } else {
+                _fastRoute->run(*_result);
+                addRemainingGuides(_result);
+        }
         std::cout << "Running FastRoute... Done!\n";
         
         std::cout << " > Fixing long segments...\n";
@@ -279,6 +278,7 @@ void FastRouteKernel::runFastRoute() {
 		fixLongSegments();
 		std::cout << " > Fixing long segments... Done!\n";
 	}
+
         computeWirelength();
 
         if (_reportCongest) {
@@ -291,6 +291,73 @@ void FastRouteKernel::runFastRoute() {
 		double elapsed = (std::chrono::duration_cast<std::chrono::microseconds>(end - begin).count()) /1000000.0;
                 std::cout << "[INFO] Elapsed time: " << elapsed << "\n";
 	}
+}
+
+void FastRouteKernel::runAntennaAvoidanceFlow() {
+        std::cout << "Running antenna avoidance flow...\n";
+        std::vector<FastRoute::NET> globalRoute;
+        std::vector<FastRoute::NET> newRoute;
+        std::vector<FastRoute::NET> originalRoute;
+
+        _fastRoute->run(globalRoute);
+
+        addRemainingGuides(&globalRoute);
+        originalRoute = globalRoute;
+        
+        connectPadPins(&globalRoute);
+
+        for (FastRoute::NET &netRoute : globalRoute) {
+                mergeSegments(netRoute);
+        }
+
+        getPreviousCapacities(_minRoutingLayer);
+        addLocalConnections(globalRoute);
+
+        resetResources();
+
+        for (FastRoute::NET gr : originalRoute) {
+                _result->push_back(gr);
+        }
+
+        int violationsCnt = _dbWrapper->checkAntennaViolations(globalRoute, _maxRoutingLayer);
+
+        if (violationsCnt > 0) {
+                _dbWrapper->fixAntennas(_diodeCellName, _diodePinName);
+                _dbWrapper->legalizePlacedCells();
+                _reroute = true;
+                startFastRoute();
+                _fastRoute->setVerbose(0);
+                std::cout << "[INFO] #Nets to reroute: " << _fastRoute->getNets().size() << "\n";
+
+                restorePreviousCapacities(_minRoutingLayer);
+
+                _fastRoute->initAuxVar();
+                _fastRoute->run(newRoute);
+                addRemainingGuides(&newRoute);
+                mergeResults(newRoute);
+        }
+}
+
+void FastRouteKernel::runClockNetsRouteFlow() {
+        std::vector<FastRoute::NET> clockNetsRoute;
+        _fastRoute->setVerbose(0);
+        _fastRoute->run(clockNetsRoute);
+        addRemainingGuides(&clockNetsRoute);
+
+        getPreviousCapacities(_minLayerForClock);
+        
+        resetResources();
+        _onlyClockNets = false;
+        _onlySignalNets = true;
+
+        startFastRoute();
+        restorePreviousCapacities(_minLayerForClock);
+
+        _fastRoute->initAuxVar();
+        _fastRoute->run(*_result);
+        addRemainingGuides(_result);
+
+        _result->insert(_result->begin(), clockNetsRoute.begin(), clockNetsRoute.end());
 }
 
 void FastRouteKernel::estimateRC() {
@@ -319,6 +386,14 @@ void FastRouteKernel::estimateRC() {
         }
 }
 
+void FastRouteKernel::enableAntennaAvoidance(char * diodeCellName, char * diodePinName) {
+        _enableAntennaFlow = true;
+        std::string cellName(diodeCellName);
+        std::string pinName(diodePinName);
+        _diodeCellName = cellName;
+        _diodePinName = pinName;
+}
+
 void FastRouteKernel::initGrid() {        
         _dbWrapper->initGrid(_maxRoutingLayer);
         
@@ -344,7 +419,7 @@ void FastRouteKernel::initRoutingTracks() {
 
 void FastRouteKernel::setCapacities() {
         for (int l = 1; l <= _grid->getNumLayers(); l++) {
-                if (l < _minRoutingLayer || l > _maxRoutingLayer) {
+                if (l < _minRoutingLayer || l > _maxRoutingLayer || (_onlyClockNets && l < _minLayerForClock)) {
                         _fastRoute->addHCapacity(0, l);
                         _fastRoute->addVCapacity(0, l);
 
@@ -368,6 +443,76 @@ void FastRouteKernel::setCapacities() {
         }
 }
 
+void FastRouteKernel::getPreviousCapacities(int previousMinLayer) {
+        int oldCap;
+        int xGrids = _grid->getXGrids();
+        int yGrids = _grid->getYGrids();
+
+        oldHUsages = new int**[_grid->getNumLayers()];
+        for (int l = 0; l < _grid->getNumLayers(); l++) {
+                oldHUsages[l] = new int*[yGrids];
+                for (int i = 0; i < yGrids; i++) {
+                        oldHUsages[l][i] = new int[xGrids];
+                }
+        }
+
+        oldVUsages = new int**[_grid->getNumLayers()];
+        for (int l = 0; l < _grid->getNumLayers(); l++) {
+                oldVUsages[l] = new int*[xGrids];
+                for (int i = 0; i < xGrids; i++) {
+                        oldVUsages[l][i] = new int[yGrids];
+                }
+        }
+
+        int oldTotalCap = 0;
+        for (int layer = previousMinLayer; layer <= _grid->getNumLayers(); layer++) {
+                for (int y = 1; y < yGrids; y++) {
+                        for (int x = 1; x < xGrids; x++) {
+                                oldCap = _fastRoute->getEdgeCurrentResource(x - 1, y - 1, layer, x, y - 1, layer);
+                                oldTotalCap += oldCap;
+                                oldHUsages[layer-1][y-1][x-1] = oldCap;
+                        }
+                }
+
+                for (int x = 1; x < xGrids; x++) {
+                        for (int y = 1; y < yGrids; y++) {
+                                oldCap = _fastRoute->getEdgeCurrentResource(x - 1, y - 1, layer, x - 1, y, layer);
+                                oldTotalCap += oldCap;
+                                oldVUsages[layer-1][x-1][y-1] = oldCap;
+                        }
+                }
+        }
+
+        std::cout << "Old total capacity: " << oldTotalCap << "\n";
+}
+
+void FastRouteKernel::restorePreviousCapacities(int previousMinLayer) {
+        int oldCap;
+        int xGrids = _grid->getXGrids();
+        int yGrids = _grid->getYGrids();
+
+        int newTotalCap = 0;
+        for (int layer = previousMinLayer; layer <= _grid->getNumLayers(); layer++) {
+                for (int y = 1; y < yGrids; y++) {
+                        for (int x = 1; x < xGrids; x++) {
+                                oldCap = oldHUsages[layer-1][y-1][x-1];
+                                newTotalCap += oldCap;
+                                _fastRoute->addAdjustment(x - 1, y - 1, layer, x, y - 1, layer, oldCap, true);
+                        }
+                }
+
+                for (int x = 1; x < xGrids; x++) {
+                        for (int y = 1; y < yGrids; y++) {
+                                oldCap = oldVUsages[layer-1][x-1][y-1];
+                                newTotalCap += oldCap;
+                                _fastRoute->addAdjustment(x - 1, y - 1, layer, x - 1, y, layer, oldCap, true);
+                        }
+                }
+        }
+
+        std::cout << "New total capacity: " << newTotalCap << "\n";
+}
+
 void FastRouteKernel::setSpacingsAndMinWidths() {
         for (int l = 1; l <= _grid->getNumLayers(); l++) {
                 _fastRoute->addMinSpacing(_grid->getSpacings()[l-1], l);
@@ -376,9 +521,10 @@ void FastRouteKernel::setSpacingsAndMinWidths() {
         }
 }
 
-void FastRouteKernel::initializeNets() {
-        _dbWrapper->initNetlist();
 
+void FastRouteKernel::initializeNets(bool reroute) {
+        _dbWrapper->initNetlist(reroute);
+        
         std::cout << "Checking pin placement...\n";
         checkPinPlacement();
         std::cout << "Checking pin placement... Done!\n";
@@ -424,7 +570,7 @@ void FastRouteKernel::initializeNets() {
 				}
 				else {
 					std::vector<FastRoute::PIN> pins;
-					for (const Pin &pin : net.getPins()) {
+					for (Pin &pin : net.getPins()) {
 						Coordinate pinPosition;
 						int topLayer = pin.getTopLayer();
 						RoutingLayer layer = getRoutingLayerByIndex(topLayer);
@@ -433,14 +579,14 @@ void FastRouteKernel::initializeNets() {
 						std::vector<Coordinate> pinPositionsOnGrid;
 						Coordinate posOnGrid;
 						Coordinate trackPos;
-                                
+
 						for (Box pinBox : pinBoxes) {
 							posOnGrid = _grid->getPositionOnGrid(pinBox.getMiddle());
 							pinPositionsOnGrid.push_back(posOnGrid);
 						}
-                        
+
 						int votes = -1;
-                        
+
 						for (Coordinate pos : pinPositionsOnGrid) {
 							int equals = std::count(pinPositionsOnGrid.begin(),
 										pinPositionsOnGrid.end(),
@@ -463,6 +609,8 @@ void FastRouteKernel::initializeNets() {
 								}
 							}
 						}
+
+                        pin.setOnGridPosition(pinPosition);
 
 						// If pin is connected to PAD, create a "fake" location in routing grid to avoid PAD obstacles
 						if ((pin.isConnectedToPad() || pin.isPort()) && !_estimateRC ) {
@@ -490,10 +638,11 @@ void FastRouteKernel::initializeNets() {
 
 						netAlpha = _netsAlpha[net.getName()];
 					}
-                
+
 					// name is copied by FR
 					char *net_name = const_cast<char *>(net.getConstName());
-					_fastRoute->addNet(net_name, idx, pins.size(), 1, grPins, netAlpha);
+                    bool isClock = (net.getSignalType() == odb::dbSigType::CLOCK) ? true : false;
+					_fastRoute->addNet(net_name, idx, pins.size(), 1, grPins, netAlpha, isClock);
 				}
 			}
 		}
@@ -525,7 +674,7 @@ void FastRouteKernel::computeGridAdjustments() {
                 RoutingLayer routingLayer = getRoutingLayerByIndex(layer);
                 
                 if (layer < _minRoutingLayer || (layer > _maxRoutingLayer &&
-                    _maxRoutingLayer > 0))
+                    _maxRoutingLayer > 0) || (_onlyClockNets && layer < _minLayerForClock))
                         continue;
 
                 int newVCapacity = 0;
@@ -570,7 +719,8 @@ void FastRouteKernel::computeTrackAdjustments() {
                 int numTracks = 0;
                 
                 if (layer.getIndex() < _minRoutingLayer ||
-                    (layer.getIndex() > _maxRoutingLayer && _maxRoutingLayer > 0))
+                    (layer.getIndex() > _maxRoutingLayer && _maxRoutingLayer > 0) ||
+                    (_onlyClockNets && layer.getIndex() < _minLayerForClock))
                         continue;
                 
                 if (layer.getPreferredDirection() == RoutingLayer::HORIZONTAL) {
@@ -894,11 +1044,11 @@ void FastRouteKernel::computeObstaclesAdjustments() {
 				int firstTileReduce = _grid->computeTileReduce(obs, firstTileBox, trackSpace, true, direction);
 
 				int lastTileReduce = _grid->computeTileReduce(obs, lastTileBox, trackSpace, false, direction);
-                        
+
 				if (direction == RoutingLayer::HORIZONTAL) {
-					for (int x = firstTile._x; x <= lastTile._x; x++) {
-						// Setting capacities of completely blocked edges to zero
-						for (int y = firstTile._y; y <= lastTile._y; y++) {
+					for (int x = firstTile._x-1; x < lastTile._x; x++) {  
+                        // Setting capacities of completely blocked edges to zero
+                        for (int y = firstTile._y-1; y < lastTile._y; y++) {
 							if (y == firstTile._y) {
 								int edgeCap = _fastRoute->getEdgeCapacity(x, y, layer, x + 1, y, layer);
 								edgeCap -= firstTileReduce;
@@ -917,9 +1067,9 @@ void FastRouteKernel::computeObstaclesAdjustments() {
 						}
 					}
 				} else {
-					for (int x = firstTile._x; x <= lastTile._x; x++) {
-						// Setting capacities of completely blocked edges to zero
-						for (int y = firstTile._y; y <= lastTile._y; y++) {
+					for (int x = firstTile._x-1; x < lastTile._x; x++) {
+                        // Setting capacities of completely blocked edges to zero
+                        for (int y = firstTile._y-1; y < lastTile._y; y++) {
 							if (x == firstTile._x) {
 								int edgeCap = _fastRoute->getEdgeCapacity(x, y, layer, x, y + 1, layer);
 								edgeCap -= firstTileReduce;
@@ -957,14 +1107,6 @@ void FastRouteKernel::setMaxRoutingLayer(const int maxLayer) {
 
 void FastRouteKernel::setUnidirectionalRoute(const bool unidirRoute) {
         _unidirectionalRoute = unidirRoute;
-}
-
-void FastRouteKernel::setClockNetRouting(const bool clockNetRouting) {
-        _clockNetRouting = clockNetRouting;
-}
-
-void FastRouteKernel::setPDRev(const bool pdRev) {
-        _pdRev = pdRev;
 }
 
 void FastRouteKernel::setAlpha(const float alpha) {
@@ -1051,6 +1193,16 @@ void FastRouteKernel::addLayerMaxLength(int layer, float length) {
         _layersMaxLengthMicrons[layer] = length;
 }
 
+void FastRouteKernel::setClockNetsRouteFlow(bool clockFlow) {
+        _clockNetsRouteFlow = clockFlow;
+        _onlyClockNets = clockFlow;
+        _onlySignalNets = false;
+}
+
+void FastRouteKernel::setMinLayerForClock(int minLayer) {
+        _minLayerForClock = minLayer;
+}
+
 void FastRouteKernel::writeGuides() {
         std::cout << "Writing guides...\n";
         std::ofstream guideFile;
@@ -1060,7 +1212,7 @@ void FastRouteKernel::writeGuides() {
                 error("Guides file could not be open\n");
         }
         RoutingLayer phLayerF;
-        addRemainingGuides(_result);
+
         connectPadPins(_result);
 
         int offsetX = _gridOrigin->getX();
@@ -1069,7 +1221,7 @@ void FastRouteKernel::writeGuides() {
         std::cout << "[INFO] Num routed nets: " << _result->size() << "\n";
         int finalLayer;
 
-        for (FastRoute::NET netRoute : *_result) {
+        for (FastRoute::NET &netRoute : *_result) {
                 mergeSegments(netRoute);
                 guideFile << netRoute.name << "\n";
                 guideFile << "(\n";
@@ -1607,7 +1759,7 @@ std::vector<FastRouteKernel::EST_> FastRouteKernel::getEst() {
 void FastRouteKernel::checkSinksAndSource() {
         bool invalid = false;
 
-        for (const Net &net : _netlist->getNets()) {
+        for (Net &net : _netlist->getNets()) {
                 if (net.getNumPins() > 1) {
 			int sourceCnt = 0;
 			int sinkCnt = 0;
@@ -1891,8 +2043,8 @@ void FastRouteKernel::fixLongSegments() {
         int fixedSegs = 0;
         int possibleViols = 0;
 
-        addRemainingGuides(_result);
 	connectPadPins(_result);
+
         for (FastRoute::NET &netRoute : *_result) {
                 mergeSegments(netRoute);
                 bool possibleViolation = false;
@@ -2119,6 +2271,55 @@ bool FastRouteKernel::checkSteinerTree(SteinerTree sTree) {
         }
 
         return true;
+}
+
+void FastRouteKernel::addLocalConnections(std::vector<FastRoute::NET> &globalRoute) {
+        Net *net;
+        int topLayer;
+        std::vector<Box> pinBoxes;
+        Coordinate pinPosition;
+        Coordinate realPinPosition;
+        FastRoute::ROUTE horSegment;
+        FastRoute::ROUTE verSegment;
+
+        for (FastRoute::NET &netRoute : globalRoute) {
+                net = _netlist->getNetByIdx(netRoute.idx);
+
+                for (Pin pin : net->getPins()) {
+                        topLayer = pin.getTopLayer();
+                        pinBoxes = pin.getBoxes().at(topLayer);
+                        pinPosition = pin.getOnGridPosition();
+
+                        realPinPosition = pinBoxes[0].getMiddle();
+                        horSegment.initX = realPinPosition.getX();
+                        horSegment.initY = realPinPosition.getY();
+                        horSegment.initLayer = topLayer;
+                        horSegment.finalX = pinPosition.getX();
+                        horSegment.finalY = realPinPosition.getY();
+                        horSegment.finalLayer = topLayer;
+
+                        verSegment.initX = pinPosition.getX();
+                        verSegment.initY = realPinPosition.getY();
+                        verSegment.initLayer = topLayer;
+                        verSegment.finalX = pinPosition.getX();
+                        verSegment.finalY = pinPosition.getY();
+                        verSegment.finalLayer = topLayer;
+
+                        netRoute.route.push_back(horSegment);
+                        netRoute.route.push_back(verSegment);
+                }
+        }
+}
+
+void FastRouteKernel::mergeResults(std::vector<FastRoute::NET> newRoute) {
+        for (FastRoute::NET netRoute : newRoute) {
+                for (int i = 0; i < _result->size(); i++) {
+                        if (netRoute.name == _result->at(i).name) {
+                                _result->at(i) = netRoute;
+                                break;
+                        }
+                }
+        }
 }
 
 bool FastRouteKernel::pinOverlapsWithSingleTrack(const Pin& pin, Coordinate &trackPosition) {

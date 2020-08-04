@@ -62,20 +62,20 @@ public:
 
         Pin() = default;
         Pin(odb::dbITerm *iterm,
-	    const Coordinate& position,
+    	    const Coordinate& position,
             const std::vector<int>& layers, const Orientation orientation,
             const std::map<int, std::vector<Box>>& boxesPerLayer,
             bool connectedToPad, Type type);
         Pin(odb::dbBTerm *bterm,
-	    const Coordinate& position,
+    	    const Coordinate& position,
             const std::vector<int>& layers, const Orientation orientation,
             const std::map<int, std::vector<Box>>& boxesPerLayer,
             bool connectedToPad, Type type);
         
-	odb::dbITerm* getITerm() const;
-	odb::dbBTerm* getBTerm() const;
-	std::string getName() const;
-	const Coordinate& getPosition() const { return _position; }
+    	odb::dbITerm* getITerm() const;
+    	odb::dbBTerm* getBTerm() const;
+    	std::string getName() const;
+    	const Coordinate& getPosition() const { return _position; }
         const std::vector<int>& getLayers() const { return _layers; }
         int getNumLayers() const { return _layers.size(); }
         int getTopLayer() const { return _layers.back(); }
@@ -85,12 +85,15 @@ public:
         bool isPort() const { return _isPort; }
         Type getType() const { return _type; }
         bool isConnectedToPad() const { return _connectedToPad; }
+        const Coordinate& getOnGridPosition() const { return _onGridPosition; }
+        void setOnGridPosition(Coordinate onGridPos) { _onGridPosition = onGridPos; }
 
 private:
-	union { odb::dbITerm *_iterm;
-		odb::dbBTerm *_bterm;
-	};
+    	union { odb::dbITerm *_iterm;
+    		odb::dbBTerm *_bterm;
+    	};
         Coordinate _position;
+        Coordinate _onGridPosition;
         std::vector<int> _layers;
         Orientation _orientation;
         std::map<int, std::vector<Box>> _boxesPerLayer;
