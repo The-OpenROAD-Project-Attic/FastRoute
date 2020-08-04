@@ -424,7 +424,7 @@ void FastRouteKernel::initializeNets() {
 				}
 				else {
 					std::vector<FastRoute::PIN> pins;
-					for (Pin pin : net.getPins()) {
+					for (const Pin &pin : net.getPins()) {
 						Coordinate pinPosition;
 						int topLayer = pin.getTopLayer();
 						RoutingLayer layer = getRoutingLayerByIndex(topLayer);
@@ -988,10 +988,10 @@ void FastRouteKernel::addLayerAdjustment(int layer, float reductionPercentage) {
                 std::cout << "[ERROR] Specified layer " << layer
 			  << " for adjustment is greater than max routing layer "
 			  << _maxRoutingLayer << " and will be ignored" << std::endl;
-                return;
-        }
-        _layersToAdjust.push_back(layer);
-        _layersReductionPercentage.push_back(reductionPercentage);
+        } else {
+		_layersToAdjust.push_back(layer);
+		_layersReductionPercentage.push_back(reductionPercentage);
+	}
 }
 
 void FastRouteKernel::addRegionAdjustment(int minX, int minY, int maxX, int maxY,
@@ -1619,7 +1619,7 @@ void FastRouteKernel::checkSinksAndSource() {
 				}
 			}
 
-			if (net.getNumPins() != (sinkCnt+sourceCnt) || sourceCnt != 1) {
+			if ((net.getNumPins() != sinkCnt+sourceCnt) || sourceCnt != 1) {
 				invalid = true;
 				std::cout << "[ERROR] Net " << net.getName() << " has invalid sinks/source distribution\n";
 				std::cout << "    #Sinks: " << sinkCnt << "; #sources: " << sourceCnt << "\n";
@@ -1683,7 +1683,6 @@ void FastRouteKernel::mergeSegments(FastRoute::NET &net) {
 		} else {
 			i++;
 		}
-			
 	}
         
         net.route = segments;
