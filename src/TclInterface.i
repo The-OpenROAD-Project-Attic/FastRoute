@@ -39,6 +39,8 @@
 #include "TclInterface.h"
 %}
 
+%include "../../Exception.i"
+
 namespace FastRoute {
 
 extern void help();
@@ -102,4 +104,3 @@ extern void write_guides();
 extern void report_congestion(char * congest_file);
 
 }
-

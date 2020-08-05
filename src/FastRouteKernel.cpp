@@ -2001,8 +2001,8 @@ void FastRouteKernel::mergeSegments(FastRoute::NET& net)
 {
   std::vector<ROUTE> segments = net.route;
   std::vector<ROUTE> finalSegments;
-  if (segments.size() < 1) {
-    error("Net %s has segments vector empty\n", net.name.c_str());
+  if (segments.empty()) {
+    error("Net %s has no segments\n", net.name.c_str());
   }
 
   std::map<Point, int> segsAtPoint;
