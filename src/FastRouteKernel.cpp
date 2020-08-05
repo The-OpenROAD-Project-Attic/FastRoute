@@ -316,6 +316,10 @@ void FastRouteKernel::runFastRoute()
           / 1000000.0;
     std::cout << "[INFO] Elapsed time: " << elapsed << "\n";
   }
+
+  for (FastRoute::NET& netRoute : *_result) {
+    mergeSegments(netRoute);
+  }
 }
 
 void FastRouteKernel::runAntennaAvoidanceFlow()
@@ -331,10 +335,6 @@ void FastRouteKernel::runAntennaAvoidanceFlow()
   originalRoute = globalRoute;
 
   connectPadPins(&globalRoute);
-
-  for (FastRoute::NET& netRoute : globalRoute) {
-    mergeSegments(netRoute);
-  }
 
   getPreviousCapacities(_minRoutingLayer);
   addLocalConnections(globalRoute);
@@ -401,8 +401,6 @@ void FastRouteKernel::estimateRC()
 
   RcTreeBuilder builder(_openroad, _dbWrapper);
   for (FastRoute::NET& netRoute : *_result) {
-    mergeSegments(netRoute);
-
     SteinerTree sTree;
     Net* net = _netlist->getNetByIdx(netRoute.idx);
     const std::vector<Pin>& pins = net->getPins();
@@ -1390,86 +1388,87 @@ void FastRouteKernel::writeGuides()
   int finalLayer;
 
   for (FastRoute::NET& netRoute : *_result) {
-    mergeSegments(netRoute);
-    guideFile << netRoute.name << "\n";
-    guideFile << "(\n";
-    std::vector<Box> guideBox;
-    finalLayer = -1;
-    for (FastRoute::ROUTE route : netRoute.route) {
-      if (route.initLayer != finalLayer && finalLayer != -1) {
-        mergeBox(guideBox);
-        for (Box guide : guideBox) {
-          guideFile << guide.getLowerBound().getX() + offsetX << " "
-                    << guide.getLowerBound().getY() + offsetY << " "
-                    << guide.getUpperBound().getX() + offsetX << " "
-                    << guide.getUpperBound().getY() + offsetY << " "
-                    << phLayerF.getName() << "\n";
-        }
-        guideBox.clear();
-        finalLayer = route.initLayer;
-      }
-      if (route.initLayer == route.finalLayer) {
-        if (route.initLayer < _minRoutingLayer && route.initX != route.finalX
-            && route.initY != route.finalY) {
-          error("Routing with guides in blocked metal for net %s\n",
-                netRoute.name.c_str());
-        }
-        Box box;
-        box = globalRoutingToBox(route);
-        guideBox.push_back(box);
-        if (route.finalLayer < _minRoutingLayer && !_unidirectionalRoute) {
-          phLayerF = getRoutingLayerByIndex(
-              (route.finalLayer + (_minRoutingLayer - route.finalLayer)));
-        } else {
-          phLayerF = getRoutingLayerByIndex(route.finalLayer);
-        }
-        finalLayer = route.finalLayer;
-      } else {
-        if (abs(route.finalLayer - route.initLayer) > 1) {
-          error("Connection between non-adjacent layers in net %s\n",
-                netRoute.name.c_str());
-        } else {
-          RoutingLayer phLayerI;
-          if (route.initLayer < _minRoutingLayer && !_unidirectionalRoute) {
-            phLayerI = getRoutingLayerByIndex(route.initLayer + _minRoutingLayer
-                                              - route.initLayer);
-          } else {
-            phLayerI = getRoutingLayerByIndex(route.initLayer);
-          }
-          if (route.finalLayer < _minRoutingLayer && !_unidirectionalRoute) {
-            phLayerF = getRoutingLayerByIndex(
-                route.finalLayer + _minRoutingLayer - route.finalLayer);
-          } else {
-            phLayerF = getRoutingLayerByIndex(route.finalLayer);
-          }
-          finalLayer = route.finalLayer;
-          Box box;
-          box = globalRoutingToBox(route);
-          guideBox.push_back(box);
-          mergeBox(guideBox);
-          for (Box guide : guideBox) {
-            guideFile << guide.getLowerBound().getX() + offsetX << " "
-                      << guide.getLowerBound().getY() + offsetY << " "
-                      << guide.getUpperBound().getX() + offsetX << " "
-                      << guide.getUpperBound().getY() + offsetY << " "
-                      << phLayerI.getName() << "\n";
-          }
-          guideBox.clear();
+    if (!netRoute.route.empty()) {
+      guideFile << netRoute.name << "\n";
+      guideFile << "(\n";
+      std::vector<Box> guideBox;
+      finalLayer = -1;
+      for (FastRoute::ROUTE route : netRoute.route) {
+	if (route.initLayer != finalLayer && finalLayer != -1) {
+	  mergeBox(guideBox);
+	  for (Box guide : guideBox) {
+	    guideFile << guide.getLowerBound().getX() + offsetX << " "
+		      << guide.getLowerBound().getY() + offsetY << " "
+		      << guide.getUpperBound().getX() + offsetX << " "
+		      << guide.getUpperBound().getY() + offsetY << " "
+		      << phLayerF.getName() << "\n";
+	  }
+	  guideBox.clear();
+	  finalLayer = route.initLayer;
+	}
+	if (route.initLayer == route.finalLayer) {
+	  if (route.initLayer < _minRoutingLayer && route.initX != route.finalX
+	      && route.initY != route.finalY) {
+	    error("Routing with guides in blocked metal for net %s\n",
+		  netRoute.name.c_str());
+	  }
+	  Box box;
+	  box = globalRoutingToBox(route);
+	  guideBox.push_back(box);
+	  if (route.finalLayer < _minRoutingLayer && !_unidirectionalRoute) {
+	    phLayerF = getRoutingLayerByIndex(
+					      (route.finalLayer + (_minRoutingLayer - route.finalLayer)));
+	  } else {
+	    phLayerF = getRoutingLayerByIndex(route.finalLayer);
+	  }
+	  finalLayer = route.finalLayer;
+	} else {
+	  if (abs(route.finalLayer - route.initLayer) > 1) {
+	    error("Connection between non-adjacent layers in net %s\n",
+		  netRoute.name.c_str());
+	  } else {
+	    RoutingLayer phLayerI;
+	    if (route.initLayer < _minRoutingLayer && !_unidirectionalRoute) {
+	      phLayerI = getRoutingLayerByIndex(route.initLayer + _minRoutingLayer
+						- route.initLayer);
+	    } else {
+	      phLayerI = getRoutingLayerByIndex(route.initLayer);
+	    }
+	    if (route.finalLayer < _minRoutingLayer && !_unidirectionalRoute) {
+	      phLayerF = getRoutingLayerByIndex(
+						route.finalLayer + _minRoutingLayer - route.finalLayer);
+	    } else {
+	      phLayerF = getRoutingLayerByIndex(route.finalLayer);
+	    }
+	    finalLayer = route.finalLayer;
+	    Box box;
+	    box = globalRoutingToBox(route);
+	    guideBox.push_back(box);
+	    mergeBox(guideBox);
+	    for (Box guide : guideBox) {
+	      guideFile << guide.getLowerBound().getX() + offsetX << " "
+			<< guide.getLowerBound().getY() + offsetY << " "
+			<< guide.getUpperBound().getX() + offsetX << " "
+			<< guide.getUpperBound().getY() + offsetY << " "
+			<< phLayerI.getName() << "\n";
+	    }
+	    guideBox.clear();
 
-          box = globalRoutingToBox(route);
-          guideBox.push_back(box);
-        }
+	    box = globalRoutingToBox(route);
+	    guideBox.push_back(box);
+	  }
+	}
       }
+      mergeBox(guideBox);
+      for (Box guide : guideBox) {
+	guideFile << guide.getLowerBound().getX() + offsetX << " "
+		  << guide.getLowerBound().getY() + offsetY << " "
+		  << guide.getUpperBound().getX() + offsetX << " "
+		  << guide.getUpperBound().getY() + offsetY << " "
+		  << phLayerF.getName() << "\n";
+      }
+      guideFile << ")\n";
     }
-    mergeBox(guideBox);
-    for (Box guide : guideBox) {
-      guideFile << guide.getLowerBound().getX() + offsetX << " "
-                << guide.getLowerBound().getY() + offsetY << " "
-                << guide.getUpperBound().getX() + offsetX << " "
-                << guide.getUpperBound().getY() + offsetY << " "
-                << phLayerF.getName() << "\n";
-    }
-    guideFile << ")\n";
   }
 
   guideFile.close();
@@ -1999,9 +1998,9 @@ void FastRouteKernel::computeWirelength()
 
 void FastRouteKernel::mergeSegments(FastRoute::NET& net)
 {
-  std::vector<ROUTE> segments = net.route;
-  std::vector<ROUTE> finalSegments;
-  if (!segments.empty()) {
+  if (!net.route.empty()) {
+    // vector copy - bad bad -cherry
+    std::vector<ROUTE> segments = net.route;
     std::map<Point, int> segsAtPoint;
     for (const ROUTE& seg : segments) {
       segsAtPoint[{seg.initX, seg.initY, seg.initLayer}] += 1;
@@ -2301,7 +2300,6 @@ void FastRouteKernel::fixLongSegments()
   connectPadPins(_result);
 
   for (FastRoute::NET& netRoute : *_result) {
-    mergeSegments(netRoute);
     bool possibleViolation = false;
     for (ROUTE seg : netRoute.route) {
       long segLen
