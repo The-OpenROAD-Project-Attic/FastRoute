@@ -129,7 +129,7 @@ class DBWrapper
   opendp::Opendp* _opendp = nullptr;
 
   std::map<std::string, odb::dbNet*> dbNets;
-  std::map<std::string, std::vector<std::pair<int, std::vector<odb::dbITerm*>>>>
+  std::map<std::string, std::vector<VINFO>>
       antennaViolations;
   std::vector<odb::dbNet*> dirtyNets;
 };

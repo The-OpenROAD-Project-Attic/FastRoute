@@ -1203,7 +1203,7 @@ int DBWrapper::checkAntennaViolations(std::vector<FastRoute::NET> routing,
 
     odb::orderWires(dbNets[netName], false, false);
 
-    std::vector<std::pair<int, std::vector<odb::dbITerm*>>> netViol
+    std::vector<VINFO> netViol
         = _arc->get_net_antenna_violations(dbNets[netName]);
     if (netViol.size() > 0) {
       antennaViolations[dbNets[netName]->getConstName()] = netViol;
@@ -1347,7 +1347,7 @@ void DBWrapper::fixAntennas(std::string antennaCellName,
   for (auto const& violation : antennaViolations) {
     odb::dbNet* net = dbNets[violation.first];
     for (int i = 0; i < violation.second.size(); i++) {
-      for (odb::dbITerm* sinkITerm : std::get<1>(violation.second[i])) {
+      for (odb::dbITerm* sinkITerm : violation.second[i].iterms) {
         odb::dbInst* sinkInst = sinkITerm->getInst();
         std::string antennaInstName = "ANTENNA_" + std::to_string(cnt);
         insertDiode(net,
