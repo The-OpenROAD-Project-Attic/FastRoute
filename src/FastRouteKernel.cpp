@@ -292,6 +292,10 @@ void FastRouteKernel::runFastRoute()
   }
   std::cout << "Running FastRoute... Done!\n";
 
+  for (FastRoute::NET& netRoute : *_result) {
+    mergeSegments(netRoute);
+  }
+
   std::cout << " > Fixing long segments...\n";
   if (_maxLengthDBU == -1) {
     std::cout << "[WARNING] Max routing length not defined. Skipping...\n";
@@ -315,10 +319,6 @@ void FastRouteKernel::runFastRoute()
                .count())
           / 1000000.0;
     std::cout << "[INFO] Elapsed time: " << elapsed << "\n";
-  }
-
-  for (FastRoute::NET& netRoute : *_result) {
-    mergeSegments(netRoute);
   }
 }
 
