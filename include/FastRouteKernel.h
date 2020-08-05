@@ -246,10 +246,10 @@ class FastRouteKernel
   const int _selectedMetal = 3;
   const float transitionLayerAdjust = 0.6;
   const int _gcellsOffset = 2;
-  int _overflowIterations = 50;
-  int _pdRevForHighFanout = -1;
-  bool _allowOverflow = false;
-  bool _estimateRC = false;
+  int _overflowIterations;
+  int _pdRevForHighFanout;
+  bool _allowOverflow;
+  bool _estimateRC;
   bool _reportCongest;
   std::vector<int> _vCapacities;
   std::vector<int> _hCapacities;

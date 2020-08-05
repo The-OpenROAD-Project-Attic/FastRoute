@@ -80,9 +80,11 @@ void FastRouteKernel::init()
   _maxRoutingLayer = -1;
   _unidirectionalRoute = 0;
   _fixLayer = 0;
+  _clockNetRouting = false;
   _overflowIterations = 500;
   _pdRevForHighFanout = -1;
-  _allowOverflow = 0;
+  _allowOverflow = false;
+  _estimateRC = false;
   _seed = 0;
   _reportCongest = false;
 
