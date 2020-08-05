@@ -2001,41 +2001,39 @@ void FastRouteKernel::mergeSegments(FastRoute::NET& net)
 {
   std::vector<ROUTE> segments = net.route;
   std::vector<ROUTE> finalSegments;
-  if (segments.empty()) {
-    error("Net %s has no segments\n", net.name.c_str());
-  }
-
-  std::map<Point, int> segsAtPoint;
-  for (const ROUTE& seg : segments) {
-    segsAtPoint[{seg.initX, seg.initY, seg.initLayer}] += 1;
-    segsAtPoint[{seg.finalX, seg.finalY, seg.finalLayer}] += 1;
-  }
-
-  uint i = 0;
-  while (i < segments.size() - 1) {
-    ROUTE segment0 = segments[i];
-    ROUTE segment1 = segments[i + 1];
-
-    // both segments are not vias
-    if (segment0.initLayer == segment0.finalLayer
-        && segment1.initLayer == segment1.finalLayer &&
-        // segments are on the same layer
-        segment0.initLayer == segment1.initLayer) {
-      // if segment 0 connects to the end of segment 1
-      ROUTE newSeg = segments[i];
-      if (segmentsConnect(segment0, segment1, newSeg, segsAtPoint)) {
-        segments[i] = newSeg;
-        // N^2 again -cherry
-        segments.erase(segments.begin() + i + 1);
-      } else {
-        i++;
-      }
-    } else {
-      i++;
+  if (!segments.empty()) {
+    std::map<Point, int> segsAtPoint;
+    for (const ROUTE& seg : segments) {
+      segsAtPoint[{seg.initX, seg.initY, seg.initLayer}] += 1;
+      segsAtPoint[{seg.finalX, seg.finalY, seg.finalLayer}] += 1;
     }
-  }
 
-  net.route = segments;
+    uint i = 0;
+    while (i < segments.size() - 1) {
+      ROUTE segment0 = segments[i];
+      ROUTE segment1 = segments[i + 1];
+
+      // both segments are not vias
+      if (segment0.initLayer == segment0.finalLayer
+	  && segment1.initLayer == segment1.finalLayer &&
+	  // segments are on the same layer
+	  segment0.initLayer == segment1.initLayer) {
+	// if segment 0 connects to the end of segment 1
+	ROUTE newSeg = segments[i];
+	if (segmentsConnect(segment0, segment1, newSeg, segsAtPoint)) {
+	  segments[i] = newSeg;
+	  // N^2 again -cherry
+	  segments.erase(segments.begin() + i + 1);
+	} else {
+	  i++;
+	}
+      } else {
+	i++;
+      }
+    }
+
+    net.route = segments;
+  }
 }
 
 bool FastRouteKernel::segmentsConnect(const ROUTE& seg0,
