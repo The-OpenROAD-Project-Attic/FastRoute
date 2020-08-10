@@ -1,3 +1,5 @@
+# This repository is obsolete. FastRoute has been integrated into the OpenROAD repository
+
 FastRoute
 ======================
 
